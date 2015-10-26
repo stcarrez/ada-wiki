@@ -1,0 +1,24 @@
+with "@UTIL_DIR@config";
+with "@UTIL_DIR@util";
+with "@UTIL_DIR@util_unit";
+with "wiki";
+
+project Wiki_Tests is
+
+   for Languages use ("Ada", "Project file");
+
+   Mains := ("wiki_harness.adb");
+
+   for Source_Dirs use ("regtests");
+
+   for Main use Mains;
+
+   for Object_Dir use "./" & Config'Object_Dir & "/obj";
+   for Exec_Dir use "./" & Config'Exec_Dir & "/bin";
+
+   package Binder renames Config.Binder;
+   package Builder renames Config.Builder;
+   package Compiler renames Config.Compiler;
+   package Linker renames Config.Linker;
+
+end Wiki_Tests;
