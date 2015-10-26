@@ -1,0 +1,212 @@
+## The type of library we want to build. Possible values:
+##   relocatable
+##   static
+WIKI_LIBRARY_TYPE=static
+
+# You may edit this makefile as long as you keep these original 
+# target names defined.
+MODE=distrib
+GNATMAKE=@GNATMAKE@
+GNATCLEAN=gnatclean
+GPRINSTALL=@GPRINSTALL@
+SVN=svn
+INSTALL=@INSTALL@
+
+GPRPATH=wiki.gpr
+
+BUILDS_SHARED=@BUILDS_SHARED@
+
+version=@WIKI_VERSION@
+
+distdir=ada-wiki-@WIKI_VERSION@
+
+DIST_FILE=ada-wiki-@WIKI_VERSION@.tar.gz
+
+LN_S=@LN_S@
+MKDIR=mkdir
+CP=cp
+LN=ln -s
+
+ifeq (${OS},Windows_NT)
+LIBEXT=dll
+LIBVER=dll
+else
+LIBEXT=so
+LIBVER=so.$(version)
+endif
+
+srcdir = .
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+top_builddir = .
+
+# share/ada/adainclude
+infix_inc=@ADA_INC_BASE@
+
+# share/ada/adainclude
+infix_prj=@ADA_PRJ_BASE@
+
+# lib
+infix_lib=@ADA_LIB_BASE@
+
+# lib/ada/adalib
+infix_ali=@ADA_ALI_BASE@
+
+includedir=${prefix}/${infix_inc}
+projectdir=${prefix}/${infix_prj}
+bindir=${prefix}/bin
+libdir=${prefix}/${infix_lib}
+alidir=${prefix}/${infix_ali}
+
+libname=libada_wiki
+docdir=libada-wiki
+samplesdir=${prefix}/share/doc/$(docdir)
+
+CPUS := @NR_CPUS@
+MAKE_ARGS=-XMODE=${MODE} -XWIKI_LIBRARY_TYPE=${WIKI_LIBRARY_TYPE} -XPROCESSORS=$(CPUS) 
+ifeq ($(WIKI_LIBRARY_TYPE),relocatable)
+MAKE_ARGS += -XUTIL_BUILD=relocatable -XUTIL_LIBRARY_TYPE=relocatable
+MAKE_ARGS += -XXMLADA_BUILD=relocatable
+MAKE_ARGS += -XLIBRARY_TYPE=relocatable
+endif
+
+ifeq (${BUILDS_SHARED},yes)
+all:     static shared
+install: install_static install_shared install-info
+else
+all:     static
+install: install_static install-info
+endif
+
+# Build executables for all mains defined by the project.
+build:
+	$(GNATMAKE) -m -p -P"$(GPRPATH)" $(MAKE_ARGS)
+
+static:
+	$(MAKE) WIKI_LIBRARY_TYPE=static build
+
+shared:
+	$(MAKE) WIKI_LIBRARY_TYPE=relocatable build
+
+# Not intended for manual invocation.
+# Invoked if automatic builds are enabled.
+# Analyzes only on those sources that have changed.
+# Does not build executables.
+autobuild:
+	$(GNATMAKE) -gnatc -c -k  -P "$(GPRPATH)"
+
+# Clean the root project of all build products.
+clean:
+	-$(GNATCLEAN) -q -P "$(GPRPATH)" -XWIKI_LIBRARY_TYPE=static
+	-$(GNATCLEAN) -q -P "$(GPRPATH)" -XWIKI_LIBRARY_TYPE=relocatable
+	-$(GNATCLEAN) -q -Pwiki_tests
+	-rm -f lib/*.a lib/*.$(DLLEXT)
+
+# Clean root project and all imported projects too.
+clean_tree:
+	$(GNATCLEAN) -q -P "$(GPRPATH)" -r
+
+# Check *all* sources for errors, even those not changed.
+# Does not build executables.
+analyze:
+	$(GNATMAKE) -f  -gnatc -c -k  -P "$(GPRPATH)"
+
+# Clean, then build executables for all mains defined by the project.
+rebuild: clean build
+
+# Build and run the unit tests
+test:	build
+	$(GNATMAKE) -p -Pwiki_tests $(MAKE_ARGS)
+	bin/wiki_harness -xml wiki-aunit.xml
+
+# Files to package in source distribution
+DISTFILES=README LICENSE.txt NOTICE.txt NEWS CHANGES ChangeLog config.guess configure config.sub \
+configure.in Makefile.in install-sh \
+wiki.gpr.in wiki_tests.gpr.in samples.gpr config.gpr \
+src samples regtests \
+doc distrib
+
+dist:
+	-rm -rf $(distdir)
+	mkdir $(distdir)
+	-chmod 777 $(distdir)
+	here=`cd $(top_builddir) && pwd`; \
+	top_distdir=`cd $(distdir) && pwd`; \
+	distdir=`cd $(distdir) && pwd`; \
+	for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
+	done
+	rm -f $(distdir)/distrib/*.gpr
+	rm -rf $(distdir)/regtests/result
+	mkdir $(distdir)/bin
+	mkdir $(distdir)/obj
+	mkdir $(distdir)/lib
+	tar --exclude=.svn --exclude=.git --exclude="*~" --exclude="*.o" --exclude="*.ali" \
+	    --exclude="*.log" --exclude="*.a" \
+	    -cvzf $(DIST_FILE) $(distdir)
+
+install_static:
+	$(MAKE) WIKI_LIBRARY_TYPE=static install_lib
+
+install_shared:
+	$(MAKE) WIKI_LIBRARY_TYPE=relocatable install_lib
+
+install_lib:
+ifneq (${GPRINSTALL},)
+	$(GPRINSTALL) -p -f --prefix=${prefix} $(MAKE_ARGS) \
+		--build-name=$(WIKI_LIBRARY_TYPE) $(GPRPATH)
+else
+	$(MKDIR) -p ${includedir}/ada-wiki
+	$(MKDIR) -p ${projectdir}/
+	${MKDIR} -p ${alidir}/ada-wiki ${bindir}
+	${CP} -p src/*.ad[bs] ${includedir}/ada-wiki
+	sed -e "s,LIBRARY_TYPE,$(WIKI_LIBRARY_TYPE),g" < distrib/wiki.gpr > ${projectdir}/wiki.gpr
+	${CP} -p lib/$(WIKI_LIBRARY_TYPE)/*.ali ${alidir}/ada-wiki/
+ifeq ($(WIKI_LIBRARY_TYPE),static)
+	${CP} lib/$(WIKI_LIBRARY_TYPE)/$(libname).a ${libdir}/
+else
+	${CP} -p lib/$(WIKI_LIBRARY_TYPE)/$(libname).$(LIBVER) ${libdir}/
+ifneq (${OS},Windows_NT)
+	cd ${libdir} && \
+	   rm -f $(libname).$(LIBEXT) && \
+	   ${LN} $(libname).$(LIBVER) $(libname).$(LIBEXT)
+else
+	${CP} -p lib/$(WIKI_LIBRARY_TYPE)/$(libname).$(LIBVER) ${bindir}/
+endif
+endif
+endif
+
+install-info:
+	@echo "Installation directories:"
+	@echo "  Ada source files:    ${includedir}"
+	@echo "  ALI files:           ${alidir}"
+	@echo "  Libraries:           ${libdir}"
+	@echo "  GNAT project:        ${projectdir}"
+	@echo "Environment setup:"
+	@echo "  export ADA_PROJECT_PATH=${projectdir}:$$ADA_PROJECT_PATH"
+
+install_samples:
+	$(MKDIR) -p $(samplesdir)/samples
+	cp -rp $(srcdir)/samples/*.ad[sb] $(samplesdir)/samples/
+	cp -p $(srcdir)/samples.gpr $(samplesdir)
+	cp -p $(srcdir)/config.gpr $(samplesdir)
+
+uninstall:
+ifneq (${GPRINSTALL},)
+	-$(GPRINSTALL) -q -f --prefix=${prefix} $(MAKE_ARGS) --uninstall $(GPRPATH)
+else
+	rm -rf ${includedir}/ada-wiki
+	rm -rf ${alidir}/ada-wiki
+	rm -f ${libdir}/$(libname).a
+	rm -f ${libdir}/$(libname).$(LIBEXT)
+	rm -f ${projectdir}/wiki.gpr
+endif
