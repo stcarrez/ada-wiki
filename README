@@ -1,0 +1,25 @@
+Ada Wiki is a small library that provides and focuses only on the Wiki engine.
+
+The library allows to:
+
+ o Parse a wiki text such as Mediawiki, Creole, PhpBB, Dotclear and Google Code
+ o Render the wiki text in HTML or text
+
+To use Ada Wiki library, configure as follows:
+
+   ./configure
+   make
+
+The unit tests are built and executed with:
+
+   make test
+
+For the installation, use the following command:
+
+   make install
+
+Documentation
+
+   The Ada Wiki sources as well as a wiki documentation is provided on:
+
+   https://github.com/stcarrez/ada-wiki
