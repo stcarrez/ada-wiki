@@ -26,7 +26,7 @@ package body Wiki.Utils is
    function To_Html (Text   : in Wide_Wide_String;
                      Syntax : in Wiki.Parsers.Wiki_Syntax_Type) return String is
       Writer   : aliased Wiki.Writers.Builders.Html_Writer_Type;
-      Renderer : aliased Wiki.Render.Html.Html_Writer;
+      Renderer : aliased Wiki.Render.Html.Html_Renderer;
    begin
       Renderer.Set_Writer (Writer'Unchecked_Access);
       Wiki.Parsers.Parse (Renderer'Unchecked_Access, Text, Syntax);
