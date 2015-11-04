@@ -16,36 +16,12 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Strings.Unbounded;
-
-with Wiki.Writers.Html;
-with Wiki.Writers.Text;
+with Wiki.Writers.Builders;
 package body Wiki.Writers is
 
-   --  ------------------------------
-   --  Render the wiki text according to the wiki syntax in an HTML string.
-   --  ------------------------------
-   function To_Html (Text   : in Wide_Wide_String;
-                     Syntax : in AWA.Wikis.Parsers.Wiki_Syntax_Type) return String is
-      --  Writer   : aliased ASF.Contexts.Writer.String.String_Writer;
-      Html     : aliased AWA.Wikis.Writers.Html.Html_Writer;
+   procedure foo is
    begin
-      --  Html.Set_Writer (Writer'Unchecked_Access);
-      Wiki.Parsers.Parse (Html'Unchecked_Access, Text, Syntax);
-      return Ada.Strings.Unbounded.To_String (Writer.Get_Response);
-   end To_Html;
-
-   --  ------------------------------
-   --  Render the wiki text according to the wiki syntax in a text string.
-   --  Wiki formatting and decoration are removed.
-   --  ------------------------------
-   function To_Text (Text   : in Wide_Wide_String;
-                     Syntax : in AWA.Wikis.Parsers.Wiki_Syntax_Type) return String is
-      --  Writer   : aliased ASF.Contexts.Writer.String.String_Writer;
-      Renderer : aliased AWA.Wikis.Writers.Text.Text_Writer;
-   begin
-      --  Renderer.Set_Writer (Writer'Unchecked_Access);
-      Wiki.Parsers.Parse (Renderer'Unchecked_Access, Text, Syntax);
-      return Ada.Strings.Unbounded.To_String (Writer.Get_Response);
-   end To_Text;
+      null;
+   end foo;
 
 end Wiki.Writers;

@@ -15,17 +15,58 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-
+with Ada.Strings.Wide_Wide_Unbounded;
 with Wiki.Parsers;
+
+--  == Writer interfaces ==
+--  The <tt>Wiki.Writers</tt> package defines the interfaces used by the renderer to write
+--  their outputs.
+--
 package Wiki.Writers is
 
-   --  Render the wiki text according to the wiki syntax in an HTML string.
-   function To_Html (Text   : in Wide_Wide_String;
-                     Syntax : in Wiki.Parsers.Wiki_Syntax_Type) return String;
+   use Ada.Strings.Wide_Wide_Unbounded;
 
-   --  Render the wiki text according to the wiki syntax in a text string.
-   --  Wiki formatting and decoration are removed.
-   function To_Text (Text   : in Wide_Wide_String;
-                     Syntax : in Wiki.Parsers.Wiki_Syntax_Type) return String;
+   type Writer_Type is limited interface;
+   type Writer_Type_Access is access all Writer_Type'Class;
+
+   procedure Write (Writer  : in out Writer_Type;
+                    Content : in Wide_Wide_String) is abstract;
+
+   --  Write a single character to the string builder.
+   procedure Write (Writer : in out Writer_Type;
+                    Char   : in Wide_Wide_Character) is abstract;
+
+   procedure Write (Writer  : in out Writer_Type;
+                    Content : in Unbounded_Wide_Wide_String) is abstract;
+
+   type Html_Writer_Type is limited interface and Writer_Type;
+   type Html_Writer_Type_Access is access all Html_Writer_Type'Class;
+
+   --  Write an XML element using the given name and with the content.
+   --  This is similar to calling <b>Start_Element</b>, <b>Write_Text</b>
+   --  and <b>End_Element</b>.
+   procedure Write_Wide_Element (Writer  : in out Html_writer_Type;
+                                 Name    : in String;
+                                 Content : in Unbounded_Wide_Wide_String) is abstract;
+
+   --  Write an XML attribute within an XML element.
+   --  The attribute value is escaped according to the XML escape rules.
+   procedure Write_Wide_Attribute (Writer  : in out Html_writer_Type;
+                                   Name    : in String;
+                                   Content : in Unbounded_Wide_Wide_String) is abstract;
+
+   --  Start an XML element with the given name.
+   procedure Start_Element (Writer : in out Html_Writer_Type;
+                            Name   : in String) is abstract;
+
+   --  Closes an XML element of the given name.
+   procedure End_Element (Writer : in out Html_Writer_Type;
+                          Name   : in String) is abstract;
+
+   --  Write a text escaping any character as necessary.
+   procedure Write_Wide_Text (Writer  : in out Html_Writer_Type;
+                              Content : in Unbounded_Wide_Wide_String) is abstract;
+
+   procedure foo;
 
 end Wiki.Writers;

@@ -20,8 +20,6 @@ with Util.Strings;
 
 package body Wiki.Render.Html is
 
---   use Wiki.Documents;
-
    --  ------------------------------
    --  Set the output writer.
    --  ------------------------------
