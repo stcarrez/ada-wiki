@@ -16,7 +16,6 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Strings.Wide_Wide_Unbounded;
-with Wiki.Parsers;
 
 --  == Writer interfaces ==
 --  The <tt>Wiki.Writers</tt> package defines the interfaces used by the renderer to write

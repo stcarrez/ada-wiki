@@ -15,7 +15,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Strings.Wide_Wide_Unbounded;
 with Util.Texts.Builders;
 
 --  == Writer interfaces ==

@@ -15,8 +15,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Strings.Wide_Wide_Unbounded;
-
 with Wiki.Documents;
 with Wiki.Writers;
 
@@ -24,8 +22,6 @@ with Wiki.Writers;
 --  The <tt>Text_Renderer</tt> allows to render a wiki document into a text content.
 --  The formatting rules are ignored except for the paragraphs and sections.
 package Wiki.Render.Html is
-
-   use Ada.Strings.Wide_Wide_Unbounded;
 
    --  ------------------------------
    --  Wiki to HTML writer
