@@ -30,6 +30,15 @@ package body Wiki.Render.Html is
    end Set_Writer;
 
    --  ------------------------------
+   --  Set the link renderer.
+   --  ------------------------------
+   procedure Set_Link_Renderer (Document : in out Html_Renderer;
+                                Links    : in Link_Renderer_Access) is
+   begin
+      Document.Links := Links;
+   end Set_Link_Renderer;
+
+   --  ------------------------------
    --  Add a section header in the document.
    --  ------------------------------
    overriding
@@ -190,6 +199,8 @@ package body Wiki.Render.Html is
                        Link     : in Unbounded_Wide_Wide_String;
                        Language : in Unbounded_Wide_Wide_String;
                        Title    : in Unbounded_Wide_Wide_String) is
+      Exists : Boolean;
+      URI    : Unbounded_Wide_Wide_String;
    begin
       Document.Open_Paragraph;
       Document.Writer.Start_Element ("a");
@@ -199,7 +210,8 @@ package body Wiki.Render.Html is
       if Length (Language) > 0 then
          Document.Writer.Write_Wide_Attribute ("lang", Language);
       end if;
-      Document.Writer.Write_Wide_Attribute ("href", Link);
+      Document.Links.Make_Page_Link (Link, URI, Exists);
+      Document.Writer.Write_Wide_Attribute ("href", URI);
       Document.Writer.Write_Wide_Text (Name);
       Document.Writer.End_Element ("a");
    end Add_Link;
@@ -214,6 +226,10 @@ package body Wiki.Render.Html is
                         Position    : in Unbounded_Wide_Wide_String;
                         Description : in Unbounded_Wide_Wide_String) is
       pragma Unreferenced (Position);
+
+      URI    : Unbounded_Wide_Wide_String;
+      Width  : Natural;
+      Height : Natural;
    begin
       Document.Open_Paragraph;
       Document.Writer.Start_Element ("img");
@@ -223,7 +239,14 @@ package body Wiki.Render.Html is
       if Length (Description) > 0 then
          Document.Writer.Write_Wide_Attribute ("longdesc", Description);
       end if;
-      Document.Writer.Write_Wide_Attribute ("src", Link);
+      Document.Links.Make_Image_Link (Link, URI, Width, Height);
+      Document.Writer.Write_Wide_Attribute ("src", URI);
+      if Width > 0 then
+         Document.Writer.Write_Attribute ("width", Natural'Image (Width));
+      end if;
+      if Height > 0 then
+         Document.Writer.Write_Attribute ("height", Natural'Image (Height));
+      end if;
       Document.Writer.End_Element ("img");
    end Add_Image;
 
