@@ -238,7 +238,18 @@ package body Wiki.Parsers is
                Col := Col + 1;
             elsif C = LF or C = CR then
                Col := 0;
-               Append (P.Text, C);
+               --  Check for CR + LF and treat it as a single LF.
+               if C = CR and then not P.Is_Eof then
+                  Peek (P, C);
+                  if C = LF then
+                     Append (P.Text, C);
+                  else
+                     Put_Back (P, C);
+                     Append (P.Text, LF);
+                  end if;
+               else
+                  Append (P.Text, C);
+               end if;
             else
                Col := Col + 1;
                Append (P.Text, C);
