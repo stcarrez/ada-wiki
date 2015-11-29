@@ -267,6 +267,18 @@ package body Wiki.Parsers.Tests is
                                 Wiki.Utils.To_Html ("///" & LF & "* code *" & LF & "///",
                                                  SYNTAX_DOTCLEAR),
                                 "Preformat rendering invalid");
+      Util.Tests.Assert_Equals (T, "<pre>item1 x" & ASCII.LF & "item2 x" & ASCII.LF & "item3 x"
+                                & ASCII.LF & "</pre>",
+                                Wiki.Utils.To_Html (" item1 x" & LF & " item2 x" & LF & " item3 x",
+                                                 SYNTAX_DOTCLEAR),
+                                "Preformat rendering invalid");
+      Util.Tests.Assert_Equals (T, "<pre>item1 x" & ASCII.LF & "item2 x"
+                                & ASCII.LF & "item3 x"
+                                & ASCII.LF & "</pre>",
+                                Wiki.Utils.To_Html (" item1 x" & CR & LF & " item2 x"
+                                  & CR & LF & " item3 x",
+                                                 SYNTAX_DOTCLEAR),
+                                "Preformat rendering invalid");
    end Test_Wiki_Preformatted;
 
    --  ------------------------------
