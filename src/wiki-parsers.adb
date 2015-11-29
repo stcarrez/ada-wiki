@@ -368,6 +368,7 @@ package body Wiki.Parsers is
    --  Parse a link.
    --  Example:
    --    [name]
+   --    [url]
    --    [name|url]
    --    [name|url|language]
    --    [name|url|language|title]
@@ -430,7 +431,11 @@ package body Wiki.Parsers is
       end if;
       P.Empty_Line := False;
       Flush_Text (P);
-      P.Document.Add_Link (Title, Link, Language, Link_Title);
+      if Length (Link) = 0 then
+         P.Document.Add_Link (Title, Title, Language, Link_Title);
+      else
+         P.Document.Add_Link (Title, Link, Language, Link_Title);
+      end if;
       Peek (P, C);
       if not P.Is_Eof then
          if C = CR or C = LF then
