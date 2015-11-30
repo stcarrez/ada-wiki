@@ -44,6 +44,9 @@ package Wiki.Parsers is
          --  MediaWiki syntax http://www.mediawiki.org/wiki/Help:Formatting
          SYNTAX_MEDIA_WIKI,
 
+         --  Markdown
+         SYNTAX_MARKDOWN,
+
          --  A mix of the above
          SYNTAX_MIX);
 
