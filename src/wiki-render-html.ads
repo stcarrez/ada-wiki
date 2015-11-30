@@ -15,8 +15,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Strings.Wide_Wide_Unbounded;
-
 with Wiki.Documents;
 with Wiki.Writers;
 
@@ -24,8 +22,6 @@ with Wiki.Writers;
 --  The <tt>Text_Renderer</tt> allows to render a wiki document into a text content.
 --  The formatting rules are ignored except for the paragraphs and sections.
 package Wiki.Render.Html is
-
-   use Ada.Strings.Wide_Wide_Unbounded;
 
    --  ------------------------------
    --  Wiki to HTML writer
@@ -35,6 +31,10 @@ package Wiki.Render.Html is
    --  Set the output writer.
    procedure Set_Writer (Document : in out Html_Renderer;
                          Writer   : in Wiki.Writers.Html_Writer_Type_Access);
+
+   --  Set the link renderer.
+   procedure Set_Link_Renderer (Document : in out Html_Renderer;
+                                Links    : in Link_Renderer_Access);
 
    --  Add a section header in the document.
    overriding
@@ -113,9 +113,12 @@ private
 
    type List_Style_Array is array (1 .. 32) of Boolean;
 
+   Default_Links : aliased Default_Link_Renderer;
+
    type Html_Renderer is new Wiki.Documents.Document_Reader with record
       Writer         : Wiki.Writers.Html_Writer_Type_Access := null;
       Format         : Wiki.Documents.Format_Map := (others => False);
+      Links          : Link_Renderer_Access := Default_Links'Access;
       Has_Paragraph  : Boolean := False;
       Need_Paragraph : Boolean := False;
       Current_Level  : Natural := 0;

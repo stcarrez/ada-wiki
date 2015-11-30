@@ -138,7 +138,9 @@ package body Wiki.Render.Text is
          Document.Writer.Write (Title);
       end if;
       Document.Writer.Write (Link);
-      Document.Writer.Write (Name);
+      if Link /= Name then
+         Document.Writer.Write (Name);
+      end if;
       Document.Empty_Line := False;
    end Add_Link;
 

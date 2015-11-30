@@ -19,7 +19,6 @@
 with Util.Test_Caller;
 
 with Wiki.Utils;
-with Wiki.Writers;
 package body Wiki.Parsers.Tests is
 
    package Caller is new Util.Test_Caller (Test, "Wikis.Parsers");
@@ -178,7 +177,7 @@ package body Wiki.Parsers.Tests is
    --  ------------------------------
    procedure Test_Wiki_Link (T : in out Test) is
    begin
-      Util.Tests.Assert_Equals (T, "<p><a href="""">name</a></p>",
+      Util.Tests.Assert_Equals (T, "<p><a href=""name"">name</a></p>",
                                 Wiki.Utils.To_Html ("[name]", SYNTAX_GOOGLE),
                                 "Link rendering invalid");
       Util.Tests.Assert_Equals (T, "<p><a title=""some"" lang=""en"" " &
@@ -186,12 +185,20 @@ package body Wiki.Parsers.Tests is
                                 Wiki.Utils.To_Html ("[name |http://www.joe.com/item|en|some]",
                                 SYNTAX_DOTCLEAR),
                                 "Link rendering invalid");
-      Util.Tests.Assert_Equals (T, "<p><a href="""">name</a></p>",
+      Util.Tests.Assert_Equals (T, "<p><a href=""name"">name</a></p>",
                                 Wiki.Utils.To_Html ("[[name]]", SYNTAX_CREOLE),
                                 "Link rendering invalid");
       Util.Tests.Assert_Equals (T, "<p>[d</p>",
                                 Wiki.Utils.To_Html ("[d", SYNTAX_CREOLE),
                                 "No link rendering invalid");
+      Util.Tests.Assert_Equals (T, "<p><a " &
+                                "href=""http://www.joe.com/item"">http://www.joe.com/item</a></p>",
+                                Wiki.Utils.To_Html ("[http://www.joe.com/item]",
+                                SYNTAX_DOTCLEAR),
+                                "Link rendering invalid");
+      Util.Tests.Assert_Equals (T, "<p><a href=""name"">name</a></p>",
+                                Wiki.Utils.To_Html ("[[name]]", SYNTAX_MEDIA_WIKI),
+                                "Link rendering invalid");
    end Test_Wiki_Link;
 
    --  ------------------------------
@@ -261,6 +268,18 @@ package body Wiki.Parsers.Tests is
                                 "Preformat rendering invalid");
       Util.Tests.Assert_Equals (T, "<pre>* code *" & ASCII.LF & "</pre>",
                                 Wiki.Utils.To_Html ("///" & LF & "* code *" & LF & "///",
+                                                 SYNTAX_DOTCLEAR),
+                                "Preformat rendering invalid");
+      Util.Tests.Assert_Equals (T, "<pre>item1 x" & ASCII.LF & "item2 x" & ASCII.LF & "item3 x"
+                                & ASCII.LF & "</pre>",
+                                Wiki.Utils.To_Html (" item1 x" & LF & " item2 x" & LF & " item3 x",
+                                                 SYNTAX_DOTCLEAR),
+                                "Preformat rendering invalid");
+      Util.Tests.Assert_Equals (T, "<pre>item1 x" & ASCII.LF & "item2 x"
+                                & ASCII.LF & "item3 x"
+                                & ASCII.LF & "</pre>",
+                                Wiki.Utils.To_Html (" item1 x" & CR & LF & " item2 x"
+                                  & CR & LF & " item3 x",
                                                  SYNTAX_DOTCLEAR),
                                 "Preformat rendering invalid");
    end Test_Wiki_Preformatted;

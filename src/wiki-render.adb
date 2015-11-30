@@ -15,44 +15,36 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Strings.Wide_Wide_Unbounded;
-package Wiki.Render is
+package body Wiki.Render is
 
-   pragma Preelaborate;
-
-   use Ada.Strings.Wide_Wide_Unbounded;
-
-   type Link_Renderer is limited interface;
-   type Link_Renderer_Access is access all Link_Renderer'Class;
-
+   --  ------------------------------
    --  Get the image link that must be rendered from the wiki image link.
-   procedure Make_Image_Link (Renderer : in Link_Renderer;
-                              Link     : in Unbounded_Wide_Wide_String;
-                              URI      : out Unbounded_Wide_Wide_String;
-                              Width    : out Natural;
-                              Height   : out Natural) is abstract;
-
-   --  Get the page link that must be rendered from the wiki page link.
-   procedure Make_Page_Link (Renderer : in Link_Renderer;
-                             Link     : in Unbounded_Wide_Wide_String;
-                             URI      : out Unbounded_Wide_Wide_String;
-                             Exists   : out Boolean) is abstract;
-
-   type Default_Link_Renderer is new Link_Renderer with null record;
-
-   --  Get the image link that must be rendered from the wiki image link.
+   --  ------------------------------
    overriding
    procedure Make_Image_Link (Renderer : in Default_Link_Renderer;
                               Link     : in Unbounded_Wide_Wide_String;
                               URI      : out Unbounded_Wide_Wide_String;
                               Width    : out Natural;
-                              Height   : out Natural);
+                              Height   : out Natural) is
+      pragma Unreferenced (Renderer);
+   begin
+      URI    := Link;
+      Width  := 0;
+      Height := 0;
+   end Make_Image_Link;
 
+   --  ------------------------------
    --  Get the page link that must be rendered from the wiki page link.
+   --  ------------------------------
    overriding
    procedure Make_Page_Link (Renderer : in Default_Link_Renderer;
                              Link     : in Unbounded_Wide_Wide_String;
                              URI      : out Unbounded_Wide_Wide_String;
-                             Exists   : out Boolean);
+                             Exists   : out Boolean) is
+      pragma Unreferenced (Renderer);
+   begin
+      URI    := Link;
+      Exists := True;
+   end Make_Page_Link;
 
 end Wiki.Render;

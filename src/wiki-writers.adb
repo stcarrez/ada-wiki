@@ -15,13 +15,19 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Strings.Unbounded;
-with Wiki.Writers.Builders;
+with Ada.Characters.Conversions;
 package body Wiki.Writers is
 
-   procedure foo is
+   --  ------------------------------
+   --  Write an XML attribute within an XML element.
+   --  The attribute value is escaped according to the XML escape rules.
+   --  ------------------------------
+   procedure Write_Attribute (Writer  : in out Html_writer_Type'Class;
+                              Name    : in String;
+                              Content : in String) is
+      S : constant Wide_Wide_String := Ada.Characters.Conversions.To_Wide_Wide_String (Content);
    begin
-      null;
-   end foo;
+      Writer.Write_Wide_Attribute (Name, To_Unbounded_Wide_Wide_String (S));
+   end Write_Attribute;
 
 end Wiki.Writers;

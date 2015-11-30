@@ -238,7 +238,18 @@ package body Wiki.Parsers is
                Col := Col + 1;
             elsif C = LF or C = CR then
                Col := 0;
-               Append (P.Text, C);
+               --  Check for CR + LF and treat it as a single LF.
+               if C = CR and then not P.Is_Eof then
+                  Peek (P, C);
+                  if C = LF then
+                     Append (P.Text, C);
+                  else
+                     Put_Back (P, C);
+                     Append (P.Text, LF);
+                  end if;
+               else
+                  Append (P.Text, C);
+               end if;
             else
                Col := Col + 1;
                Append (P.Text, C);
@@ -368,6 +379,7 @@ package body Wiki.Parsers is
    --  Parse a link.
    --  Example:
    --    [name]
+   --    [url]
    --    [name|url]
    --    [name|url|language]
    --    [name|url|language|title]
@@ -430,7 +442,11 @@ package body Wiki.Parsers is
       end if;
       P.Empty_Line := False;
       Flush_Text (P);
-      P.Document.Add_Link (Title, Link, Language, Link_Title);
+      if Length (Link) = 0 then
+         P.Document.Add_Link (Title, Title, Language, Link_Title);
+      else
+         P.Document.Add_Link (Title, Link, Language, Link_Title);
+      end if;
       Peek (P, C);
       if not P.Is_Eof then
          if C = CR or C = LF then
@@ -1001,7 +1017,11 @@ package body Wiki.Parsers is
             P.Link_Double_Bracket := True;
             Parse_Token (P, Creole_Wiki_Table);
 
-         when SYNTAX_MEDIA_WIKI | SYNTAX_PHPBB =>
+         when SYNTAX_PHPBB =>
+            Parse_Token (P, Mediawiki_Wiki_Table);
+
+         when SYNTAX_MEDIA_WIKI =>
+            P.Link_Double_Bracket := True;
             Parse_Token (P, Mediawiki_Wiki_Table);
 
          when SYNTAX_MARKDOWN =>

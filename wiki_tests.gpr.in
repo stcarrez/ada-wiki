@@ -5,7 +5,7 @@ with "wiki";
 
 project Wiki_Tests is
 
-   for Languages use ("Ada", "Project file");
+   for Languages use ("Ada");
 
    Mains := ("wiki_harness.adb");
 

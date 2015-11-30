@@ -16,7 +16,6 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Strings.Wide_Wide_Unbounded;
-with Wiki.Parsers;
 
 --  == Writer interfaces ==
 --  The <tt>Wiki.Writers</tt> package defines the interfaces used by the renderer to write
@@ -67,6 +66,10 @@ package Wiki.Writers is
    procedure Write_Wide_Text (Writer  : in out Html_Writer_Type;
                               Content : in Unbounded_Wide_Wide_String) is abstract;
 
-   procedure foo;
+   --  Write an XML attribute within an XML element.
+   --  The attribute value is escaped according to the XML escape rules.
+   procedure Write_Attribute (Writer  : in out Html_writer_Type'Class;
+                              Name    : in String;
+                              Content : in String);
 
 end Wiki.Writers;
