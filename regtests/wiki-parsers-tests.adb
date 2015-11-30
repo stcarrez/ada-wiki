@@ -196,6 +196,9 @@ package body Wiki.Parsers.Tests is
                                 Wiki.Utils.To_Html ("[http://www.joe.com/item]",
                                 SYNTAX_DOTCLEAR),
                                 "Link rendering invalid");
+      Util.Tests.Assert_Equals (T, "<p><a href=""name"">name</a></p>",
+                                Wiki.Utils.To_Html ("[[name]]", SYNTAX_MEDIA_WIKI),
+                                "Link rendering invalid");
    end Test_Wiki_Link;
 
    --  ------------------------------
