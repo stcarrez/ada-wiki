@@ -996,7 +996,11 @@ package body Wiki.Parsers is
             P.Link_Double_Bracket := True;
             Parse_Token (P, Creole_Wiki_Table);
 
-         when SYNTAX_MEDIA_WIKI | SYNTAX_PHPBB =>
+         when SYNTAX_PHPBB =>
+            Parse_Token (P, Mediawiki_Wiki_Table);
+
+         when SYNTAX_MEDIA_WIKI =>
+            P.Link_Double_Bracket := True;
             Parse_Token (P, Mediawiki_Wiki_Table);
 
          when SYNTAX_MIX =>
