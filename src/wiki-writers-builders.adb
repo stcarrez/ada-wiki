@@ -195,7 +195,7 @@ package body Wiki.Writers.Builders is
       Close_Current (Writer);
       if Count > 0 then
          for I in 1 .. Count loop
-            Html_Writer_Type'Class (Writer).Write (Element (Content, I));
+            Html_Writer_Type'Class (Writer).Write_Escape (Element (Content, I));
          end loop;
       end if;
    end Write_Wide_Text;
