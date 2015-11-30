@@ -889,6 +889,27 @@ package body Wiki.Parsers is
        others => Parse_Text'Access
       );
 
+   Markdown_Wiki_Table : constant Parser_Table
+     := (
+       16#0A# => Parse_End_Line'Access,
+       16#0D# => Parse_End_Line'Access,
+       Character'Pos (' ') => Parse_Space'Access,
+       Character'Pos ('#') => Parse_Header'Access,
+       Character'Pos ('*') => Parse_Double_Bold'Access,
+       Character'Pos ('/') => Parse_Double_Italic'Access,
+       Character'Pos ('@') => Parse_Double_Code'Access,
+       Character'Pos ('^') => Parse_Single_Superscript'Access,
+       Character'Pos ('-') => Parse_Double_Strikeout'Access,
+       Character'Pos ('+') => Parse_Double_Strikeout'Access,
+       Character'Pos (',') => Parse_Double_Subscript'Access,
+       Character'Pos ('[') => Parse_Link'Access,
+       Character'Pos ('\') => Parse_Line_Break'Access,
+       Character'Pos ('#') => Parse_List'Access,
+       Character'Pos ('{') => Parse_Image'Access,
+       Character'Pos ('%') => Parse_Line_Break'Access,
+       others => Parse_Text'Access
+      );
+
    Mediawiki_Wiki_Table : constant Parser_Table
      := (
        16#0A# => Parse_End_Line'Access,
@@ -982,6 +1003,9 @@ package body Wiki.Parsers is
 
          when SYNTAX_MEDIA_WIKI | SYNTAX_PHPBB =>
             Parse_Token (P, Mediawiki_Wiki_Table);
+
+         when SYNTAX_MARKDOWN =>
+            Parse_Token (P, Markdown_Wiki_Table);
 
          when SYNTAX_MIX =>
             P.Is_Dotclear := True;
