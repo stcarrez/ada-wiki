@@ -207,6 +207,21 @@ package body Wiki.Render.Text is
       Document.Empty_Line := False;
    end Add_Preformatted;
 
+   overriding
+   procedure Start_Element (Document   : in out Text_Renderer;
+                            Name       : in Unbounded_Wide_Wide_String;
+                            Attributes : in Wiki.Attributes.Attribute_List_Type) is
+   begin
+      null;
+   end Start_Element;
+
+   overriding
+   procedure End_Element (Document : in out Text_Renderer;
+                          Name     : in Unbounded_Wide_Wide_String) is
+   begin
+      null;
+   end End_Element;
+
    --  ------------------------------
    --  Finish the document after complete wiki text has been parsed.
    --  ------------------------------

@@ -15,7 +15,7 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-
+with Ada.Characters.Conversions;
 with Util.Strings;
 
 package body Wiki.Render.Html is
@@ -329,6 +329,21 @@ package body Wiki.Render.Html is
          Document.Writer.End_Element ("pre");
       end if;
    end Add_Preformatted;
+
+   overriding
+   procedure Start_Element (Document   : in out Html_Renderer;
+                            Name       : in Unbounded_Wide_Wide_String;
+                            Attributes : in Wiki.Attributes.Attribute_List_Type) is
+   begin
+      Document.Writer.Start_Element (Ada.Characters.Conversions.To_String (To_Wide_Wide_String (Name)));
+   end Start_Element;
+
+   overriding
+   procedure End_Element (Document : in out Html_Renderer;
+                          Name     : in Unbounded_Wide_Wide_String) is
+   begin
+      Document.Writer.End_Element (Ada.Characters.Conversions.To_String (To_Wide_Wide_String (Name)));
+   end End_Element;
 
    --  ------------------------------
    --  Finish the document after complete wiki text has been parsed.
