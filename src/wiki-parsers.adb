@@ -15,19 +15,11 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-
+with Wiki.Parsers.Html;
 package body Wiki.Parsers is
 
    use Wiki.Documents;
    use Ada.Strings.Wide_Wide_Unbounded;
-
-   --  Peek the next character from the wiki text buffer.
-   procedure Peek (P     : in out Parser;
-                   Token : out Wide_Wide_Character);
-
-   --  Put back the character so that it will be returned by the next call to Peek.
-   procedure Put_Back (P     : in out Parser;
-                       Token : in Wide_Wide_Character);
 
    --  Flush the wiki text that was collected in the text buffer.
    procedure Flush_Text (P : in out Parser);
@@ -839,126 +831,144 @@ package body Wiki.Parsers is
       P.Document.Add_Line_Break;
    end Parse_Line_Break;
 
+   --  ------------------------------
+   --  Parse a line break.
+   --  Example:
+   --     \\    (Creole)
+   --     %%%   (Dotclear)
+   --  ------------------------------
+   procedure Parse_Maybe_Html (P     : in out Parser;
+                               Token : in Wide_Wide_Character) is
+      C : Wide_Wide_Character;
+   begin
+      Wiki.Parsers.Html.Parse_Element (P);
+   end Parse_Maybe_Html;
+
    Google_Wiki_Table : constant Parser_Table
      := (
-       16#0A# => Parse_End_Line'Access,
-       16#0D# => Parse_End_Line'Access,
-       Character'Pos (' ') => Parse_Space'Access,
-       Character'Pos ('=') => Parse_Header'Access,
-       Character'Pos ('*') => Parse_Single_Bold'Access,
-       Character'Pos ('_') => Parse_Single_Italic'Access,
-       Character'Pos ('`') => Parse_Single_Code'Access,
-       Character'Pos ('^') => Parse_Single_Superscript'Access,
-       Character'Pos ('~') => Parse_Double_Strikeout'Access,
-       Character'Pos (',') => Parse_Double_Subscript'Access,
-       Character'Pos ('[') => Parse_Link'Access,
-       Character'Pos ('\') => Parse_Line_Break'Access,
-       Character'Pos ('#') => Parse_List'Access,
-       Character'Pos ('{') => Parse_Preformatted'Access,
-       Character'Pos ('}') => Parse_Preformatted'Access,
-       others => Parse_Text'Access
-      );
+         16#0A# => Parse_End_Line'Access,
+         16#0D# => Parse_End_Line'Access,
+         Character'Pos (' ') => Parse_Space'Access,
+         Character'Pos ('=') => Parse_Header'Access,
+         Character'Pos ('*') => Parse_Single_Bold'Access,
+         Character'Pos ('_') => Parse_Single_Italic'Access,
+         Character'Pos ('`') => Parse_Single_Code'Access,
+         Character'Pos ('^') => Parse_Single_Superscript'Access,
+         Character'Pos ('~') => Parse_Double_Strikeout'Access,
+         Character'Pos (',') => Parse_Double_Subscript'Access,
+         Character'Pos ('[') => Parse_Link'Access,
+         Character'Pos ('\') => Parse_Line_Break'Access,
+         Character'Pos ('#') => Parse_List'Access,
+         Character'Pos ('{') => Parse_Preformatted'Access,
+         Character'Pos ('}') => Parse_Preformatted'Access,
+         Character'Pos ('<') => Parse_Maybe_Html'Access,
+         others => Parse_Text'Access
+        );
 
    Dotclear_Wiki_Table : constant Parser_Table
      := (
-       16#0A# => Parse_End_Line'Access,
-       16#0D# => Parse_End_Line'Access,
-       Character'Pos (' ') => Parse_Space'Access,
-       Character'Pos ('!') => Parse_Header'Access,
-       Character'Pos ('_') => Parse_Double_Bold'Access,
-       Character'Pos (''') => Parse_Double_Italic'Access,
-       Character'Pos ('@') => Parse_Double_Code'Access,
-       Character'Pos ('^') => Parse_Single_Superscript'Access,
-       Character'Pos ('-') => Parse_Double_Strikeout'Access,
-       Character'Pos ('+') => Parse_Double_Strikeout'Access,
-       Character'Pos (',') => Parse_Double_Subscript'Access,
-       Character'Pos ('[') => Parse_Link'Access,
-       Character'Pos ('\') => Parse_Line_Break'Access,
-       Character'Pos ('{') => Parse_Quote'Access,
-       Character'Pos ('#') => Parse_List'Access,
-       Character'Pos ('*') => Parse_List'Access,
-       Character'Pos ('(') => Parse_Image'Access,
-       Character'Pos ('/') => Parse_Preformatted'Access,
-       Character'Pos ('%') => Parse_Line_Break'Access,
-       Character'Pos ('>') => Parse_Blockquote'Access,
-       others => Parse_Text'Access
-      );
+         16#0A# => Parse_End_Line'Access,
+         16#0D# => Parse_End_Line'Access,
+         Character'Pos (' ') => Parse_Space'Access,
+         Character'Pos ('!') => Parse_Header'Access,
+         Character'Pos ('_') => Parse_Double_Bold'Access,
+         Character'Pos (''') => Parse_Double_Italic'Access,
+         Character'Pos ('@') => Parse_Double_Code'Access,
+         Character'Pos ('^') => Parse_Single_Superscript'Access,
+         Character'Pos ('-') => Parse_Double_Strikeout'Access,
+         Character'Pos ('+') => Parse_Double_Strikeout'Access,
+         Character'Pos (',') => Parse_Double_Subscript'Access,
+         Character'Pos ('[') => Parse_Link'Access,
+         Character'Pos ('\') => Parse_Line_Break'Access,
+         Character'Pos ('{') => Parse_Quote'Access,
+         Character'Pos ('#') => Parse_List'Access,
+         Character'Pos ('*') => Parse_List'Access,
+         Character'Pos ('(') => Parse_Image'Access,
+         Character'Pos ('/') => Parse_Preformatted'Access,
+         Character'Pos ('%') => Parse_Line_Break'Access,
+         Character'Pos ('>') => Parse_Blockquote'Access,
+         Character'Pos ('<') => Parse_Maybe_Html'Access,
+         others => Parse_Text'Access
+        );
 
    Creole_Wiki_Table : constant Parser_Table
      := (
-       16#0A# => Parse_End_Line'Access,
-       16#0D# => Parse_End_Line'Access,
-       Character'Pos (' ') => Parse_Space'Access,
-       Character'Pos ('=') => Parse_Header'Access,
-       Character'Pos ('*') => Parse_Double_Bold'Access,
-       Character'Pos ('/') => Parse_Double_Italic'Access,
-       Character'Pos ('@') => Parse_Double_Code'Access,
-       Character'Pos ('^') => Parse_Single_Superscript'Access,
-       Character'Pos ('-') => Parse_Double_Strikeout'Access,
-       Character'Pos ('+') => Parse_Double_Strikeout'Access,
-       Character'Pos (',') => Parse_Double_Subscript'Access,
-       Character'Pos ('[') => Parse_Link'Access,
-       Character'Pos ('\') => Parse_Line_Break'Access,
-       Character'Pos ('#') => Parse_List'Access,
-       Character'Pos ('{') => Parse_Image'Access,
-       Character'Pos ('%') => Parse_Line_Break'Access,
-       others => Parse_Text'Access
-      );
+         16#0A# => Parse_End_Line'Access,
+         16#0D# => Parse_End_Line'Access,
+         Character'Pos (' ') => Parse_Space'Access,
+         Character'Pos ('=') => Parse_Header'Access,
+         Character'Pos ('*') => Parse_Double_Bold'Access,
+         Character'Pos ('/') => Parse_Double_Italic'Access,
+         Character'Pos ('@') => Parse_Double_Code'Access,
+         Character'Pos ('^') => Parse_Single_Superscript'Access,
+         Character'Pos ('-') => Parse_Double_Strikeout'Access,
+         Character'Pos ('+') => Parse_Double_Strikeout'Access,
+         Character'Pos (',') => Parse_Double_Subscript'Access,
+         Character'Pos ('[') => Parse_Link'Access,
+         Character'Pos ('\') => Parse_Line_Break'Access,
+         Character'Pos ('#') => Parse_List'Access,
+         Character'Pos ('{') => Parse_Image'Access,
+         Character'Pos ('%') => Parse_Line_Break'Access,
+         Character'Pos ('<') => Parse_Maybe_Html'Access,
+         others => Parse_Text'Access
+        );
 
    Markdown_Wiki_Table : constant Parser_Table
      := (
-       16#0A# => Parse_End_Line'Access,
-       16#0D# => Parse_End_Line'Access,
-       Character'Pos (' ') => Parse_Space'Access,
-       Character'Pos ('#') => Parse_Header'Access,
-       Character'Pos ('*') => Parse_Double_Bold'Access,
-       Character'Pos ('/') => Parse_Double_Italic'Access,
-       Character'Pos ('@') => Parse_Double_Code'Access,
-       Character'Pos ('^') => Parse_Single_Superscript'Access,
-       Character'Pos ('-') => Parse_Double_Strikeout'Access,
-       Character'Pos ('+') => Parse_Double_Strikeout'Access,
-       Character'Pos (',') => Parse_Double_Subscript'Access,
-       Character'Pos ('[') => Parse_Link'Access,
-       Character'Pos ('\') => Parse_Line_Break'Access,
-       Character'Pos ('#') => Parse_List'Access,
-       Character'Pos ('{') => Parse_Image'Access,
-       Character'Pos ('%') => Parse_Line_Break'Access,
-       others => Parse_Text'Access
-      );
+         16#0A# => Parse_End_Line'Access,
+         16#0D# => Parse_End_Line'Access,
+         Character'Pos (' ') => Parse_Space'Access,
+         Character'Pos ('#') => Parse_Header'Access,
+         Character'Pos ('*') => Parse_Double_Bold'Access,
+         Character'Pos ('/') => Parse_Double_Italic'Access,
+         Character'Pos ('@') => Parse_Double_Code'Access,
+         Character'Pos ('^') => Parse_Single_Superscript'Access,
+         Character'Pos ('-') => Parse_Double_Strikeout'Access,
+         Character'Pos ('+') => Parse_Double_Strikeout'Access,
+         Character'Pos (',') => Parse_Double_Subscript'Access,
+         Character'Pos ('[') => Parse_Link'Access,
+         Character'Pos ('\') => Parse_Line_Break'Access,
+         Character'Pos ('{') => Parse_Image'Access,
+         Character'Pos ('%') => Parse_Line_Break'Access,
+         Character'Pos ('<') => Parse_Maybe_Html'Access,
+         others => Parse_Text'Access
+        );
 
    Mediawiki_Wiki_Table : constant Parser_Table
      := (
-       16#0A# => Parse_End_Line'Access,
-       16#0D# => Parse_End_Line'Access,
-       Character'Pos (' ') => Parse_Space'Access,
-       Character'Pos ('=') => Parse_Header'Access,
-       Character'Pos (''') => Parse_Bold_Italic'Access,
-       Character'Pos ('[') => Parse_Link'Access,
-       Character'Pos ('\') => Parse_Line_Break'Access,
-       Character'Pos ('{') => Parse_Quote'Access,
-       Character'Pos ('#') => Parse_List'Access,
-       Character'Pos ('*') => Parse_List'Access,
-       others => Parse_Text'Access
-      );
+         16#0A# => Parse_End_Line'Access,
+         16#0D# => Parse_End_Line'Access,
+         Character'Pos (' ') => Parse_Space'Access,
+         Character'Pos ('=') => Parse_Header'Access,
+         Character'Pos (''') => Parse_Bold_Italic'Access,
+         Character'Pos ('[') => Parse_Link'Access,
+         Character'Pos ('\') => Parse_Line_Break'Access,
+         Character'Pos ('{') => Parse_Quote'Access,
+         Character'Pos ('#') => Parse_List'Access,
+         Character'Pos ('*') => Parse_List'Access,
+         Character'Pos ('<') => Parse_Maybe_Html'Access,
+         others => Parse_Text'Access
+        );
 
    Misc_Wiki_Table : constant Parser_Table
      := (
-       16#0A# => Parse_End_Line'Access,
-       16#0D# => Parse_End_Line'Access,
-       Character'Pos (' ') => Parse_Space'Access,
-       Character'Pos ('=') => Parse_Header'Access,
-       Character'Pos ('*') => Parse_Single_Bold'Access,
-       Character'Pos ('_') => Parse_Single_Italic'Access,
-       Character'Pos ('`') => Parse_Single_Code'Access,
-       Character'Pos ('^') => Parse_Single_Superscript'Access,
-       Character'Pos ('~') => Parse_Double_Strikeout'Access,
-       Character'Pos (',') => Parse_Double_Subscript'Access,
-       Character'Pos ('[') => Parse_Link'Access,
-       Character'Pos ('\') => Parse_Line_Break'Access,
-       Character'Pos ('#') => Parse_List'Access,
-       Character'Pos ('@') => Parse_Double_Code'Access,
-       others => Parse_Text'Access
-      );
+         16#0A# => Parse_End_Line'Access,
+         16#0D# => Parse_End_Line'Access,
+         Character'Pos (' ') => Parse_Space'Access,
+         Character'Pos ('=') => Parse_Header'Access,
+         Character'Pos ('*') => Parse_Single_Bold'Access,
+         Character'Pos ('_') => Parse_Single_Italic'Access,
+         Character'Pos ('`') => Parse_Single_Code'Access,
+         Character'Pos ('^') => Parse_Single_Superscript'Access,
+         Character'Pos ('~') => Parse_Double_Strikeout'Access,
+         Character'Pos (',') => Parse_Double_Subscript'Access,
+         Character'Pos ('[') => Parse_Link'Access,
+         Character'Pos ('\') => Parse_Line_Break'Access,
+         Character'Pos ('#') => Parse_List'Access,
+         Character'Pos ('@') => Parse_Double_Code'Access,
+         Character'Pos ('<') => Parse_Maybe_Html'Access,
+         others => Parse_Text'Access
+        );
 
    --  ------------------------------
    --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
