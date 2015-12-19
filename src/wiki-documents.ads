@@ -16,7 +16,7 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Strings.Wide_Wide_Unbounded;
-
+with Wiki.Attributes;
 package Wiki.Documents is
 
    pragma Preelaborate;
@@ -88,6 +88,13 @@ package Wiki.Documents is
    procedure Add_Preformatted (Document : in out Document_Reader;
                                Text     : in Unbounded_Wide_Wide_String;
                                Format   : in Unbounded_Wide_Wide_String) is abstract;
+
+   procedure Start_Element (Document   : in out Document_Reader;
+                            Name       : in Unbounded_Wide_Wide_String;
+                            Attributes : in Wiki.Attributes.Attribute_List_Type) is abstract;
+
+   procedure End_Element (Document : in out Document_Reader;
+                          Name     : in Unbounded_Wide_Wide_String) is abstract;
 
    --  Finish the document after complete wiki text has been parsed.
    procedure Finish (Document : in out Document_Reader) is abstract;
