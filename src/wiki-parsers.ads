@@ -18,8 +18,10 @@
 with Ada.Strings.Wide_Wide_Unbounded;
 
 with Wiki.Documents;
+with Wiki.Attributes;
 
---  The <b>AWA.Wikis.Parsers</b> package implements a parser for several well known wiki formats.
+--  == Wiki Parsers ==
+--  The <b>Wikis.Parsers</b> package implements a parser for several well known wiki formats.
 --  The parser works with the <b>Document_Reader</b> interface type which defines several
 --  procedures that are called by the parser when the wiki text is scanned.
 package Wiki.Parsers is
@@ -75,6 +77,7 @@ private
       Document            : Wiki.Documents.Document_Reader_Access;
       Format              : Wiki.Documents.Format_Map;
       Text                : Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
+      Token               : Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
       Empty_Line          : Boolean := True;
       Is_Eof              : Boolean := False;
       In_Paragraph        : Boolean := False;
@@ -86,6 +89,7 @@ private
       Escape_Char         : Wide_Wide_Character;
       List_Level          : Natural := 0;
       Reader              : Input_Access := null;
+      Attributes          : Wiki.Attributes.Attribute_List_Type;
    end record;
 
    type Parser_Handler is access procedure (P     : in out Parser;
@@ -93,5 +97,14 @@ private
 
    type Parser_Table is array (0 .. 127) of Parser_Handler;
    type Parser_Table_Access is access Parser_Table;
+
+   --  Peek the next character from the wiki text buffer.
+   procedure Peek (P     : in out Parser;
+                   Token : out Wide_Wide_Character);
+
+   --  Put back the character so that it will be returned by the next call to Peek.
+   procedure Put_Back (P     : in out Parser;
+                       Token : in Wide_Wide_Character);
+
 
 end Wiki.Parsers;
