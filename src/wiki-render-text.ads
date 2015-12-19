@@ -15,6 +15,7 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
+with Wiki.Attributes;
 with Wiki.Documents;
 with Wiki.Writers;
 
@@ -97,6 +98,15 @@ package Wiki.Render.Text is
    procedure Add_Preformatted (Document : in out Text_Renderer;
                                Text     : in Unbounded_Wide_Wide_String;
                                Format   : in Unbounded_Wide_Wide_String);
+
+   overriding
+   procedure Start_Element (Document   : in out Text_Renderer;
+                            Name       : in Unbounded_Wide_Wide_String;
+                            Attributes : in Wiki.Attributes.Attribute_List_Type);
+
+   overriding
+   procedure End_Element (Document : in out Text_Renderer;
+                          Name     : in Unbounded_Wide_Wide_String);
 
    --  Finish the document after complete wiki text has been parsed.
    overriding
