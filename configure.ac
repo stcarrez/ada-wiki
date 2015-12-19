@@ -68,5 +68,5 @@ WIKI_LIBDIR="lib"
 AC_SUBST(WIKI_LIBDIR)
 
 AC_OUTPUT(
-Makefile wiki.gpr wiki_tests.gpr
+Makefile wiki.gpr wiki_tests.gpr samples.gpr
 )
