@@ -982,6 +982,7 @@ package body Wiki.Parsers is
          Character'Pos ('#') => Parse_List'Access,
          Character'Pos ('*') => Parse_List'Access,
          Character'Pos ('<') => Parse_Maybe_Html'Access,
+         Character'Pos ('-') => Parse_Horizontal_Rule'Access,
          others => Parse_Text'Access
         );
 
