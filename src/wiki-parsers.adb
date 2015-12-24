@@ -21,9 +21,6 @@ package body Wiki.Parsers is
    use Wiki.Documents;
    use Ada.Strings.Wide_Wide_Unbounded;
 
-   --  Flush the wiki text that was collected in the text buffer.
-   procedure Flush_Text (P : in out Parser);
-
    --  Append a character to the wiki text buffer.
    procedure Parse_Text (P     : in out Parser;
                          Token : in Wide_Wide_Character);
