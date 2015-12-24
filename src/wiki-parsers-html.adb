@@ -141,6 +141,8 @@ package body Wiki.Parsers.Html is
          if C /= '>' then
             Put_Back (P, C);
          end if;
+         Flush_Text (P);
+         P.Document.End_Element (Name);
       else
          Collect_Attributes (P);
          P.Document.Start_Element (Name, P.Attributes);
