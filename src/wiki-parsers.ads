@@ -106,5 +106,7 @@ private
    procedure Put_Back (P     : in out Parser;
                        Token : in Wide_Wide_Character);
 
+   --  Flush the wiki text that was collected in the text buffer.
+   procedure Flush_Text (P : in out Parser);
 
 end Wiki.Parsers;
