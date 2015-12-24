@@ -66,14 +66,21 @@ package Wiki.Writers.Builders is
    type Html_Writer_Type_Access is access all Html_Writer_Type'Class;
 
    overriding
-   procedure Write_Wide_Element (Writer  : in out Html_writer_Type;
+   procedure Write_Wide_Element (Writer  : in out Html_Writer_Type;
                                  Name    : in String;
                                  Content : in Unbounded_Wide_Wide_String);
 
    overriding
-   procedure Write_Wide_Attribute (Writer  : in out Html_writer_Type;
+   procedure Write_Wide_Attribute (Writer  : in out Html_Writer_Type;
                                    Name    : in String;
                                    Content : in Unbounded_Wide_Wide_String);
+
+   --  Write an XML attribute within an XML element.
+   --  The attribute value is escaped according to the XML escape rules.
+   overriding
+   procedure Write_Wide_Attribute (Writer  : in out Html_Writer_Type;
+                                   Name    : in String;
+                                   Content : in Wide_Wide_String);
 
    overriding
    procedure Start_Element (Writer : in out Html_Writer_Type;
