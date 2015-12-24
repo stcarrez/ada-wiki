@@ -135,6 +135,7 @@ private
       List_Styles    : List_Style_Array := (others => False);
       Has_Item       : Boolean := False;
       Quote_Level    : Natural := 0;
+      Html_Level     : Natural := 0;
    end record;
 
 end Wiki.Render.Html;
