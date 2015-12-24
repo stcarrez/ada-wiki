@@ -16,6 +16,7 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Strings.Wide_Wide_Unbounded;
+with Ada.Containers.Vectors;
 
 with Wiki.Documents;
 with Wiki.Attributes;
@@ -61,6 +62,8 @@ package Wiki.Parsers is
 
 private
 
+   use Ada.Strings.Wide_Wide_Unbounded;
+
    HT : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#09#);
    LF : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#0A#);
    CR : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#0D#);
@@ -70,6 +73,13 @@ private
    procedure Read_Char (From : in out Input;
                         Token : out Wide_Wide_Character;
                         Eof   : out Boolean) is abstract;
+
+   package Wide_Wide_String_Vectors is
+     new Ada.Containers.Vectors (Index_Type   => Positive,
+                                 Element_Type => Unbounded_Wide_Wide_String);
+
+   subtype Wide_Wide_String_Vector is Wide_Wide_String_Vectors.Vector;
+   subtype Wide_Wide_String_Cursor is Wide_Wide_String_Vectors.Cursor;
 
    type Parser is limited record
       Pending             : Wide_Wide_Character;
@@ -90,6 +100,7 @@ private
       List_Level          : Natural := 0;
       Reader              : Input_Access := null;
       Attributes          : Wiki.Attributes.Attribute_List_Type;
+      Html_Stack          : Wide_Wide_String_Vector;
    end record;
 
    type Parser_Handler is access procedure (P     : in out Parser;
@@ -108,5 +119,15 @@ private
 
    --  Flush the wiki text that was collected in the text buffer.
    procedure Flush_Text (P : in out Parser);
+
+   procedure Start_Element (P          : in out Parser;
+                            Name       : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
+                            Attributes : in Wiki.Attributes.Attribute_List_Type);
+
+   procedure End_Element (P    : in out Parser;
+                          Name : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String);
+
+   --  Flush the pending HTML stack elements.
+   procedure Flush_Stack (P : in out Parser);
 
 end Wiki.Parsers;
