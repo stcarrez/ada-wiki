@@ -145,7 +145,33 @@ package body Wiki.Writers.Builders is
       Writer.End_Element (Name);
    end Write_Wide_Element;
 
-   procedure Write_Wide_Attribute (Writer  : in out Html_writer_Type;
+   --  Write an XML attribute within an XML element.
+   --  The attribute value is escaped according to the XML escape rules.
+   procedure Write_Wide_Attribute (Writer  : in out Html_Writer_Type;
+                                   Name    : in String;
+                                   Content : in Wide_Wide_String) is
+   begin
+      if Writer.Close_Start then
+         Writer.Write_Char (' ');
+         Writer.Write_String (Name);
+         Writer.Write_Char ('=');
+         Writer.Write_Char ('"');
+         for I in Content'Range loop
+            declare
+               C : constant Wide_Wide_Character := Content (I);
+            begin
+               if C = '"' then
+                  Writer.Write_String ("&quot;");
+               else
+                  Writer.Write_Escape (C);
+               end if;
+            end;
+         end loop;
+         Writer.Write_Char ('"');
+      end if;
+   end Write_Wide_Attribute;
+
+   procedure Write_Wide_Attribute (Writer  : in out Html_Writer_Type;
                                    Name    : in String;
                                    Content : in Unbounded_Wide_Wide_String) is
       Count : constant Natural := Length (Content);
