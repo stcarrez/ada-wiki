@@ -106,6 +106,12 @@ package body Wiki.Parsers is
    procedure Parse_Quote (P     : in out Parser;
                           Token : in Wide_Wide_Character);
 
+   --  Parse a horizontal rule.
+   --  Example:
+   --    ----
+   procedure Parse_Horizontal_Rule (P     : in out Parser;
+                                    Token : in Wide_Wide_Character);
+
    procedure Parse_Token (P     : in out Parser;
                           Table : in Parser_Table);
 
@@ -506,6 +512,38 @@ package body Wiki.Parsers is
    end Parse_Quote;
 
    --  ------------------------------
+   --  Parse a horizontal rule.
+   --  Example:
+   --    ---- (dotclear)
+   --  ------------------------------
+   procedure Parse_Horizontal_Rule (P     : in out Parser;
+                                    Token : in Wide_Wide_Character) is
+      C     : Wide_Wide_Character;
+      Count : Natural := 1;
+   begin
+      loop
+         Peek (P, C);
+         exit when C /= Token;
+         Count := Count + 1;
+      end loop;
+      if Count >= 4 then
+         Flush_Text (P);
+         P.Document.Add_Horizontal_Rule;
+         if C /= LF and C /= CR then
+            Put_Back (P, C);
+         end if;
+      elsif P.Is_Dotclear and Count = 2 then
+         Toggle_Format (P, STRIKEOUT);
+         Put_Back (P, C);
+      else
+         for I in 1 .. Count loop
+            Append (P.Text, Token);
+         end loop;
+         Put_Back (P, C);
+      end if;
+   end Parse_Horizontal_Rule;
+
+   --  ------------------------------
    --  Parse an image.
    --  Example:
    --    ((url|alt text))
@@ -839,7 +877,6 @@ package body Wiki.Parsers is
    --  ------------------------------
    procedure Parse_Maybe_Html (P     : in out Parser;
                                Token : in Wide_Wide_Character) is
-      C : Wide_Wide_Character;
    begin
       Wiki.Parsers.Html.Parse_Element (P);
    end Parse_Maybe_Html;
@@ -875,7 +912,7 @@ package body Wiki.Parsers is
          Character'Pos (''') => Parse_Double_Italic'Access,
          Character'Pos ('@') => Parse_Double_Code'Access,
          Character'Pos ('^') => Parse_Single_Superscript'Access,
-         Character'Pos ('-') => Parse_Double_Strikeout'Access,
+         Character'Pos ('-') => Parse_Horizontal_Rule'Access,
          Character'Pos ('+') => Parse_Double_Strikeout'Access,
          Character'Pos (',') => Parse_Double_Subscript'Access,
          Character'Pos ('[') => Parse_Link'Access,
@@ -887,7 +924,6 @@ package body Wiki.Parsers is
          Character'Pos ('/') => Parse_Preformatted'Access,
          Character'Pos ('%') => Parse_Line_Break'Access,
          Character'Pos ('>') => Parse_Blockquote'Access,
-         Character'Pos ('<') => Parse_Maybe_Html'Access,
          others => Parse_Text'Access
         );
 
@@ -909,7 +945,6 @@ package body Wiki.Parsers is
          Character'Pos ('#') => Parse_List'Access,
          Character'Pos ('{') => Parse_Image'Access,
          Character'Pos ('%') => Parse_Line_Break'Access,
-         Character'Pos ('<') => Parse_Maybe_Html'Access,
          others => Parse_Text'Access
         );
 
