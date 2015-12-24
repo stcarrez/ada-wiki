@@ -142,10 +142,10 @@ package body Wiki.Parsers.Html is
             Put_Back (P, C);
          end if;
          Flush_Text (P);
-         P.Document.End_Element (Name);
+         End_Element (P, Name);
       else
          Collect_Attributes (P);
-         P.Document.Start_Element (Name, P.Attributes);
+         Start_Element (P, Name, P.Attributes);
       end if;
    end Parse_Element;
 
