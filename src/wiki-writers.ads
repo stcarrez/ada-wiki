@@ -54,6 +54,12 @@ package Wiki.Writers is
                                    Name    : in String;
                                    Content : in Unbounded_Wide_Wide_String) is abstract;
 
+   --  Write an XML attribute within an XML element.
+   --  The attribute value is escaped according to the XML escape rules.
+   procedure Write_Wide_Attribute (Writer  : in out Html_writer_Type;
+                                   Name    : in String;
+                                   Content : in Wide_Wide_String) is abstract;
+
    --  Start an XML element with the given name.
    procedure Start_Element (Writer : in out Html_Writer_Type;
                             Name   : in String) is abstract;
