@@ -120,6 +120,8 @@ package body Wiki.Render.Text is
    procedure Add_Horizontal_Rule (Document : in out Text_Renderer) is
    begin
       Document.Close_Paragraph;
+      Document.Writer.Write ("---------------------------------------------------------");
+      Document.Add_Line_Break;
    end Add_Horizontal_Rule;
 
    --  ------------------------------
