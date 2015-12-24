@@ -340,6 +340,7 @@ package body Wiki.Render.Html is
    procedure Start_Element (Document   : in out Html_Renderer;
                             Name       : in Unbounded_Wide_Wide_String;
                             Attributes : in Wiki.Attributes.Attribute_List_Type) is
+      Iter : Wiki.Attributes.Cursor := Wiki.Attributes.First (Attributes);
    begin
       Document.Html_Level := Document.Html_Level + 1;
       if Name = "p" then
@@ -347,6 +348,11 @@ package body Wiki.Render.Html is
          Document.Need_Paragraph := False;
       end if;
       Document.Writer.Start_Element (Ada.Characters.Conversions.To_String (To_Wide_Wide_String (Name)));
+      while Wiki.Attributes.Has_Element (Iter) loop
+         Document.Writer.Write_Wide_Attribute (Name    => Wiki.Attributes.Get_Name (Iter),
+                                               Content => Wiki.Attributes.Get_Wide_Value (Iter));
+         Wiki.Attributes.Next (Iter);
+      end loop;
    end Start_Element;
 
    overriding
