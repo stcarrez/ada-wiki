@@ -177,6 +177,36 @@ package body Wiki.Parsers is
       end if;
    end Flush_Text;
 
+   procedure Start_Element (P          : in out Parser;
+                            Name       : in Unbounded_Wide_Wide_String;
+                            Attributes : in Wiki.Attributes.Attribute_List_Type) is
+   begin
+      Flush_Text (P);
+      P.Document.Start_Element (Name, Attributes);
+      P.Html_Stack.Append (Name);
+   end Start_Element;
+
+   procedure End_Element (P    : in out Parser;
+                          Name : in Unbounded_Wide_Wide_String) is
+   begin
+      Flush_Text (P);
+      if not P.Html_Stack.Is_Empty then
+         P.Html_Stack.Delete_Last;
+         P.Document.End_Element (Name);
+      end if;
+   end End_Element;
+
+   --  ------------------------------
+   --  Flush the pending HTML stack elements.
+   --  ------------------------------
+   procedure Flush_Stack (P : in out Parser) is
+   begin
+      while not P.Html_Stack.Is_Empty loop
+         P.Document.End_Element (P.Html_Stack.Last_Element);
+         P.Html_Stack.Delete_LAst;
+      end loop;
+   end Flush_Stack;
+
    --  ------------------------------
    --  Append a character to the wiki text buffer.
    --  ------------------------------
@@ -364,6 +394,10 @@ package body Wiki.Parsers is
       if Level = 0 then
          Level := 1;
       end if;
+
+      --  If some HTML was included, force a close of all the opened elements before the
+      --  new section header.
+      Flush_Stack (P);
       Flush_Text (P);
       P.Document.Add_Header (Header, Level);
       P.Empty_Line   := True;
@@ -1093,6 +1127,7 @@ package body Wiki.Parsers is
       end loop;
 
       Flush_Text (P);
+      Flush_Stack (P);
       P.Document.Finish;
    end Parse_Token;
 
