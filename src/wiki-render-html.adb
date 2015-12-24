@@ -147,6 +147,9 @@ package body Wiki.Render.Html is
 
    procedure Close_Paragraph (Document : in out Html_Renderer) is
    begin
+      if Document.Html_Level > 0 then
+         return;
+      end if;
       if Document.Has_Paragraph then
          Document.Writer.End_Element ("p");
       end if;
@@ -167,6 +170,9 @@ package body Wiki.Render.Html is
 
    procedure Open_Paragraph (Document : in out Html_Renderer) is
    begin
+      if Document.Html_Level > 0 then
+         return;
+      end if;
       if Document.Need_Paragraph then
          Document.Writer.Start_Element ("p");
          Document.Has_Paragraph  := True;
@@ -335,6 +341,7 @@ package body Wiki.Render.Html is
                             Name       : in Unbounded_Wide_Wide_String;
                             Attributes : in Wiki.Attributes.Attribute_List_Type) is
    begin
+      Document.Html_Level := Document.Html_Level + 1;
       if Name = "p" then
          Document.Has_Paragraph := True;
          Document.Need_Paragraph := False;
@@ -346,6 +353,7 @@ package body Wiki.Render.Html is
    procedure End_Element (Document : in out Html_Renderer;
                           Name     : in Unbounded_Wide_Wide_String) is
    begin
+      Document.Html_Level := Document.Html_Level - 1;
       if Name = "p" then
          Document.Has_Paragraph := False;
          Document.Need_Paragraph := True;
