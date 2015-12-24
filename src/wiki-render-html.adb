@@ -335,6 +335,10 @@ package body Wiki.Render.Html is
                             Name       : in Unbounded_Wide_Wide_String;
                             Attributes : in Wiki.Attributes.Attribute_List_Type) is
    begin
+      if Name = "p" then
+         Document.Has_Paragraph := True;
+         Document.Need_Paragraph := False;
+      end if;
       Document.Writer.Start_Element (Ada.Characters.Conversions.To_String (To_Wide_Wide_String (Name)));
    end Start_Element;
 
@@ -342,6 +346,10 @@ package body Wiki.Render.Html is
    procedure End_Element (Document : in out Html_Renderer;
                           Name     : in Unbounded_Wide_Wide_String) is
    begin
+      if Name = "p" then
+         Document.Has_Paragraph := False;
+         Document.Need_Paragraph := True;
+      end if;
       Document.Writer.End_Element (Ada.Characters.Conversions.To_String (To_Wide_Wide_String (Name)));
    end End_Element;
 
