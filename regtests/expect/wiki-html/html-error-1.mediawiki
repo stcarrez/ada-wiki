@@ -1,0 +1,1 @@
+<span class="css-class-test">Html span</span><h2>Span close before section</h2>
