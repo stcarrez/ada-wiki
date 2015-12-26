@@ -35,7 +35,7 @@ package body Wiki.Parsers.Html is
    function Is_Letter (C : in Wide_Wide_Character) return Boolean is
    begin
       return C > ' ' and C /= ':' and C /= '>' and C /= ''' and C /= '"'
-        and C /= '/' and C /= '=';
+        and C /= '/' and C /= '=' and C /= '<';
    end Is_Letter;
 
    procedure Skip_Spaces (P : in out Parser) is
@@ -55,6 +55,7 @@ package body Wiki.Parsers.Html is
                                    Name : in out Unbounded_Wide_Wide_String) is
       C : Wide_Wide_Character;
    begin
+      Name := To_Unbounded_Wide_Wide_String ("");
       Skip_Spaces (P);
       while not P.Is_Eof loop
          Peek (P, C);
@@ -80,16 +81,34 @@ package body Wiki.Parsers.Html is
 
    procedure Collect_Attribute_Value (P     : in out Parser;
                                       Value : in out Unbounded_Wide_Wide_String) is
-      C : Wide_Wide_Character;
+      C     : Wide_Wide_Character;
+      Token : Wide_Wide_Character;
    begin
-      while not P.Is_Eof loop
-         Peek (P, C);
-         if C = ''' or C = '"' or C = ' ' or C = '=' or C = '>' or C = '<' or C = '`' then
-            Put_Back (P, C);
-            return;
-         end if;
-         Append (Value, C);
-      end loop;
+      Peek (P, Token);
+      if Is_Space (Token) then
+         return;
+      elsif Token = '>' then
+         Put_Back (P, Token);
+         return;
+      elsif Token /= ''' and Token /= '"' then
+         Append (Value, Token);
+         while not P.Is_Eof loop
+            Peek (P, C);
+            if C = ''' or C = '"' or C = ' ' or C = '=' or C = '>' or C = '<' or C = '`' then
+               Put_Back (P, C);
+               return;
+            end if;
+            Append (Value, C);
+         end loop;
+      else
+         while not P.Is_Eof loop
+            Peek (P, C);
+            if C = Token then
+               return;
+            end if;
+            Append (Value, C);
+         end loop;
+      end if;
    end Collect_Attribute_Value;
 
    --  Parse a list of HTML attributes up to the first '>'.
@@ -104,15 +123,19 @@ package body Wiki.Parsers.Html is
       Name  : Unbounded_Wide_Wide_String;
       Value : Unbounded_Wide_Wide_String;
    begin
-      loop
+      Wiki.Attributes.Clear (P.Attributes);
+      while not P.Is_Eof loop
          Parse_Attribute_Name (P, Name);
          Skip_Spaces (P);
          Peek (P, C);
-         exit when C = '>';
+         if C = '>' or C = '<' then
+            Put_Back (P, C);
+            exit;
+         end if;
          if C = '=' then
             Collect_Attribute_Value (P, Value);
             Attributes.Append (P.Attributes, Name, Value);
-         elsif Is_Space (C) then
+         elsif Is_Space (C) and Length (Name) > 0 then
             Attributes.Append (P.Attributes, Name, Null_Unbounded_Wide_Wide_String);
          end if;
       end loop;
@@ -145,6 +168,10 @@ package body Wiki.Parsers.Html is
          End_Element (P, Name);
       else
          Collect_Attributes (P);
+         Peek (P, C);
+         if C /= '>' then
+            Put_Back (P, C);
+         end if;
          Start_Element (P, Name, P.Attributes);
       end if;
    end Parse_Element;
