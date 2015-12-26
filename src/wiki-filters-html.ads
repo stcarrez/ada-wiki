@@ -112,6 +112,12 @@ package Wiki.Filters.Html is
    --  ------------------------------
    type Html_Filter_Type is new Filter_Type with private;
 
+   --  Add a section header in the document.
+   overriding
+   procedure Add_Header (Document : in out Html_Filter_Type;
+                         Header   : in Unbounded_Wide_Wide_String;
+                         Level    : in Positive);
+
    --  Add a text block with the given format.
    overriding
    procedure Add_Text (Document : in out Html_Filter_Type;
