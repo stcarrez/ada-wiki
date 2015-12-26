@@ -17,6 +17,7 @@
 -----------------------------------------------------------------------
 with Wiki.Render.Text;
 with Wiki.Render.Html;
+with Wiki.Filters.Html;
 with Wiki.Writers.Builders;
 package body Wiki.Utils is
 
@@ -27,9 +28,11 @@ package body Wiki.Utils is
                      Syntax : in Wiki.Parsers.Wiki_Syntax_Type) return String is
       Writer   : aliased Wiki.Writers.Builders.Html_Writer_Type;
       Renderer : aliased Wiki.Render.Html.Html_Renderer;
+      Filter   : aliased Wiki.Filters.Html.Html_Filter_Type;
    begin
       Renderer.Set_Writer (Writer'Unchecked_Access);
-      Wiki.Parsers.Parse (Renderer'Unchecked_Access, Text, Syntax);
+      Filter.Set_Document (Renderer'Unchecked_Access);
+      Wiki.Parsers.Parse (Filter'Unchecked_Access, Text, Syntax);
       return Writer.To_String;
    end To_Html;
 
