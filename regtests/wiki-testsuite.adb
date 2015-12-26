@@ -17,6 +17,7 @@
 -----------------------------------------------------------------------
 with Wiki.Parsers.Tests;
 with Wiki.Writers.Tests;
+with Wiki.Filters.Html.Tests;
 package body Wiki.Testsuite is
 
    Tests : aliased Util.Tests.Test_Suite;
@@ -24,6 +25,7 @@ package body Wiki.Testsuite is
    function Suite return Util.Tests.Access_Test_Suite is
       Ret : constant Util.Tests.Access_Test_Suite := Tests'Access;
    begin
+      Wiki.Filters.Html.Tests.Add_Tests (Ret);
       Wiki.Parsers.Tests.Add_Tests (Ret);
       Wiki.Writers.Tests.Add_Tests (Ret);
       return Ret;
