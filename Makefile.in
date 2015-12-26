@@ -127,7 +127,7 @@ test:	build
 	bin/wiki_harness -xml wiki-aunit.xml
 
 # Files to package in source distribution
-DISTFILES=README LICENSE.txt NOTICE.txt NEWS CHANGES ChangeLog config.guess configure config.sub \
+DISTFILES=README.md LICENSE.txt NOTICE.txt NEWS CHANGES ChangeLog config.guess configure config.sub \
 configure.in Makefile.in install-sh \
 wiki.gpr.in wiki_tests.gpr.in samples.gpr config.gpr \
 src samples regtests \
@@ -191,11 +191,13 @@ endif
 endif
 
 install-info:
+ifeq (${GPRINSTALL},)
 	@echo "Installation directories:"
 	@echo "  Ada source files:    ${includedir}"
 	@echo "  ALI files:           ${alidir}"
 	@echo "  Libraries:           ${libdir}"
 	@echo "  GNAT project:        ${projectdir}"
+endif
 	@echo "Environment setup:"
 	@echo "  export ADA_PROJECT_PATH=${projectdir}:$$ADA_PROJECT_PATH"
 
