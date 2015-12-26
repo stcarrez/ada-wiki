@@ -569,6 +569,18 @@ package body Wiki.Filters.Html is
       end case;
    end Find_Tag;
 
+   --  ------------------------------
+   --  Add a section header in the document.
+   --  ------------------------------
+   overriding
+   procedure Add_Header (Document : in out Html_Filter_Type;
+                         Header   : in Unbounded_Wide_Wide_String;
+                         Level    : in Positive) is
+   begin
+      Document.Flush_Stack;
+      Filter_Type (Document).Add_Header (Header, Level);
+   end Add_Header;
+
    --  Add a text block with the given format.
    overriding
    procedure Add_Text (Document : in out Html_Filter_Type;
