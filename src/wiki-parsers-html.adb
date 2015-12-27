@@ -133,7 +133,7 @@ package body Wiki.Parsers.Html is
          Parse_Attribute_Name (P, Name);
          Skip_Spaces (P);
          Peek (P, C);
-         if C = '>' or C = '<' then
+         if C = '>' or C = '<' or C = '/' then
             Put_Back (P, C);
             exit;
          end if;
@@ -176,7 +176,14 @@ package body Wiki.Parsers.Html is
       else
          Collect_Attributes (P);
          Peek (P, C);
-         if C /= '>' then
+         if C = '/' then
+            Peek (P, C);
+            if C = '>' then
+               Start_Element (P, Name, P.Attributes);
+               End_Element (P, Name);
+               return;
+            end if;
+         elsif C /= '>' then
             Put_Back (P, C);
          end if;
          Start_Element (P, Name, P.Attributes);
