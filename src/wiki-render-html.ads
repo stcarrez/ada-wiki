@@ -131,9 +131,9 @@ private
       Links          : Link_Renderer_Access := Default_Links'Access;
       Has_Paragraph  : Boolean := False;
       Need_Paragraph : Boolean := False;
+      Has_Item       : Boolean := False;
       Current_Level  : Natural := 0;
       List_Styles    : List_Style_Array := (others => False);
-      Has_Item       : Boolean := False;
       Quote_Level    : Natural := 0;
       Html_Level     : Natural := 0;
    end record;
