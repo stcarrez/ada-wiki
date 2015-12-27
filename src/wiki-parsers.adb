@@ -177,6 +177,17 @@ package body Wiki.Parsers is
       end if;
    end Flush_Text;
 
+   --  ------------------------------
+   --  Flush the wiki dl/dt/dd definition list.
+   --  ------------------------------
+   procedure Flush_List (P : in out Parser) is
+   begin
+      if P.In_List then
+         End_Element (P, To_Unbounded_Wide_Wide_String ("dl"));
+         P.In_List := False;
+      end if;
+   end Flush_List;
+
    procedure Start_Element (P          : in out Parser;
                             Name       : in Unbounded_Wide_Wide_String;
                             Attributes : in Wiki.Attributes.Attribute_List_Type) is
@@ -216,6 +227,7 @@ package body Wiki.Parsers is
       Stop_Token : Wide_Wide_Character;
       Format     : Unbounded_Wide_Wide_String;
       Col        : Natural;
+      Is_Html    : Boolean := False;
    begin
       if Token /= ' ' then
          Peek (P, C);
@@ -236,6 +248,7 @@ package body Wiki.Parsers is
          return;
       end if;
       Flush_Text (P);
+      Flush_List (P);
       if Token = ' ' then
          Col := 1;
          while not P.Is_Eof loop
@@ -288,6 +301,8 @@ package body Wiki.Parsers is
          else
             Stop_Token := Token;
          end if;
+         Flush_List (P);
+         Is_Html := Format = "html";
          Col := 0;
          while not P.Is_Eof loop
             Peek (P, C);
@@ -304,14 +319,20 @@ package body Wiki.Parsers is
             else
                Col := Col + 1;
             end if;
-            Append (P.Text, C);
+            if Is_Html and C = '<' then
+               Wiki.Parsers.Html.Parse_Element (P);
+            else
+               Append (P.Text, C);
+            end if;
          end loop;
       end if;
       P.Empty_Line := True;
 
-      P.Document.Add_Preformatted (P.Text, Format);
-      P.Text := Null_Unbounded_Wide_Wide_String;
-      P.Document.Add_Paragraph;
+      if not Is_Html then
+         P.Document.Add_Preformatted (P.Text, Format);
+         P.Text := Null_Unbounded_Wide_Wide_String;
+         P.Document.Add_Paragraph;
+      end if;
       P.In_Paragraph := True;
    end Parse_Preformatted;
 
@@ -381,6 +402,7 @@ package body Wiki.Parsers is
       end if;
 
       Flush_Text (P);
+      Flush_List (P);
       P.Document.Add_Header (Header, Level);
       P.Empty_Line   := True;
       P.In_Paragraph := False;
@@ -541,6 +563,7 @@ package body Wiki.Parsers is
       end loop;
       if Count >= 4 then
          Flush_Text (P);
+         Flush_List (P);
          P.Document.Add_Horizontal_Rule;
          if C /= LF and C /= CR then
             Put_Back (P, C);
@@ -742,6 +765,44 @@ package body Wiki.Parsers is
       end if;
    end Parse_List;
 
+   --  Parse a list definition:
+   --    ;item 1
+   --    : definition 1
+   procedure Parse_Item (P     : in out Parser;
+                         Token : in Wide_Wide_Character) is
+      C     : Wide_Wide_Character;
+      Level : Natural := 1;
+   begin
+      if not P.Empty_Line then
+         Parse_Text (P, Token);
+         return;
+      end if;
+      Flush_Text (P);
+      Wiki.Attributes.Clear (P.Attributes);
+      if not P.In_List then
+         Start_Element (P, To_Unbounded_Wide_Wide_String ("dl"), P.Attributes);
+         P.In_List := True;
+      end if;
+      Start_Element (P, To_Unbounded_Wide_Wide_String ("dt"), P.Attributes);
+   end Parse_Item;
+
+   --  Parse a list definition:
+   --    ;item 1
+   --    : definition 1
+   procedure Parse_Definition (P     : in out Parser;
+                               Token : in Wide_Wide_Character) is
+      C     : Wide_Wide_Character;
+      Level : Natural := 1;
+   begin
+      if not P.Empty_Line then
+         Parse_Text (P, Token);
+         return;
+      end if;
+      Flush_Text (P);
+      Wiki.Attributes.Clear (P.Attributes);
+      Start_Element (P, To_Unbounded_Wide_Wide_String ("dd"), P.Attributes);
+   end Parse_Definition;
+
    --  ------------------------------
    --  Parse a blockquote.
    --  Example:
@@ -764,6 +825,7 @@ package body Wiki.Parsers is
          Level := Level + 1;
       end loop;
       Flush_Text (P);
+      Flush_List (P);
       P.Empty_Line := True;
       P.Quote_Level := Level;
       P.Document.Add_Blockquote (Level);
@@ -822,6 +884,7 @@ package body Wiki.Parsers is
       Put_Back (P, C);
       if Count >= 2 then
          Flush_Text (P);
+         Flush_List (P);
 
          --  Finish the active blockquotes if a new paragraph is started on an empty line.
          if P.Quote_Level > 0 then
@@ -996,6 +1059,8 @@ package body Wiki.Parsers is
          Character'Pos ('*') => Parse_List'Access,
          Character'Pos ('<') => Parse_Maybe_Html'Access,
          Character'Pos ('-') => Parse_Horizontal_Rule'Access,
+         Character'Pos (';') => Parse_Item'Access,
+         Character'Pos (':') => Parse_Definition'Access,
          others => Parse_Text'Access
         );
 
