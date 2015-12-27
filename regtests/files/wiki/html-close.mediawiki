@@ -1,0 +1,6 @@
+<p>
+  <img src="tst" />
+  <div />
+  <div class='empty' />
+  test
+</p>

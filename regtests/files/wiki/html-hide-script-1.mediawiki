@@ -1,0 +1,9 @@
+<b class=test>
+  <span class='css-class-test'
+     <i>Italic
+  <script>
+      This is a script content, filtered by the HTML filter.
+      <b>This is some inner content (invalid)</b>
+  </script>
+
+

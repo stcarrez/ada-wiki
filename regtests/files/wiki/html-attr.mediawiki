@@ -1,0 +1,7 @@
+<h1 id="firstHeading" class="firstHeading">Main Page</h1>
+<div class="pBody">
+  <ul>
+    <li id="ca-nstab-main" class="selected"><a href="Main_Page" title="View the content page [c]" accesskey="c">Article</a></li>
+	<li id="ca-talk" class="new"><a href="/index.php?title=Talk:Main_Page&amp;action=edit&amp;redlink=1" title="Discussion about the content page [t]" accesskey="t">Discussion</a></li>
+  </ul>
+</div>
