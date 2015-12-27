@@ -697,10 +697,21 @@ package body Wiki.Filters.Html is
       elsif not Document.Allowed (Tag) and not Document.Hidden (Tag) then
          return;
       end if;
+
+      --  Emit a end tag element until we find our matching tag and the top most tag
+      --  allows the end tag to be omitted (ex: a td, tr, td, dd, ...).
+      while not Document.Stack.Is_Empty loop
+         Current_Tag := Document.Stack.Last_Element;
+         exit when Current_Tag = Tag or not Tag_Omission (Current_Tag);
+         if Document.Hide_Level = 0 then
+            Filter_Type (Document).End_Element (Tag_Names (Current_Tag));
+         end if;
+         Document.Stack.Delete_Last;
+      end loop;
+
       if Document.Hide_Level = 0 then
          Filter_Type (Document).End_Element (Name);
       end if;
-      Current_Tag := Document.Stack.Last_Element;
       if Document.Hidden (Current_Tag) then
          Document.Hide_Level := Document.Hide_Level - 1;
       end if;
