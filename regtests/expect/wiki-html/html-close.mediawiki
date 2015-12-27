@@ -1,5 +1,5 @@
-<p> <img src="tst"></img>
- <div></div>
- <div class="empty"></div>
+<p> <img src="tst" />
+ <div />
+ <div class="empty" />
  test
 </p>

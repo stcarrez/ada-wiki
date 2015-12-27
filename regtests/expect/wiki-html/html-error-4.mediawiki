@@ -5,10 +5,10 @@
  <td>Item</td>
  </tr><tr>
  <td>Item <b>2</b></td>
- <td>Item <hr></hr>3</td>
+ <td>Item <hr />3</td>
  </tr><tr>
  <td>Item 4
  </td><td>Item 5
  </td><tr>
- <td>Item 6<img></img>
- </td><td>Item 7<hr></hr>4<h1>Title</h2></td></tr></tr></table></i></span></b>
+ <td>Item 6<img />
+ </td><td>Item 7<hr />4<h1>Title</h2></td></tr></tr></table></i></span></b>

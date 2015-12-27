@@ -1,1 +1,1 @@
-<b class="none"> <span class="css-class-test"></span></b>
+<b class="none"> <span class="css-class-test" /></b>

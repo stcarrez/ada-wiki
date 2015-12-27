@@ -1,0 +1,7 @@
+<dl><dt>item 1
+</dt><dd>definition for item 1
+</dd><dt>item <i>2</i>
+</dt><dd>definition <i>3</i></dd></dl><p>Paragraph</p><dl><dt>list 2 item 1
+</dt><dd>definition item 1
+</dd><dt>list 2 item 2
+</dt><dd>definition item 2</dd></dl><p>Second paragraph</p><h2>Section 1</h2>
