@@ -83,6 +83,7 @@ private
       Empty_Line          : Boolean := True;
       Is_Eof              : Boolean := False;
       In_Paragraph        : Boolean := False;
+      In_List             : Boolean := False;
       Need_Paragraph      : Boolean := True;
       Link_Double_Bracket : Boolean := False;
       Is_Dotclear         : Boolean := False;
@@ -110,6 +111,9 @@ private
 
    --  Flush the wiki text that was collected in the text buffer.
    procedure Flush_Text (P : in out Parser);
+
+   --  Flush the wiki dl/dt/dd definition list.
+   procedure Flush_List (P : in out Parser);
 
    procedure Start_Element (P          : in out Parser;
                             Name       : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
