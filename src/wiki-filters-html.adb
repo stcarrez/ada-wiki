@@ -668,7 +668,9 @@ package body Wiki.Filters.Html is
       while not Document.Stack.Is_Empty loop
          Current_Tag := Document.Stack.Last_Element;
          if Need_Close (Tag, Current_Tag) then
-            Filter_Type (Document).End_Element (Tag_Names (Current_Tag));
+            if Document.Hide_Level = 0 then
+               Filter_Type (Document).End_Element (Tag_Names (Current_Tag));
+            end if;
             Document.Stack.Delete_Last;
          end if;
          exit when not No_End_Tag (Current_Tag);
