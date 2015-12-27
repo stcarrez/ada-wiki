@@ -208,10 +208,15 @@ package body Wiki.Writers.Builders is
    procedure End_Element (Writer : in out Html_Writer_Type;
                           Name   : in String) is
    begin
-      Close_Current (Writer);
-      Writer.Write_String ("</");
-      Writer.Write_String (Name);
-      Writer.Write_Char ('>');
+      if Writer.Close_Start then
+         Writer.Write_String (" />");
+         Writer.Close_Start := False;
+      else
+         Close_Current (Writer);
+         Writer.Write_String ("</");
+         Writer.Write_String (Name);
+         Writer.Write_Char ('>');
+      end if;
    end End_Element;
 
    procedure Write_Wide_Text (Writer  : in out Html_Writer_Type;
