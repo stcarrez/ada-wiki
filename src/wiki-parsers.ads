@@ -109,6 +109,9 @@ private
    procedure Put_Back (P     : in out Parser;
                        Token : in Wide_Wide_Character);
 
+   --  Skip all the spaces and tabs as well as end of the current line (CR+LF).
+   procedure Skip_End_Of_Line (P : in out Parser);
+
    --  Flush the wiki text that was collected in the text buffer.
    procedure Flush_Text (P : in out Parser);
 
@@ -116,7 +119,7 @@ private
    procedure Flush_List (P : in out Parser);
 
    procedure Start_Element (P          : in out Parser;
-                            Name       : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
+                            Name       : in Unbounded_Wide_Wide_String;
                             Attributes : in Wiki.Attributes.Attribute_List_Type);
 
    procedure End_Element (P    : in out Parser;
