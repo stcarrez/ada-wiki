@@ -1,0 +1,6 @@
+
+ Italic
+ 
+ This is a script content, filtered by the HTML filter.
+ This is some inner content (invalid)
+ 
