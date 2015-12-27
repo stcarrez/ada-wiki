@@ -161,6 +161,15 @@ package Wiki.Filters.Html is
    procedure Allowed (Filter : in out Html_Filter_Type;
                       Tag    : in Html_Tag_Type);
 
+   --  Mark the HTML tag as being hidden.  The tag and its inner content including the text
+   --  will be removed and not passed to the final document.
+   procedure Hide (Filter : in out Html_Filter_Type;
+                   Tag    : in Html_tag_Type);
+
+   --  Mark the HTML tag as being visible.
+   procedure Visible (Filter : in out Html_Filter_Type;
+                      Tag    : in Html_Tag_Type);
+
    --  Flush the HTML element that have not yet been closed.
    procedure Flush_Stack (Document : in out Html_Filter_Type);
 
@@ -176,15 +185,20 @@ private
    subtype Tag_Cursor is Tag_Vectors.Cursor;
 
    type Html_Filter_Type is new Filter_Type with record
-      Allowed  : Tag_Boolean_Array := (UNKNOWN_TAG => False,
-                                       SCRIPT_TAG  => False,
-                                       HTML_TAG    => False,
-                                       HEAD_TAG    => False,
-                                       BODY_TAG    => False,
-                                       META_TAG    => False,
-                                       TITLE_TAG   => False,
-                                       others      => True);
-      Stack    : Tag_Vector;
+      Allowed    : Tag_Boolean_Array := (UNKNOWN_TAG => False,
+                                         SCRIPT_TAG  => False,
+                                         HTML_TAG    => False,
+                                         HEAD_TAG    => False,
+                                         BODY_TAG    => False,
+                                         META_TAG    => False,
+                                         TITLE_TAG   => False,
+                                         others      => True);
+
+      Hidden     : Tag_Boolean_Array := (UNKNOWN_TAG => False,
+                                         SCRIPT_TAG  => True,
+                                         others      => False);
+      Stack      : Tag_Vector;
+      Hide_Level : Natural := 0;
    end record;
 
    --  Find the tag from the tag name.
