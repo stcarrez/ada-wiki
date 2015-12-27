@@ -587,7 +587,9 @@ package body Wiki.Filters.Html is
                        Text     : in Unbounded_Wide_Wide_String;
                        Format   : in Wiki.Documents.Format_Map) is
    begin
-      if not Document.Stack.Is_Empty then
+      if Document.Hide_Level > 0 then
+         return;
+      elsif not Document.Stack.Is_Empty then
          declare
             Current_Tag : constant Html_Tag_Type := Document.Stack.Last_Element;
          begin
@@ -663,9 +665,6 @@ package body Wiki.Filters.Html is
       Tag         : constant Html_Tag_Type := Find_Tag (To_Wide_Wide_String (Name));
       Current_Tag : Html_Tag_Type;
    begin
-      if not Document.Allowed (Tag) then
-         return;
-      end if;
       while not Document.Stack.Is_Empty loop
          Current_Tag := Document.Stack.Last_Element;
          if Need_Close (Tag, Current_Tag) then
@@ -674,20 +673,36 @@ package body Wiki.Filters.Html is
          end if;
          exit when not No_End_Tag (Current_Tag);
       end loop;
+      if Document.Hidden (Tag) then
+         Document.Hide_Level := Document.Hide_Level + 1;
+      elsif not Document.Allowed (Tag) then
+         return;
+      end if;
       Document.Stack.Append (Tag);
-      Filter_Type (Document).Start_Element (Name, Attributes);
+      if Document.Hide_Level = 0 then
+         Filter_Type (Document).Start_Element (Name, Attributes);
+      end if;
    end Start_Element;
 
    overriding
    procedure End_Element (Document : in out Html_Filter_Type;
                           Name     : in Unbounded_Wide_Wide_String) is
-      Tag : constant Html_Tag_Type := Find_Tag (To_Wide_Wide_String (Name));
+      Tag         : constant Html_Tag_Type := Find_Tag (To_Wide_Wide_String (Name));
+      Current_Tag : Html_Tag_Type;
    begin
-      if not Document.Allowed (Tag) or else Document.Stack.Is_Empty then
+      if Document.Stack.Is_Empty then
+         return;
+      elsif not Document.Allowed (Tag) and not Document.Hidden (Tag) then
          return;
       end if;
+      if Document.Hide_Level = 0 then
+         Filter_Type (Document).End_Element (Name);
+      end if;
+      Current_Tag := Document.Stack.Last_Element;
+      if Document.Hidden (Current_Tag) then
+         Document.Hide_Level := Document.Hide_Level - 1;
+      end if;
       Document.Stack.Delete_Last;
-      Filter_Type (Document).End_Element (Name);
    end End_Element;
 
    --  ------------------------------
@@ -699,7 +714,12 @@ package body Wiki.Filters.Html is
          declare
             Tag : constant Html_Tag_Type := Document.Stack.Last_Element;
          begin
-            Filter_Type (Document).End_Element (Tag_Names (Tag));
+            if Document.Hide_Level = 0 then
+               Filter_Type (Document).End_Element (Tag_Names (Tag));
+            end if;
+            if Document.Hidden (Tag) then
+               Document.Hide_Level := Document.Hide_Level - 1;
+            end if;
          end;
          Document.Stack.Delete_Last;
       end loop;
@@ -732,5 +752,24 @@ package body Wiki.Filters.Html is
    begin
       Filter.Allowed (Tag) := True;
    end Allowed;
+
+   --  ------------------------------
+   --  Mark the HTML tag as being hidden.  The tag and its inner content including the text
+   --  will be removed and not passed to the final document.
+   --  ------------------------------
+   procedure Hide (Filter : in out Html_Filter_Type;
+                   Tag    : in Html_tag_Type) is
+   begin
+      Filter.Hidden (Tag) := True;
+   end Hide;
+
+   --  ------------------------------
+   --  Mark the HTML tag as being visible.
+   --  ------------------------------
+   procedure Visible (Filter : in out Html_Filter_Type;
+                      Tag    : in Html_Tag_Type) is
+   begin
+      Filter.Hidden (Tag) := False;
+   end Visible;
 
 end Wiki.Filters.Html;
