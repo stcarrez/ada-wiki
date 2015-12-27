@@ -50,7 +50,9 @@ package body Wiki.Parsers.Html is
       end loop;
    end Skip_Spaces;
 
+   --  ------------------------------
    --  Parse an HTML attribute
+   --  ------------------------------
    procedure Parse_Attribute_Name (P    : in out Parser;
                                    Name : in out Unbounded_Wide_Wide_String) is
       C : Wide_Wide_Character;
@@ -84,6 +86,7 @@ package body Wiki.Parsers.Html is
       C     : Wide_Wide_Character;
       Token : Wide_Wide_Character;
    begin
+      Value := To_Unbounded_Wide_Wide_String ("");
       Peek (P, Token);
       if Is_Space (Token) then
          return;
@@ -111,6 +114,7 @@ package body Wiki.Parsers.Html is
       end if;
    end Collect_Attribute_Value;
 
+   --  ------------------------------
    --  Parse a list of HTML attributes up to the first '>'.
    --  attr-name
    --  attr-name=
@@ -118,6 +122,7 @@ package body Wiki.Parsers.Html is
    --  attr-name='value'
    --  attr-name="value"
    --  <name name='value' ...>
+   --  ------------------------------
    procedure Collect_Attributes (P     : in out Parser) is
       C     : Wide_Wide_Character;
       Name  : Unbounded_Wide_Wide_String;
@@ -147,8 +152,10 @@ package body Wiki.Parsers.Html is
       end if;
    end Collect_Attributes;
 
+   --  ------------------------------
    --  Parse a HTML element <XXX attributes>
    --  or parse an end of HTML element </XXX>
+   --  ------------------------------
    procedure Parse_Element (P : in out Parser) is
       Name : Unbounded_Wide_Wide_String;
       C    : Wide_Wide_Character;
