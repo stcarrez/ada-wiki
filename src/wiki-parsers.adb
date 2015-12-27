@@ -19,7 +19,6 @@ with Wiki.Parsers.Html;
 package body Wiki.Parsers is
 
    use Wiki.Documents;
-   use Ada.Strings.Wide_Wide_Unbounded;
 
    --  Append a character to the wiki text buffer.
    procedure Parse_Text (P     : in out Parser;
@@ -129,6 +128,24 @@ package body Wiki.Parsers is
    procedure Parse_List (P     : in out Parser;
                          Token : in Wide_Wide_Character);
 
+   --  Parse a HTML component.
+   --  Example:
+   --     <b> or </b>
+   procedure Parse_Maybe_Html (P     : in out Parser;
+                               Token : in Wide_Wide_Character);
+
+   --  Parse a list definition:
+   --    ;item 1
+   --    : definition 1
+   procedure Parse_Item (P     : in out Parser;
+                         Token : in Wide_Wide_Character);
+
+   --  Parse a list definition:
+   --    ;item 1
+   --    : definition 1
+   procedure Parse_Definition (P     : in out Parser;
+                               Token : in Wide_Wide_Character);
+
    procedure Toggle_Format (P      : in out Parser;
                             Format : in Format_Type);
 
@@ -212,6 +229,29 @@ package body Wiki.Parsers is
       Append (P.Text, Token);
       P.Empty_Line := False;
    end Parse_Text;
+
+   --  ------------------------------
+   --  Skip all the spaces and tabs as well as end of the current line (CR+LF).
+   --  ------------------------------
+   procedure Skip_End_Of_Line (P : in out Parser) is
+      C : Wide_Wide_Character;
+   begin
+      loop
+         Peek (P, C);
+         exit when C /= ' ' and C /= HT;
+      end loop;
+      if C = CR then
+         Peek (P, C);
+         if C /= LF then
+            Put_Back (P, C);
+         end if;
+      elsif C = LF then
+         Peek (P, C);
+         if C /= CR then
+            Put_Back (P, C);
+         end if;
+      end if;
+   end Skip_End_Of_Line;
 
    --  ------------------------------
    --  Parse a pre-formatted text which starts either by a space or by a sequence
@@ -325,6 +365,7 @@ package body Wiki.Parsers is
                Append (P.Text, C);
             end if;
          end loop;
+         Skip_End_Of_Line (P);
       end if;
       P.Empty_Line := True;
 
@@ -332,8 +373,8 @@ package body Wiki.Parsers is
          P.Document.Add_Preformatted (P.Text, Format);
          P.Text := Null_Unbounded_Wide_Wide_String;
          P.Document.Add_Paragraph;
+         P.In_Paragraph := True;
       end if;
-      P.In_Paragraph := True;
    end Parse_Preformatted;
 
    --  ------------------------------
@@ -765,13 +806,13 @@ package body Wiki.Parsers is
       end if;
    end Parse_List;
 
+   --  ------------------------------
    --  Parse a list definition:
    --    ;item 1
    --    : definition 1
+   --  ------------------------------
    procedure Parse_Item (P     : in out Parser;
                          Token : in Wide_Wide_Character) is
-      C     : Wide_Wide_Character;
-      Level : Natural := 1;
    begin
       if not P.Empty_Line then
          Parse_Text (P, Token);
@@ -786,13 +827,13 @@ package body Wiki.Parsers is
       Start_Element (P, To_Unbounded_Wide_Wide_String ("dt"), P.Attributes);
    end Parse_Item;
 
+   --  ------------------------------
    --  Parse a list definition:
    --    ;item 1
    --    : definition 1
+   --  ------------------------------
    procedure Parse_Definition (P     : in out Parser;
                                Token : in Wide_Wide_Character) is
-      C     : Wide_Wide_Character;
-      Level : Natural := 1;
    begin
       if not P.Empty_Line then
          Parse_Text (P, Token);
@@ -946,13 +987,13 @@ package body Wiki.Parsers is
    end Parse_Line_Break;
 
    --  ------------------------------
-   --  Parse a line break.
+   --  Parse a HTML component.
    --  Example:
-   --     \\    (Creole)
-   --     %%%   (Dotclear)
+   --     <b> or </b>
    --  ------------------------------
    procedure Parse_Maybe_Html (P     : in out Parser;
                                Token : in Wide_Wide_Character) is
+      pragma Unreferenced (Token);
    begin
       Wiki.Parsers.Html.Parse_Element (P);
    end Parse_Maybe_Html;
