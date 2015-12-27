@@ -141,7 +141,7 @@ package body Wiki.Writers.Tests is
             Tst    : Test_Case_Access;
          begin
             if Simple /= "." and then Simple /= ".."
-              and then Simple /= ".svn"
+              and then Simple /= ".svn" and then Simple (Simple'Last) /= '~'
             then
                Tst := Create_Test (Simple, True);
                Suite.Add_Test (Tst.all'Access);
