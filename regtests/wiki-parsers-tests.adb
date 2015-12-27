@@ -245,14 +245,14 @@ package body Wiki.Parsers.Tests is
    --  ------------------------------
    procedure Test_Wiki_Image (T : in out Test) is
    begin
-      Util.Tests.Assert_Equals (T, "<p><img src=""/image/t.png""></img></p>",
+      Util.Tests.Assert_Equals (T, "<p><img src=""/image/t.png"" /></p>",
                                 Wiki.Utils.To_Html ("((/image/t.png))", SYNTAX_DOTCLEAR),
                                 "Image rendering invalid");
-      Util.Tests.Assert_Equals (T, "<p><img alt=""title"" src=""/image/t.png""></img></p>",
+      Util.Tests.Assert_Equals (T, "<p><img alt=""title"" src=""/image/t.png"" /></p>",
                                 Wiki.Utils.To_Html ("((/image/t.png|title))", SYNTAX_DOTCLEAR),
                                 "Image rendering invalid");
       Util.Tests.Assert_Equals (T, "<p><img alt=""title"" longdesc=""describe"" " &
-                                "src=""/image/t.png""></img></p>",
+                                "src=""/image/t.png"" /></p>",
                                 Wiki.Utils.To_Html ("((/image/t.png|title|D|describe))",
                                                  SYNTAX_DOTCLEAR),
                                 "Image rendering invalid");
