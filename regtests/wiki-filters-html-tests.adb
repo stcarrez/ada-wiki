@@ -36,18 +36,23 @@ package body Wiki.Filters.Html.Tests is
                        Test_Find_Tag'Access);
    end Add_Tests;
 
+   --  ------------------------------
    --  Test Find_Tag operation.
+   --  ------------------------------
    procedure Test_Find_Tag (T : in out Test) is
    begin
       for I in Html_Tag_Type'Range loop
          declare
-            Name : constant String := Html_Tag_Type'Image (I);
+            Name  : constant String := Html_Tag_Type'Image (I);
             Wname : constant Wide_Wide_String := Html_Tag_Type'Wide_Wide_Image (I);
-            Pos  : constant Natural := Util.Strings.Index (Name, '_');
-            Tag  : constant Html_Tag_Type := Find_Tag (WName (WName'First .. Pos - 1));
+            Pos   : constant Natural := Util.Strings.Index (Name, '_');
+            Tag   : constant Html_Tag_Type := Find_Tag (Wname (Wname'First .. Pos - 1));
          begin
             Log.Info ("Checking tag {0}", Name);
             Assert_Equals (T, I, Tag, "Find_Tag failed");
+
+            Assert_Equals (T, UNKNOWN_TAG, Find_Tag (Wname (Wname'First .. Pos - 1) & "x"),
+                          "Find_Tag must return UNKNOWN_TAG");
          end;
       end loop;
    end Test_Find_Tag;
