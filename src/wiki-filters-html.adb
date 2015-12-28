@@ -76,6 +76,7 @@ package body Wiki.Filters.Html is
          HR_TAG    => To_Unbounded_Wide_Wide_String ("hr"),
          BR_TAG    => To_Unbounded_Wide_Wide_String ("br"),
          SPAN_TAG  => To_Unbounded_Wide_Wide_String ("span"),
+         OPTION_TAG => To_Unbounded_Wide_Wide_String ("option"),
          DL_TAG    => To_Unbounded_Wide_Wide_String ("dl"),
          DT_TAG    => To_Unbounded_Wide_Wide_String ("dt"),
          DD_TAG    => To_Unbounded_Wide_Wide_String ("dd"),
