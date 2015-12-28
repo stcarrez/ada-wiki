@@ -1,0 +1,11 @@
+<form>
+  <select id= name=test >
+     <option selected>option 1
+     <option>option 2
+  </select>
+  <select id=>
+     <option selected>option 1
+     <option>option 2
+  </select>
+  <input name id selected />
+</form>
