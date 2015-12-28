@@ -70,18 +70,6 @@ package body Wiki.Parsers.Html is
    end Parse_Attribute_Name;
 
    procedure Collect_Attribute_Value (P     : in out Parser;
-                                      Quote : in Wide_Wide_Character;
-                                      Value : in out Unbounded_Wide_Wide_String) is
-      C : Wide_Wide_Character;
-   begin
-      while not P.Is_Eof loop
-         Peek (P, C);
-         exit when C = Quote;
-         Append (Value, C);
-      end loop;
-   end Collect_Attribute_Value;
-
-   procedure Collect_Attribute_Value (P     : in out Parser;
                                       Value : in out Unbounded_Wide_Wide_String) is
       C     : Wide_Wide_Character;
       Token : Wide_Wide_Character;
