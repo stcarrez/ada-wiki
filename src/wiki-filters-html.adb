@@ -100,6 +100,11 @@ package body Wiki.Filters.Html is
       end if;
    end Tag;
 
+   function Find_Tag (Name : in Unbounded_Wide_Wide_String) return Html_Tag_Type is
+   begin
+      return Find_Tag (To_Wide_Wide_String (Name));
+   end Find_Tag;
+
    --  ------------------------------
    --  Find the tag from the tag name.
    --  ------------------------------

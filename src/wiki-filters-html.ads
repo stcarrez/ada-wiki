@@ -107,6 +107,10 @@ package Wiki.Filters.Html is
       UNKNOWN_TAG
      );
 
+   --  Find the tag from the tag name.
+   function Find_Tag (Name : in Wide_Wide_String) return Html_Tag_Type;
+   function Find_Tag (Name : in Unbounded_Wide_Wide_String) return Html_Tag_Type;
+
    --  ------------------------------
    --  Filter type
    --  ------------------------------
@@ -200,8 +204,5 @@ private
       Stack      : Tag_Vector;
       Hide_Level : Natural := 0;
    end record;
-
-   --  Find the tag from the tag name.
-   function Find_Tag (Name : in Wide_Wide_String) return Html_Tag_Type;
 
 end Wiki.Filters.Html;
