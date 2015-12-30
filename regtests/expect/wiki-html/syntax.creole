@@ -1,0 +1,14 @@
+<p>First paragraph.</p><p>Second paragraph.</p><h1>Section h1</h1><h2>Section h2</h2><h3>Section h3</h3><h4>Section h4</h4><h5>Section h5</h5><ul><li>item 1
+</li><li><ul>item 1.1
+</li><li>item 1.2
+</li><li>item 2
+</li><li>item 3
+</li><li>item 3.1
+</li><li>item 3.2</li></ul></ul><ol><li>num 1
+</li><li>num 2</li></ol><p>Section bloc:</p><p> L1: line 1
+ L2: line 2
+ L3: line 3</p><p>Formatting</p><p><i>emphasis</i></p><ul><ul><li>strong</li></ul></ul><p><b>Line</b><br /><b>break</b></p><p><b>superscript</b></p><p><b><sub>subscript</sub></b></p><p><b>__underline__</b></p><p><a href="A link">A link</a><b>
+
+</b><a href="title">A link</a><b>
+</b></p><p><img alt="Alt text}}" src="link" /><img alt="Alt text" src="link" /></p><p><img src="{" /><b><i>A</i></b><b> </b>pre<b>-formatted section 
+</b></p><h2>[[Nowiki]]</h2><b>}}}</b>

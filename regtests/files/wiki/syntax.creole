@@ -2,15 +2,15 @@ First paragraph.
 
 Second paragraph.
 
-= Section h1 =
+= Section h1
 
-== Section h2 ==
+== Section h2
 
-=== Section h3 ===
+=== Section h3
 
-==== Section h4 ====
+==== Section h4
 
-===== Section h5 =====
+===== Section h5
 
 ----
 
@@ -39,19 +39,20 @@ Formatting
 
 Line\\break
 
-++insert++
-
 ^^superscript^^
 
---delete--
+,,subscript,,
 
-[A link]
-[Title|A link]
-[Title|link|en]
-[Title|link|en|The link title]
+__underline__
+
+[[A link]]
+[[A link|title]]
 
 {{link|Alt text}}
 {{link|Alt text|center}}
 
-A @@code@@ statement.
+{{{
+//A// **pre**-formatted section 
+== [[Nowiki]]
+}}}
 
