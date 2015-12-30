@@ -16,7 +16,10 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Characters.Conversions;
+with Wiki.Filters.Html;
 package body Wiki.Render.Text is
+
+   LF : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#0A#);
 
    --  ------------------------------
    --  Set the output writer.
@@ -26,6 +29,15 @@ package body Wiki.Render.Text is
    begin
       Document.Writer := Writer;
    end Set_Writer;
+
+   --  ------------------------------
+   --  Emit a new line.
+   --  ------------------------------
+   procedure New_Line (Document : in out Text_Renderer) is
+   begin
+      Document.Writer.Write (LF);
+      Document.Empty_Line := True;
+   end New_Line;
 
    --  ------------------------------
    --  Add a section header in the document.
@@ -192,6 +204,11 @@ package body Wiki.Render.Text is
                        Format   : in Wiki.Documents.Format_Map) is
       pragma Unreferenced (Format);
    begin
+      if Document.Empty_Line and Document.Indent_Level /= 0 then
+         for I in 1 .. Document.Indent_Level loop
+            Document.Writer.Write (' ');
+         end loop;
+      end if;
       Document.Writer.Write (Text);
       Document.Empty_Line := False;
    end Add_Text;
@@ -213,15 +230,37 @@ package body Wiki.Render.Text is
    procedure Start_Element (Document   : in out Text_Renderer;
                             Name       : in Unbounded_Wide_Wide_String;
                             Attributes : in Wiki.Attributes.Attribute_List_Type) is
+      use type Wiki.Filters.Html.Html_Tag_Type;
+
+      Tag : constant Wiki.Filters.Html.Html_Tag_Type := Wiki.Filters.Html.Find_Tag (Name);
    begin
-      null;
+      if Tag = Wiki.Filters.Html.DT_TAG then
+         Document.Close_Paragraph;
+         Document.Indent_Level := 0;
+      elsif Tag = Wiki.Filters.Html.DD_TAG then
+         Document.Close_Paragraph;
+         Document.Empty_Line := True;
+         Document.Indent_Level := 4;
+      end if;
    end Start_Element;
 
    overriding
    procedure End_Element (Document : in out Text_Renderer;
                           Name     : in Unbounded_Wide_Wide_String) is
+      use type Wiki.Filters.Html.Html_Tag_Type;
+
+      Tag : constant Wiki.Filters.Html.Html_Tag_Type := Wiki.Filters.Html.Find_Tag (Name);
    begin
-      null;
+      if Tag = Wiki.Filters.Html.DT_TAG then
+         Document.Close_Paragraph;
+         Document.Indent_Level := 0;
+      elsif Tag = Wiki.Filters.Html.DD_TAG then
+         Document.Close_Paragraph;
+         Document.Indent_Level := 0;
+      elsif Tag = Wiki.Filters.Html.DL_TAG then
+         Document.Close_Paragraph;
+         Document.New_Line;
+      end if;
    end End_Element;
 
    --  ------------------------------
