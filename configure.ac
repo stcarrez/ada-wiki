@@ -22,8 +22,8 @@ AC_CANONICAL_SYSTEM
 dnl AM_MAINTAINER_MODE
 
 # Current release settings
-WIKI_MAJOR_VERSION=0
-WIKI_MINOR_VERSION=1
+WIKI_MAJOR_VERSION=1
+WIKI_MINOR_VERSION=0
 WIKI_MICRO_VERSION=0
 WIKI_VERSION=$WIKI_MAJOR_VERSION.$WIKI_MINOR_VERSION.$WIKI_MICRO_VERSION
 
@@ -68,5 +68,5 @@ WIKI_LIBDIR="lib"
 AC_SUBST(WIKI_LIBDIR)
 
 AC_OUTPUT(
-Makefile wiki.gpr wiki_tests.gpr samples.gpr
+Makefile wiki.gpr wiki_tests.gpr samples.gpr distrib/wiki.gpr
 )

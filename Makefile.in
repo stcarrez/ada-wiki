@@ -105,7 +105,8 @@ autobuild:
 # Clean the root project of all build products.
 clean:
 	-$(GNATCLEAN) -q -P "$(GPRPATH)" -XWIKI_LIBRARY_TYPE=static
-	-$(GNATCLEAN) -q -P "$(GPRPATH)" -XWIKI_LIBRARY_TYPE=relocatable
+	-$(GNATCLEAN) -q -P "$(GPRPATH)" -XWIKI_LIBRARY_TYPE=relocatable \
+	   -XUTIL_BUILD=relocatable -XUTIL_LIBRARY_TYPE=relocatable
 	-$(GNATCLEAN) -q -Pwiki_tests
 	-rm -f lib/*.a lib/*.$(DLLEXT)
 
@@ -129,7 +130,7 @@ test:	build
 # Files to package in source distribution
 DISTFILES=README.md LICENSE.txt NOTICE.txt NEWS CHANGES ChangeLog config.guess configure config.sub \
 configure.in Makefile.in install-sh \
-wiki.gpr.in wiki_tests.gpr.in samples.gpr config.gpr \
+wiki.gpr.in wiki_tests.gpr.in samples.gpr.in config.gpr \
 src samples regtests \
 doc distrib
 

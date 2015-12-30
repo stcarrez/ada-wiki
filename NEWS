@@ -1,0 +1,5 @@
+Version 1.0.0   - Dec 2015
+  - Implement a wiki parser with several Wiki formats (moved from AWA)
+  - Support for Dotclear2, Mediawiki, Creole, Markdown, PhpBB syntax
+  - Add support for HTML embedded in wiki text
+  - Define a framework to plug wiki filters
