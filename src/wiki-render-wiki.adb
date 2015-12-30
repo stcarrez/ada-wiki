@@ -15,7 +15,7 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-
+with Wiki.Filters.Html;
 package body Wiki.Render.Wiki is
 
    HEADER_CREOLE     : aliased constant Wide_Wide_String := "=";
@@ -66,6 +66,7 @@ package body Wiki.Render.Wiki is
       for I in 1 .. Level loop
          Document.Writer.Write (Document.Tags (Header_Start).all);
       end loop;
+      Document.Writer.Write (' ');
       Document.Writer.Write (Header);
       if Document.Tags (Header_End)'Length > 0 then
          Document.Writer.Write (' ');
@@ -180,8 +181,15 @@ package body Wiki.Render.Wiki is
    procedure Start_Element (Document   : in out Wiki_Renderer;
                             Name       : in Unbounded_Wide_Wide_String;
                             Attributes : in Attribute_List_Type) is
+      use type Filters.Html.Html_Tag_Type;
+
+      Tag : constant Filters.Html.Html_Tag_Type := Filters.Html.Find_Tag (Name);
    begin
-      null;
+      if Tag = Filters.Html.BR_TAG then
+         Document.Add_Line_Break;
+      elsif Tag = Filters.Html.HR_TAG then
+         Document.Add_Horizontal_Rule;
+      end if;
    end Start_Element;
 
    overriding
