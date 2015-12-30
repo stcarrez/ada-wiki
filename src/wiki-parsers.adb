@@ -128,6 +128,9 @@ package body Wiki.Parsers is
    procedure Parse_List (P     : in out Parser;
                          Token : in Wide_Wide_Character);
 
+   procedure Parse_List_Or_Bold (P     : in out Parser;
+                                 Token : in Wide_Wide_Character);
+
    --  Parse a HTML component.
    --  Example:
    --     <b> or </b>
@@ -806,6 +809,29 @@ package body Wiki.Parsers is
       end if;
    end Parse_List;
 
+   procedure Parse_List_Or_Bold (P     : in out Parser;
+                                 Token : in Wide_Wide_Character) is
+      C     : Wide_Wide_Character;
+      Level : Natural := 1;
+   begin
+      if not P.Empty_Line then
+         Parse_Double_Bold (P, Token);
+         return;
+      end if;
+      loop
+         Peek (P, C);
+         exit when C /= '#' and C /= '*';
+         Level := Level + 1;
+      end loop;
+      Flush_Text (P);
+      P.Document.Add_List_Item (Level, Token = '#');
+
+      --  Ignore the first white space after the list item.
+      if C /= ' ' and C /= HT then
+         Put_Back (P, C);
+      end if;
+   end Parse_List_Or_Bold;
+
    --  ------------------------------
    --  Parse a list definition:
    --    ;item 1
@@ -1050,7 +1076,7 @@ package body Wiki.Parsers is
          16#0D# => Parse_End_Line'Access,
          Character'Pos (' ') => Parse_Space'Access,
          Character'Pos ('=') => Parse_Header'Access,
-         Character'Pos ('*') => Parse_Double_Bold'Access,
+         Character'Pos ('*') => Parse_List_Or_Bold'Access,
          Character'Pos ('/') => Parse_Double_Italic'Access,
          Character'Pos ('@') => Parse_Double_Code'Access,
          Character'Pos ('^') => Parse_Single_Superscript'Access,
