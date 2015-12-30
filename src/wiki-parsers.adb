@@ -1088,6 +1088,8 @@ package body Wiki.Parsers is
          Character'Pos ('#') => Parse_List'Access,
          Character'Pos ('{') => Parse_Image'Access,
          Character'Pos ('%') => Parse_Line_Break'Access,
+         Character'Pos (';') => Parse_Item'Access,
+         Character'Pos (':') => Parse_Definition'Access,
          others => Parse_Text'Access
         );
 
