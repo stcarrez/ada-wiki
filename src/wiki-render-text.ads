@@ -114,6 +114,9 @@ package Wiki.Render.Text is
 
 private
 
+   --  Emit a new line.
+   procedure New_Line (Document : in out Text_Renderer);
+
    procedure Close_Paragraph (Document : in out Text_Renderer);
    procedure Open_Paragraph (Document : in out Text_Renderer);
 
@@ -123,6 +126,7 @@ private
       Has_Paragraph  : Boolean := False;
       Need_Paragraph : Boolean := False;
       Empty_Line     : Boolean := True;
+      Indent_Level   : Natural := 0;
    end record;
 
 end Wiki.Render.Text;
