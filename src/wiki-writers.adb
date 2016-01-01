@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-writers -- Wiki writers
---  Copyright (C) 2011, 2012, 2013 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,7 @@ package body Wiki.Writers is
    --  Write an XML attribute within an XML element.
    --  The attribute value is escaped according to the XML escape rules.
    --  ------------------------------
-   procedure Write_Attribute (Writer  : in out Html_writer_Type'Class;
+   procedure Write_Attribute (Writer  : in out Html_Writer_Type'Class;
                               Name    : in String;
                               Content : in String) is
       S : constant Wide_Wide_String := Ada.Characters.Conversions.To_Wide_Wide_String (Content);
