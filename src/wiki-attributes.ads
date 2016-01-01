@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-attributes -- Wiki document attributes
---  Copyright (C) 2015 Stephane Carrez
+--  Copyright (C) 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +27,8 @@ package Wiki.Attributes is
 
    pragma Preelaborate;
 
+   use Ada.Strings.Wide_Wide_Unbounded;
+
    type Cursor is private;
 
    --  Get the attribute name.
@@ -37,6 +39,9 @@ package Wiki.Attributes is
 
    --  Get the attribute wide value.
    function Get_Wide_Value (Position : in Cursor) return Wide_Wide_String;
+
+   --  Get the attribute wide value.
+   function Get_Unbounded_Wide_Value (Position : in Cursor) return Unbounded_Wide_Wide_String;
 
    --  Returns True if the cursor has a valid attribute.
    function Has_Element (Position : in Cursor) return Boolean;
@@ -50,6 +55,10 @@ package Wiki.Attributes is
    --  Find the attribute with the given name.
    function Find (List : in Attribute_List_Type;
                   Name : in String) return Cursor;
+
+   --  Find the attribute with the given name and return its value.
+   function Get_Attribute (List : in Attribute_List_Type;
+                           Name : in String) return Unbounded_Wide_Wide_String;
 
    --  Append the attribute to the attribute list.
    procedure Append (List  : in out Attribute_List_Type;
