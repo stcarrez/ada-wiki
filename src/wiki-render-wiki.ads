@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-wiki -- Wiki to Wiki renderer
---  Copyright (C) 2015 Stephane Carrez
+--  Copyright (C) 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -129,6 +129,8 @@ private
    type Wiki_Tag_Type is (Bold_Start, Bold_End, Italic_Start, Italic_End,
                           Underline_Start, Underline_End,
                           Header_Start, Header_End,
+                          Img_Start, Img_End,
+                          Link_Start, Link_End,
                           Line_Break,
                           Blockquote_Start, Blockquote_End);
 
@@ -139,6 +141,7 @@ private
 
    procedure Close_Paragraph (Document : in out Wiki_Renderer);
    procedure Open_Paragraph (Document : in out Wiki_Renderer);
+   procedure Start_Keep_Content (Document : in out Wiki_Renderer);
 
    type List_Style_Array is array (1 .. 32) of Boolean;
 
@@ -153,8 +156,14 @@ private
       Has_Item       : Boolean := False;
       Need_Paragraph : Boolean := False;
       Empty_Line     : Boolean := True;
+      Keep_Content   : Boolean := False;
       Current_Level  : Natural := 0;
       Quote_Level    : Natural := 0;
+      Current_Style  : Documents.Format_Map := (others => False);
+      Content        : Unbounded_Wide_Wide_String;
+      Link_Href      : Unbounded_Wide_Wide_String;
+      Link_Title     : Unbounded_Wide_Wide_String;
+      Link_Lang      : Unbounded_Wide_Wide_String;
    end record;
 
 end Wiki.Render.Wiki;
