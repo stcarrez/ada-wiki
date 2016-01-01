@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-wiki -- Wiki to Wiki renderer
---  Copyright (C) 2015 Stephane Carrez
+--  Copyright (C) 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,10 @@ package body Wiki.Render.Wiki is
    HEADER_CREOLE     : aliased constant Wide_Wide_String := "=";
    BOLD_CREOLE       : aliased constant Wide_Wide_String := "**";
    LINE_BREAK_CREOLE : aliased constant Wide_Wide_String := "%%%";
+   IMG_START_CREOLE  : aliased constant Wide_Wide_String := "{{";
+   IMG_END_CREOLE    : aliased constant Wide_Wide_String := "}}";
+   LINK_START_CREOLE : aliased constant Wide_Wide_String := "[[";
+   LINK_END_CREOLE   : aliased constant Wide_Wide_String := "]]";
 
    LF : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#0A#);
 
@@ -38,6 +42,10 @@ package body Wiki.Render.Wiki is
             Document.Tags (Header_Start) := HEADER_CREOLE'Access;
             Document.Tags (Header_End)   := HEADER_CREOLE'Access;
             Document.Tags (Line_Break)   := LINE_BREAK_CREOLE'Access;
+            Document.Tags (Img_Start)    := IMG_START_CREOLE'Access;
+            Document.Tags (Img_End)      := IMG_END_CREOLE'Access;
+            Document.Tags (Link_Start)   := LINK_START_CREOLE'Access;
+            Document.Tags (Link_End)     := LINK_END_CREOLE'Access;
 
       end case;
    end Set_Writer;
@@ -136,7 +144,13 @@ package body Wiki.Render.Wiki is
                        Language : in Unbounded_Wide_Wide_String;
                        Title    : in Unbounded_Wide_Wide_String) is
    begin
-      null;
+      Document.Writer.Write (Document.Tags (Link_Start).all);
+      Document.Writer.Write (Link);
+      if Length (Name) > 0 then
+         Document.Writer.Write ("|");
+         Document.Writer.Write (Name);
+      end if;
+      Document.Writer.Write (Document.Tags (Link_End).all);
    end Add_Link;
 
    --  Add an image.
@@ -147,7 +161,13 @@ package body Wiki.Render.Wiki is
                         Position    : in Unbounded_Wide_Wide_String;
                         Description : in Unbounded_Wide_Wide_String) is
    begin
-      null;
+      Document.Writer.Write (Document.Tags (Img_Start).all);
+      Document.Writer.Write (Link);
+      if Length (Alt) > 0 then
+         Document.Writer.Write ("|");
+         Document.Writer.Write (Alt);
+      end if;
+      Document.Writer.Write (Document.Tags (Img_End).all);
    end Add_Image;
 
    --  Add a quote.
@@ -166,7 +186,11 @@ package body Wiki.Render.Wiki is
                        Text     : in Unbounded_Wide_Wide_String;
                        Format   : in Documents.Format_Map) is
    begin
-      Document.Writer.Write (Text);
+      if Document.Keep_Content then
+         Append (Document.Content, Text);
+      else
+         Document.Writer.Write (Text);
+      end if;
    end Add_Text;
 
    --  Add a text block that is pre-formatted.
@@ -177,6 +201,12 @@ package body Wiki.Render.Wiki is
       null;
    end Add_Preformatted;
 
+   procedure Start_Keep_Content (Document : in out Wiki_Renderer) is
+   begin
+      Document.Keep_Content := True;
+      Document.Content := To_Unbounded_Wide_Wide_String ("");
+   end Start_Keep_Content;
+
    overriding
    procedure Start_Element (Document   : in out Wiki_Renderer;
                             Name       : in Unbounded_Wide_Wide_String;
@@ -185,18 +215,129 @@ package body Wiki.Render.Wiki is
 
       Tag : constant Filters.Html.Html_Tag_Type := Filters.Html.Find_Tag (Name);
    begin
-      if Tag = Filters.Html.BR_TAG then
-         Document.Add_Line_Break;
-      elsif Tag = Filters.Html.HR_TAG then
-         Document.Add_Horizontal_Rule;
-      end if;
+      case Tag is
+         when Filters.Html.BR_TAG =>
+            Document.Add_Line_Break;
+
+         when Filters.Html.HR_TAG =>
+            Document.Add_Horizontal_Rule;
+
+         when Filters.Html.H1_TAG | Filters.Html.H2_TAG
+            | Filters.Html.H3_TAG | Filters.Html.H4_TAG
+            | Filters.Html.H5_TAG | Filters.Html.H6_TAG =>
+            Document.Start_Keep_Content;
+
+         when Filters.Html.IMG_TAG =>
+            Document.Add_Image (Link        => Get_Attribute (Attributes, "src"),
+                                Alt         => Get_Attribute (Attributes, "alt"),
+                                Position    => Null_Unbounded_Wide_Wide_String,
+                                Description => Null_Unbounded_Wide_Wide_String);
+
+         when Filters.Html.A_TAG =>
+            Document.Link_Href := Get_Attribute (Attributes, "href");
+            Document.Link_Title := Get_Attribute (Attributes, "title");
+            Document.Link_Lang := Get_Attribute (Attributes, "lang");
+            Document.Start_Keep_Content;
+
+         when Filters.Html.B_TAG | Filters.Html.EM_TAG | Filters.Html.STRONG_TAG =>
+            if not Document.Keep_Content then
+               Document.Current_Style (Documents.BOLD) := True;
+            end if;
+
+         when Filters.Html.I_TAG =>
+            if not Document.Keep_Content then
+               Document.Current_Style (Documents.ITALIC) := True;
+            end if;
+
+         when Filters.Html.U_TAG =>
+            if not Document.Keep_Content then
+               Document.Current_Style (Documents.CODE) := True;
+            end if;
+
+         when Filters.Html.SUP_TAG =>
+            if not Document.Keep_Content then
+               Document.Current_Style (Documents.SUPERSCRIPT) := True;
+            end if;
+
+         when Filters.Html.SUB_TAG =>
+            if not Document.Keep_Content then
+               Document.Current_Style (Documents.SUBSCRIPT) := True;
+            end if;
+
+         when others =>
+            null;
+
+      end case;
    end Start_Element;
 
    overriding
    procedure End_Element (Document : in out Wiki_Renderer;
                           Name     : in Unbounded_Wide_Wide_String) is
+      use type Filters.Html.Html_Tag_Type;
+
+      Tag : constant Filters.Html.Html_Tag_Type := Filters.Html.Find_Tag (Name);
    begin
-      null;
+      case Tag is
+         when Filters.Html.H1_TAG =>
+            Document.Add_Header (Document.Content, 1);
+            Document.Keep_Content := False;
+
+         when Filters.Html.H2_TAG =>
+            Document.Add_Header (Document.Content, 2);
+            Document.Keep_Content := False;
+
+         when Filters.Html.H3_TAG =>
+            Document.Add_Header (Document.Content, 3);
+            Document.Keep_Content := False;
+
+         when Filters.Html.H4_TAG =>
+            Document.Add_Header (Document.Content, 4);
+            Document.Keep_Content := False;
+
+         when Filters.Html.H5_TAG =>
+            Document.Add_Header (Document.Content, 5);
+            Document.Keep_Content := False;
+
+         when Filters.Html.H6_TAG =>
+            Document.Add_Header (Document.Content, 6);
+            Document.Keep_Content := False;
+
+         when Filters.Html.A_TAG =>
+            Document.Add_Link (Name     => Document.Content,
+                               Link     => Document.Link_Href,
+                               Language => Document.Link_Lang,
+                               Title    => Document.Link_Title);
+            Document.Keep_Content := False;
+
+         when Filters.Html.B_TAG | Filters.Html.EM_TAG | Filters.Html.STRONG_TAG =>
+            if not Document.Keep_Content then
+               Document.Current_Style (Documents.BOLD) := False;
+            end if;
+
+         when Filters.Html.I_TAG =>
+            if not Document.Keep_Content then
+               Document.Current_Style (Documents.ITALIC) := False;
+            end if;
+
+         when Filters.Html.U_TAG =>
+            if not Document.Keep_Content then
+               Document.Current_Style (Documents.CODE) := False;
+            end if;
+
+         when Filters.Html.SUP_TAG =>
+            if not Document.Keep_Content then
+               Document.Current_Style (Documents.SUPERSCRIPT) := False;
+            end if;
+
+         when Filters.Html.SUB_TAG =>
+            if not Document.Keep_Content then
+               Document.Current_Style (Documents.SUBSCRIPT) := False;
+            end if;
+
+         when others =>
+            null;
+
+      end case;
    end End_Element;
 
    --  Finish the document after complete wiki text has been parsed.
