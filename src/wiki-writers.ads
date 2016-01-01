@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-writers -- Wiki writers
---  Copyright (C) 2011, 2012, 2013, 2015 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,19 +44,19 @@ package Wiki.Writers is
    --  Write an XML element using the given name and with the content.
    --  This is similar to calling <b>Start_Element</b>, <b>Write_Text</b>
    --  and <b>End_Element</b>.
-   procedure Write_Wide_Element (Writer  : in out Html_writer_Type;
+   procedure Write_Wide_Element (Writer  : in out Html_Writer_Type;
                                  Name    : in String;
                                  Content : in Unbounded_Wide_Wide_String) is abstract;
 
    --  Write an XML attribute within an XML element.
    --  The attribute value is escaped according to the XML escape rules.
-   procedure Write_Wide_Attribute (Writer  : in out Html_writer_Type;
+   procedure Write_Wide_Attribute (Writer  : in out Html_Writer_Type;
                                    Name    : in String;
                                    Content : in Unbounded_Wide_Wide_String) is abstract;
 
    --  Write an XML attribute within an XML element.
    --  The attribute value is escaped according to the XML escape rules.
-   procedure Write_Wide_Attribute (Writer  : in out Html_writer_Type;
+   procedure Write_Wide_Attribute (Writer  : in out Html_Writer_Type;
                                    Name    : in String;
                                    Content : in Wide_Wide_String) is abstract;
 
@@ -74,7 +74,7 @@ package Wiki.Writers is
 
    --  Write an XML attribute within an XML element.
    --  The attribute value is escaped according to the XML escape rules.
-   procedure Write_Attribute (Writer  : in out Html_writer_Type'Class;
+   procedure Write_Attribute (Writer  : in out Html_Writer_Type'Class;
                               Name    : in String;
                               Content : in String);
 
