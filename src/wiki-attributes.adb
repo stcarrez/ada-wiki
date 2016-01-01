@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-attributes -- Wiki document attributes
---  Copyright (C) 2015 Stephane Carrez
+--  Copyright (C) 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,6 +50,15 @@ package body Wiki.Attributes is
    end Get_Wide_Value;
 
    --  ------------------------------
+   --  Get the attribute wide value.
+   --  ------------------------------
+   function Get_Unbounded_Wide_Value (Position : in Cursor) return Unbounded_Wide_Wide_String is
+      Attr : constant Attribute_Access := Attribute_Vectors.Element (Position.Pos);
+   begin
+      return To_Unbounded_Wide_Wide_String (Attr.Value);
+   end Get_Unbounded_Wide_Value;
+
+   --  ------------------------------
    --  Returns True if the cursor has a valid attribute.
    --  ------------------------------
    function Has_Element (Position : in Cursor) return Boolean is
@@ -84,6 +93,20 @@ package body Wiki.Attributes is
       end loop;
       return Cursor '(Pos => Iter);
    end Find;
+
+   --  ------------------------------
+   --  Find the attribute with the given name and return its value.
+   --  ------------------------------
+   function Get_Attribute (List : in Attribute_List_Type;
+                           Name : in String) return Unbounded_Wide_Wide_String is
+      Attr : constant Cursor := Find (List, Name);
+   begin
+      if Has_Element (Attr) then
+         return Get_Unbounded_Wide_Value (Attr);
+      else
+         return Null_Unbounded_Wide_Wide_String;
+      end if;
+   end Get_Attribute;
 
    --  ------------------------------
    --  Append the attribute to the attribute list.
