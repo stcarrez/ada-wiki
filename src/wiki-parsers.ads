@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers -- Wiki parser
---  Copyright (C) 2011, 2015 Stephane Carrez
+--  Copyright (C) 2011, 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,7 +50,10 @@ package Wiki.Parsers is
          SYNTAX_MARKDOWN,
 
          --  A mix of the above
-         SYNTAX_MIX);
+         SYNTAX_MIX,
+
+         --  The input is plain possibly incorrect HTML.
+         SYNTAX_HTML);
 
    --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
    --  specified in <b>Syntax</b> and invoke the document reader procedures defined
