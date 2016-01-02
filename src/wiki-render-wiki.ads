@@ -15,9 +15,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Strings.Wide_Wide_Unbounded;
-
-with Util.Strings;
 
 with Wiki.Documents;
 with Wiki.Attributes;
@@ -30,7 +27,6 @@ with Wiki.Parsers;
 package Wiki.Render.Wiki is
 
    use Standard.Wiki.Attributes;
-   use Ada.Strings.Wide_Wide_Unbounded;
 
    --  ------------------------------
    --  Wiki to HTML writer
