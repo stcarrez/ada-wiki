@@ -131,6 +131,7 @@ private
                           Header_Start, Header_End,
                           Img_Start, Img_End,
                           Link_Start, Link_End,
+                          Preformat_Start, Preformat_End,
                           Line_Break,
                           Blockquote_Start, Blockquote_End);
 
