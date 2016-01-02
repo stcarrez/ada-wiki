@@ -133,6 +133,7 @@ private
                           Link_Start, Link_End,
                           Preformat_Start, Preformat_End,
                           Line_Break,
+                          Horizontal_Rule,
                           Blockquote_Start, Blockquote_End);
 
    type Wiki_Tag_Array is array (Wiki_Tag_Type) of Wide_String_Access;
@@ -158,6 +159,7 @@ private
       Need_Paragraph : Boolean := False;
       Empty_Line     : Boolean := True;
       Keep_Content   : Boolean := False;
+      Invert_Header_Level : Boolean := False;
       Current_Level  : Natural := 0;
       Quote_Level    : Natural := 0;
       Current_Style  : Documents.Format_Map := (others => False);
