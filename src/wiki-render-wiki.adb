@@ -30,6 +30,15 @@ package body Wiki.Render.Wiki is
    LINK_END_CREOLE        : aliased constant Wide_Wide_String := "]]";
    PREFORMAT_START_CREOLE : aliased constant Wide_Wide_String := "{{{";
    PREFORMAT_END_CREOLE   : aliased constant Wide_Wide_String := "}}}" & LF;
+   HORIZONTAL_RULE_CREOLE : aliased constant Wide_Wide_String := "----" & LF;
+
+   HEADER_DOTCLEAR          : aliased constant Wide_Wide_String := "!";
+   IMG_START_DOTCLEAR       : aliased constant Wide_Wide_String := "((";
+   IMG_END_DOTCLEAR         : aliased constant Wide_Wide_String := "))";
+   LINK_START_DOTCLEAR      : aliased constant Wide_Wide_String := "[";
+   LINK_END_DOTCLEAR        : aliased constant Wide_Wide_String := "]";
+   PREFORMAT_START_DOTCLEAR : aliased constant Wide_Wide_String := "///";
+   PREFORMAT_END_DOTCLEAR   : aliased constant Wide_Wide_String := "///" & LF;
 
    --  Set the output writer.
    procedure Set_Writer (Document : in out Wiki_Renderer;
@@ -39,6 +48,20 @@ package body Wiki.Render.Wiki is
       Document.Writer := Writer;
       Document.Syntax := Format;
       case Format is
+         when Parsers.SYNTAX_DOTCLEAR =>
+            Document.Tags (Bold_Start)   := BOLD_CREOLE'Access;
+            Document.Tags (Bold_End)     := BOLD_CREOLE'Access;
+            Document.Tags (Header_Start) := HEADER_DOTCLEAR'Access;
+            Document.Tags (Line_Break)   := LINE_BREAK_CREOLE'Access;
+            Document.Tags (Img_Start)    := IMG_START_DOTCLEAR'Access;
+            Document.Tags (Img_End)      := IMG_END_DOTCLEAR'Access;
+            Document.Tags (Link_Start)   := LINK_START_DOTCLEAR'Access;
+            Document.Tags (Link_End)     := LINK_END_DOTCLEAR'Access;
+            Document.Tags (Preformat_Start) := PREFORMAT_START_DOTCLEAR'Access;
+            Document.Tags (Preformat_End)   := PREFORMAT_END_DOTCLEAR'Access;
+            Document.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
+            Document.Invert_Header_Level := True;
+
          when others =>
             Document.Tags (Bold_Start)   := BOLD_CREOLE'Access;
             Document.Tags (Bold_End)     := BOLD_CREOLE'Access;
@@ -51,6 +74,7 @@ package body Wiki.Render.Wiki is
             Document.Tags (Link_End)     := LINK_END_CREOLE'Access;
             Document.Tags (Preformat_Start) := PREFORMAT_START_CREOLE'Access;
             Document.Tags (Preformat_End)   := PREFORMAT_END_CREOLE'Access;
+            Document.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
 
       end case;
    end Set_Writer;
@@ -71,12 +95,21 @@ package body Wiki.Render.Wiki is
    procedure Add_Header (Document : in out Wiki_Renderer;
                          Header   : in Unbounded_Wide_Wide_String;
                          Level    : in Positive) is
+      Count : Natural := Level;
    begin
       Document.Close_Paragraph;
       if not Document.Empty_Line then
          Document.New_Line;
       end if;
-      for I in 1 .. Level loop
+      if Document.Invert_Header_Level then
+         if Count > 5 then
+            Count := 5;
+         end if;
+         Count := 6 - Count;
+      elsif Count > 6 then
+         Count := 6;
+      end if;
+      for I in 1 .. Count loop
          Document.Writer.Write (Document.Tags (Header_Start).all);
       end loop;
       Document.Writer.Write (' ');
@@ -138,7 +171,7 @@ package body Wiki.Render.Wiki is
    procedure Add_Horizontal_Rule (Document : in out Wiki_Renderer) is
    begin
       Document.Close_Paragraph;
-      Document.Writer.Write ("----");
+      Document.Writer.Write (Document.Tags (Horizontal_Rule).all);
    end Add_Horizontal_Rule;
 
    --  Add a link.
@@ -400,7 +433,9 @@ package body Wiki.Render.Wiki is
 
    procedure Close_Paragraph (Document : in out Wiki_Renderer) is
    begin
-      null;
+      if not Document.Empty_Line then
+         Document.New_Line;
+      end if;
    end Close_Paragraph;
 
    procedure Open_Paragraph (Document : in out Wiki_Renderer) is
