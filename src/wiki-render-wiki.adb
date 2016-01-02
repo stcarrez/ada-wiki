@@ -15,8 +15,10 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Wiki.Filters.Html;
 with Ada.Wide_Wide_Characters.Handling;
+
+with Wiki.Filters.Html;
+with Wiki.Helpers;
 package body Wiki.Render.Wiki is
 
    LF : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#0A#);
@@ -225,26 +227,30 @@ package body Wiki.Render.Wiki is
    procedure Add_Text (Document : in out Wiki_Renderer;
                        Text     : in Unbounded_Wide_Wide_String;
                        Format   : in Documents.Format_Map) is
+      Content : constant Wide_Wide_String := To_Wide_Wide_String (Text);
+      Start   : Natural := Content'First;
+      Last    : Natural := Content'Last;
    begin
+      if Document.Keep_Content or Document.Empty_Line then
+         while Start <= Content'Last and then Helpers.Is_Space_Or_Newline (Content (Start)) loop
+            Start := Start + 1;
+         end loop;
+      end if;
       if Document.Keep_Content then
-         declare
-            use Ada.Wide_Wide_Characters.Handling;
-
-            Content : constant Wide_Wide_String := To_Wide_Wide_String (Text);
-            Start   : Natural := Content'First;
-            Last    : Natural := Content'Last;
-         begin
-            while Start <= Content'Last and then Is_space (Content (Start)) loop
-               Start := Start + 1;
-            end loop;
-            while Last >= Start and then Is_Space (Content (Last)) loop
-               Last := Last - 1;
-            end loop;
-            Append (Document.Content, Content (Start .. Last));
-         end;
+         while Last >= Start and then Helpers.Is_Space (Content (Last)) loop
+            Last := Last - 1;
+         end loop;
+         Append (Document.Content, Content (Start .. Last));
       else
-         Document.Writer.Write (Text);
-         Document.Empty_Line := False;
+         for I in Start .. Last loop
+            if Ada.Wide_Wide_Characters.Handling.Is_Line_Terminator (Content (I)) then
+               Document.Writer.Write (LF);
+               Document.Empty_Line := True;
+            elsif not Document.Empty_Line or else not Helpers.Is_Space (Content (I)) then
+               Document.Writer.Write (Content (I));
+               Document.Empty_Line := False;
+            end if;
+         end loop;
       end if;
    end Add_Text;
 
