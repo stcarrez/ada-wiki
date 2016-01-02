@@ -16,17 +16,20 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Wiki.Filters.Html;
+with Ada.Wide_Wide_Characters.Handling;
 package body Wiki.Render.Wiki is
 
-   HEADER_CREOLE     : aliased constant Wide_Wide_String := "=";
-   BOLD_CREOLE       : aliased constant Wide_Wide_String := "**";
-   LINE_BREAK_CREOLE : aliased constant Wide_Wide_String := "%%%";
-   IMG_START_CREOLE  : aliased constant Wide_Wide_String := "{{";
-   IMG_END_CREOLE    : aliased constant Wide_Wide_String := "}}";
-   LINK_START_CREOLE : aliased constant Wide_Wide_String := "[[";
-   LINK_END_CREOLE   : aliased constant Wide_Wide_String := "]]";
-
    LF : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#0A#);
+
+   HEADER_CREOLE          : aliased constant Wide_Wide_String := "=";
+   BOLD_CREOLE            : aliased constant Wide_Wide_String := "**";
+   LINE_BREAK_CREOLE      : aliased constant Wide_Wide_String := "%%%";
+   IMG_START_CREOLE       : aliased constant Wide_Wide_String := "{{";
+   IMG_END_CREOLE         : aliased constant Wide_Wide_String := "}}";
+   LINK_START_CREOLE      : aliased constant Wide_Wide_String := "[[";
+   LINK_END_CREOLE        : aliased constant Wide_Wide_String := "]]";
+   PREFORMAT_START_CREOLE : aliased constant Wide_Wide_String := "{{{";
+   PREFORMAT_END_CREOLE   : aliased constant Wide_Wide_String := "}}}" & LF;
 
    --  Set the output writer.
    procedure Set_Writer (Document : in out Wiki_Renderer;
@@ -46,6 +49,8 @@ package body Wiki.Render.Wiki is
             Document.Tags (Img_End)      := IMG_END_CREOLE'Access;
             Document.Tags (Link_Start)   := LINK_START_CREOLE'Access;
             Document.Tags (Link_End)     := LINK_END_CREOLE'Access;
+            Document.Tags (Preformat_Start) := PREFORMAT_START_CREOLE'Access;
+            Document.Tags (Preformat_End)   := PREFORMAT_END_CREOLE'Access;
 
       end case;
    end Set_Writer;
@@ -151,6 +156,7 @@ package body Wiki.Render.Wiki is
          Document.Writer.Write (Name);
       end if;
       Document.Writer.Write (Document.Tags (Link_End).all);
+      Document.Empty_Line := False;
    end Add_Link;
 
    --  Add an image.
@@ -168,6 +174,7 @@ package body Wiki.Render.Wiki is
          Document.Writer.Write (Alt);
       end if;
       Document.Writer.Write (Document.Tags (Img_End).all);
+      Document.Empty_Line := False;
    end Add_Image;
 
    --  Add a quote.
@@ -187,9 +194,24 @@ package body Wiki.Render.Wiki is
                        Format   : in Documents.Format_Map) is
    begin
       if Document.Keep_Content then
-         Append (Document.Content, Text);
+         declare
+            use Ada.Wide_Wide_Characters.Handling;
+
+            Content : constant Wide_Wide_String := To_Wide_Wide_String (Text);
+            Start   : Natural := Content'First;
+            Last    : Natural := Content'Last;
+         begin
+            while Start <= Content'Last and then Is_space (Content (Start)) loop
+               Start := Start + 1;
+            end loop;
+            while Last >= Start and then Is_Space (Content (Last)) loop
+               Last := Last - 1;
+            end loop;
+            Append (Document.Content, Content (Start .. Last));
+         end;
       else
          Document.Writer.Write (Text);
+         Document.Empty_Line := False;
       end if;
    end Add_Text;
 
@@ -197,8 +219,27 @@ package body Wiki.Render.Wiki is
    procedure Add_Preformatted (Document : in out Wiki_Renderer;
                                Text     : in Unbounded_Wide_Wide_String;
                                Format   : in Unbounded_Wide_Wide_String) is
+      Content       : constant Wide_Wide_String := To_Wide_Wide_String (Text);
+      Col           : Natural := 2;
    begin
-      null;
+      Document.New_Line;
+      Document.Writer.Write (Document.Tags (Preformat_Start).all);
+      for I in Content'Range loop
+         if Content (I) = LF then
+            Col := 0;
+         end if;
+         if I = Content'First and then Col > 0 then
+            Document.Writer.Write (LF);
+            Col := 0;
+         end if;
+         Document.Writer.Write (Content (I));
+      end loop;
+      if Col /= 0 then
+         Document.New_Line;
+      end if;
+      Document.Writer.Write (Document.Tags (Preformat_End).all);
+      Document.New_Line;
+      Document.Empty_Line := True;
    end Add_Preformatted;
 
    procedure Start_Keep_Content (Document : in out Wiki_Renderer) is
@@ -263,6 +304,12 @@ package body Wiki.Render.Wiki is
             if not Document.Keep_Content then
                Document.Current_Style (Documents.SUBSCRIPT) := True;
             end if;
+
+         when Filters.Html.P_TAG =>
+            Document.New_Line;
+
+         when Filters.Html.PRE_TAG =>
+            Document.Start_Keep_Content;
 
          when others =>
             null;
@@ -333,6 +380,10 @@ package body Wiki.Render.Wiki is
             if not Document.Keep_Content then
                Document.Current_Style (Documents.SUBSCRIPT) := False;
             end if;
+
+         when Filters.Html.PRE_TAG =>
+            Document.Add_Preformatted (Document.Content, Null_Unbounded_Wide_Wide_String);
+            Document.Keep_Content := False;
 
          when others =>
             null;
