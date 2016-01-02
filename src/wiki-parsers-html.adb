@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-html -- Wiki HTML parser
---  Copyright (C) 2015 Stephane Carrez
+--  Copyright (C) 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +20,12 @@ with Ada.Strings.Wide_Wide_Unbounded;
 package body Wiki.Parsers.Html is
 
    use Ada.Strings.Wide_Wide_Unbounded;
+
+   --  Parse a HTML/XML comment to strip it.
+   procedure Parse_Comment (P : in out Parser);
+
+   --  Parse a simple DOCTYPE declaration and ignore it.
+   procedure Parse_Doctype (P : in out Parser);
 
    procedure Collect_Attributes (P     : in out Parser);
    function Is_Space (C : in Wide_Wide_Character) return Boolean;
@@ -141,6 +147,42 @@ package body Wiki.Parsers.Html is
    end Collect_Attributes;
 
    --  ------------------------------
+   --  Parse a HTML/XML comment to strip it.
+   --  ------------------------------
+   procedure Parse_Comment (P : in out Parser) is
+      C     : Wide_Wide_Character;
+   begin
+      Peek (P, C);
+      while not P.Is_Eof loop
+         Peek (P, C);
+         if C = '-' then
+            declare
+               Count : Natural := 1;
+            begin
+               Peek (P, C);
+               while not P.Is_Eof and C = '-' loop
+                  Peek (P, C);
+                  Count := Count + 1;
+               end loop;
+               exit when C = '>' and Count >= 2;
+            end;
+         end if;
+      end loop;
+   end Parse_Comment;
+
+   --  ------------------------------
+   --  Parse a simple DOCTYPE declaration and ignore it.
+   --  ------------------------------
+   procedure Parse_Doctype (P : in out Parser) is
+      C : Wide_Wide_Character;
+   begin
+      while not P.Is_Eof loop
+         Peek (P, C);
+         exit when C = '>';
+      end loop;
+   end Parse_Doctype;
+
+   --  ------------------------------
    --  Parse a HTML element <XXX attributes>
    --  or parse an end of HTML element </XXX>
    --  ------------------------------
@@ -149,6 +191,15 @@ package body Wiki.Parsers.Html is
       C    : Wide_Wide_Character;
    begin
       Peek (P, C);
+      if C = '!' then
+         Peek (P, C);
+         if C = '-' then
+            Parse_Comment (P);
+         else
+            Parse_Doctype (P);
+         end if;
+         return;
+      end if;
       if C /= '/' then
          Put_Back (P, C);
       end if;
