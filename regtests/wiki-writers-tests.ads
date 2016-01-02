@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  Render Tests - Unit tests for AWA Wiki rendering
---  Copyright (C) 2013 Stephane Carrez
+--  Copyright (C) 2013, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +30,7 @@ package Wiki.Writers.Tests is
       File    : Ada.Strings.Unbounded.Unbounded_String;
       Expect  : Ada.Strings.Unbounded.Unbounded_String;
       Result  : Ada.Strings.Unbounded.Unbounded_String;
+      Source  : Wiki.Parsers.Wiki_Syntax_Type;
       Format  : Wiki.Parsers.Wiki_Syntax_Type;
       Is_Html : Boolean := False;
    end record;
