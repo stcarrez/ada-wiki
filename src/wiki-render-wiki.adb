@@ -33,6 +33,7 @@ package body Wiki.Render.Wiki is
    PREFORMAT_START_CREOLE : aliased constant Wide_Wide_String := "{{{";
    PREFORMAT_END_CREOLE   : aliased constant Wide_Wide_String := "}}}" & LF;
    HORIZONTAL_RULE_CREOLE : aliased constant Wide_Wide_String := "----" & LF;
+   LINK_SEPARATOR_CREOLE  : aliased constant Wide_Wide_String := "|";
 
    HEADER_DOTCLEAR          : aliased constant Wide_Wide_String := "!";
    IMG_START_DOTCLEAR       : aliased constant Wide_Wide_String := "((";
@@ -59,10 +60,12 @@ package body Wiki.Render.Wiki is
             Document.Tags (Img_End)      := IMG_END_DOTCLEAR'Access;
             Document.Tags (Link_Start)   := LINK_START_DOTCLEAR'Access;
             Document.Tags (Link_End)     := LINK_END_DOTCLEAR'Access;
+            Document.Tags (Link_Separator)  := LINK_SEPARATOR_CREOLE'Access;
             Document.Tags (Preformat_Start) := PREFORMAT_START_DOTCLEAR'Access;
             Document.Tags (Preformat_End)   := PREFORMAT_END_DOTCLEAR'Access;
             Document.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
             Document.Invert_Header_Level := True;
+            Document.Allow_Link_Language := True;
 
          when others =>
             Document.Tags (Bold_Start)   := BOLD_CREOLE'Access;
@@ -74,6 +77,7 @@ package body Wiki.Render.Wiki is
             Document.Tags (Img_End)      := IMG_END_CREOLE'Access;
             Document.Tags (Link_Start)   := LINK_START_CREOLE'Access;
             Document.Tags (Link_End)     := LINK_END_CREOLE'Access;
+            Document.Tags (Link_Separator)  := LINK_SEPARATOR_CREOLE'Access;
             Document.Tags (Preformat_Start) := PREFORMAT_START_CREOLE'Access;
             Document.Tags (Preformat_End)   := PREFORMAT_END_CREOLE'Access;
             Document.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
@@ -176,7 +180,9 @@ package body Wiki.Render.Wiki is
       Document.Writer.Write (Document.Tags (Horizontal_Rule).all);
    end Add_Horizontal_Rule;
 
+   --  ------------------------------
    --  Add a link.
+   --  ------------------------------
    overriding
    procedure Add_Link (Document : in out Wiki_Renderer;
                        Name     : in Unbounded_Wide_Wide_String;
@@ -187,8 +193,11 @@ package body Wiki.Render.Wiki is
       Document.Writer.Write (Document.Tags (Link_Start).all);
       Document.Writer.Write (Link);
       if Length (Name) > 0 then
-         Document.Writer.Write ("|");
+         Document.Writer.Write (Document.Tags (Link_Separator).all);
          Document.Writer.Write (Name);
+      end if;
+      if Document.Allow_Link_Language and Length (Language) > 0 then
+         Document.Writer.Write (Document.Tags (Link_Separator).all);
       end if;
       Document.Writer.Write (Document.Tags (Link_End).all);
       Document.Empty_Line := False;
@@ -205,7 +214,7 @@ package body Wiki.Render.Wiki is
       Document.Writer.Write (Document.Tags (Img_Start).all);
       Document.Writer.Write (Link);
       if Length (Alt) > 0 then
-         Document.Writer.Write ("|");
+         Document.Writer.Write (Document.Tags (Link_Separator).all);
          Document.Writer.Write (Alt);
       end if;
       Document.Writer.Write (Document.Tags (Img_End).all);
