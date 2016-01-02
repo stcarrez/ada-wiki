@@ -126,7 +126,7 @@ private
                           Underline_Start, Underline_End,
                           Header_Start, Header_End,
                           Img_Start, Img_End,
-                          Link_Start, Link_End,
+                          Link_Start, Link_End, Link_Separator,
                           Preformat_Start, Preformat_End,
                           Line_Break,
                           Horizontal_Rule,
@@ -156,6 +156,7 @@ private
       Empty_Line     : Boolean := True;
       Keep_Content   : Boolean := False;
       Invert_Header_Level : Boolean := False;
+      Allow_Link_Language : Boolean := False;
       Current_Level  : Natural := 0;
       Quote_Level    : Natural := 0;
       Current_Style  : Documents.Format_Map := (others => False);
