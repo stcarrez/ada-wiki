@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers -- Wiki parser
---  Copyright (C) 2011, 2012, 2013, 2014, 2015 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -961,7 +961,7 @@ package body Wiki.Parsers is
          P.Document.Add_Paragraph;
          P.In_Paragraph := True;
       elsif Length (P.Text) > 0 or not P.Empty_Line then
-         Append (P.Text, Token);
+         Append (P.Text, LF);
       end if;
 
       --  Finish the active blockquotes if a new paragraph is started immediately after
@@ -1153,6 +1153,14 @@ package body Wiki.Parsers is
          others => Parse_Text'Access
         );
 
+   Html_Table : constant Parser_Table
+     := (
+         16#0A# => Parse_End_Line'Access,
+         16#0D# => Parse_End_Line'Access,
+         Character'Pos ('<') => Parse_Maybe_Html'Access,
+         others => Parse_Text'Access
+        );
+
    --  ------------------------------
    --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
    --  specified in <b>Syntax</b> and invoke the document reader procedures defined
@@ -1223,6 +1231,9 @@ package body Wiki.Parsers is
          when SYNTAX_MIX =>
             P.Is_Dotclear := True;
             Parse_Token (P, Misc_Wiki_Table);
+
+         when SYNTAX_HTML =>
+            Parse_Token (P, Html_Table);
 
       end case;
    end Parse;
