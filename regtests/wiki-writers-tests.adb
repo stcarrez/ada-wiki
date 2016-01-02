@@ -205,8 +205,8 @@ package body Wiki.Writers.Tests is
                            Tst := Create_Test (Name & ".creole", Path & "/" & Simple,
                                                Syntax, "/wiki-import/", True);
 
-                        when Wiki.Parsers.SYNTAX_MEDIA_WIKI =>
-                           Tst := Create_Test (Name & ".mediawiki", Path & "/" & Simple,
+                        when Wiki.Parsers.SYNTAX_DOTCLEAR =>
+                           Tst := Create_Test (Name & ".dotclear", Path & "/" & Simple,
                                                Syntax, "/wiki-import/", True);
 
                         when others =>
