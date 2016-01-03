@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-writers-builders -- Wiki writer to a string builder
---  Copyright (C) 2011, 2012, 2013, 2015 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,7 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Characters.Conversions;
+with GNAT.Encode_UTF8_String;
 package body Wiki.Writers.Builders is
 
    --  ------------------------------
@@ -52,20 +53,21 @@ package body Wiki.Writers.Builders is
    --  Convert what was collected in the writer builder to a string and return it.
    --  ------------------------------
    function To_String (Source : in Writer_Builder_Type) return String is
-      Pos    : Natural := 0;
-      Result : String (1 .. Wide_Wide_Builders.Length (Source.Content));
+      Pos    : Natural := 1;
+      Result : String (1 .. 5 * Wide_Wide_Builders.Length (Source.Content));
 
       procedure Convert (Chunk : in Wide_Wide_String) is
       begin
          for I in Chunk'Range loop
-            Pos := Pos + 1;
-            Result (Pos) := Ada.Characters.Conversions.To_Character (Chunk (I));
+            GNAT.Encode_UTF8_String.Encode_Wide_Wide_Character (Char   => Chunk (I),
+                                                                Result => Result,
+                                                                Ptr    => Pos);
          end loop;
       end Convert;
 
    begin
       Wide_Wide_Builders.Iterate (Source.Content, Convert'Access);
-      return Result;
+      return Result (1 .. Pos - 1);
    end To_String;
 
    --  ------------------------------
