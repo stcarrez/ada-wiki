@@ -121,6 +121,10 @@ private
    --  Flush the wiki dl/dt/dd definition list.
    procedure Flush_List (P : in out Parser);
 
+   --  Append a character to the wiki text buffer.
+   procedure Parse_Text (P     : in out Parser;
+                         Token : in Wide_Wide_Character);
+
    procedure Start_Element (P          : in out Parser;
                             Name       : in Unbounded_Wide_Wide_String;
                             Attributes : in Wiki.Attributes.Attribute_List_Type);
