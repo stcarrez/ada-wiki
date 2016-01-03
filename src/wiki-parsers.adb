@@ -20,10 +20,6 @@ package body Wiki.Parsers is
 
    use Wiki.Documents;
 
-   --  Append a character to the wiki text buffer.
-   procedure Parse_Text (P     : in out Parser;
-                         Token : in Wide_Wide_Character);
-
    --  Parse the beginning or the end of a double character sequence.  This procedure
    --  is instantiated for several format types (bold, italic, superscript, subscript, code).
    --  Example:
@@ -1127,6 +1123,7 @@ package body Wiki.Parsers is
          Character'Pos ('#') => Parse_List'Access,
          Character'Pos ('*') => Parse_List'Access,
          Character'Pos ('<') => Parse_Maybe_Html'Access,
+         Character'Pos ('&') => Html.Parse_Entity'Access,
          Character'Pos ('-') => Parse_Horizontal_Rule'Access,
          Character'Pos (';') => Parse_Item'Access,
          Character'Pos (':') => Parse_Definition'Access,
@@ -1158,6 +1155,7 @@ package body Wiki.Parsers is
          16#0A# => Parse_End_Line'Access,
          16#0D# => Parse_End_Line'Access,
          Character'Pos ('<') => Parse_Maybe_Html'Access,
+         Character'Pos ('&') => Html.Parse_Entity'Access,
          others => Parse_Text'Access
         );
 
