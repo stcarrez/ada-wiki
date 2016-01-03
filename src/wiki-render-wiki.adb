@@ -265,7 +265,7 @@ package body Wiki.Render.Wiki is
          end loop;
       end if;
       if Document.Keep_Content then
-         while Last >= Start and then Helpers.Is_Space (Content (Last)) loop
+         while Last >= Start and then Helpers.Is_Space_Or_Newline (Content (Last)) loop
             Last := Last - 1;
          end loop;
          Append (Document.Content, Content (Start .. Last));
@@ -290,7 +290,9 @@ package body Wiki.Render.Wiki is
       end if;
    end Add_Text;
 
+   --  ------------------------------
    --  Add a text block that is pre-formatted.
+   --  ------------------------------
    procedure Add_Preformatted (Document : in out Wiki_Renderer;
                                Text     : in Unbounded_Wide_Wide_String;
                                Format   : in Unbounded_Wide_Wide_String) is
@@ -300,8 +302,10 @@ package body Wiki.Render.Wiki is
       Document.New_Line;
       Document.Writer.Write (Document.Tags (Preformat_Start).all);
       for I in Content'Range loop
-         if Content (I) = LF then
+         if Ada.Wide_Wide_Characters.Handling.Is_Line_Terminator (Content (I)) then
             Col := 0;
+         else
+            Col := Col + 1;
          end if;
          if I = Content'First and then Col > 0 then
             Document.Writer.Write (LF);
