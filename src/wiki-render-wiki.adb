@@ -34,6 +34,8 @@ package body Wiki.Render.Wiki is
    PREFORMAT_END_CREOLE   : aliased constant Wide_Wide_String := "}}}" & LF;
    HORIZONTAL_RULE_CREOLE : aliased constant Wide_Wide_String := "----" & LF;
    LINK_SEPARATOR_CREOLE  : aliased constant Wide_Wide_String := "|";
+   LIST_ITEM_CREOLE       : aliased constant Wide_Wide_String := "*";
+   LIST_ORDERED_ITEM_CREOLE : aliased constant Wide_Wide_String := "#";
 
    HEADER_DOTCLEAR          : aliased constant Wide_Wide_String := "!";
    IMG_START_DOTCLEAR       : aliased constant Wide_Wide_String := "((";
@@ -64,6 +66,8 @@ package body Wiki.Render.Wiki is
             Document.Tags (Preformat_Start) := PREFORMAT_START_DOTCLEAR'Access;
             Document.Tags (Preformat_End)   := PREFORMAT_END_DOTCLEAR'Access;
             Document.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
+            Document.Tags (List_Item)       := LIST_ITEM_CREOLE'Access;
+            Document.Tags (List_Ordered_Item) := LIST_ORDERED_ITEM_CREOLE'Access;
             Document.Invert_Header_Level := True;
             Document.Allow_Link_Language := True;
 
@@ -78,6 +82,8 @@ package body Wiki.Render.Wiki is
             Document.Tags (Link_Start)   := LINK_START_CREOLE'Access;
             Document.Tags (Link_End)     := LINK_END_CREOLE'Access;
             Document.Tags (Link_Separator)  := LINK_SEPARATOR_CREOLE'Access;
+            Document.Tags (List_Item)       := LIST_ITEM_CREOLE'Access;
+            Document.Tags (List_Ordered_Item) := LIST_ORDERED_ITEM_CREOLE'Access;
             Document.Tags (Preformat_Start) := PREFORMAT_START_CREOLE'Access;
             Document.Tags (Preformat_End)   := PREFORMAT_END_CREOLE'Access;
             Document.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
@@ -162,17 +168,30 @@ package body Wiki.Render.Wiki is
       null;
    end Add_Blockquote;
 
+   --  ------------------------------
    --  Add a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
+   --  ------------------------------
    overriding
    procedure Add_List_Item (Document : in out Wiki_Renderer;
                             Level    : in Positive;
                             Ordered  : in Boolean) is
    begin
-      null;
+      Document.Close_Paragraph;
+      Document.Writer.Write (Document.Tags (List_Start).all);
+      for I in 1 .. Level loop
+         if Ordered then
+            Document.Writer.Write (Document.Tags (List_Ordered_Item).all);
+         else
+            Document.Writer.Write (Document.Tags (List_Item).all);
+         end if;
+      end loop;
+      Document.Writer.Write (' ');
    end Add_List_Item;
 
+   --  ------------------------------
    --  Add an horizontal rule (<hr>).
+   --  ------------------------------
    overriding
    procedure Add_Horizontal_Rule (Document : in out Wiki_Renderer) is
    begin
@@ -256,6 +275,14 @@ package body Wiki.Render.Wiki is
                Document.Writer.Write (LF);
                Document.Empty_Line := True;
             elsif not Document.Empty_Line or else not Helpers.Is_Space (Content (I)) then
+               if Document.In_List then
+                  if Document.UL_List_Level > Document.OL_List_Level then
+                     Document.Add_List_Item (Document.UL_List_Level, False);
+                  else
+                     Document.Add_List_Item (Document.OL_List_Level, True);
+                  end if;
+                  Document.In_List := False;
+               end if;
                Document.Writer.Write (Content (I));
                Document.Empty_Line := False;
             end if;
@@ -359,6 +386,15 @@ package body Wiki.Render.Wiki is
          when Filters.Html.PRE_TAG =>
             Document.Start_Keep_Content;
 
+         when Filters.Html.UL_TAG =>
+            Document.UL_List_Level := Document.UL_List_Level + 1;
+
+         when Filters.Html.OL_Tag =>
+            Document.OL_List_Level := Document.OL_List_Level + 1;
+
+         when Filters.Html.LI_TAG =>
+            Document.In_List := True;
+
          when others =>
             null;
 
@@ -432,6 +468,15 @@ package body Wiki.Render.Wiki is
          when Filters.Html.PRE_TAG =>
             Document.Add_Preformatted (Document.Content, Null_Unbounded_Wide_Wide_String);
             Document.Keep_Content := False;
+
+         when Filters.Html.UL_TAG =>
+            Document.UL_List_Level := Document.UL_List_Level - 1;
+
+         when Filters.Html.OL_Tag =>
+            Document.OL_List_Level := Document.OL_List_Level - 1;
+
+         when Filters.Html.LI_TAG =>
+            Document.In_List := False;
 
          when others =>
             null;
