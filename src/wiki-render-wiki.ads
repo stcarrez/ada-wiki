@@ -128,6 +128,7 @@ private
                           Img_Start, Img_End,
                           Link_Start, Link_End, Link_Separator,
                           Preformat_Start, Preformat_End,
+                          List_Start, List_Item, List_Ordered_Item,
                           Line_Break,
                           Horizontal_Rule,
                           Blockquote_Start, Blockquote_End);
@@ -155,10 +156,13 @@ private
       Need_Paragraph : Boolean := False;
       Empty_Line     : Boolean := True;
       Keep_Content   : Boolean := False;
+      In_List        : Boolean := False;
       Invert_Header_Level : Boolean := False;
       Allow_Link_Language : Boolean := False;
       Current_Level  : Natural := 0;
       Quote_Level    : Natural := 0;
+      UL_List_Level  : Natural := 0;
+      OL_List_Level  : Natural := 0;
       Current_Style  : Documents.Format_Map := (others => False);
       Content        : Unbounded_Wide_Wide_String;
       Link_Href      : Unbounded_Wide_Wide_String;
