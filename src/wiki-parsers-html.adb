@@ -15,11 +15,10 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Strings.Wide_Wide_Unbounded;
+with Ada.Characters.Conversions;
 
+with Wiki.Parsers.Html.Entities;
 package body Wiki.Parsers.Html is
-
-   use Ada.Strings.Wide_Wide_Unbounded;
 
    --  Parse a HTML/XML comment to strip it.
    procedure Parse_Comment (P : in out Parser);
@@ -228,5 +227,38 @@ package body Wiki.Parsers.Html is
          Start_Element (P, Name, P.Attributes);
       end if;
    end Parse_Element;
+
+   --  ------------------------------
+   --  Parse an HTML entity such as &nbsp; and replace it with the corresponding code.
+   --  ------------------------------
+   procedure Parse_Entity (P     : in out Parser;
+                           Token : in Wide_Wide_Character) is
+      Name : String (1 .. 10);
+      Len  : Natural := 0;
+      High : Natural := Wiki.Parsers.Html.Entities.Keywords'Last;
+      Low  : Natural := Wiki.Parsers.Html.Entities.Keywords'First;
+      Pos  : Natural;
+      C    : Wide_Wide_Character;
+   begin
+      loop
+         Peek (P, C);
+         exit when C = ';';
+         if Len < Name'Last then
+            Len := Len + 1;
+         end if;
+         Name (Len) := Ada.Characters.Conversions.To_Character (C);
+      end loop;
+      while Low <= High loop
+         Pos := (Low + High) / 2;
+         if Wiki.Parsers.Html.Entities.Keywords (Pos).all = Name (1 .. Len) then
+            Parse_Text (P, Entities.Mapping (Pos));
+            return;
+         elsif Entities.Keywords (Pos).all < Name (1 .. Len) then
+            Low := Pos + 1;
+         else
+            High := Pos - 1;
+         end if;
+      end loop;
+   end Parse_Entity;
 
 end Wiki.Parsers.Html;
