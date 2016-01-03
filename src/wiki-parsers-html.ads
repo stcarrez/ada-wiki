@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-html -- Wiki HTML parser
---  Copyright (C) 2015 Stephane Carrez
+--  Copyright (C) 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,5 +30,9 @@ private package Wiki.Parsers.Html is
    --  Parse a HTML element <XXX attributes>
    --  or parse an end of HTML element </XXX>
    procedure Parse_Element (P : in out Parser);
+
+   --  Parse an HTML entity such as &nbsp; and replace it with the corresponding code.
+   procedure Parse_Entity (P     : in out Parser;
+                           Token : in Wide_Wide_Character);
 
 end Wiki.Parsers.Html;
