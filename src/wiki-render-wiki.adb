@@ -45,6 +45,8 @@ package body Wiki.Render.Wiki is
    PREFORMAT_START_DOTCLEAR : aliased constant Wide_Wide_String := "///";
    PREFORMAT_END_DOTCLEAR   : aliased constant Wide_Wide_String := "///" & LF;
 
+   Empty_Formats : constant Documents.Format_Map := (others => False);
+
    --  Set the output writer.
    procedure Set_Writer (Document : in out Wiki_Renderer;
                          Writer   : in Writers.Writer_Type_Access;
@@ -54,8 +56,8 @@ package body Wiki.Render.Wiki is
       Document.Syntax := Format;
       case Format is
          when Parsers.SYNTAX_DOTCLEAR =>
-            Document.Tags (Bold_Start)   := BOLD_CREOLE'Access;
-            Document.Tags (Bold_End)     := BOLD_CREOLE'Access;
+            Document.Style_Start_Tags (Documents.BOLD)   := BOLD_CREOLE'Access;
+            Document.Style_End_Tags (Documents.BOLD)     := BOLD_CREOLE'Access;
             Document.Tags (Header_Start) := HEADER_DOTCLEAR'Access;
             Document.Tags (Line_Break)   := LINE_BREAK_CREOLE'Access;
             Document.Tags (Img_Start)    := IMG_START_DOTCLEAR'Access;
@@ -72,8 +74,8 @@ package body Wiki.Render.Wiki is
             Document.Allow_Link_Language := True;
 
          when others =>
-            Document.Tags (Bold_Start)   := BOLD_CREOLE'Access;
-            Document.Tags (Bold_End)     := BOLD_CREOLE'Access;
+            Document.Style_Start_Tags (Documents.BOLD)   := BOLD_CREOLE'Access;
+            Document.Style_End_Tags (Documents.BOLD)     := BOLD_CREOLE'Access;
             Document.Tags (Header_Start) := HEADER_CREOLE'Access;
             Document.Tags (Header_End)   := HEADER_CREOLE'Access;
             Document.Tags (Line_Break)   := LINE_BREAK_CREOLE'Access;
@@ -109,6 +111,7 @@ package body Wiki.Render.Wiki is
                          Level    : in Positive) is
       Count : Natural := Level;
    begin
+      Document.Set_Format (Empty_Formats);
       Document.Close_Paragraph;
       if not Document.Empty_Line then
          Document.New_Line;
@@ -250,14 +253,34 @@ package body Wiki.Render.Wiki is
       null;
    end Add_Quote;
 
+   --  Set the text style format.
+   procedure Set_Format (Document : in out Wiki_Renderer;
+                         Format   : in Documents.Format_Map) is
+      F : Boolean;
+   begin
+      for I in Format'Range loop
+         F := Format (I) or Document.Current_Style (I);
+         if Document.Format (I) /= F then
+            if F then
+               Document.Writer.Write (Document.Style_Start_Tags (I).all);
+               Document.Format (I) := True;
+            else
+               Document.Writer.Write (Document.Style_End_Tags (I).all);
+               Document.Format (I) := False;
+            end if;
+         end if;
+      end loop;
+   end Set_Format;
+
    --  Add a text block with the given format.
    overriding
    procedure Add_Text (Document : in out Wiki_Renderer;
                        Text     : in Unbounded_Wide_Wide_String;
                        Format   : in Documents.Format_Map) is
-      Content : constant Wide_Wide_String := To_Wide_Wide_String (Text);
-      Start   : Natural := Content'First;
-      Last    : Natural := Content'Last;
+      Content      : constant Wide_Wide_String := To_Wide_Wide_String (Text);
+      Start        : Natural := Content'First;
+      Last         : Natural := Content'Last;
+      Apply_Format : Boolean := True;
    begin
       if Document.Keep_Content or Document.Empty_Line then
          while Start <= Content'Last and then Helpers.Is_Space_Or_Newline (Content (Start)) loop
@@ -282,6 +305,10 @@ package body Wiki.Render.Wiki is
                      Document.Add_List_Item (Document.OL_List_Level, True);
                   end if;
                   Document.In_List := False;
+               end if;
+               if Apply_Format then
+                  Document.Set_Format (Format);
+                  Apply_Format := False;
                end if;
                Document.Writer.Write (Content (I));
                Document.Empty_Line := False;
@@ -492,7 +519,7 @@ package body Wiki.Render.Wiki is
    overriding
    procedure Finish (Document : in out Wiki_Renderer) is
    begin
-      null;
+      Document.Set_Format (Empty_Formats);
    end Finish;
 
    procedure Close_Paragraph (Document : in out Wiki_Renderer) is
