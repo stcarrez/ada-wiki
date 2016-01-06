@@ -1152,8 +1152,6 @@ package body Wiki.Parsers is
 
    Html_Table : constant Parser_Table
      := (
-         16#0A# => Parse_End_Line'Access,
-         16#0D# => Parse_End_Line'Access,
          Character'Pos ('<') => Parse_Maybe_Html'Access,
          Character'Pos ('&') => Html.Parse_Entity'Access,
          others => Parse_Text'Access
