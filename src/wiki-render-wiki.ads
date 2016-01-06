@@ -131,7 +131,7 @@ private
                           Link_Start, Link_End, Link_Separator,
                           Preformat_Start, Preformat_End,
                           List_Start, List_Item, List_Ordered_Item,
-                          Line_Break,
+                          Line_Break, Escape_Rule,
                           Horizontal_Rule,
                           Blockquote_Start, Blockquote_End);
 
