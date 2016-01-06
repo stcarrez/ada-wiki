@@ -36,6 +36,7 @@ package body Wiki.Render.Wiki is
    LINK_SEPARATOR_CREOLE  : aliased constant Wide_Wide_String := "|";
    LIST_ITEM_CREOLE       : aliased constant Wide_Wide_String := "*";
    LIST_ORDERED_ITEM_CREOLE : aliased constant Wide_Wide_String := "#";
+   ESCAPE_CREOLE            : aliased constant Wide_Wide_String := "~";
 
    HEADER_DOTCLEAR          : aliased constant Wide_Wide_String := "!";
    IMG_START_DOTCLEAR       : aliased constant Wide_Wide_String := "((";
@@ -44,6 +45,7 @@ package body Wiki.Render.Wiki is
    LINK_END_DOTCLEAR        : aliased constant Wide_Wide_String := "]";
    PREFORMAT_START_DOTCLEAR : aliased constant Wide_Wide_String := "///";
    PREFORMAT_END_DOTCLEAR   : aliased constant Wide_Wide_String := "///" & LF;
+   ESCAPE_DOTCLEAR          : aliased constant Wide_Wide_String := "\";
 
    Empty_Formats : constant Documents.Format_Map := (others => False);
 
@@ -70,6 +72,7 @@ package body Wiki.Render.Wiki is
             Document.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
             Document.Tags (List_Item)       := LIST_ITEM_CREOLE'Access;
             Document.Tags (List_Ordered_Item) := LIST_ORDERED_ITEM_CREOLE'Access;
+            Document.Tags (Escape_Rule)       := ESCAPE_DOTCLEAR'Access;
             Document.Invert_Header_Level := True;
             Document.Allow_Link_Language := True;
 
@@ -89,6 +92,7 @@ package body Wiki.Render.Wiki is
             Document.Tags (Preformat_Start) := PREFORMAT_START_CREOLE'Access;
             Document.Tags (Preformat_End)   := PREFORMAT_END_CREOLE'Access;
             Document.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
+            Document.Tags (Escape_Rule)     := ESCAPE_DOTCLEAR'Access;
 
       end case;
    end Set_Writer;
