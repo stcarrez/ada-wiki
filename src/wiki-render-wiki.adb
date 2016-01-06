@@ -109,10 +109,8 @@ package body Wiki.Render.Wiki is
                          Level    : in Positive) is
       Count : Natural := Level;
    begin
+      Document.Writer.Write (LF);
       Document.Close_Paragraph;
-      if not Document.Empty_Line then
-         Document.New_Line;
-      end if;
       if Document.Invert_Header_Level then
          if Count > 5 then
             Count := 5;
