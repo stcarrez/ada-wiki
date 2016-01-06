@@ -126,9 +126,7 @@ private
 
    type Wide_String_Access is access constant Wide_Wide_String;
 
-   type Wiki_Tag_Type is (Bold_Start, Bold_End, Italic_Start, Italic_End,
-                          Underline_Start, Underline_End,
-                          Header_Start, Header_End,
+   type Wiki_Tag_Type is (Header_Start, Header_End,
                           Img_Start, Img_End,
                           Link_Start, Link_End, Link_Separator,
                           Preformat_Start, Preformat_End,
