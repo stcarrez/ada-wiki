@@ -118,6 +118,10 @@ package Wiki.Render.Wiki is
    overriding
    procedure Finish (Document : in out Wiki_Renderer);
 
+   --  Set the text style format.
+   procedure Set_Format (Document : in out Wiki_Renderer;
+                         Format   : in Documents.Format_Map);
+
 private
 
    type Wide_String_Access is access constant Wide_Wide_String;
@@ -135,6 +139,8 @@ private
 
    type Wiki_Tag_Array is array (Wiki_Tag_Type) of Wide_String_Access;
 
+   type Wiki_Format_Array is array (Documents.Format_Type) of Wide_String_Access;
+
    --  Emit a new line.
    procedure New_Line (Document : in out Wiki_Renderer);
 
@@ -147,27 +153,29 @@ private
    EMPTY_TAG : aliased constant Wide_Wide_String := "";
 
    type Wiki_Renderer is new Documents.Document_Reader with record
-      Writer         : Writers.Writer_Type_Access := null;
-      Syntax         : Parsers.Wiki_Syntax_Type := Parsers.SYNTAX_CREOLE;
-      Format         : Documents.Format_Map := (others => False);
-      Tags           : Wiki_Tag_Array := (others => EMPTY_TAG'Access);
-      Has_Paragraph  : Boolean := False;
-      Has_Item       : Boolean := False;
-      Need_Paragraph : Boolean := False;
-      Empty_Line     : Boolean := True;
-      Keep_Content   : Boolean := False;
-      In_List        : Boolean := False;
+      Writer              : Writers.Writer_Type_Access := null;
+      Syntax              : Parsers.Wiki_Syntax_Type := Parsers.SYNTAX_CREOLE;
+      Format              : Documents.Format_Map := (others => False);
+      Tags                : Wiki_Tag_Array := (others => EMPTY_TAG'Access);
+      Style_Start_Tags    : Wiki_Format_Array := (others => EMPTY_TAG'Access);
+      Style_End_Tags      : Wiki_Format_Array := (others => EMPTY_TAG'Access);
+      Has_Paragraph       : Boolean := False;
+      Has_Item            : Boolean := False;
+      Need_Paragraph      : Boolean := False;
+      Empty_Line          : Boolean := True;
+      Keep_Content        : Boolean := False;
+      In_List             : Boolean := False;
       Invert_Header_Level : Boolean := False;
       Allow_Link_Language : Boolean := False;
-      Current_Level  : Natural := 0;
-      Quote_Level    : Natural := 0;
-      UL_List_Level  : Natural := 0;
-      OL_List_Level  : Natural := 0;
-      Current_Style  : Documents.Format_Map := (others => False);
-      Content        : Unbounded_Wide_Wide_String;
-      Link_Href      : Unbounded_Wide_Wide_String;
-      Link_Title     : Unbounded_Wide_Wide_String;
-      Link_Lang      : Unbounded_Wide_Wide_String;
+      Current_Level       : Natural := 0;
+      Quote_Level         : Natural := 0;
+      UL_List_Level       : Natural := 0;
+      OL_List_Level       : Natural := 0;
+      Current_Style       : Documents.Format_Map := (others => False);
+      Content             : Unbounded_Wide_Wide_String;
+      Link_Href           : Unbounded_Wide_Wide_String;
+      Link_Title          : Unbounded_Wide_Wide_String;
+      Link_Lang           : Unbounded_Wide_Wide_String;
    end record;
 
 end Wiki.Render.Wiki;
