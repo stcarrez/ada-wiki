@@ -112,7 +112,9 @@ package body Wiki.Render.Wiki is
       Count : Natural := Level;
    begin
       Document.Set_Format (Empty_Formats);
-      Document.Writer.Write (LF);
+      if not Document.Empty_Line then
+         Document.Writer.Write (LF);
+      end if;
       Document.Close_Paragraph;
       if Document.Invert_Header_Level then
          if Count > 5 then
@@ -275,6 +277,8 @@ package body Wiki.Render.Wiki is
    procedure Add_Text (Document : in out Wiki_Renderer;
                        Text     : in Unbounded_Wide_Wide_String;
                        Format   : in Documents.Format_Map) is
+      use type Documents.Format_Map;
+
       Content      : constant Wide_Wide_String := To_Wide_Wide_String (Text);
       Start        : Natural := Content'First;
       Last         : Natural := Content'Last;
@@ -293,8 +297,13 @@ package body Wiki.Render.Wiki is
       else
          for I in Start .. Last loop
             if Ada.Wide_Wide_Characters.Handling.Is_Line_Terminator (Content (I)) then
-               Document.Writer.Write (LF);
-               Document.Empty_Line := True;
+               if Document.Empty_Line = False then
+                  if Apply_Format and then Document.Format /= Empty_Formats then
+                     Document.Set_Format (Empty_Formats);
+                  end if;
+                  Document.Writer.Write (LF);
+                  Document.Empty_Line := True;
+               end if;
             elsif not Document.Empty_Line or else not Helpers.Is_Space (Content (I)) then
                if Document.In_List then
                   if Document.UL_List_Level > Document.OL_List_Level then
