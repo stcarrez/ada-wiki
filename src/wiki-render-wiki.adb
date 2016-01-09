@@ -23,29 +23,36 @@ package body Wiki.Render.Wiki is
 
    LF : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#0A#);
 
-   HEADER_CREOLE          : aliased constant Wide_Wide_String := "=";
-   BOLD_CREOLE            : aliased constant Wide_Wide_String := "**";
-   LINE_BREAK_CREOLE      : aliased constant Wide_Wide_String := "%%%";
-   IMG_START_CREOLE       : aliased constant Wide_Wide_String := "{{";
-   IMG_END_CREOLE         : aliased constant Wide_Wide_String := "}}";
-   LINK_START_CREOLE      : aliased constant Wide_Wide_String := "[[";
-   LINK_END_CREOLE        : aliased constant Wide_Wide_String := "]]";
-   PREFORMAT_START_CREOLE : aliased constant Wide_Wide_String := "{{{";
-   PREFORMAT_END_CREOLE   : aliased constant Wide_Wide_String := "}}}" & LF;
-   HORIZONTAL_RULE_CREOLE : aliased constant Wide_Wide_String := "----" & LF;
-   LINK_SEPARATOR_CREOLE  : aliased constant Wide_Wide_String := "|";
-   LIST_ITEM_CREOLE       : aliased constant Wide_Wide_String := "*";
-   LIST_ORDERED_ITEM_CREOLE : aliased constant Wide_Wide_String := "#";
-   ESCAPE_CREOLE            : aliased constant Wide_Wide_String := "~";
+   HEADER_CREOLE             : aliased constant Wide_Wide_String := "=";
+   BOLD_CREOLE               : aliased constant Wide_Wide_String := "**";
+   LINE_BREAK_CREOLE         : aliased constant Wide_Wide_String := "%%%";
+   IMG_START_CREOLE          : aliased constant Wide_Wide_String := "{{";
+   IMG_END_CREOLE            : aliased constant Wide_Wide_String := "}}";
+   LINK_START_CREOLE         : aliased constant Wide_Wide_String := "[[";
+   LINK_END_CREOLE           : aliased constant Wide_Wide_String := "]]";
+   PREFORMAT_START_CREOLE    : aliased constant Wide_Wide_String := "{{{";
+   PREFORMAT_END_CREOLE      : aliased constant Wide_Wide_String := "}}}" & LF;
+   HORIZONTAL_RULE_CREOLE    : aliased constant Wide_Wide_String := "----" & LF;
+   LINK_SEPARATOR_CREOLE     : aliased constant Wide_Wide_String := "|";
+   LIST_ITEM_CREOLE          : aliased constant Wide_Wide_String := "*";
+   LIST_ORDERED_ITEM_CREOLE  : aliased constant Wide_Wide_String := "#";
+   ESCAPE_CREOLE             : aliased constant Wide_Wide_String := "~";
 
-   HEADER_DOTCLEAR          : aliased constant Wide_Wide_String := "!";
-   IMG_START_DOTCLEAR       : aliased constant Wide_Wide_String := "((";
-   IMG_END_DOTCLEAR         : aliased constant Wide_Wide_String := "))";
-   LINK_START_DOTCLEAR      : aliased constant Wide_Wide_String := "[";
-   LINK_END_DOTCLEAR        : aliased constant Wide_Wide_String := "]";
-   PREFORMAT_START_DOTCLEAR : aliased constant Wide_Wide_String := "///";
-   PREFORMAT_END_DOTCLEAR   : aliased constant Wide_Wide_String := "///" & LF;
-   ESCAPE_DOTCLEAR          : aliased constant Wide_Wide_String := "\";
+   HEADER_DOTCLEAR           : aliased constant Wide_Wide_String := "!";
+   IMG_START_DOTCLEAR        : aliased constant Wide_Wide_String := "((";
+   IMG_END_DOTCLEAR          : aliased constant Wide_Wide_String := "))";
+   LINK_START_DOTCLEAR       : aliased constant Wide_Wide_String := "[";
+   LINK_END_DOTCLEAR         : aliased constant Wide_Wide_String := "]";
+   PREFORMAT_START_DOTCLEAR  : aliased constant Wide_Wide_String := "///";
+   PREFORMAT_END_DOTCLEAR    : aliased constant Wide_Wide_String := "///" & LF;
+   ESCAPE_DOTCLEAR           : aliased constant Wide_Wide_String := "\";
+
+   LINE_BREAK_MEDIAWIKI      : aliased constant Wide_Wide_String := "<br />";
+   BOLD_MEDIAWIKI            : aliased constant Wide_Wide_String := "'''";
+   PREFORMAT_START_MEDIAWIKI : aliased constant Wide_Wide_String := "<pre>";
+   PREFORMAT_END_MEDIAWIKI   : aliased constant Wide_Wide_String := "</pre>";
+   IMG_START_MEDIAWIKI       : aliased constant Wide_Wide_String := "[[File:";
+   IMG_END_MEDIAWIKI         : aliased constant Wide_Wide_String := "]]";
 
    Empty_Formats : constant Documents.Format_Map := (others => False);
 
@@ -76,6 +83,25 @@ package body Wiki.Render.Wiki is
             Document.Invert_Header_Level := True;
             Document.Allow_Link_Language := True;
             Document.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("-+_*{}][/=\");
+
+         when Parsers.SYNTAX_MEDIA_WIKI =>
+            Document.Style_Start_Tags (Documents.BOLD)   := BOLD_MEDIAWIKI'Access;
+            Document.Style_End_Tags (Documents.BOLD)     := BOLD_MEDIAWIKI'Access;
+            Document.Tags (Header_Start) := HEADER_CREOLE'Access;
+            Document.Tags (Header_End)   := HEADER_CREOLE'Access;
+            Document.Tags (Line_Break)   := LINE_BREAK_MEDIAWIKI'Access;
+            Document.Tags (Img_Start)    := IMG_START_MEDIAWIKI'Access;
+            Document.Tags (Img_End)      := IMG_END_MEDIAWIKI'Access;
+            Document.Tags (Link_Start)   := LINK_START_CREOLE'Access;
+            Document.Tags (Link_End)     := LINK_END_CREOLE'Access;
+            Document.Tags (Link_Separator)  := LINK_SEPARATOR_CREOLE'Access;
+            Document.Tags (List_Item)       := LIST_ITEM_CREOLE'Access;
+            Document.Tags (List_Ordered_Item) := LIST_ORDERED_ITEM_CREOLE'Access;
+            Document.Tags (Preformat_Start) := PREFORMAT_START_MEDIAWIKI'Access;
+            Document.Tags (Preformat_End)   := PREFORMAT_END_MEDIAWIKI'Access;
+            Document.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
+            Document.Tags (Escape_Rule)     := ESCAPE_CREOLE'Access;
+            Document.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("'+_-*(){}][!");
 
          when others =>
             Document.Style_Start_Tags (Documents.BOLD)   := BOLD_CREOLE'Access;
