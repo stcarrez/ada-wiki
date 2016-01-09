@@ -15,7 +15,10 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
+with Ada.Strings.Wide_Wide_Fixed;
+
 with Wiki.Parsers.Html;
+with Wiki.Helpers;
 package body Wiki.Parsers is
 
    use Wiki.Documents;
@@ -449,6 +452,37 @@ package body Wiki.Parsers is
    end Parse_Header;
 
    --  ------------------------------
+   --  Check if the link refers to an image and must be rendered as an image.
+   --  ------------------------------
+   function Is_Image (P    : in Parser;
+                      Link : in Wide_Wide_String) return Boolean is
+      Pos : Natural;
+   begin
+      if not P.Check_Image_Link then
+         return False;
+      elsif Wiki.Helpers.Is_Url (Link) then
+         Pos := Ada.Strings.Wide_Wide_Fixed.Index (Link, ".", Ada.Strings.Backward);
+         if Pos = 0 then
+            return False;
+         else
+            return Wiki.Helpers.Is_Image_Extension (Link (Pos .. Link'Last));
+         end if;
+      elsif Link'Length <= 5 then
+         return False;
+      elsif Link (Link'First .. Link'First + 4) /= "File:" and
+        Link (Link'First .. Link'First + 5) /= "Image:" then
+         return False;
+      else
+         Pos := Ada.Strings.Wide_Wide_Fixed.Index (Link, ".", Ada.Strings.Backward);
+         if Pos = 0 then
+            return False;
+         else
+            return Wiki.Helpers.Is_Image_Extension (Link (Pos .. Link'Last));
+         end if;
+      end if;
+   end Is_Image;
+
+   --  ------------------------------
    --  Parse a link.
    --  Example:
    --    [name]
@@ -469,6 +503,7 @@ package body Wiki.Parsers is
       Title      : Unbounded_Wide_Wide_String;
       Language   : Unbounded_Wide_Wide_String;
       Link_Title : Unbounded_Wide_Wide_String;
+      Tmp        : Unbounded_Wide_Wide_String;
       C          : Wide_Wide_Character;
 
       procedure Parse_Link_Token (Into : in out Unbounded_Wide_Wide_String) is
@@ -515,8 +550,19 @@ package body Wiki.Parsers is
       end if;
       P.Empty_Line := False;
       Flush_Text (P);
+      if not P.Link_Title_First then
+         Tmp := Title;
+         Title := Link;
+         Link := Tmp;
+      end if;
       if Length (Link) = 0 then
-         P.Document.Add_Link (Title, Title, Language, Link_Title);
+         if Is_Image (P, To_Wide_Wide_String (Title)) then
+            P.Document.Add_Image (Title, Title, Language, Link_Title);
+         else
+            P.Document.Add_Link (Title, Title, Language, Link_Title);
+         end if;
+      elsif Is_Image (P, To_Wide_Wide_String (Link)) then
+         P.Document.Add_Image (Title, Link, Language, Link_Title);
       else
          P.Document.Add_Link (Title, Link, Language, Link_Title);
       end if;
@@ -1207,6 +1253,7 @@ package body Wiki.Parsers is
             P.Is_Dotclear := True;
             P.Escape_Char := '\';
             P.Header_Offset := -6;
+            P.Link_Title_First := True;
             Parse_Token (P, Dotclear_Wiki_Table);
 
          when SYNTAX_CREOLE =>
@@ -1218,6 +1265,7 @@ package body Wiki.Parsers is
 
          when SYNTAX_MEDIA_WIKI =>
             P.Link_Double_Bracket := True;
+            P.Check_Image_Link := True;
             Parse_Token (P, Mediawiki_Wiki_Table);
 
          when SYNTAX_MARKDOWN =>
