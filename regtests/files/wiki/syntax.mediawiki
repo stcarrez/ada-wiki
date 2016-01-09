@@ -1,0 +1,69 @@
+First paragraph.
+
+Second paragraph.
+
+= Section h1 =
+
+== Section h2 ==
+
+=== Section h3 ===
+
+==== Section h4 ====
+
+===== Section h5 =====
+
+----
+
+* item 1
+** item 1.1
+** item 1.2
+* item 2
+* item 3
+*# item 3.1
+*# item 3.2
+
+# num 1
+# num 2
+
+Section bloc:
+
+ L1: line 1
+ L2: line 2
+ L3: line 3
+
+Formatting
+
+''emphasis''
+
+'''strong'''
+
+'''''strong and emphasis'''''
+
+<strike>Strike text</strike>
+
+<!--  Comment not displayed in final content -->
+
+Line<br />break
+
+<ins>Insert</ins>
+<u>Underline</u>
+<s>Strike</s>
+<del>Delete</del>
+
+[[A link]]
+[[A link|title]]
+
+;item 1
+: definition item 1
+;item 2
+: definition item 2
+;item 3
+: definition item 3
+
+<pre>
+* item 1
+''item''
+== dd ==
+</pre>
+
+

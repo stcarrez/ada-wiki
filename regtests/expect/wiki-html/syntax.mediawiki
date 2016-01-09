@@ -1,0 +1,23 @@
+<p>First paragraph.</p><p>Second paragraph.</p><h1>Section h1</h1><h2>Section h2</h2><h3>Section h3</h3><h4>Section h4</h4><h5>Section h5</h5><hr /><ul><li>item 1
+</li><li><ul>item 1.1
+</li><li>item 1.2
+</li><li>item 2
+</li><li>item 3
+</li><li>item 3.1
+</li><li>item 3.2</li></ul></ul><ol><li>num 1
+</li><li>num 2</li></ol><p>Section bloc:</p><p> L1: line 1
+ L2: line 2
+ L3: line 3</p><p>Formatting</p><p><i>emphasis</i></p><p><b>strong</b></p><p><b><i>strong and emphasis</i></b></p><p>Strike text</p><p>Line<br />break</p><ins>Insert</ins><p>
+<u>Underline</u>
+<s>Strike</s>
+<del>Delete</del></p><p><a href="A link">A link</a>
+
+<a href="A link">title</a>
+</p><dl><dt>item 1
+</dt><dd> definition item 1
+</dd><dt>item 2
+</dt><dd> definition item 2
+</dd><dt>item 3
+</dt><dd> definition item 3</dd></dl><pre><ul>item 1
+<i>item</i>
+</></ul><h2>dd</h2>
