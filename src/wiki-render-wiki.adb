@@ -75,6 +75,7 @@ package body Wiki.Render.Wiki is
             Document.Tags (Escape_Rule)       := ESCAPE_DOTCLEAR'Access;
             Document.Invert_Header_Level := True;
             Document.Allow_Link_Language := True;
+            Document.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("-*{}][/=\");
 
          when others =>
             Document.Style_Start_Tags (Documents.BOLD)   := BOLD_CREOLE'Access;
@@ -92,7 +93,8 @@ package body Wiki.Render.Wiki is
             Document.Tags (Preformat_Start) := PREFORMAT_START_CREOLE'Access;
             Document.Tags (Preformat_End)   := PREFORMAT_END_CREOLE'Access;
             Document.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
-            Document.Tags (Escape_Rule)     := ESCAPE_DOTCLEAR'Access;
+            Document.Tags (Escape_Rule)     := ESCAPE_CREOLE'Access;
+            Document.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("'+_-*(){}][!");
 
       end case;
    end Set_Writer;
@@ -320,6 +322,9 @@ package body Wiki.Render.Wiki is
                if Apply_Format then
                   Document.Set_Format (Format);
                   Apply_Format := False;
+               end if;
+               if Ada.Strings.Wide_Wide_Maps.Is_In (Content (I), Document.Escape_Set) then
+                  Document.Writer.Write (Document.Tags (Escape_Rule).all);
                end if;
                Document.Writer.Write (Content (I));
                Document.Empty_Line := False;
