@@ -209,6 +209,10 @@ package body Wiki.Writers.Tests is
                            Tst := Create_Test (Name & ".dotclear", Path & "/" & Simple,
                                                Syntax, "/wiki-import/", True);
 
+                        when Wiki.Parsers.SYNTAX_MEDIA_WIKI =>
+                           Tst := Create_Test (Name & ".mediawiki", Path & "/" & Simple,
+                                               Syntax, "/wiki-import/", True);
+
                         when others =>
                            Tst := null;
 
