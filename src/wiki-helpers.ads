@@ -27,4 +27,7 @@ package Wiki.Helpers is
    --  Returns True if the character is a space, tab or a newline.
    function Is_Space_Or_Newline (C : in Wide_Wide_Character) return Boolean;
 
+   --  Returns True if the text is a valid URL
+   function Is_Url (Text : in Wide_Wide_String) return Boolean;
+
 end Wiki.Helpers;
