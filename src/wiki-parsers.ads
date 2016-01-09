@@ -90,6 +90,8 @@ private
       Need_Paragraph      : Boolean := True;
       Link_Double_Bracket : Boolean := False;
       Is_Dotclear         : Boolean := False;
+      Link_Title_First    : Boolean := False;
+      Check_Image_Link    : Boolean := False;
       Header_Offset       : Integer := 0;
       Quote_Level         : Natural := 0;
       Escape_Char         : Wide_Wide_Character;
@@ -124,6 +126,10 @@ private
    --  Append a character to the wiki text buffer.
    procedure Parse_Text (P     : in out Parser;
                          Token : in Wide_Wide_Character);
+
+   --  Check if the link refers to an image and must be rendered as an image.
+   function Is_Image (P    : in Parser;
+                      Link : in Wide_Wide_String) return Boolean;
 
    procedure Start_Element (P          : in out Parser;
                             Name       : in Unbounded_Wide_Wide_String;
