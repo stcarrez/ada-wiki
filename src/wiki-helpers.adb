@@ -35,4 +35,17 @@ package body Wiki.Helpers is
       return Is_Space (C) or Ada.Wide_Wide_Characters.Handling.Is_Line_Terminator (C);
    end Is_Space_Or_Newline;
 
+   --  ------------------------------
+   --  Returns True if the text is a valid URL
+   --  ------------------------------
+   function Is_Url (Text : in Wide_Wide_String) return Boolean is
+   begin
+      if Name'Length <= 9 then
+         return False;
+      else
+         return Name (Name'First .. Name'First + 6) = "http://"
+           or Name (Name'First .. Name'First + 7) = "https://";
+      end if;
+   end Is_Url;
+
 end Wiki.Helpers;
