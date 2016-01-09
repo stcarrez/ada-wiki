@@ -1,6 +1,5 @@
 
 < ¢©>&
-
 Alpha: Α
 Beta: Β
 Gamma: Γ
@@ -25,7 +24,5 @@ Phi: Φ
 Chi: Χ
 Psi: Ψ
 Omega: Ω
-
 First symbol: Æ
-Last symbol: ‌  (zero width non-joiner)
-
+Last symbol: ‌  ~(zero width non~-joiner~)

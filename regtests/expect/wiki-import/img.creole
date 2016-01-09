@@ -1,3 +1,2 @@
 
 The inline {{/test.png|Test image}} image.
-
