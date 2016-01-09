@@ -15,6 +15,7 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
+with Ada.Strings.Wide_Wide_Maps;
 
 with Wiki.Documents;
 with Wiki.Attributes;
@@ -157,6 +158,7 @@ private
       Tags                : Wiki_Tag_Array := (others => EMPTY_TAG'Access);
       Style_Start_Tags    : Wiki_Format_Array := (others => EMPTY_TAG'Access);
       Style_End_Tags      : Wiki_Format_Array := (others => EMPTY_TAG'Access);
+      Escape_Set          : Ada.Strings.Wide_Wide_Maps.Wide_Wide_Character_Set;
       Has_Paragraph       : Boolean := False;
       Has_Item            : Boolean := False;
       Need_Paragraph      : Boolean := False;
