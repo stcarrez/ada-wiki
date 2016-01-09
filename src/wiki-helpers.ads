@@ -30,4 +30,9 @@ package Wiki.Helpers is
    --  Returns True if the text is a valid URL
    function Is_Url (Text : in Wide_Wide_String) return Boolean;
 
+   --  Returns True if the extension part correspond to an image.
+   --  Recognized extension are: .png, .gif, .jpg, .jpeg.
+   --  The extension case is ignored.
+   function Is_Image_Extension (Ext : in Wide_Wide_String) return Boolean;
+
 end Wiki.Helpers;
