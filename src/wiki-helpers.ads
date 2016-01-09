@@ -18,6 +18,8 @@
 
 package Wiki.Helpers is
 
+   pragma Preelaborate;
+
    LF : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#0A#);
    HT : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#09#);
 
