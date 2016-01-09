@@ -1119,7 +1119,6 @@ package body Wiki.Parsers is
          Character'Pos (''') => Parse_Bold_Italic'Access,
          Character'Pos ('[') => Parse_Link'Access,
          Character'Pos ('\') => Parse_Line_Break'Access,
-         Character'Pos ('{') => Parse_Quote'Access,
          Character'Pos ('#') => Parse_List'Access,
          Character'Pos ('*') => Parse_List'Access,
          Character'Pos ('<') => Parse_Maybe_Html'Access,
