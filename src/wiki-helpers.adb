@@ -40,12 +40,23 @@ package body Wiki.Helpers is
    --  ------------------------------
    function Is_Url (Text : in Wide_Wide_String) return Boolean is
    begin
-      if Name'Length <= 9 then
+      if Text'Length <= 9 then
          return False;
       else
-         return Name (Name'First .. Name'First + 6) = "http://"
-           or Name (Name'First .. Name'First + 7) = "https://";
+         return Text (Text'First .. Text'First + 6) = "http://"
+           or Text (Text'First .. Text'First + 7) = "https://";
       end if;
    end Is_Url;
+
+   --  ------------------------------
+   --  Returns True if the extension part correspond to an image.
+   --  Recognized extension are: .png, .gif, .jpg, .jpeg.
+   --  The extension case is ignored.
+   --  ------------------------------
+   function Is_Image_Extension (Ext : in Wide_Wide_String) return Boolean is
+      S : constant Wide_Wide_String := Ada.Wide_Wide_Characters.Handling.To_Lower (Ext);
+   begin
+      return S = ".png" or S = ".jpg" or S = ".gif" or S = ".jpeg";
+   end Is_Image_Extension;
 
 end Wiki.Helpers;
