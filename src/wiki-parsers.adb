@@ -554,14 +554,14 @@ package body Wiki.Parsers is
          Tmp := Title;
          Title := Link;
          Link := Tmp;
+         if Length (Title) = 0 then
+            Title := Link;
+         end if;
       end if;
       if Length (Link) = 0 then
-         if Is_Image (P, To_Wide_Wide_String (Title)) then
-            P.Document.Add_Image (Title, Title, Language, Link_Title);
-         else
-            P.Document.Add_Link (Title, Title, Language, Link_Title);
-         end if;
-      elsif Is_Image (P, To_Wide_Wide_String (Link)) then
+         Link := Title;
+      end if;
+      if Is_Image (P, To_Wide_Wide_String (Link)) then
          P.Document.Add_Image (Title, Link, Language, Link_Title);
       else
          P.Document.Add_Link (Title, Link, Language, Link_Title);
