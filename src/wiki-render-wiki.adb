@@ -75,7 +75,7 @@ package body Wiki.Render.Wiki is
             Document.Tags (Escape_Rule)       := ESCAPE_DOTCLEAR'Access;
             Document.Invert_Header_Level := True;
             Document.Allow_Link_Language := True;
-            Document.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("-*{}][/=\");
+            Document.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("-+_*{}][/=\");
 
          when others =>
             Document.Style_Start_Tags (Documents.BOLD)   := BOLD_CREOLE'Access;
@@ -289,6 +289,7 @@ package body Wiki.Render.Wiki is
       Start        : Natural := Content'First;
       Last         : Natural := Content'Last;
       Apply_Format : Boolean := True;
+      Check_Escape : Boolean := True;
    begin
       if Document.Keep_Content or Document.Empty_Line then
          while Start <= Content'Last and then Helpers.Is_Space_Or_Newline (Content (Start)) loop
@@ -323,8 +324,13 @@ package body Wiki.Render.Wiki is
                   Document.Set_Format (Format);
                   Apply_Format := False;
                end if;
-               if Ada.Strings.Wide_Wide_Maps.Is_In (Content (I), Document.Escape_Set) then
-                  Document.Writer.Write (Document.Tags (Escape_Rule).all);
+               if Check_Escape then
+                  if Ada.Strings.Wide_Wide_Maps.Is_In (Content (I), Document.Escape_Set) then
+                     Document.Writer.Write (Document.Tags (Escape_Rule).all);
+                     Check_Escape := False;
+                  end if;
+               else
+                  Check_Escape := True;
                end if;
                Document.Writer.Write (Content (I));
                Document.Empty_Line := False;
