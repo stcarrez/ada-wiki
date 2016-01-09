@@ -9,6 +9,6 @@
  L2: line 2
  L3: line 3</p><p>Formatting</p><p><i>emphasis</i></p><ul><ul><li>strong</li></ul></ul><p><b>Line</b><br /><b>break</b></p><p><b>superscript</b></p><p><b><sub>subscript</sub></b></p><p><b>__underline__</b></p><p><a href="A link">A link</a><b>
 
-</b><a href="title">A link</a><b>
+</b><a href="A link">title</a><b>
 </b></p><p><img alt="Alt text}}" src="link" /><img alt="Alt text" src="link" /></p><p><img src="{" /><b><i>A</i></b><b> </b>pre<b>-formatted section 
 </b></p><h2>[[Nowiki]]</h2><b>}}}</b>
