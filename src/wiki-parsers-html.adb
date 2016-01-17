@@ -240,12 +240,10 @@ package body Wiki.Parsers.Html is
       Pos  : Natural;
       C    : Wide_Wide_Character;
    begin
-      loop
+      while Len < Name'Last loop
          Peek (P, C);
-         exit when C = ';';
-         if Len < Name'Last then
-            Len := Len + 1;
-         end if;
+         exit when C = ';' or else P.Is_Eof;
+         Len := Len + 1;
          Name (Len) := Ada.Characters.Conversions.To_Character (C);
       end loop;
       while Low <= High loop
@@ -258,6 +256,12 @@ package body Wiki.Parsers.Html is
          else
             High := Pos - 1;
          end if;
+      end loop;
+
+      --  The HTML entity is not recognized: we must treat it as plain wiki text.
+      Parse_Text (P, '&');
+      for I in 1 .. Len loop
+         Parse_Text (P, Ada.Characters.Conversions.To_Wide_Wide_Character (Name (I)));
       end loop;
    end Parse_Entity;
 
