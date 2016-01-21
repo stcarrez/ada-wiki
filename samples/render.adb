@@ -43,7 +43,19 @@ procedure Render is
    Syntax    : Wiki.Parsers.Wiki_Syntax_Type := Wiki.Parsers.SYNTAX_MARKDOWN;
 begin
    loop
-      case Getopt ("t f:") is
+      case Getopt ("m M d c t f:") is
+         when 'm' =>
+            Syntax := Wiki.Parsers.SYNTAX_MARKDOWN;
+
+         when 'M' =>
+            Syntax := Wiki.Parsers.SYNTAX_MEDIA_WIKI;
+
+         when 'c' =>
+            Syntax := Wiki.Parsers.SYNTAX_CREOLE;
+
+         when 'd' =>
+            Syntax := Wiki.Parsers.SYNTAX_DOTCLEAR;
+
          when 't' =>
             Html_Mode := False;
 

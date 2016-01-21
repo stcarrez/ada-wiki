@@ -8,7 +8,9 @@
 </li><li>num 2</li></ol><p>Section bloc:</p><pre>L1: line 1
 L2: line 2
 L3: line 3
-</pre><p>Formatting</p><p><i>emphasis</i></p><p><b>strong</b></p><p>Line<br />break</p><p><del>insert</del></p><p><del>delete</del></p><p><a href="A link">A link</a>
+</pre><p>Formatting</p><p><i>emphasis</i></p><p><b>strong</b></p><p>Line<br />break</p><p><del>insert</del></p><p><del>delete</del></p><blockquote><p>citation line 1
+citation line 2
+citation line 3</p></blockquote><p><a href="A link">A link</a>
 
 <a href="A link">Title</a>
 
