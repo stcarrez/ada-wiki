@@ -19,6 +19,15 @@ with Ada.Characters.Conversions;
 with GNAT.Encode_UTF8_String;
 package body Wiki.Writers.Builders is
 
+   --  Close the current XML entity if an entity was started
+   procedure Close_Current (Stream : in out Html_Writer_Type'Class);
+
+   --  Internal method to write a character on the response stream
+   --  and escape that character as necessary.  Unlike 'Write_Char',
+   --  this operation does not closes the current XML entity.
+   procedure Write_Escape (Stream : in out Html_Writer_Type'Class;
+                           Char   : in Wide_Wide_Character);
+
    --  ------------------------------
    --  Write the content to the string builder.
    --  ------------------------------
@@ -53,6 +62,8 @@ package body Wiki.Writers.Builders is
    --  Convert what was collected in the writer builder to a string and return it.
    --  ------------------------------
    function To_String (Source : in Writer_Builder_Type) return String is
+      procedure Convert (Chunk : in Wide_Wide_String);
+
       Pos    : Natural := 1;
       Result : String (1 .. 5 * Wide_Wide_Builders.Length (Source.Content));
 
@@ -129,7 +140,7 @@ package body Wiki.Writers.Builders is
    --  ------------------------------
    --  Close the current XML entity if an entity was started
    --  ------------------------------
-   procedure Close_Current (Stream : in out Html_writer_Type'Class) is
+   procedure Close_Current (Stream : in out Html_Writer_Type'Class) is
    begin
       if Stream.Close_Start then
          Stream.Write_Char ('>');
@@ -137,7 +148,7 @@ package body Wiki.Writers.Builders is
       end if;
    end Close_Current;
 
-   procedure Write_Wide_Element (Writer  : in out Html_writer_Type;
+   procedure Write_Wide_Element (Writer  : in out Html_Writer_Type;
                                  Name    : in String;
                                  Content : in Unbounded_Wide_Wide_String) is
 
