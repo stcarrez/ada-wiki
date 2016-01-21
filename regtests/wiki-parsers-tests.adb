@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-tests -- Unit tests for wiki parsing
---  Copyright (C) 2011, 2012, 2013, 2015 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -139,7 +139,8 @@ package body Wiki.Parsers.Tests is
                                 Wiki.Utils.To_Html ("====== item ===", SYNTAX_GOOGLE),
                                 "H6 rendering invalid");
       Util.Tests.Assert_Equals (T, "<h1>item</h1><h2>item2</h2>",
-                                Wiki.Utils.To_Html ("= item =" & CR & "== item2 ==", SYNTAX_GOOGLE),
+                                Wiki.Utils.To_Html ("= item =" & CR & "== item2 ==",
+                                  SYNTAX_GOOGLE),
                                 "H1 rendering invalid");
       Util.Tests.Assert_Equals (T, "<h1>item</h1><h2>item2</h2><h1>item3</h1>",
         Wiki.Utils.To_Html ("= item =" & CR & "== item2 ==" & CR & "= item3 =",
