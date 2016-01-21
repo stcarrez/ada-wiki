@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
---  render -- XHTML Rendering example
---  Copyright (C) 2010 Stephane Carrez
+--  render -- Wiki rendering example
+--  Copyright (C) 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,6 @@
 with Ada.Text_IO;
 with Ada.IO_Exceptions;
 with Ada.Strings.Unbounded;
-with Ada.Strings.Fixed;
 with Ada.Characters.Conversions;
 
 with GNAT.Command_Line;
@@ -28,22 +27,31 @@ with Util.Files;
 with Wiki.Utils;
 with Wiki.Parsers;
 
---  This example reads an XHTML file and renders the result.
---  render -html -dotclear -markdown infile
---  render -text
 procedure Render is
 
    use GNAT.Command_Line;
-   use Ada.Strings.Fixed;
    use Ada.Strings.Unbounded;
    use Ada.Characters.Conversions;
+
+   procedure Usage;
+
+   procedure Usage is
+   begin
+      Ada.Text_IO.Put_Line ("Render a wiki text file into HTML (default) or text");
+      Ada.Text_IO.Put_Line ("Usage: render [-t] [-m] [-M] [-d] [-c] {wiki-file}");
+      Ada.Text_IO.Put_Line ("  -t      Render to text only");
+      Ada.Text_IO.Put_Line ("  -m      Render a Markdown wiki content");
+      Ada.Text_IO.Put_Line ("  -M      Render a Mediawiki wiki content");
+      Ada.Text_IO.Put_Line ("  -d      Render a Dotclear wiki content");
+      Ada.Text_IO.Put_Line ("  -c      Render a Creole wiki content");
+   end Usage;
 
    Count     : Natural := 0;
    Html_Mode : Boolean := True;
    Syntax    : Wiki.Parsers.Wiki_Syntax_Type := Wiki.Parsers.SYNTAX_MARKDOWN;
 begin
    loop
-      case Getopt ("m M d c t f:") is
+      case Getopt ("m M d c t") is
          when 'm' =>
             Syntax := Wiki.Parsers.SYNTAX_MARKDOWN;
 
@@ -59,14 +67,6 @@ begin
          when 't' =>
             Html_Mode := False;
 
-         when 'f' =>
-            declare
-               Value : constant String := Parameter;
-               Pos   : constant Natural := Index (Value, "=");
-            begin
-               Ada.Text_IO.Put_Line (Value);
-            end;
-
          when others =>
             exit;
       end case;
@@ -79,17 +79,18 @@ begin
       begin
          if Name = "" then
             if Count = 0 then
-               Ada.Text_IO.Put_Line ("Usage: render [-DNAME=VALUE ] file");
-               Ada.Text_IO.Put_Line ("Example: render -DcontextPath=/test samples/web/ajax.xhtml");
+               Usage;
             end if;
             return;
          end if;
          Count := Count + 1;
          Util.Files.Read_File (Name, Data);
          if Html_Mode then
-            Ada.Text_IO.Put_Line (Wiki.Utils.To_Html (To_Wide_Wide_String (To_String (Data)), Syntax));
+            Ada.Text_IO.Put_Line
+              (Wiki.Utils.To_Html (To_Wide_Wide_String (To_String (Data)), Syntax));
          else
-            Ada.Text_IO.Put_Line (Wiki.Utils.To_Text (To_Wide_Wide_String (To_String (Data)), Syntax));
+            Ada.Text_IO.Put_Line
+              (Wiki.Utils.To_Text (To_Wide_Wide_String (To_String (Data)), Syntax));
          end if;
       exception
          when Ada.IO_Exceptions.Name_Error =>
@@ -97,4 +98,9 @@ begin
 
       end;
    end loop;
+
+exception
+   when Invalid_Switch =>
+      Ada.Text_IO.Put_Line ("Invalid option.");
+      Usage;
 end Render;
