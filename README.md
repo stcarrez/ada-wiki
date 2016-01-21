@@ -13,7 +13,7 @@ The library allows to:
 * Parse a wiki text such as Mediawiki, Creole, PhpBB, Dotclear and Google Code
 * Parse HTML content in embedded wiki text,
 * Filter out the wiki, HTML or text through customizable filters,
-* Render the wiki text in HTML or text
+* Render the wiki text in HTML, text or another wiki format
 
 To use Ada Wiki library, configure as follows:
 ```
@@ -28,6 +28,26 @@ For the installation, use the following command:
 ```
    make install
 ```
+
+# Samples
+
+A first example shows how to render a Wiki text into HTML or text.
+Another one takes some HTML content and render a Wiki text in one of the supported
+Wiki format.  To build the samples, use the following command:
+```
+   gnatmake -Psamples
+```
+
+To import a HTML content and produce a Wiki text, use the following:
+```
+   bin/import -M https://en.wikibooks.org/wiki/Ada_Programming > content.wiki
+```
+
+And to render the Wiki text into HTML use:
+```
+   bin/render -M content.wiki
+```
+
 # Documentation
 
 The Ada Wiki sources as well as a wiki documentation is provided on:
