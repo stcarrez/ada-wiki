@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-html -- Wiki HTML renderer
---  Copyright (C) 2011, 2012, 2013, 2014, 2015 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,8 @@ with Ada.Characters.Conversions;
 with Util.Strings;
 
 package body Wiki.Render.Html is
+
+   package ACC renames Ada.Characters.Conversions;
 
    --  ------------------------------
    --  Set the output writer.
@@ -78,7 +80,6 @@ package body Wiki.Render.Html is
    overriding
    procedure Add_Line_Break (Document : in out Html_Renderer) is
    begin
-      --  Document.Writer.Write_Raw ("<br />");
       Document.Writer.Write ("<br />");
    end Add_Line_Break;
 
@@ -347,7 +348,7 @@ package body Wiki.Render.Html is
          Document.Has_Paragraph := True;
          Document.Need_Paragraph := False;
       end if;
-      Document.Writer.Start_Element (Ada.Characters.Conversions.To_String (To_Wide_Wide_String (Name)));
+      Document.Writer.Start_Element (ACC.To_String (To_Wide_Wide_String (Name)));
       while Wiki.Attributes.Has_Element (Iter) loop
          Document.Writer.Write_Wide_Attribute (Name    => Wiki.Attributes.Get_Name (Iter),
                                                Content => Wiki.Attributes.Get_Wide_Value (Iter));
@@ -364,7 +365,7 @@ package body Wiki.Render.Html is
          Document.Has_Paragraph := False;
          Document.Need_Paragraph := True;
       end if;
-      Document.Writer.End_Element (Ada.Characters.Conversions.To_String (To_Wide_Wide_String (Name)));
+      Document.Writer.End_Element (ACC.To_String (To_Wide_Wide_String (Name)));
    end End_Element;
 
    --  ------------------------------
