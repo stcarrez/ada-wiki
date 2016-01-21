@@ -1,5 +1,5 @@
 dnl Autoconf configure script for Ada Wiki
-dnl Copyright (C) 2015 Stephane Carrez
+dnl Copyright (C) 2015, 2016 Stephane Carrez
 dnl Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 dnl
 dnl  Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,7 +39,7 @@ AC_PROG_LN_S
 AC_SUBST(WIKI_VERSION)
 AC_SUBST(WIKI_MAJOR_VERSION)
 AC_SUBST(WIKI_MINOR_VERSION)
-AC_SUBST(EL_MICRO_VERSION)
+AC_SUBST(WIKI_MICRO_VERSION)
 
 AC_MSG_CHECKING([number of processors])
 NR_CPUS=`getconf _NPROCESSORS_CONF 2>/dev/null || getconf NPROCESSORS_CONF 2>/dev/null || echo 1`
