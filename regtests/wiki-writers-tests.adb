@@ -104,6 +104,9 @@ package body Wiki.Writers.Tests is
 
    procedure Add_Tests (Suite : in Util.Tests.Access_Test_Suite) is
       use Ada.Directories;
+
+      procedure Add_Import_Tests;
+      procedure Add_Wiki_Tests;
       function Create_Test (Name    : in String;
                             Path    : in String;
                             Format  : in Wiki.Parsers.Wiki_Syntax_Type;
