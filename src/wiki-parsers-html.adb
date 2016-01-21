@@ -21,6 +21,10 @@ with Wiki.Helpers;
 with Wiki.Parsers.Html.Entities;
 package body Wiki.Parsers.Html is
 
+   --  Parse an HTML attribute
+   procedure Parse_Attribute_Name (P    : in out Parser;
+                                   Name : in out Unbounded_Wide_Wide_String);
+
    --  Parse a HTML/XML comment to strip it.
    procedure Parse_Comment (P : in out Parser);
 
@@ -216,6 +220,8 @@ package body Wiki.Parsers.Html is
    --  ------------------------------
    procedure Parse_Entity (P     : in out Parser;
                            Token : in Wide_Wide_Character) is
+      pragma Unreferenced (Token);
+
       Name : String (1 .. 10);
       Len  : Natural := 0;
       High : Natural := Wiki.Parsers.Html.Entities.Keywords'Last;
