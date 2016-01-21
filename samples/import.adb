@@ -189,4 +189,10 @@ begin
 
       end;
    end loop;
+
+exception
+   when Invalid_Switch =>
+      Ada.Text_IO.Put_Line ("Invalid option.");
+      Usage;
+
 end Import;
