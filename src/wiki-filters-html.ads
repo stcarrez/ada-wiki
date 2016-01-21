@@ -168,7 +168,7 @@ package Wiki.Filters.Html is
    --  Mark the HTML tag as being hidden.  The tag and its inner content including the text
    --  will be removed and not passed to the final document.
    procedure Hide (Filter : in out Html_Filter_Type;
-                   Tag    : in Html_tag_Type);
+                   Tag    : in Html_Tag_Type);
 
    --  Mark the HTML tag as being visible.
    procedure Visible (Filter : in out Html_Filter_Type;
