@@ -243,6 +243,7 @@ package body Wiki.Render.Wiki is
                        Link     : in Unbounded_Wide_Wide_String;
                        Language : in Unbounded_Wide_Wide_String;
                        Title    : in Unbounded_Wide_Wide_String) is
+      pragma Unreferenced (Title);
    begin
       Document.Writer.Write (Document.Tags (Link_Start).all);
       Document.Writer.Write (Link);
@@ -264,6 +265,7 @@ package body Wiki.Render.Wiki is
                         Alt         : in Unbounded_Wide_Wide_String;
                         Position    : in Unbounded_Wide_Wide_String;
                         Description : in Unbounded_Wide_Wide_String) is
+      pragma Unreferenced (Position, Description);
    begin
       Document.Writer.Write (Document.Tags (Img_Start).all);
       Document.Writer.Write (Link);
@@ -371,6 +373,8 @@ package body Wiki.Render.Wiki is
    procedure Add_Preformatted (Document : in out Wiki_Renderer;
                                Text     : in Unbounded_Wide_Wide_String;
                                Format   : in Unbounded_Wide_Wide_String) is
+      pragma Unreferenced (Format);
+
       Content       : constant Wide_Wide_String := To_Wide_Wide_String (Text);
       Col           : Natural := 2;
    begin
@@ -468,7 +472,7 @@ package body Wiki.Render.Wiki is
          when Filters.Html.UL_TAG =>
             Document.UL_List_Level := Document.UL_List_Level + 1;
 
-         when Filters.Html.OL_Tag =>
+         when Filters.Html.OL_TAG =>
             Document.OL_List_Level := Document.OL_List_Level + 1;
 
          when Filters.Html.LI_TAG =>
@@ -551,7 +555,7 @@ package body Wiki.Render.Wiki is
          when Filters.Html.UL_TAG =>
             Document.UL_List_Level := Document.UL_List_Level - 1;
 
-         when Filters.Html.OL_Tag =>
+         when Filters.Html.OL_TAG =>
             Document.OL_List_Level := Document.OL_List_Level - 1;
 
          when Filters.Html.LI_TAG =>
