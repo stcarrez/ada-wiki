@@ -230,6 +230,7 @@ package body Wiki.Render.Text is
    procedure Start_Element (Document   : in out Text_Renderer;
                             Name       : in Unbounded_Wide_Wide_String;
                             Attributes : in Wiki.Attributes.Attribute_List_Type) is
+      pragma Unreferenced (Attributes);
       use type Wiki.Filters.Html.Html_Tag_Type;
 
       Tag : constant Wiki.Filters.Html.Html_Tag_Type := Wiki.Filters.Html.Find_Tag (Name);
