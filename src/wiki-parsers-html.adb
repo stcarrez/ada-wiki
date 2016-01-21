@@ -17,6 +17,7 @@
 -----------------------------------------------------------------------
 with Ada.Characters.Conversions;
 
+with Wiki.Helpers;
 with Wiki.Parsers.Html.Entities;
 package body Wiki.Parsers.Html is
 
@@ -27,33 +28,15 @@ package body Wiki.Parsers.Html is
    procedure Parse_Doctype (P : in out Parser);
 
    procedure Collect_Attributes (P     : in out Parser);
-   function Is_Space (C : in Wide_Wide_Character) return Boolean;
    function Is_Letter (C : in Wide_Wide_Character) return Boolean;
    procedure Collect_Attribute_Value (P     : in out Parser;
                                       Value : in out Unbounded_Wide_Wide_String);
-
-   function Is_Space (C : in Wide_Wide_Character) return Boolean is
-   begin
-      return C = ' ' or C = LF or C = CR;
-   end Is_Space;
 
    function Is_Letter (C : in Wide_Wide_Character) return Boolean is
    begin
       return C > ' ' and C /= ':' and C /= '>' and C /= ''' and C /= '"'
         and C /= '/' and C /= '=' and C /= '<';
    end Is_Letter;
-
-   procedure Skip_Spaces (P : in out Parser) is
-      C : Wide_Wide_Character;
-   begin
-      while not P.Is_Eof loop
-         Peek (P, C);
-         if not Is_Space (C) then
-            Put_Back (P, C);
-            return;
-         end if;
-      end loop;
-   end Skip_Spaces;
 
    --  ------------------------------
    --  Parse an HTML attribute
@@ -81,7 +64,7 @@ package body Wiki.Parsers.Html is
    begin
       Value := To_Unbounded_Wide_Wide_String ("");
       Peek (P, Token);
-      if Is_Space (Token) then
+      if Wiki.Helpers.Is_Space (Token) then
          return;
       elsif Token = '>' then
          Put_Back (P, Token);
@@ -133,7 +116,7 @@ package body Wiki.Parsers.Html is
          if C = '=' then
             Collect_Attribute_Value (P, Value);
             Attributes.Append (P.Attributes, Name, Value);
-         elsif Is_Space (C) and Length (Name) > 0 then
+         elsif Wiki.Helpers.Is_Space (C) and Length (Name) > 0 then
             Attributes.Append (P.Attributes, Name, Null_Unbounded_Wide_Wide_String);
          end if;
       end loop;
