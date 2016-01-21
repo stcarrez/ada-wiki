@@ -777,7 +777,7 @@ package body Wiki.Filters.Html is
    --  will be removed and not passed to the final document.
    --  ------------------------------
    procedure Hide (Filter : in out Html_Filter_Type;
-                   Tag    : in Html_tag_Type) is
+                   Tag    : in Html_Tag_Type) is
    begin
       Filter.Hidden (Tag) := True;
    end Hide;
