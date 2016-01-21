@@ -117,6 +117,9 @@ private
    --  Skip all the spaces and tabs as well as end of the current line (CR+LF).
    procedure Skip_End_Of_Line (P : in out Parser);
 
+   --  Skip white spaces and tabs.
+   procedure Skip_Spaces (P : in out Parser);
+
    --  Flush the wiki text that was collected in the text buffer.
    procedure Flush_Text (P : in out Parser);
 
