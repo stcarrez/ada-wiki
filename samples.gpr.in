@@ -4,7 +4,7 @@ with "wiki";
 
 project Samples is
 
-   Mains := ("render.adb");
+   Mains := ("render.adb", "import.adb");
 
    for Main use Mains;
 
