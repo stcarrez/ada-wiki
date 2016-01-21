@@ -207,6 +207,21 @@ package body Wiki.Parsers is
       end if;
    end Flush_List;
 
+   --  ------------------------------
+   --  Skip white spaces and tabs.
+   --  ------------------------------
+   procedure Skip_Spaces (P : in out Parser) is
+      C : Wide_Wide_Character;
+   begin
+      while not P.Is_Eof loop
+         Peek (P, C);
+         if not Wiki.Helpers.Is_Space (C) then
+            Put_Back (P, C);
+            return;
+         end if;
+      end loop;
+   end Skip_Spaces;
+
    procedure Start_Element (P          : in out Parser;
                             Name       : in Unbounded_Wide_Wide_String;
                             Attributes : in Wiki.Attributes.Attribute_List_Type) is
@@ -470,7 +485,8 @@ package body Wiki.Parsers is
       elsif Link'Length <= 5 then
          return False;
       elsif Link (Link'First .. Link'First + 4) /= "File:" and
-        Link (Link'First .. Link'First + 5) /= "Image:" then
+        Link (Link'First .. Link'First + 5) /= "Image:"
+      then
          return False;
       else
          Pos := Ada.Strings.Wide_Wide_Fixed.Index (Link, ".", Ada.Strings.Backward);
