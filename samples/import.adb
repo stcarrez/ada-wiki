@@ -53,6 +53,7 @@ procedure Import is
 
    procedure Usage is
    begin
+      Ada.Text_IO.Put_Line ("Import HTML into a target Wiki format");
       Ada.Text_IO.Put_Line ("Usage: import [-t] [-m] [-M] [-d] [-c] {URL | file}");
       Ada.Text_IO.Put_Line ("  -t      Convert to text only");
       Ada.Text_IO.Put_Line ("  -m      Convert to Markdown");
