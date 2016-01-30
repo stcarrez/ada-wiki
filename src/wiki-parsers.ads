@@ -19,6 +19,8 @@ with Ada.Strings.Wide_Wide_Unbounded;
 
 with Wiki.Documents;
 with Wiki.Attributes;
+with Wiki.Plugins;
+with Wiki.Filters;
 
 --  == Wiki Parsers ==
 --  The <b>Wikis.Parsers</b> package implements a parser for several well known wiki formats.
@@ -55,6 +57,28 @@ package Wiki.Parsers is
          --  The input is plain possibly incorrect HTML.
          SYNTAX_HTML);
 
+   type Parser is tagged limited private;
+
+   --  Add the plugin to the wiki engine.
+   procedure Add_Plugin (Engine : in out Parser;
+                         Name   : in String;
+                         Plugin : in Wiki.Plugins.Wiki_Plugin_Access);
+
+   --  Set the wiki syntax that the wiki engine must use.
+   procedure Set_Syntax (Engine : in out Parser;
+                         Syntax : in Wiki_Syntax_Type := SYNTAX_MIX);
+
+   --  Add a filter in the wiki engine.
+   procedure Add_Filter (Engine : in out Parser;
+                         Filter : in Wiki.Filters.Filter_Type_Access);
+
+   --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax configured
+   --  on the wiki engine.  The document reader operations are invoked while parsing the wiki
+   --  text.
+   procedure Parse (Engine : in out Parser;
+                    Text   : in Wide_Wide_String;
+                    Into   : in Wiki.Documents.Document_Reader_Access);
+
    --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
    --  specified in <b>Syntax</b> and invoke the document reader procedures defined
    --  by <b>into</b>.
@@ -76,9 +100,10 @@ private
                         Token : out Wide_Wide_Character;
                         Eof   : out Boolean) is abstract;
 
-   type Parser is limited record
+   type Parser is tagged limited record
       Pending             : Wide_Wide_Character;
       Has_Pending         : Boolean;
+      Syntax              : Wiki_Syntax_Type;
       Document            : Wiki.Documents.Document_Reader_Access;
       Format              : Wiki.Documents.Format_Map;
       Text                : Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
