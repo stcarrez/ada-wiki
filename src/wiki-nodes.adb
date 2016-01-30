@@ -30,6 +30,15 @@ package body Wiki.Nodes is
    end Create_Text;
 
    --  ------------------------------
+   --  Append a node to the document.
+   --  ------------------------------
+   procedure Append (Into : in out Document;
+                     Node : in Node_Type_Access) is
+   begin
+      Append (Into.Nodes, Node);
+   end Append;
+
+   --  ------------------------------
    --  Append a node to the node list.
    --  ------------------------------
    procedure Append (Into : in out Node_List;
