@@ -136,9 +136,6 @@ package Wiki.Nodes is
    end record;
    type Node_Type_Access is access all Node_Type;
 
-   type Document_Node_Access is private;
-   type Document is limited private;
-
    --  Create a text node.
    function Create_Text (Text : in WString) return Node_Type_Access;
 
@@ -186,19 +183,8 @@ private
    procedure Append (Into : in out Node_List;
                      Node : in Node_Type_Access);
 
-   type Document_Node;
-
-   type Document_Node_Access is access all Document_Node;
-
-   type Document_Node (Kind : Node_Kind; Len : Natural) is limited record
-      Next  : Document_Node_Access;
-      Prev  : Document_Node_Access;
-      Data  : Node_Type (Kind, Len);
-   end record;
-
    type Document is limited record
-      First : Document_Node_Access;
-      Last  : Document_Node_Access;
+      Nodes : Node_List;
    end record;
 
 end Wiki.Nodes;
