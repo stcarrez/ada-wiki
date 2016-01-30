@@ -171,7 +171,7 @@ private
    type Node_List_Block_Access is access all Node_List_Block;
 
    type Node_List_Block (Max : Positive) is limited record
-      Next  : Node_List_Block;
+      Next  : Node_List_Block_Access;
       Last  : Natural := 0;
       List  : Node_Array (1 .. Max);
    end record;
@@ -181,6 +181,10 @@ private
       Length  : Natural := 0;
       First   : Node_List_Block (NODE_LIST_BLOCK_SIZE);
    end record;
+
+   --  Append a node to the node list.
+   procedure Append (Into : in out Node_List;
+                     Node : in Node_Type_Access);
 
    type Document_Node;
 
