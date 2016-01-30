@@ -28,6 +28,7 @@ package Wiki.Plugins is
    pragma Preelaborate;
 
    type Wiki_Plugin is limited interface;
+   type Wiki_Plugin_Access is access all Wiki_Plugin'Class;
 
    --  Expand the plugin configured with the parameters for the document.
    procedure Expand (Plugin   : in out Wiki_Plugin;
