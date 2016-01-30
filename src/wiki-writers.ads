@@ -21,9 +21,20 @@ with Ada.Strings.Wide_Wide_Unbounded;
 --  The <tt>Wiki.Writers</tt> package defines the interfaces used by the renderer to write
 --  their outputs.
 --
+--  The <tt>Input_Stream</tt> interface defines the interface that must be implemented to
+--  read the source Wiki content.  The <tt>Read</tt> procedure is called by the parser
+--  repeatedly while scanning the Wiki content.
 package Wiki.Writers is
 
    use Ada.Strings.Wide_Wide_Unbounded;
+
+   type Input_Stream is limited interface;
+
+   --  Read one character from the input stream and return False to the <tt>Eof</tt> indicator.
+   --  When there is no character to read, return True in the <tt>Eof</tt> indicator.
+   procedure Read (Input : in out Input_Stream;
+                   Char  : out Wide_Wide_Character;
+                   Eof   : out Boolean) is abstract;
 
    type Writer_Type is limited interface;
    type Writer_Type_Access is access all Writer_Type'Class;
