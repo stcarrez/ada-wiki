@@ -29,4 +29,21 @@ package body Wiki.Nodes is
                              others => <>);
    end Create_Text;
 
+   --  ------------------------------
+   --  Append a node to the node list.
+   --  ------------------------------
+   procedure Append (Into : in out Node_List;
+                     Node : in Node_Type_Access) is
+      Block : Node_List_Block_Access := Into.Current;
+   begin
+      if Block.Last = Block.Max then
+         Block.Next := new Node_List_Block (Into.Length);
+         Block := Block.Next;
+         Into.Current := Block;
+      end if;
+      Block.Last := Block.Last + 1;
+      Block.List (Block.Last) := Node;
+      Into.Length := Into.Length + 1;
+   end Append;
+
 end Wiki.Nodes;
