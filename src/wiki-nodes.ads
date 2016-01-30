@@ -139,6 +139,12 @@ package Wiki.Nodes is
    --  Create a text node.
    function Create_Text (Text : in WString) return Node_Type_Access;
 
+   type Document is limited private;
+
+   --  Append a node to the document.
+   procedure Append (Into : in out Document;
+                     Node : in Node_Type_Access);
+
    --     procedure Add_Text (Doc  : in out Document;
 --                         Text : in WString);
 
