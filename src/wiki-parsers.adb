@@ -1218,6 +1218,35 @@ package body Wiki.Parsers is
          others => Parse_Text'Access
         );
 
+   --  Add the plugin to the wiki engine.
+   procedure Add_Plugin (Engine : in out Parser;
+                         Name   : in String;
+                         Plugin : in Wiki.Plugins.Wiki_Plugin_Access) is
+   begin
+      null;
+   end Add_Plugin;
+
+   --  Set the wiki syntax that the wiki engine must use.
+   procedure Set_Syntax (Engine : in out Parser;
+                         Syntax : in Wiki_Syntax_Type := SYNTAX_MIX) is
+   begin
+      Engine.Syntax := Syntax;
+   end Set_Syntax;
+
+   --  Add a filter in the wiki engine.
+   procedure Add_Filter (Engine : in out Parser;
+                         Filter : in Wiki.Filters.Filter_Type_Access) is
+   begin
+      null;
+   end Add_Filter;
+
+   procedure Parse (Engine : in out Parser;
+                    Text   : in Wide_Wide_String;
+                    Into   : in Wiki.Documents.Document_Reader_Access) is
+   begin
+      null;
+   end Parse;
+
    --  ------------------------------
    --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
    --  specified in <b>Syntax</b> and invoke the document reader procedures defined
