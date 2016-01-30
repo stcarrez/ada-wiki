@@ -163,8 +163,23 @@ package Wiki.Nodes is
 
 private
 
+   NODE_LIST_BLOCK_SIZE : constant Positive := 20;
+
+   type Node_Array is array (Positive range <>) of Node_Type_Access;
+
+   type Node_List_Block;
+   type Node_List_Block_Access is access all Node_List_Block;
+
+   type Node_List_Block (Max : Positive) is limited record
+      Next  : Node_List_Block;
+      Last  : Natural := 0;
+      List  : Node_Array (1 .. Max);
+   end record;
+
    type Node_List is limited record
-      N : Natural;
+      Current : Node_List_Block_Access;
+      Length  : Natural := 0;
+      First   : Node_List_Block (NODE_LIST_BLOCK_SIZE);
    end record;
 
    type Document_Node;
