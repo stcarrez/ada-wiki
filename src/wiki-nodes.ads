@@ -27,6 +27,7 @@ package Wiki.Nodes is
                       N_HORIZONTAL_RULE,
                       N_PARAGRAPH,
                       N_BLOCKQUOTE,
+                      N_QUOTE,
                       N_TAG_START,
                       N_TAG_END,
                       N_INDENT,
@@ -101,8 +102,8 @@ package Wiki.Nodes is
       UNKNOWN_TAG
      );
 
-   --  Now:    Stream -> Unbounded -> Wide_Wide -> Renderer
-   --  Copy:   Stream -> Builder   -> Node_Type -> Renderer
+   type Node_List is limited private;
+   type Node_List_Access is access all Node_List;
 
    type Node_Type (Kind : Node_Kind; Len : Natural) is limited record
       case Kind is
@@ -115,7 +116,7 @@ package Wiki.Nodes is
             Text   : WString (1 .. Len);
 
          when N_LINK | N_IMAGE =>
-            Attributes : Wiki.Attributes.Attribute_List_Type;
+            Link       : Wiki.Attributes.Attribute_List_Type;
 
          when N_QUOTE =>
             Quote      : WString (1 .. Len);
@@ -123,6 +124,7 @@ package Wiki.Nodes is
          when N_TAG_START =>
             Tag_Start  : Html_Tag_Type;
             Attributes : Wiki.Attributes.Attribute_List_Type;
+            Children   : Node_List_Access;
 
          when N_TAG_END =>
             Tag_End    : Html_Tag_Type;
@@ -132,10 +134,38 @@ package Wiki.Nodes is
 
       end case;
    end record;
+   type Node_Type_Access is access all Node_Type;
 
+   type Document_Node_Access is private;
    type Document is limited private;
 
+   --  Create a text node.
+   function Create_Text (Text : in WString) return Node_Type_Access;
+
+   --     procedure Add_Text (Doc  : in out Document;
+--                         Text : in WString);
+
+--     type Renderer is limited interface;
+--
+--     procedure Render (Engine : in out Renderer;
+--                       Doc    : in Document;
+--                       Node   : in Node_Type) is abstract;
+--
+--     procedure Iterate (Doc     : in Document;
+--                        Process : access procedure (Doc : in Document; Node : in Node_Type)) is
+--        Node : Document_Node_Access := Doc.First;
+--     begin
+--        while Node /= null loop
+--           Process (Doc, Node.Data);
+--           Node := Node.Next;
+--        end loop;
+--     end Iterate;
+
 private
+
+   type Node_List is limited record
+      N : Natural;
+   end record;
 
    type Document_Node;
 
