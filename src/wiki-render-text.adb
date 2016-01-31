@@ -39,27 +39,11 @@ package body Wiki.Render.Text is
    end New_Line;
 
    --  ------------------------------
-   --  Add a section header in the document.
-   --  ------------------------------
-   procedure Add_Header (Document : in out Text_Renderer;
-                         Header   : in Unbounded_Wide_Wide_String;
-                         Level    : in Positive) is
-      pragma Unreferenced (Level);
-   begin
-      Document.Close_Paragraph;
-      if not Document.Empty_Line then
-         Document.Add_Line_Break;
-      end if;
-      Document.Writer.Write (Header);
-      Document.Add_Line_Break;
-   end Add_Header;
-
-   --  ------------------------------
    --  Add a line break (<br>).
    --  ------------------------------
    procedure Add_Line_Break (Document : in out Text_Renderer) is
    begin
-      Document.Writer.Write (Ada.Characters.Conversions.To_Wide_Wide_Character (ASCII.LF));
+      Document.Output.Write (Wiki.Helpers.LF);
       Document.Empty_Line := True;
    end Add_Line_Break;
 
@@ -253,7 +237,7 @@ package body Wiki.Render.Text is
             if not Engine.Empty_Line then
                Engine.Add_Line_Break;
             end if;
-            Engine.Writer.Write (Node.Content);
+            Engine.Output.Write (Node.Content);
             Engine.Add_Line_Break;
 
          when Wiki.Nodes.N_LINE_BREAK =>
