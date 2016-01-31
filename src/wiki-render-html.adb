@@ -66,8 +66,9 @@ package body Wiki.Render.Html is
 
          when Wiki.Nodes.N_HORIZONTAL_RULE =>
             Engine.Close_Paragraph;
-            Engine.Output.Write ("---------------------------------------------------------");
-            Engine.Add_Line_Break;
+            Engine.Add_Blockquote (0);
+            Engine.Output.Start_Element ("hr");
+            Engine.Output.End_Element ("hr");
 
          when Wiki.Nodes.N_PARAGRAPH =>
             Engine.Close_Paragraph;
@@ -270,18 +271,6 @@ package body Wiki.Render.Html is
          Document.Has_Item := True;
       end if;
    end Open_Paragraph;
-
-   --  ------------------------------
-   --  Add an horizontal rule (<hr>).
-   --  ------------------------------
-   overriding
-   procedure Add_Horizontal_Rule (Document : in out Html_Renderer) is
-   begin
-      Document.Close_Paragraph;
-      Document.Add_Blockquote (0);
-      Document.Writer.Start_Element ("hr");
-      Document.Writer.End_Element ("hr");
-   end Add_Horizontal_Rule;
 
    --  ------------------------------
    --  Add a link.
