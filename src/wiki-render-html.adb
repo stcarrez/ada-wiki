@@ -52,17 +52,12 @@ package body Wiki.Render.Html is
    begin
       case Node.Kind is
          when Wiki.Nodes.N_HEADER =>
-            Engine.Close_Paragraph;
-            if not Engine.Empty_Line then
-               Engine.Add_Line_Break;
-            end if;
-            Engine.Output.Write (Node.Header);
-            Engine.Add_Line_Break;
             Engine.Add_Header (Header => Node.Header,
                                Level  => Node.Level);
 
          when Wiki.Nodes.N_LINE_BREAK =>
-            Engine.Add_Line_Break;
+            Engine.Output.Start_Element ("br");
+            Engine.Output.End_Element ("br");
 
          when Wiki.Nodes.N_HORIZONTAL_RULE =>
             Engine.Close_Paragraph;
@@ -159,15 +154,6 @@ package body Wiki.Render.Html is
             Engine.Output.Write_Wide_Element ("h3", Header);
       end case;
    end Add_Header;
-
-   --  ------------------------------
-   --  Add a line break (<br>).
-   --  ------------------------------
-   overriding
-   procedure Add_Line_Break (Document : in out Html_Renderer) is
-   begin
-      Document.Writer.Write ("<br />");
-   end Add_Line_Break;
 
    --  ------------------------------
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
