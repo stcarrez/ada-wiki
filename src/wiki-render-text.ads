@@ -73,11 +73,6 @@ package Wiki.Render.Text is
                         Link     : in Unbounded_Wide_Wide_String;
                         Language : in Unbounded_Wide_Wide_String);
 
-   --  Add a text block with the given format.
-   procedure Add_Text (Document : in out Text_Renderer;
-                       Text     : in Unbounded_Wide_Wide_String;
-                       Format   : in Wiki.Documents.Format_Map);
-
    --  Add a text block that is pre-formatted.
    procedure Add_Preformatted (Document : in out Text_Renderer;
                                Text     : in Unbounded_Wide_Wide_String;
