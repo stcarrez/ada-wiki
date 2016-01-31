@@ -21,6 +21,7 @@ with Wiki.Documents;
 with Wiki.Attributes;
 with Wiki.Plugins;
 with Wiki.Filters;
+with Wiki.Strings;
 
 --  == Wiki Parsers ==
 --  The <b>Wikis.Parsers</b> package implements a parser for several well known wiki formats.
@@ -106,7 +107,7 @@ private
       Syntax              : Wiki_Syntax_Type;
       Document            : Wiki.Documents.Document_Reader_Access;
       Format              : Wiki.Documents.Format_Map;
-      Text                : Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
+      Text                : Wiki.Strings.BString;
       Token               : Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
       Empty_Line          : Boolean := True;
       Is_Eof              : Boolean := False;
