@@ -81,8 +81,8 @@ package Wiki.Render.Html is
                         Language : in Unbounded_Wide_Wide_String);
 
    --  Add a text block with the given format.
-   procedure Add_Text (Document : in out Html_Renderer;
-                       Text     : in Unbounded_Wide_Wide_String;
+   procedure Add_Text (Engine   : in out Html_Renderer;
+                       Text     : in Wiki.Strings.WString;
                        Format   : in Wiki.Documents.Format_Map);
 
    --  Add a text block that is pre-formatted.
@@ -122,5 +122,9 @@ private
       Quote_Level    : Natural := 0;
       Html_Level     : Natural := 0;
    end record;
+
+   procedure Render_Tag (Engine : in out Html_Renderer;
+                         Doc    : in Wiki.Nodes.Document;
+                         Node   : in Wiki.Nodes.Node_Type);
 
 end Wiki.Render.Html;
