@@ -17,32 +17,30 @@
 -----------------------------------------------------------------------
 with Ada.Characters.Conversions;
 with Wiki.Filters.Html;
+with Wiki.Helpers;
 package body Wiki.Render.Text is
-
-   LF : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#0A#);
 
    --  ------------------------------
    --  Set the output writer.
    --  ------------------------------
-   procedure Set_Writer (Document : in out Text_Renderer;
-                         Writer   : in Wiki.Writers.Writer_Type_Access) is
+   procedure Set_Output_Stream (Engine : in out Text_Renderer;
+                                Stream : in Streams.Output_Stream_Access) is
    begin
-      Document.Writer := Writer;
-   end Set_Writer;
+      Engine.Output := Stream;
+   end Set_Output_Stream;
 
    --  ------------------------------
    --  Emit a new line.
    --  ------------------------------
    procedure New_Line (Document : in out Text_Renderer) is
    begin
-      Document.Writer.Write (LF);
+      Document.Output.Write (Wiki.Helpers.LF);
       Document.Empty_Line := True;
    end New_Line;
 
    --  ------------------------------
    --  Add a section header in the document.
    --  ------------------------------
-   overriding
    procedure Add_Header (Document : in out Text_Renderer;
                          Header   : in Unbounded_Wide_Wide_String;
                          Level    : in Positive) is
@@ -59,7 +57,6 @@ package body Wiki.Render.Text is
    --  ------------------------------
    --  Add a line break (<br>).
    --  ------------------------------
-   overriding
    procedure Add_Line_Break (Document : in out Text_Renderer) is
    begin
       Document.Writer.Write (Ada.Characters.Conversions.To_Wide_Wide_Character (ASCII.LF));
@@ -70,7 +67,6 @@ package body Wiki.Render.Text is
    --  Add a paragraph (<p>).  Close the previous paragraph if any.
    --  The paragraph must be closed at the next paragraph or next header.
    --  ------------------------------
-   overriding
    procedure Add_Paragraph (Document : in out Text_Renderer) is
    begin
       Document.Close_Paragraph;
@@ -82,7 +78,6 @@ package body Wiki.Render.Text is
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
    --  ------------------------------
-   overriding
    procedure Add_Blockquote (Document : in out Text_Renderer;
                              Level    : in Natural) is
    begin
@@ -96,7 +91,6 @@ package body Wiki.Render.Text is
    --  Add a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
    --  ------------------------------
-   overriding
    procedure Add_List_Item (Document : in out Text_Renderer;
                             Level    : in Positive;
                             Ordered  : in Boolean) is
@@ -126,20 +120,8 @@ package body Wiki.Render.Text is
    end Open_Paragraph;
 
    --  ------------------------------
-   --  Add an horizontal rule (<hr>).
-   --  ------------------------------
-   overriding
-   procedure Add_Horizontal_Rule (Document : in out Text_Renderer) is
-   begin
-      Document.Close_Paragraph;
-      Document.Writer.Write ("---------------------------------------------------------");
-      Document.Add_Line_Break;
-   end Add_Horizontal_Rule;
-
-   --  ------------------------------
    --  Add a link.
    --  ------------------------------
-   overriding
    procedure Add_Link (Document : in out Text_Renderer;
                        Name     : in Unbounded_Wide_Wide_String;
                        Link     : in Unbounded_Wide_Wide_String;
@@ -161,7 +143,6 @@ package body Wiki.Render.Text is
    --  ------------------------------
    --  Add an image.
    --  ------------------------------
-   overriding
    procedure Add_Image (Document    : in out Text_Renderer;
                         Link        : in Unbounded_Wide_Wide_String;
                         Alt         : in Unbounded_Wide_Wide_String;
@@ -183,7 +164,6 @@ package body Wiki.Render.Text is
    --  ------------------------------
    --  Add a quote.
    --  ------------------------------
-   overriding
    procedure Add_Quote (Document : in out Text_Renderer;
                         Quote    : in Unbounded_Wide_Wide_String;
                         Link     : in Unbounded_Wide_Wide_String;
@@ -198,7 +178,6 @@ package body Wiki.Render.Text is
    --  ------------------------------
    --  Add a text block with the given format.
    --  ------------------------------
-   overriding
    procedure Add_Text (Document : in out Text_Renderer;
                        Text     : in Unbounded_Wide_Wide_String;
                        Format   : in Wiki.Documents.Format_Map) is
@@ -226,7 +205,6 @@ package body Wiki.Render.Text is
       Document.Empty_Line := False;
    end Add_Preformatted;
 
-   overriding
    procedure Start_Element (Document   : in out Text_Renderer;
                             Name       : in Unbounded_Wide_Wide_String;
                             Attributes : in Wiki.Attributes.Attribute_List_Type) is
@@ -245,7 +223,6 @@ package body Wiki.Render.Text is
       end if;
    end Start_Element;
 
-   overriding
    procedure End_Element (Document : in out Text_Renderer;
                           Name     : in Unbounded_Wide_Wide_String) is
       use type Wiki.Filters.Html.Html_Tag_Type;
@@ -264,6 +241,37 @@ package body Wiki.Render.Text is
       end if;
    end End_Element;
 
+   --  Render the node instance from the document.
+   overriding
+   procedure Render (Engine : in out Text_Renderer;
+                     Doc    : in Wiki.Nodes.Document;
+                     Node   : in Wiki.Nodes.Node_Type) is
+   begin
+      case Node.Kind is
+         when Wiki.Nodes.N_HEADER =>
+            Engine.Close_Paragraph;
+            if not Engine.Empty_Line then
+               Engine.Add_Line_Break;
+            end if;
+            Engine.Writer.Write (Node.Content);
+            Engine.Add_Line_Break;
+
+         when Wiki.Nodes.N_LINE_BREAK =>
+            Engine.Add_Line_Break;
+
+         when Wiki.Nodes.N_HORIZONTAL_RULE =>
+            Engine.Close_Paragraph;
+            Engine.Output.Write ("---------------------------------------------------------");
+            Engine.Add_Line_Break;
+
+         when Wiki.Nodes.N_PARAGRAPH =>
+            Engine.Close_Paragraph;
+            Engine.Need_Paragraph := True;
+            Engine.Add_Line_Break;
+
+      end case;
+   end Render;
+--
    --  ------------------------------
    --  Finish the document after complete wiki text has been parsed.
    --  ------------------------------
