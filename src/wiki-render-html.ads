@@ -17,7 +17,7 @@
 -----------------------------------------------------------------------
 with Wiki.Attributes;
 with Wiki.Documents;
-with Wiki.Writers;
+with Wiki.Streams;
 
 --  == HTML Renderer ==
 --  The <tt>Text_Renderer</tt> allows to render a wiki document into a text content.
@@ -25,13 +25,13 @@ with Wiki.Writers;
 package Wiki.Render.Html is
 
    --  ------------------------------
-   --  Wiki to HTML writer
+   --  Wiki to HTML renderer
    --  ------------------------------
-   type Html_Renderer is new Wiki.Documents.Document_Reader with private;
+   type Html_Renderer is new Renderer with private;
 
-   --  Set the output writer.
-   procedure Set_Writer (Document : in out Html_Renderer;
-                         Writer   : in Wiki.Writers.Html_Writer_Type_Access);
+   --  Set the output stream.
+   procedure Set_Output_Stream (Engine : in out Html_Renderer;
+                                Stream : in Wiki.Streams.Html.Html_Output_Stream_Access);
 
    --  Set the link renderer.
    procedure Set_Link_Renderer (Document : in out Html_Renderer;
@@ -125,8 +125,8 @@ private
 
    Default_Links : aliased Default_Link_Renderer;
 
-   type Html_Renderer is new Wiki.Documents.Document_Reader with record
-      Writer         : Wiki.Writers.Html_Writer_Type_Access := null;
+   type Html_Renderer is new Renderer with record
+      Output         : Wiki.Streams.Html.Html_Output_Stream_Access := null;
       Format         : Wiki.Documents.Format_Map := (others => False);
       Links          : Link_Renderer_Access := Default_Links'Access;
       Has_Paragraph  : Boolean := False;
