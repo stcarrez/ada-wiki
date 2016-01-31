@@ -48,17 +48,6 @@ package body Wiki.Render.Text is
    end Add_Line_Break;
 
    --  ------------------------------
-   --  Add a paragraph (<p>).  Close the previous paragraph if any.
-   --  The paragraph must be closed at the next paragraph or next header.
-   --  ------------------------------
-   procedure Add_Paragraph (Document : in out Text_Renderer) is
-   begin
-      Document.Close_Paragraph;
-      Document.Need_Paragraph := True;
-      Document.Add_Line_Break;
-   end Add_Paragraph;
-
-   --  ------------------------------
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
    --  ------------------------------
