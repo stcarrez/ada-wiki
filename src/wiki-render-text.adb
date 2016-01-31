@@ -16,7 +16,6 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Characters.Conversions;
-with Wiki.Filters.Html;
 with Wiki.Helpers;
 package body Wiki.Render.Text is
 
@@ -161,47 +160,13 @@ package body Wiki.Render.Text is
       Document.Empty_Line := False;
    end Add_Preformatted;
 
-   procedure Start_Element (Document   : in out Text_Renderer;
-                            Name       : in Unbounded_Wide_Wide_String;
-                            Attributes : in Wiki.Attributes.Attribute_List_Type) is
-      pragma Unreferenced (Attributes);
-      use type Wiki.Filters.Html.Html_Tag_Type;
-
-      Tag : constant Wiki.Filters.Html.Html_Tag_Type := Wiki.Filters.Html.Find_Tag (Name);
-   begin
-      if Tag = Wiki.Filters.Html.DT_TAG then
-         Document.Close_Paragraph;
-         Document.Indent_Level := 0;
-      elsif Tag = Wiki.Filters.Html.DD_TAG then
-         Document.Close_Paragraph;
-         Document.Empty_Line := True;
-         Document.Indent_Level := 4;
-      end if;
-   end Start_Element;
-
-   procedure End_Element (Document : in out Text_Renderer;
-                          Name     : in Unbounded_Wide_Wide_String) is
-      use type Wiki.Filters.Html.Html_Tag_Type;
-
-      Tag : constant Wiki.Filters.Html.Html_Tag_Type := Wiki.Filters.Html.Find_Tag (Name);
-   begin
-      if Tag = Wiki.Filters.Html.DT_TAG then
-         Document.Close_Paragraph;
-         Document.Indent_Level := 0;
-      elsif Tag = Wiki.Filters.Html.DD_TAG then
-         Document.Close_Paragraph;
-         Document.Indent_Level := 0;
-      elsif Tag = Wiki.Filters.Html.DL_TAG then
-         Document.Close_Paragraph;
-         Document.New_Line;
-      end if;
-   end End_Element;
-
    --  Render the node instance from the document.
    overriding
    procedure Render (Engine : in out Text_Renderer;
                      Doc    : in Wiki.Nodes.Document;
                      Node   : in Wiki.Nodes.Node_Type) is
+      use type Wiki.Nodes.Html_Tag_Type;
+      use type Wiki.Nodes.Node_List_Access;
    begin
       case Node.Kind is
          when Wiki.Nodes.N_HEADER =>
@@ -233,6 +198,30 @@ package body Wiki.Render.Text is
             end if;
             Engine.Output.Write (Node.Text);
             Engine.Empty_Line := False;
+
+         when Wiki.Nodes.N_TAG_START =>
+            if Node.Children /= null then
+               if Node.Tag_Start = Wiki.Nodes.DT_TAG then
+                  Engine.Close_Paragraph;
+                  Engine.Indent_Level := 0;
+                  Engine.Render (Doc, Node.Children);
+                  Engine.Close_Paragraph;
+                  Engine.Indent_Level := 0;
+               elsif Node.Tag_Start = Wiki.Nodes.DD_TAG then
+                  Engine.Close_Paragraph;
+                  Engine.Empty_Line := True;
+                  Engine.Indent_Level := 4;
+                  Engine.Render (Doc, Node.Children);
+                  Engine.Close_Paragraph;
+                  Engine.Indent_Level := 0;
+               else
+                  Engine.Render (Doc, Node.Children);
+                  if Node.Tag_Start = Wiki.Nodes.DL_TAG then
+                     Engine.Close_Paragraph;
+                     Engine.New_Line;
+                  end if;
+               end if;
+            end if;
 
       end case;
    end Render;
