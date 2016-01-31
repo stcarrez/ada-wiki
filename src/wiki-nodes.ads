@@ -19,6 +19,8 @@ with Wiki.Attributes;
 with Wiki.Documents;
 package Wiki.Nodes is
 
+   pragma Preelaborate;
+
    subtype Format_Map is Wiki.Documents.Format_Map;
    subtype WString is Wide_Wide_String;
 
@@ -105,6 +107,9 @@ package Wiki.Nodes is
    type Node_List is limited private;
    type Node_List_Access is access all Node_List;
 
+   type Node_Type;
+   type Node_Type_Access is access all Node_Type;
+
    type Node_Type (Kind : Node_Kind; Len : Natural) is limited record
       case Kind is
          when N_HEADER | N_BLOCKQUOTE | N_INDENT =>
@@ -125,6 +130,7 @@ package Wiki.Nodes is
             Tag_Start  : Html_Tag_Type;
             Attributes : Wiki.Attributes.Attribute_List_Type;
             Children   : Node_List_Access;
+            Parent     : Node_Type_Access;
 
          when N_TAG_END =>
             Tag_End    : Html_Tag_Type;
@@ -134,7 +140,6 @@ package Wiki.Nodes is
 
       end case;
    end record;
-   type Node_Type_Access is access all Node_Type;
 
    --  Create a text node.
    function Create_Text (Text : in WString) return Node_Type_Access;
@@ -144,6 +149,11 @@ package Wiki.Nodes is
    --  Append a node to the document.
    procedure Append (Into : in out Document;
                      Node : in Node_Type_Access);
+
+   --  Append a HTML tag start node to the document.
+   procedure Add_Tag (Document   : in out Wiki.Nodes.Document;
+                      Tag        : in Html_Tag_Type;
+                      Attributes : in Wiki.Attributes.Attribute_List_Type);
 
    --     procedure Add_Text (Doc  : in out Document;
 --                         Text : in WString);
@@ -190,7 +200,8 @@ private
                      Node : in Node_Type_Access);
 
    type Document is limited record
-      Nodes : Node_List;
+      Nodes   : Node_List;
+      Current : Node_Type_Access;
    end record;
 
 end Wiki.Nodes;
