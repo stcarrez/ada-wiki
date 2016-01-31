@@ -90,13 +90,6 @@ package Wiki.Render.Html is
                                Text     : in Unbounded_Wide_Wide_String;
                                Format   : in Unbounded_Wide_Wide_String);
 
-   procedure Start_Element (Document   : in out Html_Renderer;
-                            Name       : in Unbounded_Wide_Wide_String;
-                            Attributes : in Wiki.Attributes.Attribute_List_Type);
-
-   procedure End_Element (Document : in out Html_Renderer;
-                          Name     : in Unbounded_Wide_Wide_String);
-
    --  Finish the document after complete wiki text has been parsed.
    overriding
    procedure Finish (Document : in out Html_Renderer);
