@@ -95,19 +95,12 @@ package body Wiki.Render.Text is
    --  Add a link.
    --  ------------------------------
    procedure Add_Link (Document : in out Text_Renderer;
-                       Name     : in Unbounded_Wide_Wide_String;
-                       Link     : in Unbounded_Wide_Wide_String;
-                       Language : in Unbounded_Wide_Wide_String;
-                       Title    : in Unbounded_Wide_Wide_String) is
-      pragma Unreferenced (Language);
+                       Title    : in Wiki.Strings.WString;
+                       Attr     : in Wiki.Attributes.Attribute_List_Type) is
    begin
       Document.Open_Paragraph;
-      if Length (Title) > 0 then
+      if Title'Length /= 0 then
          Document.Output.Write (Title);
-      end if;
-      Document.Output.Write (Link);
-      if Link /= Name then
-         Document.Output.Write (Name);
       end if;
       Document.Empty_Line := False;
    end Add_Link;
@@ -123,29 +116,15 @@ package body Wiki.Render.Text is
       pragma Unreferenced (Position);
    begin
       Document.Open_Paragraph;
-      if Length (Alt) > 0 then
-         Document.Output.Write (Alt);
-      end if;
-      if Length (Description) > 0 then
-         Document.Output.Write (Description);
-      end if;
-      Document.Output.Write (Link);
+--        if Length (Alt) > 0 then
+--           Document.Output.Write (Alt);
+--        end if;
+--        if Length (Description) > 0 then
+--           Document.Output.Write (Description);
+--        end if;
+--        Document.Output.Write (Link);
       Document.Empty_Line := False;
    end Add_Image;
-
-   --  ------------------------------
-   --  Add a quote.
-   --  ------------------------------
-   procedure Add_Quote (Document : in out Text_Renderer;
-                        Quote    : in Unbounded_Wide_Wide_String;
-                        Link     : in Unbounded_Wide_Wide_String;
-                        Language : in Unbounded_Wide_Wide_String) is
-      pragma Unreferenced (Link, Language);
-   begin
-      Document.Open_Paragraph;
-      Document.Output.Write (Quote);
-      Document.Empty_Line := False;
-   end Add_Quote;
 
    --  ------------------------------
    --  Add a text block that is pre-formatted.
@@ -156,7 +135,7 @@ package body Wiki.Render.Text is
       pragma Unreferenced (Format);
    begin
       Document.Close_Paragraph;
-      Document.Output.Write (Text);
+--        Document.Output.Write (Text);
       Document.Empty_Line := False;
    end Add_Preformatted;
 
@@ -190,6 +169,9 @@ package body Wiki.Render.Text is
             Engine.Need_Paragraph := True;
             Engine.Add_Line_Break;
 
+         when Wiki.Nodes.N_INDENT =>
+            Engine.Indent_Level := Node.Level;
+
          when Wiki.Nodes.N_TEXT =>
             if Engine.Empty_Line and Engine.Indent_Level /= 0 then
                for I in 1 .. Engine.Indent_Level loop
@@ -198,6 +180,20 @@ package body Wiki.Render.Text is
             end if;
             Engine.Output.Write (Node.Text);
             Engine.Empty_Line := False;
+
+         when Wiki.Nodes.N_QUOTE =>
+            Engine.Open_Paragraph;
+            Engine.Output.Write (Node.Quote);
+            Engine.Empty_Line := False;
+
+         when Wiki.Nodes.N_LINK =>
+            Engine.Add_Link (Node.Title, Node.Link_Attr);
+
+         when Wiki.Nodes.N_IMAGE =>
+            null;
+
+         when Wiki.Nodes.N_BLOCKQUOTE =>
+            null;
 
          when Wiki.Nodes.N_TAG_START =>
             if Node.Children /= null then
