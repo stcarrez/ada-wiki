@@ -18,6 +18,7 @@
 with Wiki.Attributes;
 with Wiki.Documents;
 with Wiki.Streams;
+with Wiki.Strings;
 
 --  == Text Renderer ==
 --  The <tt>Text_Renderer</tt> allows to render a wiki document into a text content.
@@ -55,10 +56,8 @@ package Wiki.Render.Text is
 
    --  Add a link.
    procedure Add_Link (Document : in out Text_Renderer;
-                       Name     : in Unbounded_Wide_Wide_String;
-                       Link     : in Unbounded_Wide_Wide_String;
-                       Language : in Unbounded_Wide_Wide_String;
-                       Title    : in Unbounded_Wide_Wide_String);
+                       Title    : in Wiki.Strings.WString;
+                       Attr     : in Wiki.Attributes.Attribute_List_Type);
 
    --  Add an image.
    procedure Add_Image (Document    : in out Text_Renderer;
@@ -66,12 +65,6 @@ package Wiki.Render.Text is
                         Alt         : in Unbounded_Wide_Wide_String;
                         Position    : in Unbounded_Wide_Wide_String;
                         Description : in Unbounded_Wide_Wide_String);
-
-   --  Add a quote.
-   procedure Add_Quote (Document : in out Text_Renderer;
-                        Quote    : in Unbounded_Wide_Wide_String;
-                        Link     : in Unbounded_Wide_Wide_String;
-                        Language : in Unbounded_Wide_Wide_String);
 
    --  Add a text block that is pre-formatted.
    procedure Add_Preformatted (Document : in out Text_Renderer;
