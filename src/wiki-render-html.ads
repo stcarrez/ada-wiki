@@ -67,9 +67,6 @@ package Wiki.Render.Html is
                             Level    : in Positive;
                             Ordered  : in Boolean);
 
-   --  Add an horizontal rule (<hr>).
-   procedure Add_Horizontal_Rule (Document : in out Html_Renderer);
-
    --  Add a link.
    procedure Add_Link (Document : in out Html_Renderer;
                        Name     : in Unbounded_Wide_Wide_String;
