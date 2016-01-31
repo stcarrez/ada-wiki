@@ -31,7 +31,6 @@ package Wiki.Nodes is
                       N_BLOCKQUOTE,
                       N_QUOTE,
                       N_TAG_START,
-                      N_TAG_END,
                       N_INDENT,
                       N_TEXT,
                       N_LINK,
@@ -133,9 +132,6 @@ package Wiki.Nodes is
             Attributes : Wiki.Attributes.Attribute_List_Type;
             Children   : Node_List_Access;
             Parent     : Node_Type_Access;
-
-         when N_TAG_END =>
-            Tag_End    : Html_Tag_Type;
 
          when others =>
             null;
