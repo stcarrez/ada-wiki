@@ -121,9 +121,11 @@ package Wiki.Nodes is
             Text   : WString (1 .. Len);
 
          when N_LINK | N_IMAGE =>
-            Link       : Wiki.Attributes.Attribute_List_Type;
+            Link_Attr  : Wiki.Attributes.Attribute_List_Type;
+            Title      : WString (1 .. Len);
 
          when N_QUOTE =>
+            Quote_Attr : Wiki.Attributes.Attribute_List_Type;
             Quote      : WString (1 .. Len);
 
          when N_TAG_START =>
