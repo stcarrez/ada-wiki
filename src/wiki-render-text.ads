@@ -40,39 +40,25 @@ package Wiki.Render.Text is
                      Node   : in Wiki.Nodes.Node_Type);
 
    --  Add a section header in the document.
-   overriding
    procedure Add_Header (Document : in out Text_Renderer;
                          Header   : in Unbounded_Wide_Wide_String;
                          Level    : in Positive);
 
    --  Add a line break (<br>).
-   overriding
    procedure Add_Line_Break (Document : in out Text_Renderer);
-
-   --  Add a paragraph (<p>).  Close the previous paragraph if any.
-   --  The paragraph must be closed at the next paragraph or next header.
-   overriding
-   procedure Add_Paragraph (Document : in out Text_Renderer);
 
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
-   overriding
    procedure Add_Blockquote (Document : in out Text_Renderer;
                              Level    : in Natural);
 
    --  Add a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
-   overriding
    procedure Add_List_Item (Document : in out Text_Renderer;
                             Level    : in Positive;
                             Ordered  : in Boolean);
 
-   --  Add an horizontal rule (<hr>).
-   overriding
-   procedure Add_Horizontal_Rule (Document : in out Text_Renderer);
-
    --  Add a link.
-   overriding
    procedure Add_Link (Document : in out Text_Renderer;
                        Name     : in Unbounded_Wide_Wide_String;
                        Link     : in Unbounded_Wide_Wide_String;
@@ -80,7 +66,6 @@ package Wiki.Render.Text is
                        Title    : in Unbounded_Wide_Wide_String);
 
    --  Add an image.
-   overriding
    procedure Add_Image (Document    : in out Text_Renderer;
                         Link        : in Unbounded_Wide_Wide_String;
                         Alt         : in Unbounded_Wide_Wide_String;
@@ -88,14 +73,12 @@ package Wiki.Render.Text is
                         Description : in Unbounded_Wide_Wide_String);
 
    --  Add a quote.
-   overriding
    procedure Add_Quote (Document : in out Text_Renderer;
                         Quote    : in Unbounded_Wide_Wide_String;
                         Link     : in Unbounded_Wide_Wide_String;
                         Language : in Unbounded_Wide_Wide_String);
 
    --  Add a text block with the given format.
-   overriding
    procedure Add_Text (Document : in out Text_Renderer;
                        Text     : in Unbounded_Wide_Wide_String;
                        Format   : in Wiki.Documents.Format_Map);
@@ -105,12 +88,10 @@ package Wiki.Render.Text is
                                Text     : in Unbounded_Wide_Wide_String;
                                Format   : in Unbounded_Wide_Wide_String);
 
-   overriding
    procedure Start_Element (Document   : in out Text_Renderer;
                             Name       : in Unbounded_Wide_Wide_String;
                             Attributes : in Wiki.Attributes.Attribute_List_Type);
 
-   overriding
    procedure End_Element (Document : in out Text_Renderer;
                           Name     : in Unbounded_Wide_Wide_String);
 
