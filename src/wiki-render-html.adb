@@ -73,7 +73,6 @@ package body Wiki.Render.Html is
          when Wiki.Nodes.N_PARAGRAPH =>
             Engine.Close_Paragraph;
             Engine.Need_Paragraph := True;
-            Engine.Add_Line_Break;
 
          when Wiki.Nodes.N_INDENT =>
             Engine.Indent_Level := Node.Level;
@@ -169,17 +168,6 @@ package body Wiki.Render.Html is
    begin
       Document.Writer.Write ("<br />");
    end Add_Line_Break;
-
-   --  ------------------------------
-   --  Add a paragraph (<p>).  Close the previous paragraph if any.
-   --  The paragraph must be closed at the next paragraph or next header.
-   --  ------------------------------
-   overriding
-   procedure Add_Paragraph (Document : in out Html_Renderer) is
-   begin
-      Document.Close_Paragraph;
-      Document.Need_Paragraph := True;
-   end Add_Paragraph;
 
    --  ------------------------------
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
