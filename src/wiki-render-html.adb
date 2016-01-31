@@ -23,13 +23,13 @@ package body Wiki.Render.Html is
    package ACC renames Ada.Characters.Conversions;
 
    --  ------------------------------
-   --  Set the output writer.
+   --  Set the output stream.
    --  ------------------------------
-   procedure Set_Writer (Document : in out Html_Renderer;
-                         Writer   : in Wiki.Writers.Html_Writer_Type_Access) is
+   procedure Set_Output_Stream (Engine : in out Html_Renderer;
+                                Stream : in Wiki.Streams.Html.Html_Output_Stream_Access) is
    begin
-      Document.Writer := Writer;
-   end Set_Writer;
+      Engine.Output := Stream;
+   end Set_Output_Stream;
 
    --  ------------------------------
    --  Set the link renderer.
