@@ -103,6 +103,11 @@ package Wiki.Nodes is
       UNKNOWN_TAG
      );
 
+   type String_Access is access constant String;
+
+   --  Get the HTML tag name.
+   function Get_Tag_Name (Tag : in Html_Tag_Type) return String_Access;
+
    type Node_List is limited private;
    type Node_List_Access is access all Node_List;
 
