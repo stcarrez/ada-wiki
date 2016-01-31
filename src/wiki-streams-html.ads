@@ -16,6 +16,7 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Strings.Wide_Wide_Unbounded;
+with Wiki.Strings;
 
 --  == Writer interfaces ==
 --  The <tt>Wiki.Writers</tt> package defines the interfaces used by the renderer to write
@@ -36,7 +37,7 @@ package Wiki.Streams.Html is
    --  and <b>End_Element</b>.
    procedure Write_Wide_Element (Writer  : in out Html_Writer_Type;
                                  Name    : in String;
-                                 Content : in Unbounded_Wide_Wide_String) is abstract;
+                                 Content : in Wiki.Strings.WString) is abstract;
 
    --  Write an XML attribute within an XML element.
    --  The attribute value is escaped according to the XML escape rules.
