@@ -19,6 +19,8 @@ with Util.Texts.Builders;
 
 package Wiki.Strings is
 
+   pragma Preelaborate;
+
    subtype WChar is Wide_Wide_Character;
    subtype WString is Wide_Wide_String;
 
