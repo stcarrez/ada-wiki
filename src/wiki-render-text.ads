@@ -39,11 +39,6 @@ package Wiki.Render.Text is
                      Doc    : in Wiki.Nodes.Document;
                      Node   : in Wiki.Nodes.Node_Type);
 
-   --  Add a section header in the document.
-   procedure Add_Header (Document : in out Text_Renderer;
-                         Header   : in Unbounded_Wide_Wide_String;
-                         Level    : in Positive);
-
    --  Add a line break (<br>).
    procedure Add_Line_Break (Document : in out Text_Renderer);
 
