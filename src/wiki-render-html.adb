@@ -41,36 +41,122 @@ package body Wiki.Render.Html is
    end Set_Link_Renderer;
 
    --  ------------------------------
-   --  Add a section header in the document.
+   --  Render the node instance from the document.
    --  ------------------------------
    overriding
-   procedure Add_Header (Document : in out Html_Renderer;
-                         Header   : in Unbounded_Wide_Wide_String;
-                         Level    : in Positive) is
+   procedure Render (Engine : in out Html_Renderer;
+                     Doc    : in Wiki.Nodes.Document;
+                     Node   : in Wiki.Nodes.Node_Type) is
+      use type Wiki.Nodes.Html_Tag_Type;
+      use type Wiki.Nodes.Node_List_Access;
    begin
-      Document.Close_Paragraph;
-      Document.Add_Blockquote (0);
+      case Node.Kind is
+         when Wiki.Nodes.N_HEADER =>
+            Engine.Close_Paragraph;
+            if not Engine.Empty_Line then
+               Engine.Add_Line_Break;
+            end if;
+            Engine.Output.Write (Node.Header);
+            Engine.Add_Line_Break;
+            Engine.Add_Header (Header => Node.Header,
+                               Level  => Node.Level);
+
+         when Wiki.Nodes.N_LINE_BREAK =>
+            Engine.Add_Line_Break;
+
+         when Wiki.Nodes.N_HORIZONTAL_RULE =>
+            Engine.Close_Paragraph;
+            Engine.Output.Write ("---------------------------------------------------------");
+            Engine.Add_Line_Break;
+
+         when Wiki.Nodes.N_PARAGRAPH =>
+            Engine.Close_Paragraph;
+            Engine.Need_Paragraph := True;
+            Engine.Add_Line_Break;
+
+         when Wiki.Nodes.N_INDENT =>
+            Engine.Indent_Level := Node.Level;
+
+         when Wiki.Nodes.N_TEXT =>
+            if Engine.Empty_Line and Engine.Indent_Level /= 0 then
+               for I in 1 .. Engine.Indent_Level loop
+                  Engine.Output.Write (' ');
+               end loop;
+            end if;
+            Engine.Output.Write (Node.Text);
+            Engine.Empty_Line := False;
+
+         when Wiki.Nodes.N_QUOTE =>
+            Engine.Open_Paragraph;
+            Engine.Output.Write (Node.Quote);
+            Engine.Empty_Line := False;
+
+         when Wiki.Nodes.N_LINK =>
+            Engine.Add_Link (Node.Title, Node.Link_Attr);
+
+         when Wiki.Nodes.N_IMAGE =>
+            null;
+
+         when Wiki.Nodes.N_BLOCKQUOTE =>
+            null;
+
+         when Wiki.Nodes.N_TAG_START =>
+            if Node.Children /= null then
+               if Node.Tag_Start = Wiki.Nodes.DT_TAG then
+                  Engine.Close_Paragraph;
+                  Engine.Indent_Level := 0;
+                  Engine.Render (Doc, Node.Children);
+                  Engine.Close_Paragraph;
+                  Engine.Indent_Level := 0;
+               elsif Node.Tag_Start = Wiki.Nodes.DD_TAG then
+                  Engine.Close_Paragraph;
+                  Engine.Empty_Line := True;
+                  Engine.Indent_Level := 4;
+                  Engine.Render (Doc, Node.Children);
+                  Engine.Close_Paragraph;
+                  Engine.Indent_Level := 0;
+               else
+                  Engine.Render (Doc, Node.Children);
+                  if Node.Tag_Start = Wiki.Nodes.DL_TAG then
+                     Engine.Close_Paragraph;
+                     Engine.New_Line;
+                  end if;
+               end if;
+            end if;
+
+      end case;
+   end Render;
+
+   --  ------------------------------
+   --  Add a section header in the document.
+   --  ------------------------------
+   procedure Add_Header (Engine : in out Html_Renderer;
+                         Header : in Wiki.Strings.WString;
+                         Level  : in Positive) is
+   begin
+      Engine.Close_Paragraph;
+      Engine.Add_Blockquote (0);
       case Level is
          when 1 =>
-            Document.Writer.Write_Wide_Element ("h1", Header);
+            Engine.Output.Write_Wide_Element ("h1", Header);
 
          when 2 =>
-            Document.Writer.Write_Wide_Element ("h2", Header);
+            Engine.Output.Write_Wide_Element ("h2", Header);
 
          when 3 =>
-            Document.Writer.Write_Wide_Element ("h3", Header);
+            Engine.Output.Write_Wide_Element ("h3", Header);
 
          when 4 =>
-            Document.Writer.Write_Wide_Element ("h4", Header);
+            Engine.Output.Write_Wide_Element ("h4", Header);
 
          when 5 =>
-            Document.Writer.Write_Wide_Element ("h5", Header);
+            Engine.Output.Write_Wide_Element ("h5", Header);
 
          when 6 =>
-            Document.Writer.Write_Wide_Element ("h6", Header);
+            Engine.Output.Write_Wide_Element ("h6", Header);
 
          when others =>
-            Document.Writer.Write_Wide_Element ("h3", Header);
+            Engine.Output.Write_Wide_Element ("h3", Header);
       end case;
    end Add_Header;
 
