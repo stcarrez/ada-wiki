@@ -17,7 +17,8 @@
 -----------------------------------------------------------------------
 with Wiki.Attributes;
 with Wiki.Documents;
-with Wiki.Streams;
+with Wiki.Streams.Html;
+with Wiki.Strings;
 
 --  == HTML Renderer ==
 --  The <tt>Text_Renderer</tt> allows to render a wiki document into a text content.
@@ -44,9 +45,9 @@ package Wiki.Render.Html is
                      Node   : in Wiki.Nodes.Node_Type);
 
    --  Add a section header in the document.
-   procedure Add_Header (Document : in out Html_Renderer;
-                         Header   : in Unbounded_Wide_Wide_String;
-                         Level    : in Positive);
+   procedure Add_Header (Engine : in out Html_Renderer;
+                         Header : in Wiki.Strings.WString;
+                         Level  : in Positive);
 
    --  Add a line break (<br>).
    procedure Add_Line_Break (Document : in out Html_Renderer);
