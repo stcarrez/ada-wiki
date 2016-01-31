@@ -67,7 +67,7 @@ package body Wiki.Render.Text is
    begin
       Document.Close_Paragraph;
       for I in 1 .. Level loop
-         Document.Writer.Write ("  ");
+         Document.Output.Write ("  ");
       end loop;
    end Add_Blockquote;
 
@@ -115,11 +115,11 @@ package body Wiki.Render.Text is
    begin
       Document.Open_Paragraph;
       if Length (Title) > 0 then
-         Document.Writer.Write (Title);
+         Document.Output.Write (Title);
       end if;
-      Document.Writer.Write (Link);
+      Document.Output.Write (Link);
       if Link /= Name then
-         Document.Writer.Write (Name);
+         Document.Output.Write (Name);
       end if;
       Document.Empty_Line := False;
    end Add_Link;
@@ -136,12 +136,12 @@ package body Wiki.Render.Text is
    begin
       Document.Open_Paragraph;
       if Length (Alt) > 0 then
-         Document.Writer.Write (Alt);
+         Document.Output.Write (Alt);
       end if;
       if Length (Description) > 0 then
-         Document.Writer.Write (Description);
+         Document.Output.Write (Description);
       end if;
-      Document.Writer.Write (Link);
+      Document.Output.Write (Link);
       Document.Empty_Line := False;
    end Add_Image;
 
@@ -155,26 +155,9 @@ package body Wiki.Render.Text is
       pragma Unreferenced (Link, Language);
    begin
       Document.Open_Paragraph;
-      Document.Writer.Write (Quote);
+      Document.Output.Write (Quote);
       Document.Empty_Line := False;
    end Add_Quote;
-
-   --  ------------------------------
-   --  Add a text block with the given format.
-   --  ------------------------------
-   procedure Add_Text (Document : in out Text_Renderer;
-                       Text     : in Unbounded_Wide_Wide_String;
-                       Format   : in Wiki.Documents.Format_Map) is
-      pragma Unreferenced (Format);
-   begin
-      if Document.Empty_Line and Document.Indent_Level /= 0 then
-         for I in 1 .. Document.Indent_Level loop
-            Document.Writer.Write (' ');
-         end loop;
-      end if;
-      Document.Writer.Write (Text);
-      Document.Empty_Line := False;
-   end Add_Text;
 
    --  ------------------------------
    --  Add a text block that is pre-formatted.
@@ -185,7 +168,7 @@ package body Wiki.Render.Text is
       pragma Unreferenced (Format);
    begin
       Document.Close_Paragraph;
-      Document.Writer.Write (Text);
+      Document.Output.Write (Text);
       Document.Empty_Line := False;
    end Add_Preformatted;
 
@@ -237,7 +220,7 @@ package body Wiki.Render.Text is
             if not Engine.Empty_Line then
                Engine.Add_Line_Break;
             end if;
-            Engine.Output.Write (Node.Content);
+            Engine.Output.Write (Node.Header);
             Engine.Add_Line_Break;
 
          when Wiki.Nodes.N_LINE_BREAK =>
@@ -252,6 +235,15 @@ package body Wiki.Render.Text is
             Engine.Close_Paragraph;
             Engine.Need_Paragraph := True;
             Engine.Add_Line_Break;
+
+         when Wiki.Nodes.N_TEXT =>
+            if Engine.Empty_Line and Engine.Indent_Level /= 0 then
+               for I in 1 .. Engine.Indent_Level loop
+                  Engine.Output.Write (' ');
+               end loop;
+            end if;
+            Engine.Output.Write (Node.Text);
+            Engine.Empty_Line := False;
 
       end case;
    end Render;
