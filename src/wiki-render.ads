@@ -16,6 +16,9 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Strings.Wide_Wide_Unbounded;
+with Wiki.Documents;
+with Wiki.Attributes;
+with Wiki.Nodes;
 package Wiki.Render is
 
    pragma Preelaborate;
@@ -54,5 +57,19 @@ package Wiki.Render is
                              Link     : in Unbounded_Wide_Wide_String;
                              URI      : out Unbounded_Wide_Wide_String;
                              Exists   : out Boolean);
+
+   --  ------------------------------
+   --  Document renderer
+   --  ------------------------------
+   type Renderer is limited interface;
+   type Renderer_Access is access all Renderer'Class;
+
+   --  Render the node instance from the document.
+   procedure Render (Engine : in out Renderer;
+                     Doc    : in Wiki.Nodes.Document;
+                     Node   : in Wiki.Nodes.Node_Type) is abstract;
+
+   --  Finish the rendering after complete wiki document nodes are rendered.
+   procedure Finish (Document : in out Renderer) is abstract;
 
 end Wiki.Render;
