@@ -30,12 +30,36 @@ package body Wiki.Nodes is
    end Create_Text;
 
    --  ------------------------------
+   --  Append a HTML tag start node to the document.
+   --  ------------------------------
+   procedure Add_Tag (Document   : in out Wiki.Nodes.Document;
+                      Tag        : in Html_Tag_Type;
+                      Attributes : in Wiki.Attributes.Attribute_List_Type) is
+      Node : constant Node_Type_Access := new Node_Type '(Kind       => N_TAG_START,
+                                                          Len        => 0,
+                                                          Tag_Start  => Tag,
+                                                          Attributes => Attributes,
+                                                          Children   => null,
+                                                          Parent     => Document.Current);
+   begin
+      Append (Document.Nodes, Node);
+      Document.Current := Node;
+   end Add_Tag;
+
+   --  ------------------------------
    --  Append a node to the document.
    --  ------------------------------
    procedure Append (Into : in out Document;
                      Node : in Node_Type_Access) is
    begin
-      Append (Into.Nodes, Node);
+      if Into.Current = null then
+         Append (Into.Nodes, Node);
+      else
+         if Into.Current.Children = null then
+            Into.Current.Children := new Node_List;
+         end if;
+         Append (Into.Current.Children.all, Node);
+      end if;
    end Append;
 
    --  ------------------------------
