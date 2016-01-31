@@ -70,21 +70,16 @@ package body Wiki.Render.Html is
             Engine.Need_Paragraph := True;
 
          when Wiki.Nodes.N_INDENT =>
-            Engine.Indent_Level := Node.Level;
+            -- Engine.Indent_Level := Node.Level;
+            null;
 
          when Wiki.Nodes.N_TEXT =>
-            if Engine.Empty_Line and Engine.Indent_Level /= 0 then
-               for I in 1 .. Engine.Indent_Level loop
-                  Engine.Output.Write (' ');
-               end loop;
-            end if;
-            Engine.Output.Write (Node.Text);
-            Engine.Empty_Line := False;
+            Engine.Add_Text (Text   => Node.Text,
+                             Format => Node.Format);
 
          when Wiki.Nodes.N_QUOTE =>
             Engine.Open_Paragraph;
             Engine.Output.Write (Node.Quote);
-            Engine.Empty_Line := False;
 
          when Wiki.Nodes.N_LINK =>
             Engine.Add_Link (Node.Title, Node.Link_Attr);
@@ -96,31 +91,34 @@ package body Wiki.Render.Html is
             null;
 
          when Wiki.Nodes.N_TAG_START =>
-            if Node.Children /= null then
-               if Node.Tag_Start = Wiki.Nodes.DT_TAG then
-                  Engine.Close_Paragraph;
-                  Engine.Indent_Level := 0;
-                  Engine.Render (Doc, Node.Children);
-                  Engine.Close_Paragraph;
-                  Engine.Indent_Level := 0;
-               elsif Node.Tag_Start = Wiki.Nodes.DD_TAG then
-                  Engine.Close_Paragraph;
-                  Engine.Empty_Line := True;
-                  Engine.Indent_Level := 4;
-                  Engine.Render (Doc, Node.Children);
-                  Engine.Close_Paragraph;
-                  Engine.Indent_Level := 0;
-               else
-                  Engine.Render (Doc, Node.Children);
-                  if Node.Tag_Start = Wiki.Nodes.DL_TAG then
-                     Engine.Close_Paragraph;
-                     Engine.New_Line;
-                  end if;
-               end if;
-            end if;
+            Engine.Render_Tag (Doc, Node);
 
       end case;
    end Render;
+
+   procedure Render_Tag (Engine : in out Html_Renderer;
+                         Doc    : in Wiki.Nodes.Document;
+                         Node   : in Wiki.Nodes.Node_Type) is
+      Name : constant Wiki.Nodes.String_Access := Wiki.Nodes.Get_Tag_Name (Node.Tag_Start);
+      Iter : Wiki.Attributes.Cursor := Wiki.Attributes.First (Node.Attributes);
+   begin
+      if Node.Tag_Start = Wiki.Nodes.P_TAG then
+         Engine.Has_Paragraph := True;
+         Engine.Need_Paragraph := False;
+      end if;
+      Engine.Output.Start_Element (Name.all);
+      while Wiki.Attributes.Has_Element (Iter) loop
+         Engine.Output.Write_Wide_Attribute (Name    => Wiki.Attributes.Get_Name (Iter),
+                                             Content => Wiki.Attributes.Get_Wide_Value (Iter));
+         Wiki.Attributes.Next (Iter);
+      end loop;
+      Engine.Render (Doc, Node.Children);
+      if Node.Tag_Start = Wiki.Nodes.P_TAG then
+         Engine.Has_Paragraph := False;
+         Engine.Need_Paragraph := True;
+      end if;
+      Engine.Output.End_Element (Name.all);
+   end Render_Tag;
 
    --  ------------------------------
    --  Add a section header in the document.
@@ -159,7 +157,6 @@ package body Wiki.Render.Html is
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
    --  ------------------------------
-   overriding
    procedure Add_Blockquote (Document : in out Html_Renderer;
                              Level    : in Natural) is
    begin
@@ -168,11 +165,11 @@ package body Wiki.Render.Html is
          Document.Need_Paragraph := True;
       end if;
       while Document.Quote_Level < Level loop
-         Document.Writer.Start_Element ("blockquote");
+         Document.Output.Start_Element ("blockquote");
          Document.Quote_Level := Document.Quote_Level + 1;
       end loop;
       while Document.Quote_Level > Level loop
-         Document.Writer.End_Element ("blockquote");
+         Document.Output.End_Element ("blockquote");
          Document.Quote_Level := Document.Quote_Level - 1;
       end loop;
    end Add_Blockquote;
@@ -181,26 +178,25 @@ package body Wiki.Render.Html is
    --  Add a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
    --  ------------------------------
-   overriding
    procedure Add_List_Item (Document : in out Html_Renderer;
                             Level    : in Positive;
                             Ordered  : in Boolean) is
    begin
       if Document.Has_Paragraph then
-         Document.Writer.End_Element ("p");
+         Document.Output.End_Element ("p");
          Document.Has_Paragraph := False;
       end if;
       if Document.Has_Item then
-         Document.Writer.End_Element ("li");
+         Document.Output.End_Element ("li");
          Document.Has_Item := False;
       end if;
       Document.Need_Paragraph := False;
       Document.Open_Paragraph;
       while Document.Current_Level < Level loop
          if Ordered then
-            Document.Writer.Start_Element ("ol");
+            Document.Output.Start_Element ("ol");
          else
-            Document.Writer.Start_Element ("ul");
+            Document.Output.Start_Element ("ul");
          end if;
          Document.Current_Level := Document.Current_Level + 1;
          Document.List_Styles (Document.Current_Level) := Ordered;
@@ -213,16 +209,16 @@ package body Wiki.Render.Html is
          return;
       end if;
       if Document.Has_Paragraph then
-         Document.Writer.End_Element ("p");
+         Document.Output.End_Element ("p");
       end if;
       if Document.Has_Item then
-         Document.Writer.End_Element ("li");
+         Document.Output.End_Element ("li");
       end if;
       while Document.Current_Level > 0 loop
          if Document.List_Styles (Document.Current_Level) then
-            Document.Writer.End_Element ("ol");
+            Document.Output.End_Element ("ol");
          else
-            Document.Writer.End_Element ("ul");
+            Document.Output.End_Element ("ul");
          end if;
          Document.Current_Level := Document.Current_Level - 1;
       end loop;
@@ -236,12 +232,12 @@ package body Wiki.Render.Html is
          return;
       end if;
       if Document.Need_Paragraph then
-         Document.Writer.Start_Element ("p");
+         Document.Output.Start_Element ("p");
          Document.Has_Paragraph  := True;
          Document.Need_Paragraph := False;
       end if;
       if Document.Current_Level > 0 and not Document.Has_Item then
-         Document.Writer.Start_Element ("li");
+         Document.Output.Start_Element ("li");
          Document.Has_Item := True;
       end if;
    end Open_Paragraph;
@@ -249,7 +245,6 @@ package body Wiki.Render.Html is
    --  ------------------------------
    --  Add a link.
    --  ------------------------------
-   overriding
    procedure Add_Link (Document : in out Html_Renderer;
                        Name     : in Unbounded_Wide_Wide_String;
                        Link     : in Unbounded_Wide_Wide_String;
@@ -259,23 +254,22 @@ package body Wiki.Render.Html is
       URI    : Unbounded_Wide_Wide_String;
    begin
       Document.Open_Paragraph;
-      Document.Writer.Start_Element ("a");
+      Document.Output.Start_Element ("a");
       if Length (Title) > 0 then
-         Document.Writer.Write_Wide_Attribute ("title", Title);
+         Document.Output.Write_Wide_Attribute ("title", Title);
       end if;
       if Length (Language) > 0 then
-         Document.Writer.Write_Wide_Attribute ("lang", Language);
+         Document.Output.Write_Wide_Attribute ("lang", Language);
       end if;
       Document.Links.Make_Page_Link (Link, URI, Exists);
-      Document.Writer.Write_Wide_Attribute ("href", URI);
-      Document.Writer.Write_Wide_Text (Name);
-      Document.Writer.End_Element ("a");
+      Document.Output.Write_Wide_Attribute ("href", URI);
+      Document.Output.Write_Wide_Text (Name);
+      Document.Output.End_Element ("a");
    end Add_Link;
 
    --  ------------------------------
    --  Add an image.
    --  ------------------------------
-   overriding
    procedure Add_Image (Document    : in out Html_Renderer;
                         Link        : in Unbounded_Wide_Wide_String;
                         Alt         : in Unbounded_Wide_Wide_String;
@@ -288,43 +282,42 @@ package body Wiki.Render.Html is
       Height : Natural;
    begin
       Document.Open_Paragraph;
-      Document.Writer.Start_Element ("img");
+      Document.Output.Start_Element ("img");
       if Length (Alt) > 0 then
-         Document.Writer.Write_Wide_Attribute ("alt", Alt);
+         Document.Output.Write_Wide_Attribute ("alt", Alt);
       end if;
       if Length (Description) > 0 then
-         Document.Writer.Write_Wide_Attribute ("longdesc", Description);
+         Document.Output.Write_Wide_Attribute ("longdesc", Description);
       end if;
       Document.Links.Make_Image_Link (Link, URI, Width, Height);
-      Document.Writer.Write_Wide_Attribute ("src", URI);
+      Document.Output.Write_Wide_Attribute ("src", URI);
       if Width > 0 then
-         Document.Writer.Write_Attribute ("width", Natural'Image (Width));
+         Document.Output.Write_Attribute ("width", Natural'Image (Width));
       end if;
       if Height > 0 then
-         Document.Writer.Write_Attribute ("height", Natural'Image (Height));
+         Document.Output.Write_Attribute ("height", Natural'Image (Height));
       end if;
-      Document.Writer.End_Element ("img");
+      Document.Output.End_Element ("img");
    end Add_Image;
 
    --  ------------------------------
    --  Add a quote.
    --  ------------------------------
-   overriding
    procedure Add_Quote (Document : in out Html_Renderer;
                         Quote    : in Unbounded_Wide_Wide_String;
                         Link     : in Unbounded_Wide_Wide_String;
                         Language : in Unbounded_Wide_Wide_String) is
    begin
       Document.Open_Paragraph;
-      Document.Writer.Start_Element ("q");
+      Document.Output.Start_Element ("q");
       if Length (Language) > 0 then
-         Document.Writer.Write_Wide_Attribute ("lang", Language);
+         Document.Output.Write_Wide_Attribute ("lang", Language);
       end if;
       if Length (Link) > 0 then
-         Document.Writer.Write_Wide_Attribute ("cite", Link);
+         Document.Output.Write_Wide_Attribute ("cite", Link);
       end if;
-      Document.Writer.Write_Wide_Text (Quote);
-      Document.Writer.End_Element ("q");
+      Document.Output.Write_Wide_Text (Quote);
+      Document.Output.End_Element ("q");
    end Add_Quote;
 
    HTML_BOLD        : aliased constant String := "b";
@@ -350,21 +343,20 @@ package body Wiki.Render.Html is
    --  ------------------------------
    --  Add a text block with the given format.
    --  ------------------------------
-   overriding
-   procedure Add_Text (Document : in out Html_Renderer;
-                       Text     : in Unbounded_Wide_Wide_String;
+   procedure Add_Text (Engine   : in out Html_Renderer;
+                       Text     : in Wiki.Strings.WString;
                        Format   : in Wiki.Documents.Format_Map) is
    begin
-      Document.Open_Paragraph;
+      Engine.Open_Paragraph;
       for I in Format'Range loop
          if Format (I) then
-            Document.Writer.Start_Element (HTML_ELEMENT (I).all);
+            Engine.Output.Start_Element (HTML_ELEMENT (I).all);
          end if;
       end loop;
-      Document.Writer.Write_Wide_Text (Text);
+      Engine.Output.Write_Wide_Text (Text);
       for I in reverse Format'Range loop
          if Format (I) then
-            Document.Writer.End_Element (HTML_ELEMENT (I).all);
+            Engine.Output.End_Element (HTML_ELEMENT (I).all);
          end if;
       end loop;
    end Add_Text;
@@ -378,15 +370,14 @@ package body Wiki.Render.Html is
    begin
       Document.Close_Paragraph;
       if Format = "html" then
-         Document.Writer.Write (Text);
+         Document.Output.Write (Text);
       else
-         Document.Writer.Start_Element ("pre");
-         Document.Writer.Write_Wide_Text (Text);
-         Document.Writer.End_Element ("pre");
+         Document.Output.Start_Element ("pre");
+--         Document.Output.Write_Wide_Text (Text);
+         Document.Output.End_Element ("pre");
       end if;
    end Add_Preformatted;
 
-   overriding
    procedure Start_Element (Document   : in out Html_Renderer;
                             Name       : in Unbounded_Wide_Wide_String;
                             Attributes : in Wiki.Attributes.Attribute_List_Type) is
@@ -397,15 +388,14 @@ package body Wiki.Render.Html is
          Document.Has_Paragraph := True;
          Document.Need_Paragraph := False;
       end if;
-      Document.Writer.Start_Element (ACC.To_String (To_Wide_Wide_String (Name)));
+      Document.Output.Start_Element (ACC.To_String (To_Wide_Wide_String (Name)));
       while Wiki.Attributes.Has_Element (Iter) loop
-         Document.Writer.Write_Wide_Attribute (Name    => Wiki.Attributes.Get_Name (Iter),
+         Document.Output.Write_Wide_Attribute (Name    => Wiki.Attributes.Get_Name (Iter),
                                                Content => Wiki.Attributes.Get_Wide_Value (Iter));
          Wiki.Attributes.Next (Iter);
       end loop;
    end Start_Element;
 
-   overriding
    procedure End_Element (Document : in out Html_Renderer;
                           Name     : in Unbounded_Wide_Wide_String) is
    begin
@@ -414,7 +404,7 @@ package body Wiki.Render.Html is
          Document.Has_Paragraph := False;
          Document.Need_Paragraph := True;
       end if;
-      Document.Writer.End_Element (ACC.To_String (To_Wide_Wide_String (Name)));
+      Document.Output.End_Element (ACC.To_String (To_Wide_Wide_String (Name)));
    end End_Element;
 
    --  ------------------------------
