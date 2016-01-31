@@ -35,37 +35,37 @@ package Wiki.Streams.Html is
    --  Write an XML element using the given name and with the content.
    --  This is similar to calling <b>Start_Element</b>, <b>Write_Text</b>
    --  and <b>End_Element</b>.
-   procedure Write_Wide_Element (Writer  : in out Html_Writer_Type;
+   procedure Write_Wide_Element (Writer  : in out Html_Output_Stream_Type;
                                  Name    : in String;
                                  Content : in Wiki.Strings.WString) is abstract;
 
    --  Write an XML attribute within an XML element.
    --  The attribute value is escaped according to the XML escape rules.
-   procedure Write_Wide_Attribute (Writer  : in out Html_Writer_Type;
+   procedure Write_Wide_Attribute (Writer  : in out Html_Output_Stream_Type;
                                    Name    : in String;
                                    Content : in Unbounded_Wide_Wide_String) is abstract;
 
    --  Write an XML attribute within an XML element.
    --  The attribute value is escaped according to the XML escape rules.
-   procedure Write_Wide_Attribute (Writer  : in out Html_Writer_Type;
+   procedure Write_Wide_Attribute (Writer  : in out Html_Output_Stream_Type;
                                    Name    : in String;
                                    Content : in Wide_Wide_String) is abstract;
 
    --  Start an XML element with the given name.
-   procedure Start_Element (Writer : in out Html_Writer_Type;
+   procedure Start_Element (Writer : in out Html_Output_Stream_Type;
                             Name   : in String) is abstract;
 
    --  Closes an XML element of the given name.
-   procedure End_Element (Writer : in out Html_Writer_Type;
+   procedure End_Element (Writer : in out Html_Output_Stream_Type;
                           Name   : in String) is abstract;
 
    --  Write a text escaping any character as necessary.
-   procedure Write_Wide_Text (Writer  : in out Html_Writer_Type;
-                              Content : in Unbounded_Wide_Wide_String) is abstract;
+   procedure Write_Wide_Text (Writer  : in out Html_Output_Stream_Type;
+                              Content : in Wiki.Strings.WString) is abstract;
 
    --  Write an XML attribute within an XML element.
    --  The attribute value is escaped according to the XML escape rules.
-   procedure Write_Attribute (Writer  : in out Html_Writer_Type'Class;
+   procedure Write_Attribute (Writer  : in out Html_Output_Stream_Type'Class;
                               Name    : in String;
                               Content : in String);
 
