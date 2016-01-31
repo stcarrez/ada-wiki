@@ -49,9 +49,6 @@ package Wiki.Render.Html is
                          Header : in Wiki.Strings.WString;
                          Level  : in Positive);
 
-   --  Add a line break (<br>).
-   procedure Add_Line_Break (Document : in out Html_Renderer);
-
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
    procedure Add_Blockquote (Document : in out Html_Renderer;
