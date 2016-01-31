@@ -378,35 +378,6 @@ package body Wiki.Render.Html is
       end if;
    end Add_Preformatted;
 
-   procedure Start_Element (Document   : in out Html_Renderer;
-                            Name       : in Unbounded_Wide_Wide_String;
-                            Attributes : in Wiki.Attributes.Attribute_List_Type) is
-      Iter : Wiki.Attributes.Cursor := Wiki.Attributes.First (Attributes);
-   begin
-      Document.Html_Level := Document.Html_Level + 1;
-      if Name = "p" then
-         Document.Has_Paragraph := True;
-         Document.Need_Paragraph := False;
-      end if;
-      Document.Output.Start_Element (ACC.To_String (To_Wide_Wide_String (Name)));
-      while Wiki.Attributes.Has_Element (Iter) loop
-         Document.Output.Write_Wide_Attribute (Name    => Wiki.Attributes.Get_Name (Iter),
-                                               Content => Wiki.Attributes.Get_Wide_Value (Iter));
-         Wiki.Attributes.Next (Iter);
-      end loop;
-   end Start_Element;
-
-   procedure End_Element (Document : in out Html_Renderer;
-                          Name     : in Unbounded_Wide_Wide_String) is
-   begin
-      Document.Html_Level := Document.Html_Level - 1;
-      if Name = "p" then
-         Document.Has_Paragraph := False;
-         Document.Need_Paragraph := True;
-      end if;
-      Document.Output.End_Element (ACC.To_String (To_Wide_Wide_String (Name)));
-   end End_Element;
-
    --  ------------------------------
    --  Finish the document after complete wiki text has been parsed.
    --  ------------------------------
