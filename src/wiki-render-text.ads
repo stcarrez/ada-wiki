@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-text -- Wiki Text renderer
---  Copyright (C) 2011, 2012, 2013, 2015 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@
 -----------------------------------------------------------------------
 with Wiki.Attributes;
 with Wiki.Documents;
-with Wiki.Writers;
+with Wiki.Streams;
 
 --  == Text Renderer ==
 --  The <tt>Text_Renderer</tt> allows to render a wiki document into a text content.
@@ -27,11 +27,17 @@ package Wiki.Render.Text is
    --  ------------------------------
    --  Wiki to Text renderer
    --  ------------------------------
-   type Text_Renderer is new Wiki.Documents.Document_Reader with private;
+   type Text_Renderer is new Wiki.Render.Renderer with private;
 
-   --  Set the output writer.
-   procedure Set_Writer (Document : in out Text_Renderer;
-                         Writer   : in Wiki.Writers.Writer_Type_Access);
+   --  Set the output stream.
+   procedure Set_Output_Stream (Engine : in out Text_Renderer;
+                                Stream : in Streams.Output_Stream_Access);
+
+   --  Render the node instance from the document.
+   overriding
+   procedure Render (Engine : in out Text_Renderer;
+                     Doc    : in Wiki.Nodes.Document;
+                     Node   : in Wiki.Nodes.Node_Type);
 
    --  Add a section header in the document.
    overriding
@@ -120,8 +126,8 @@ private
    procedure Close_Paragraph (Document : in out Text_Renderer);
    procedure Open_Paragraph (Document : in out Text_Renderer);
 
-   type Text_Renderer is new Wiki.Documents.Document_Reader with record
-      Writer         : Wiki.Writers.Writer_Type_Access := null;
+   type Text_Renderer is new Wiki.Render.Renderer with record
+      Output         : Streams.Output_Stream_Access := null;
       Format         : Wiki.Documents.Format_Map := (others => False);
       Has_Paragraph  : Boolean := False;
       Need_Paragraph : Boolean := False;
