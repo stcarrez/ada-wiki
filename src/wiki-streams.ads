@@ -34,7 +34,7 @@ package Wiki.Streams is
                    Eof   : out Boolean) is abstract;
 
    type Output_Stream is limited interface;
-   type Output_Stream_Type_Access is access all Output_Stream'Class;
+   type Output_Stream_Access is access all Output_Stream'Class;
 
    procedure Write (Stream  : in out Output_Stream;
                     Content : in Wide_Wide_String) is abstract;
