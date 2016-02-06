@@ -164,10 +164,10 @@ private
                       Link : in Wide_Wide_String) return Boolean;
 
    procedure Start_Element (P          : in out Parser;
-                            Name       : in Unbounded_Wide_Wide_String;
+                            Tag        : in Wiki.Nodes.Html_Tag_Type;
                             Attributes : in Wiki.Attributes.Attribute_List_Type);
 
    procedure End_Element (P    : in out Parser;
-                          Name : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String);
+                          Tag  : in Wiki.Nodes.Html_Tag_Type);
 
 end Wiki.Parsers;
