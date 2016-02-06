@@ -63,6 +63,35 @@ package body Wiki.Filters is
    end Add_Header;
 
    --  ------------------------------
+   --  Push a HTML node with the given tag to the document.
+   --  ------------------------------
+   procedure Push_Node (Filter     : in out Filter_Type;
+                        Document   : in out Wiki.Nodes.Document;
+                        Tag        : in Wiki.Nodes.Html_Tag_Type;
+                        Attributes : in out Wiki.Attributes.Attribute_List_Type) is
+   begin
+      if Filter.Next /= null then
+         Filter.Push_Node (Document, Tag, Attributes);
+      else
+         Wiki.Nodes.Append (Document, Tag, Attributes);
+      end if;
+   end Push_Node;
+
+   --  ------------------------------
+   --  Pop a HTML node with the given tag.
+   --  ------------------------------
+   procedure Pop_Node (Filter   : in out Filter_Type;
+                       Document : in out Wiki.Nodes.Document;
+                       Tag     : in Wiki.Nodes.Html_Tag_Type) is
+   begin
+      if Filter.Next /= null then
+         Filter.Pop_Node (Document, Tag);
+      else
+         Wiki.Nodes.Append (Document, Tag);
+      end if;
+   end Pop_Node;
+
+   --  ------------------------------
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
    --  ------------------------------
@@ -124,17 +153,6 @@ package body Wiki.Filters is
    end Add_Quote;
 
    --  ------------------------------
-   --  Add a text block with the given format.
-   --  ------------------------------
-   overriding
-   procedure Add_Text (Document : in out Filter_Type;
-                       Text     : in Unbounded_Wide_Wide_String;
-                       Format   : in Wiki.Documents.Format_Map) is
-   begin
-      Document.Document.Add_Text (Text, Format);
-   end Add_Text;
-
-   --  ------------------------------
    --  Add a text block that is pre-formatted.
    --  ------------------------------
    overriding
@@ -144,21 +162,6 @@ package body Wiki.Filters is
    begin
       Document.Document.Add_Preformatted (Text, Format);
    end Add_Preformatted;
-
-   overriding
-   procedure Start_Element (Document   : in out Filter_Type;
-                            Name       : in Unbounded_Wide_Wide_String;
-                            Attributes : in Wiki.Attributes.Attribute_List_Type) is
-   begin
-      Document.Document.Start_Element (Name, Attributes);
-   end Start_Element;
-
-   overriding
-   procedure End_Element (Document : in out Filter_Type;
-                          Name     : in Unbounded_Wide_Wide_String) is
-   begin
-      Document.Document.End_Element (Name);
-   end End_Element;
 
    --  ------------------------------
    --  Finish the document after complete wiki text has been parsed.
