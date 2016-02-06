@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters -- Wiki filters
---  Copyright (C) 2015 Stephane Carrez
+--  Copyright (C) 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +20,8 @@ with Ada.Finalization;
 
 with Wiki.Attributes;
 with Wiki.Documents;
+with Wiki.Nodes;
+with Wiki.Strings;
 
 --  == Filters ==
 --  The <b>Wiki.Filters</b> package provides a simple filter framework that allows to plug
@@ -47,44 +49,64 @@ package Wiki.Filters is
    --  ------------------------------
    --  Filter type
    --  ------------------------------
-   type Filter_Type is new Ada.Finalization.Limited_Controlled
-     and Wiki.Documents.Document_Reader with private;
+   type Filter_Type is new Ada.Finalization.Limited_Controlled with private;
    type Filter_Type_Access is access all Filter_Type'Class;
 
+   --  Add a simple node such as N_LINE_BREAK, N_HORIZONTAL_RULE or N_PARAGRAPH to the document.
+   procedure Add_Node (Filter    : in out Filter_Type;
+                       Document  : in out Wiki.Nodes.Document;
+                       Kind      : in Wiki.Nodes.Simple_Node_Kind);
+
+   --  Add a text content with the given format to the document.
+   procedure Add_Text (Filter    : in out Filter_Type;
+                       Document  : in out Wiki.Nodes.Document;
+                       Text      : in Wiki.Strings.WString;
+                       Format    : in Wiki.Nodes.Format_Map);
+
+   --  Add a section header with the given level in the document.
+   procedure Add_Header (Filter    : in out Filter_Type;
+                         Document  : in out Wiki.Nodes.Document;
+                         Header    : in Wiki.Strings.WString;
+                         Level     : in Natural);
+
+   --  Push a HTML node with the given tag to the document.
+   procedure Push_Node (Filter     : in out Filter_Type;
+                        Document   : in out Wiki.Nodes.Document;
+                        Tag        : in Wiki.Nodes.Html_Tag_Type;
+                        Attributes : in out Wiki.Attributes.Attribute_List_Type);
+
+   --  Pop a HTML node with the given tag.
+   procedure Pop_Node (Filter   : in out Filter_Type;
+                       Document : in out Wiki.Nodes.Document;
+                        Tag     : in Wiki.Nodes.Html_Tag_Type);
+
    --  Add a section header in the document.
-   overriding
    procedure Add_Header (Document : in out Filter_Type;
                          Header   : in Unbounded_Wide_Wide_String;
                          Level    : in Positive);
 
    --  Add a line break (<br>).
-   overriding
    procedure Add_Line_Break (Document : in out Filter_Type);
 
    --  Add a paragraph (<p>).  Close the previous paragraph if any.
    --  The paragraph must be closed at the next paragraph or next header.
-   overriding
    procedure Add_Paragraph (Document : in out Filter_Type);
 
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
-   overriding
    procedure Add_Blockquote (Document : in out Filter_Type;
                              Level    : in Natural);
 
    --  Add a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
-   overriding
    procedure Add_List_Item (Document : in out Filter_Type;
                             Level    : in Positive;
                             Ordered  : in Boolean);
 
    --  Add an horizontal rule (<hr>).
-   overriding
    procedure Add_Horizontal_Rule (Document : in out Filter_Type);
 
    --  Add a link.
-   overriding
    procedure Add_Link (Document : in out Filter_Type;
                        Name     : in Unbounded_Wide_Wide_String;
                        Link     : in Unbounded_Wide_Wide_String;
@@ -92,7 +114,6 @@ package Wiki.Filters is
                        Title    : in Unbounded_Wide_Wide_String);
 
    --  Add an image.
-   overriding
    procedure Add_Image (Document    : in out Filter_Type;
                         Link        : in Unbounded_Wide_Wide_String;
                         Alt         : in Unbounded_Wide_Wide_String;
@@ -100,35 +121,29 @@ package Wiki.Filters is
                         Description : in Unbounded_Wide_Wide_String);
 
    --  Add a quote.
-   overriding
    procedure Add_Quote (Document : in out Filter_Type;
                         Quote    : in Unbounded_Wide_Wide_String;
                         Link     : in Unbounded_Wide_Wide_String;
                         Language : in Unbounded_Wide_Wide_String);
 
    --  Add a text block with the given format.
-   overriding
    procedure Add_Text (Document : in out Filter_Type;
                        Text     : in Unbounded_Wide_Wide_String;
                        Format   : in Wiki.Documents.Format_Map);
 
    --  Add a text block that is pre-formatted.
-   overriding
    procedure Add_Preformatted (Document : in out Filter_Type;
                                Text     : in Unbounded_Wide_Wide_String;
                                Format   : in Unbounded_Wide_Wide_String);
 
-   overriding
    procedure Start_Element (Document   : in out Filter_Type;
                             Name       : in Unbounded_Wide_Wide_String;
                             Attributes : in Wiki.Attributes.Attribute_List_Type);
 
-   overriding
    procedure End_Element (Document : in out Filter_Type;
                           Name     : in Unbounded_Wide_Wide_String);
 
    --  Finish the document after complete wiki text has been parsed.
-   overriding
    procedure Finish (Document : in out Filter_Type);
 
    --  Set the document reader.
@@ -137,8 +152,8 @@ package Wiki.Filters is
 
 private
 
-   type Filter_Type is new Ada.Finalization.Limited_Controlled
-     and Wiki.Documents.Document_Reader with record
+   type Filter_Type is new Ada.Finalization.Limited_Controlled with record
+      Next     : Filter_Type_Access;
       Document : Wiki.Documents.Document_Reader_Access;
    end record;
 
