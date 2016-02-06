@@ -136,15 +136,10 @@ package Wiki.Filters is
    --  Finish the document after complete wiki text has been parsed.
    procedure Finish (Document : in out Filter_Type);
 
-   --  Set the document reader.
-   procedure Set_Document (Filter   : in out Filter_Type;
-                           Document : in Wiki.Documents.Document_Reader_Access);
-
 private
 
    type Filter_Type is new Ada.Finalization.Limited_Controlled with record
       Next     : Filter_Type_Access;
-      Document : Wiki.Documents.Document_Reader_Access;
    end record;
 
 end Wiki.Filters;
