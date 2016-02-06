@@ -80,11 +80,6 @@ package Wiki.Filters is
                        Document : in out Wiki.Nodes.Document;
                         Tag     : in Wiki.Nodes.Html_Tag_Type);
 
-   --  Add a section header in the document.
-   procedure Add_Header (Document : in out Filter_Type;
-                         Header   : in Unbounded_Wide_Wide_String;
-                         Level    : in Positive);
-
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
    procedure Add_Blockquote (Document : in out Filter_Type;
@@ -116,22 +111,10 @@ package Wiki.Filters is
                         Link     : in Unbounded_Wide_Wide_String;
                         Language : in Unbounded_Wide_Wide_String);
 
-   --  Add a text block with the given format.
-   procedure Add_Text (Document : in out Filter_Type;
-                       Text     : in Unbounded_Wide_Wide_String;
-                       Format   : in Wiki.Documents.Format_Map);
-
    --  Add a text block that is pre-formatted.
    procedure Add_Preformatted (Document : in out Filter_Type;
                                Text     : in Unbounded_Wide_Wide_String;
                                Format   : in Unbounded_Wide_Wide_String);
-
-   procedure Start_Element (Document   : in out Filter_Type;
-                            Name       : in Unbounded_Wide_Wide_String;
-                            Attributes : in Wiki.Attributes.Attribute_List_Type);
-
-   procedure End_Element (Document : in out Filter_Type;
-                          Name     : in Unbounded_Wide_Wide_String);
 
    --  Finish the document after complete wiki text has been parsed.
    procedure Finish (Document : in out Filter_Type);
