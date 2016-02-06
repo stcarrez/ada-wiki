@@ -33,6 +33,21 @@ package body Wiki.Filters is
    end Add_Node;
 
    --  ------------------------------
+   --  Add a text content with the given format to the document.
+   --  ------------------------------
+   procedure Add_Text (Filter    : in out Filter_Type;
+                       Document  : in out Wiki.Nodes.Document;
+                       Text      : in Wiki.Strings.WString;
+                       Format    : in Wiki.Nodes.Format_Map) is
+   begin
+      if Filter.Next /= null then
+         Filter.Add_Text (Document, Text, Format);
+      else
+         Wiki.Nodes.Append (Document, Text, Format);
+      end if;
+   end Add_Text;
+
+   --  ------------------------------
    --  Add a section header in the document.
    --  ------------------------------
    overriding
