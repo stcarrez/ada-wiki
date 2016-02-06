@@ -391,7 +391,7 @@ package body Wiki.Parsers is
       if not Is_Html then
          P.Document.Add_Preformatted (P.Text, Format);
          Clear (P.Text);
-         P.Document.Add_Paragraph;
+         P.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
          P.In_Paragraph := True;
       end if;
    end Parse_Preformatted;
@@ -1069,7 +1069,7 @@ package body Wiki.Parsers is
       end if;
       P.Empty_Line := True;
       Flush_Text (P);
-      P.Filters.Add_Node (Wiki.Nodes.N_LINE_BREAK);
+      P.Filters.Add_Node (P.Document, Wiki.Nodes.N_LINE_BREAK);
    end Parse_Line_Break;
 
    --  ------------------------------
@@ -1284,7 +1284,7 @@ package body Wiki.Parsers is
       Buffer : aliased Wide_Input;
    begin
       Buffer.Pos   := Text'First;
-      P.Document   := Into;
+--      P.Document   := Into;
       P.Empty_Line := True;
       P.Format     := (others => False);
       P.Is_Eof     := False;
@@ -1332,7 +1332,7 @@ package body Wiki.Parsers is
                           Table : in Parser_Table) is
       C : Wide_Wide_Character;
    begin
-      P.Document.Add_Paragraph;
+      P.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
       P.In_Paragraph := True;
       while not P.Is_Eof loop
          Peek (P, C);
