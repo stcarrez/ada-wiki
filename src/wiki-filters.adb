@@ -63,25 +63,6 @@ package body Wiki.Filters is
    end Add_Header;
 
    --  ------------------------------
-   --  Add a line break (<br>).
-   --  ------------------------------
-   overriding
-   procedure Add_Line_Break (Document : in out Filter_Type) is
-   begin
-      Document.Document.Add_Line_Break;
-   end Add_Line_Break;
-
-   --  ------------------------------
-   --  Add a paragraph (<p>).  Close the previous paragraph if any.
-   --  The paragraph must be closed at the next paragraph or next header.
-   --  ------------------------------
-   overriding
-   procedure Add_Paragraph (Document : in out Filter_Type) is
-   begin
-      Document.Document.Add_Paragraph;
-   end Add_Paragraph;
-
-   --  ------------------------------
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
    --  ------------------------------
