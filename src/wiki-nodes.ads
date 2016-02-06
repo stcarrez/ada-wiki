@@ -24,10 +24,10 @@ package Wiki.Nodes is
    subtype Format_Map is Wiki.Documents.Format_Map;
    subtype WString is Wide_Wide_String;
 
-   type Node_Kind is (N_HEADER,
-                      N_LINE_BREAK,
+   type Node_Kind is (N_LINE_BREAK,
                       N_HORIZONTAL_RULE,
                       N_PARAGRAPH,
+                      N_HEADER,
                       N_BLOCKQUOTE,
                       N_QUOTE,
                       N_TAG_START,
@@ -36,7 +36,10 @@ package Wiki.Nodes is
                       N_LINK,
                       N_IMAGE);
 
-   --  The possible HTML tags as described in HTML5 specification.
+   --  Node kinds which are simple markers in the document.
+   subtype Simple_Node_Kind is Node_Kind range N_LINE_BREAK .. N_PARAGRAPH;
+
+     --  The possible HTML tags as described in HTML5 specification.
    type Html_Tag_Type is
      (
       --  Section 4.1 The root element
@@ -152,6 +155,10 @@ package Wiki.Nodes is
    --  Append a node to the document.
    procedure Append (Into : in out Document;
                      Node : in Node_Type_Access);
+
+   --  Append a simple node such as N_LINE_BREAK, N_HORIZONTAL_RULE or N_PARAGRAPH.
+   procedure Append (Into : in out Document;
+                     Kind : in Simple_Node_Kind);
 
    --  Append a HTML tag start node to the document.
    procedure Add_Tag (Document   : in out Wiki.Nodes.Document;
