@@ -48,14 +48,18 @@ package body Wiki.Filters is
    end Add_Text;
 
    --  ------------------------------
-   --  Add a section header in the document.
+   --  Add a section header with the given level in the document.
    --  ------------------------------
-   overriding
-   procedure Add_Header (Document : in out Filter_Type;
-                         Header   : in Unbounded_Wide_Wide_String;
-                         Level    : in Positive) is
+   procedure Add_Header (Filter    : in out Filter_Type;
+                         Document  : in out Wiki.Nodes.Document;
+                         Header    : in Wiki.Strings.WString;
+                         Level     : in Natural) is
    begin
-      Document.Document.Add_Header (Header, Level);
+      if Filter.Next /= null then
+         Filter.Add_Header (Document, Header, Level);
+      else
+         Wiki.Nodes.Append (Document, Header, Level);
+      end if;
    end Add_Header;
 
    --  ------------------------------
