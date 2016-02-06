@@ -411,9 +411,30 @@ package body Wiki.Parsers is
    --  ------------------------------
    procedure Parse_Header (P     : in out Parser;
                            Token : in Wide_Wide_Character) is
-      Header : Unbounded_Wide_Wide_String;
+
       C      : Wide_Wide_Character;
       Level  : Integer := 1;
+
+      procedure Add_Header (Content : in Wiki.Strings.WString) is
+         Last         : Natural := Content'Last;
+         Ignore_Token : Boolean := True;
+         Seen_Token   : Boolean := False;
+      begin
+         --  Remove the spaces and '=' at end of header string.
+         while Last > Content'First loop
+            if Content (Last) = Token then
+               exit when not Ignore_Token;
+               Seen_Token := True;
+            elsif Content (Last) = ' ' or Content (Last) = HT then
+               Ignore_Token := not Seen_Token;
+            else
+               exit;
+            end if;
+            Last := Last - 1;
+         end loop;
+         P.Filters.Add_Header (P.Document, Content (Content'First .. Last), Level);
+      end Add_Header;
+
    begin
       if not P.Empty_Line then
          Parse_Text (P, Token);
@@ -430,33 +451,14 @@ package body Wiki.Parsers is
       while C = ' ' or C = HT loop
          Peek (P, C);
       end loop;
+      Flush_Text (P);
+      Flush_List (P);
 
       loop
-         Append (Header, C);
+         Append (P.Text, C);
          Peek (P, C);
          exit when C = LF or C = CR;
       end loop;
-
-      --  Remove the spaces and '=' at end of header string.
-      declare
-         Len          : Natural := Length (Header);
-         Ignore_Token : Boolean := True;
-         Seen_Token   : Boolean := False;
-      begin
-         while Len > 0 loop
-            C := Element (Header, Len);
-            if C = Token then
-               exit when not Ignore_Token;
-               Seen_Token := True;
-            elsif C = ' ' or C = HT then
-               Ignore_Token := not Seen_Token;
-            else
-               exit;
-            end if;
-            Delete (Header, Len, Len);
-            Len := Len - 1;
-         end loop;
-      end;
 
       --  dotclear header is the opposite of Creole for the level.
       Level := Level + P.Header_Offset;
@@ -467,9 +469,7 @@ package body Wiki.Parsers is
          Level := 1;
       end if;
 
-      Flush_Text (P);
-      Flush_List (P);
-      P.Document.Add_Header (Header, Level);
+      Iterate (P.Text, Add_Header'Access);
       P.Empty_Line   := True;
       P.In_Paragraph := False;
    end Parse_Header;
