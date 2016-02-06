@@ -85,13 +85,6 @@ package Wiki.Filters is
                          Header   : in Unbounded_Wide_Wide_String;
                          Level    : in Positive);
 
-   --  Add a line break (<br>).
-   procedure Add_Line_Break (Document : in out Filter_Type);
-
-   --  Add a paragraph (<p>).  Close the previous paragraph if any.
-   --  The paragraph must be closed at the next paragraph or next header.
-   procedure Add_Paragraph (Document : in out Filter_Type);
-
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
    procedure Add_Blockquote (Document : in out Filter_Type;
@@ -102,9 +95,6 @@ package Wiki.Filters is
    procedure Add_List_Item (Document : in out Filter_Type;
                             Level    : in Positive;
                             Ordered  : in Boolean);
-
-   --  Add an horizontal rule (<hr>).
-   procedure Add_Horizontal_Rule (Document : in out Filter_Type);
 
    --  Add a link.
    procedure Add_Link (Document : in out Filter_Type;
