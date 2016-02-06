@@ -34,7 +34,9 @@ package Wiki.Nodes is
                       N_INDENT,
                       N_TEXT,
                       N_LINK,
-                      N_IMAGE);
+                      N_TABLE,
+                      N_ROW,
+                      N_COLUMN);
 
    --  Node kinds which are simple markers in the document.
    subtype Simple_Node_Kind is Node_Kind range N_LINE_BREAK .. N_PARAGRAPH;
@@ -106,6 +108,9 @@ package Wiki.Nodes is
       UNKNOWN_TAG
      );
 
+   --  Find the tag from the tag name.
+   function Find_Tag (Name : in Wide_Wide_String) return Html_Tag_Type;
+
    type String_Access is access constant String;
 
    --  Get the HTML tag name.
@@ -127,7 +132,8 @@ package Wiki.Nodes is
             Format : Format_Map;
             Text   : WString (1 .. Len);
 
-         when N_LINK | N_IMAGE =>
+         when N_LINK =>
+            Image      : Boolean;
             Link_Attr  : Wiki.Attributes.Attribute_List_Type;
             Title      : WString (1 .. Len);
 
