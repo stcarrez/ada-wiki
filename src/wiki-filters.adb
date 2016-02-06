@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters -- Wiki filters
---  Copyright (C) 2015 Stephane Carrez
+--  Copyright (C) 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,20 @@
 -----------------------------------------------------------------------
 
 package body Wiki.Filters is
+
+   --  ------------------------------
+   --  Add a simple node such as N_LINE_BREAK, N_HORIZONTAL_RULE or N_PARAGRAPH to the document.
+   --  ------------------------------
+   procedure Add_Node (Filter    : in out Filter_Type;
+                       Document  : in out Wiki.Nodes.Document;
+                       Kind      : in Wiki.Nodes.Simple_Node_Kind) is
+   begin
+      if Filter.Next /= null then
+         Filter.Add_Node (Document, Kind);
+      else
+         Wiki.Nodes.Append (Document, Kind);
+      end if;
+   end Add_Node;
 
    --  ------------------------------
    --  Add a section header in the document.
