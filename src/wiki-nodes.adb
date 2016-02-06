@@ -59,6 +59,476 @@ package body Wiki.Nodes is
    end Get_Tag_Name;
 
    --  ------------------------------
+   --  Find the tag from the tag name.
+   --  ------------------------------
+   function Find_Tag (Name : in Wide_Wide_String) return Html_Tag_Type is
+   begin
+      --  The list of possible tags is well known and will not change very often.
+      --  The tag lookup is implemented to be efficient with 2 or 3 embedded cases that
+      --  reduce the comparison to the minimum.  The result is a large case statement that
+      --  becomes unreadable.
+      case Name'Length is
+         when 0 =>
+            return UNKNOWN_TAG;
+
+         when 1 =>
+            case Name (Name'First) is
+            when 'a' | 'A' =>
+               return A_TAG;
+            when 'b' | 'B' =>
+               return B_TAG;
+            when 'i' | 'I' =>
+               return I_TAG;
+            when 'p' | 'P' =>
+               return P_TAG;
+            when 'q' | 'Q' =>
+               return Q_TAG;
+            when 's' | 'S' =>
+               return S_TAG;
+            when 'u' | 'U' =>
+               return U_TAG;
+            when others =>
+               return UNKNOWN_TAG;
+            end case;
+
+         when 2 =>
+            case Name (Name'First) is
+            when 'b' | 'B' =>
+               case Name (Name'Last) is
+                  when 'r' | 'R' =>
+                     return BR_TAG;
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'd' | 'D' =>
+               case Name (Name'Last) is
+                  when 'l' | 'L' =>
+                     return DL_TAG;
+                  when 't' | 'T' =>
+                     return DT_TAG;
+                  when 'd' | 'D' =>
+                     return DD_TAG;
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'e' | 'E' =>
+               case Name (Name'Last) is
+                  when 'm' | 'M' =>
+                     return EM_TAG;
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'h' | 'H' =>
+               case Name (Name'Last) is
+                  when '1' =>
+                     return H1_TAG;
+                  when '2' =>
+                     return H2_TAG;
+                  when '3' =>
+                     return H3_TAG;
+                  when '4' =>
+                     return H4_TAG;
+                  when '5' =>
+                     return H5_TAG;
+                  when '6' =>
+                     return H6_TAG;
+                  when 'r' | 'R' =>
+                     return HR_TAG;
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'l' | 'L' =>
+               case Name (Name'Last) is
+                  when 'i' | 'I' =>
+                     return LI_TAG;
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'o' | 'O' =>
+               case Name (Name'Last) is
+                  when 'l' | 'L' =>
+                     return OL_TAG;
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'r' | 'R' =>
+               case Name (Name'Last) is
+                  when 'b' | 'B' =>
+                     return RB_TAG;
+                  when 'p' | 'P' =>
+                     return RP_TAG;
+                  when 't' | 'T' =>
+                     return RT_TAG;
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 't' | 'T' =>
+               case Name (Name'Last) is
+                  when 'r' | 'R' =>
+                     return TR_TAG;
+                  when 'd' | 'D' =>
+                     return TD_TAG;
+                  when 'h' | 'H' =>
+                     return TH_TAG;
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'u' | 'U' =>
+               case Name (Name'Last) is
+                  when 'l' | 'L' =>
+                     return UL_TAG;
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when others =>
+               return UNKNOWN_TAG;
+
+            end case;
+
+         when 3 =>
+            case Name (Name'First) is
+            when 'b' | 'B' =>
+               case Name (Name'Last) is
+                  when 'i' | 'I' =>
+                     return Tag (Name, "bdi", BDI_TAG);
+                  when 'o' | 'O' =>
+                     return Tag (Name, "bdo", BDO_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'c' | 'C' =>
+               return Tag (Name, "col", COL_TAG);
+
+            when 'd' | 'D' =>
+               case Name (Name'First + 1) is
+                  when 'i' | 'I' =>
+                     return Tag (Name, "div", DIV_TAG);
+                  when 'f' | 'F' =>
+                     return Tag (Name, "dfn", DFN_TAG);
+                  when 'e' | 'E' =>
+                     return Tag (Name, "del", DEL_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'i' | 'I' =>
+               case Name (Name'Last) is
+                  when 'g' | 'G' =>
+                     return Tag (Name, "img", IMG_TAG);
+                  when 's' | 'S' =>
+                     return Tag (Name, "ins", INS_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'k' | 'K' =>
+               return Tag (Name, "kbd", KBD_TAG);
+
+            when 'm' | 'M' =>
+               return Tag (Name, "map", MAP_TAG);
+
+            when 'n' | 'N' =>
+               return Tag (Name, "nav", NAV_TAG);
+
+            when 'p' | 'P' =>
+               return Tag (Name, "pre", PRE_TAG);
+
+            when 'r' | 'R' =>
+               return Tag (Name, "rtc", RTC_TAG);
+
+            when 's' | 'S' =>
+               case Name (Name'Last) is
+                  when 'b' | 'B' =>
+                     return Tag (Name, "sub", SUB_TAG);
+                  when 'n' | 'N' =>
+                     return SPAN_TAG;
+                  when 'p' | 'P' =>
+                     return Tag (Name, "sup", SUP_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'v' | 'V' =>
+               return Tag (Name, "var", VAR_TAG);
+
+            when 'w' | 'W' =>
+               return Tag (Name, "wbr", WBR_TAG);
+
+            when others =>
+               return UNKNOWN_TAG;
+            end case;
+
+         when 4 =>
+            case Name (Name'First) is
+            when 'a' | 'A' =>
+               case Name (Name'First + 1) is
+                  when 'b' | 'B' =>
+                     return Tag (Name, "abbr", ABBR_TAG);
+                  when 'r' | 'R' =>
+                     return Tag (Name, "area", AREA_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'b' | 'B' =>
+               case Name (Name'First + 1) is
+                  when 'a' | 'A' =>
+                     return Tag (Name, "base", BASE_TAG);
+                  when 'o' | 'O' =>
+                     return Tag (Name, "body", BODY_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'c' | 'C' =>
+               case Name (Name'First + 1) is
+                  when 'i' | 'I' =>
+                     return Tag (Name, "cite", CITE_TAG);
+                  when 'o' | 'O' =>
+                     return Tag (Name, "code", CODE_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'd' | 'D' =>
+               return Tag (Name, "data", DATA_TAG);
+
+            when 'f' | 'F' =>
+               return Tag (Name, "form", FORM_TAG);
+
+            when 'h' | 'H' =>
+               case Name (Name'First + 1) is
+                  when 't' | 'T' =>
+                     return Tag (Name, "html", HTML_TAG);
+                  when 'e' | 'E' =>
+                     return Tag (Name, "head", HEAD_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'l' | 'L' =>
+               return Tag (Name, "link", LINK_TAG);
+
+            when 'm' | 'M' =>
+               case Name (Name'Last) is
+                  when 'a' | 'A' =>
+                     return Tag (Name, "meta", META_TAG);
+                  when 'n' | 'N' =>
+                     return Tag (Name, "main", MAIN_TAG);
+                  when 'k' | 'K' =>
+                     return Tag (Name, "mark", MARK_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'r' | 'R' =>
+               return Tag (Name, "ruby", RUBY_TAG);
+
+            when 's' | 'S' =>
+               case Name (Name'First + 1) is
+                  when 'p' | 'P' =>
+                     return Tag (Name, "span", SPAN_TAG);
+                  when 'a' | 'A' =>
+                     return Tag (Name, "samp", SAMP_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 't' | 'T' =>
+               return Tag (Name, "time", TIME_TAG);
+
+            when others =>
+               return UNKNOWN_TAG;
+            end case;
+
+         when 5 =>
+            case Name (Name'First) is
+            when 'a' | 'A' =>
+               case Name (Name'First + 1) is
+                  when 's' | 'S' =>
+                     return Tag (Name, "aside", ASIDE_TAG);
+                  when 'u' | 'U' =>
+                     return Tag (Name, "audio", AUDIO_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'e' | 'E' =>
+               return Tag (Name, "embed", EMBED_TAG);
+
+            when 'i' | 'I' =>
+               return Tag (Name, "input", INPUT_TAG);
+
+            when 'l' | 'L' =>
+               return Tag (Name, "label", LABEL_TAG);
+
+            when 'm' | 'M' =>
+               return Tag (Name, "meter", METER_TAG);
+
+            when 'p' | 'P' =>
+               return Tag (Name, "param", PARAM_TAG);
+
+            when 's' | 'S' =>
+               case Name (Name'First + 1) is
+                  when 't' | 'T' =>
+                     return Tag (Name, "style", STYLE_TAG);
+                  when 'm' | 'M' =>
+                     return Tag (Name, "small", SMALL_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 't' | 'T' =>
+               case Name (Name'First + 1) is
+                  when 'i' | 'I' =>
+                     return Tag (Name, "title", TITLE_TAG);
+                  when 'r' | 'R' =>
+                     return Tag (Name, "track", TRACK_TAG);
+                  when 'a' | 'A' =>
+                     return Tag (Name, "table", TABLE_TAG);
+                  when 'b' | 'B' =>
+                     return Tag (Name, "tbody", TBODY_TAG);
+                  when 'h' | 'H' =>
+                     return Tag (Name, "thead", THEAD_TAG);
+                  when 'f' | 'F' =>
+                     return Tag (Name, "tfoot", TFOOT_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'v' | 'V' =>
+               return Tag (Name, "video", VIDEO_TAG);
+
+            when others =>
+               return UNKNOWN_TAG;
+            end case;
+
+         when others =>
+            case Name (Name'First) is
+            when 'a' | 'A' =>
+               case Name (Name'First + 1) is
+                  when 'r' | 'R' =>
+                     return Tag (Name, "article", ARTICLE_TAG);
+                  when 'd' | 'D' =>
+                     return Tag (Name, "address", ADDRESS_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'b' | 'B' =>
+               case Name (Name'First + 1) is
+                  when 'l' | 'L' =>
+                     return Tag (Name, "blockquote", BLOCKQUOTE_TAG);
+                  when 'u' | 'U' =>
+                     return Tag (Name, "button", BUTTON_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'c' | 'C' =>
+               case Name (Name'First + 2) is
+                  when 'p' | 'P' =>
+                     return Tag (Name, "caption", CAPTION_TAG);
+                  when 'l' | 'L' =>
+                     return Tag (Name, "colgroup", COLGROUP_TAG);
+                  when 'n' | 'N' =>
+                     return Tag (Name, "canvas", CANVAS_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'd' | 'D' =>
+               return Tag (Name, "datalist", DATALIST_TAG);
+
+            when 'f' | 'F' =>
+               case Name (Name'Last) is
+                  when 'r' | 'R' =>
+                     return Tag (Name, "footer", FOOTER_TAG);
+                  when 'e' | 'E' =>
+                     return Tag (Name, "figure", FIGURE_TAG);
+                  when 'n' | 'N' =>
+                     return Tag (Name, "figcaption", FIGCAPTION_TAG);
+                  when 't' | 'T' =>
+                     return Tag (Name, "fieldset", FIELDSET_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'h' | 'H' =>
+               return Tag (Name, "header", HEADER_TAG);
+
+            when 'i' | 'I' =>
+               return Tag (Name, "iframe", IFRAME_TAG);
+
+            when 'k' | 'K' =>
+               return Tag (Name, "keygen", KEYGEN_TAG);
+
+            when 'l' | 'L' =>
+               return Tag (Name, "legend", LEGEND_TAG);
+
+            when 'n' | 'N' =>
+               return Tag (Name, "noscript", NOSCRIPT_TAG);
+
+            when 'o' | 'O' =>
+               case Name (Name'First + 3) is
+                  when 'e' | 'E' =>
+                     return Tag (Name, "object", OBJECT_TAG);
+                  when 'g' | 'G' =>
+                     return Tag (Name, "optgroup", OPTGROUP_TAG);
+                  when 'i' | 'I' =>
+                     return Tag (Name, "option", OPTION_TAG);
+                  when 'p' | 'P' =>
+                     return Tag (Name, "output", OUTPUT_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 'p' | 'P' =>
+               return Tag (Name, "progress", PROGRESS_TAG);
+
+            when 's' | 'S' =>
+               case Name (Name'First + 3) is
+                  when 't' | 'T' =>
+                     return Tag (Name, "section", SECTION_TAG);
+                  when 'o' | 'O' =>
+                     return Tag (Name, "strong", STRONG_TAG);
+                  when 'r' | 'R' =>
+                     return Tag (Name, "source", SOURCE_TAG);
+                  when 'e' | 'E' =>
+                     return Tag (Name, "select", SELECT_TAG);
+                  when 'i' | 'I' =>
+                     return Tag (Name, "script", SCRIPT_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when 't' | 'T' =>
+               case Name (Name'Last) is
+                  when 'a' | 'A' =>
+                     return Tag (Name, "textarea", TEXTAREA_TAG);
+                  when 'e' | 'E' =>
+                     return Tag (Name, "template", TEMPLATE_TAG);
+                  when others =>
+                     return UNKNOWN_TAG;
+               end case;
+
+            when others =>
+               return UNKNOWN_TAG;
+            end case;
+      end case;
+   end Find_Tag;
+
+   --  ------------------------------
    --  Create a text node.
    --  ------------------------------
    function Create_Text (Text : in WString) return Node_Type_Access is
