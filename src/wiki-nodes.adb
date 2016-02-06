@@ -15,7 +15,7 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-
+with Ada.Wide_Wide_Characters.Handling;
 package body Wiki.Nodes is
 
    type Tag_Array is array (Html_Tag_Type) of String_Access;
@@ -62,6 +62,16 @@ package body Wiki.Nodes is
    --  Find the tag from the tag name.
    --  ------------------------------
    function Find_Tag (Name : in Wide_Wide_String) return Html_Tag_Type is
+      function Tag (Name   : in Wide_Wide_String;
+                    Expect : in Wide_Wide_String;
+                    Tag    : in Html_Tag_Type) return Html_Tag_Type is
+      begin
+         if Ada.Wide_Wide_Characters.Handling.To_Lower (Name) = Expect then
+            return Tag;
+         else
+            return UNKNOWN_TAG;
+         end if;
+      end Tag;
    begin
       --  The list of possible tags is well known and will not change very often.
       --  The tag lookup is implemented to be efficient with 2 or 3 embedded cases that
