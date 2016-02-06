@@ -23,6 +23,8 @@ package body Wiki.Parsers is
 
    use Wiki.Documents;
 
+   use Wiki.Strings.Wide_Wide_Builders;
+
    --  Parse the beginning or the end of a double character sequence.  This procedure
    --  is instantiated for several format types (bold, italic, superscript, subscript, code).
    --  Example:
@@ -192,7 +194,7 @@ package body Wiki.Parsers is
    begin
       if Length (P.Text) > 0 then
          P.Document.Add_Text (P.Text, P.Format);
-         P.Text := Null_Unbounded_Wide_Wide_String;
+         Clear (P.Text);
       end if;
    end Flush_Text;
 
@@ -388,7 +390,7 @@ package body Wiki.Parsers is
 
       if not Is_Html then
          P.Document.Add_Preformatted (P.Text, Format);
-         P.Text := Null_Unbounded_Wide_Wide_String;
+         Clear (P.Text);
          P.Document.Add_Paragraph;
          P.In_Paragraph := True;
       end if;
@@ -1067,7 +1069,7 @@ package body Wiki.Parsers is
       end if;
       P.Empty_Line := True;
       Flush_Text (P);
-      P.Document.Add_Line_Break;
+      P.Filters.Add_Node (Wiki.Nodes.N_LINE_BREAK);
    end Parse_Line_Break;
 
    --  ------------------------------
