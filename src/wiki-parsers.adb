@@ -210,7 +210,7 @@ package body Wiki.Parsers is
    procedure Flush_List (P : in out Parser) is
    begin
       if P.In_List then
-         End_Element (P, To_Unbounded_Wide_Wide_String ("dl"));
+         P.Filters.Pop_Node (P.Document, Wiki.Nodes.DL_TAG);
          P.In_List := False;
       end if;
    end Flush_List;
@@ -231,18 +231,18 @@ package body Wiki.Parsers is
    end Skip_Spaces;
 
    procedure Start_Element (P          : in out Parser;
-                            Name       : in Unbounded_Wide_Wide_String;
+                            Tag        : in Wiki.Nodes.Html_Tag_Type;
                             Attributes : in Wiki.Attributes.Attribute_List_Type) is
    begin
       Flush_Text (P);
-      P.Document.Start_Element (Name, Attributes);
+      P.Filters.Push_Node (P.Document, Tag, Attributes);
    end Start_Element;
 
    procedure End_Element (P    : in out Parser;
-                          Name : in Unbounded_Wide_Wide_String) is
+                          Tag  : in Wiki.Nodes.Html_Tag_Type) is
    begin
       Flush_Text (P);
-      P.Document.End_Element (Name);
+      P.Filters.Pop_Node (P.Document, Tag);
    end End_Element;
 
    --  ------------------------------
@@ -913,10 +913,10 @@ package body Wiki.Parsers is
       Flush_Text (P);
       Wiki.Attributes.Clear (P.Attributes);
       if not P.In_List then
-         Start_Element (P, To_Unbounded_Wide_Wide_String ("dl"), P.Attributes);
+         P.Filters.Push_Node (P.Document, Wiki.Nodes.DL_TAG, P.Attributes);
          P.In_List := True;
       end if;
-      Start_Element (P, To_Unbounded_Wide_Wide_String ("dt"), P.Attributes);
+      P.Filters.Push_Node (P.Document, Wiki.Nodes.DT_TAG, P.Attributes);
    end Parse_Item;
 
    --  ------------------------------
@@ -933,7 +933,7 @@ package body Wiki.Parsers is
       end if;
       Flush_Text (P);
       Wiki.Attributes.Clear (P.Attributes);
-      Start_Element (P, To_Unbounded_Wide_Wide_String ("dd"), P.Attributes);
+      P.Filters.Push_Node (P.Document, Wiki.Nodes.DD_TAG, P.Attributes);
    end Parse_Definition;
 
    --  ------------------------------
@@ -1024,7 +1024,7 @@ package body Wiki.Parsers is
             P.Document.Add_Blockquote (0);
             P.Quote_Level := 0;
          end if;
-         P.Document.Add_Paragraph;
+         P.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
          P.In_Paragraph := True;
       elsif Length (P.Text) > 0 or not P.Empty_Line then
          Append (P.Text, LF);
