@@ -668,7 +668,7 @@ package body Wiki.Parsers is
       if Count >= 4 then
          Flush_Text (P);
          Flush_List (P);
-         P.Document.Add_Horizontal_Rule;
+         P.Filters.Add_Node (P.Document, Wiki.Nodes.N_HORIZONTAL_RULE);
          if C /= LF and C /= CR then
             Put_Back (P, C);
          end if;
