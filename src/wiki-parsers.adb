@@ -191,9 +191,15 @@ package body Wiki.Parsers is
    --  Flush the wiki text that was collected in the text buffer.
    --  ------------------------------
    procedure Flush_Text (P : in out Parser) is
+
+      procedure Add_Text (Content : in Wiki.Nodes.WString) is
+      begin
+         P.Filters.Add_Text (P.Document, Content, P.Format);
+      end Add_Text;
+
    begin
       if Length (P.Text) > 0 then
-         P.Document.Add_Text (P.Text, P.Format);
+         Iterate (P.Text, Add_Text'Access);
          Clear (P.Text);
       end if;
    end Flush_Text;
