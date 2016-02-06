@@ -111,6 +111,25 @@ package body Wiki.Nodes is
    end Append;
 
    --  ------------------------------
+   --  Append a simple node such as N_LINE_BREAK, N_HORIZONTAL_RULE or N_PARAGRAPH.
+   --  ------------------------------
+   procedure Append (Into : in out Document;
+                     Kind : in Simple_Node_Kind) is
+   begin
+      case Kind is
+         when N_LINE_BREAK =>
+            Append (Into, new Node_Type '(Kind => N_LINE_BREAK, Len => 0));
+
+         when N_HORIZONTAL_RULE =>
+            Append (Into, new Node_Type '(Kind => N_HORIZONTAL_RULE, Len => 0));
+
+         when N_PARAGRAPH =>
+            Append (Into, new Node_Type '(Kind => N_PARAGRAPH, Len => 0));
+
+      end  case;
+   end Append;
+
+   --  ------------------------------
    --  Append a node to the node list.
    --  ------------------------------
    procedure Append (Into : in out Node_List;
