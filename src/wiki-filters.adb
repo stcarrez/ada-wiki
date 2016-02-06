@@ -86,15 +86,6 @@ package body Wiki.Filters is
    end Add_List_Item;
 
    --  ------------------------------
-   --  Add an horizontal rule (<hr>).
-   --  ------------------------------
-   overriding
-   procedure Add_Horizontal_Rule (Document : in out Filter_Type) is
-   begin
-      Document.Document.Add_Horizontal_Rule;
-   end Add_Horizontal_Rule;
-
-   --  ------------------------------
    --  Add a link.
    --  ------------------------------
    overriding
@@ -177,14 +168,5 @@ package body Wiki.Filters is
    begin
       Document.Document.Finish;
    end Finish;
-
-   --  ------------------------------
-   --  Set the document reader.
-   --  ------------------------------
-   procedure Set_Document (Filter   : in out Filter_Type;
-                           Document : in Wiki.Documents.Document_Reader_Access) is
-   begin
-      Filter.Document := Document;
-   end Set_Document;
 
 end Wiki.Filters;
