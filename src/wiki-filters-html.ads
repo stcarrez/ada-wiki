@@ -116,11 +116,38 @@ package Wiki.Filters.Html is
    --  ------------------------------
    type Html_Filter_Type is new Filter_Type with private;
 
-   --  Add a section header in the document.
+   --  Add a simple node such as N_LINE_BREAK, N_HORIZONTAL_RULE or N_PARAGRAPH to the document.
    overriding
-   procedure Add_Header (Document : in out Html_Filter_Type;
-                         Header   : in Unbounded_Wide_Wide_String;
-                         Level    : in Positive);
+   procedure Add_Node (Filter    : in out Html_Filter_Type;
+                       Document  : in out Wiki.Nodes.Document;
+                       Kind      : in Wiki.Nodes.Simple_Node_Kind);
+
+   --  Add a text content with the given format to the document.
+   overriding
+   procedure Add_Text (Filter    : in out Html_Filter_Type;
+                       Document  : in out Wiki.Nodes.Document;
+                       Text      : in Wiki.Strings.WString;
+                       Format    : in Wiki.Nodes.Format_Map);
+
+   --  Add a section header with the given level in the document.
+   overriding
+   procedure Add_Header (Filter    : in out Html_Filter_Type;
+                         Document  : in out Wiki.Nodes.Document;
+                         Header    : in Wiki.Strings.WString;
+                         Level     : in Natural);
+
+   --  Push a HTML node with the given tag to the document.
+   overriding
+   procedure Push_Node (Filter     : in out Html_Filter_Type;
+                        Document   : in out Wiki.Nodes.Document;
+                        Tag        : in Wiki.Nodes.Html_Tag_Type;
+                        Attributes : in out Wiki.Attributes.Attribute_List_Type);
+
+   --  Pop a HTML node with the given tag.
+   overrifing
+   procedure Pop_Node (Filter   : in out Html_Filter_Type;
+                       Document : in out Wiki.Nodes.Document;
+                        Tag     : in Wiki.Nodes.Html_Tag_Type);
 
    --  Add a text block with the given format.
    overriding
