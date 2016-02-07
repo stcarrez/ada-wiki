@@ -44,11 +44,6 @@ package Wiki.Render.Html is
                      Doc    : in Wiki.Nodes.Document;
                      Node   : in Wiki.Nodes.Node_Type);
 
-   --  Add a section header in the document.
-   procedure Add_Header (Engine : in out Html_Renderer;
-                         Header : in Wiki.Strings.WString;
-                         Level  : in Positive);
-
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
    procedure Add_Blockquote (Document : in out Html_Renderer;
@@ -112,6 +107,11 @@ private
    procedure Render_Tag (Engine : in out Html_Renderer;
                          Doc    : in Wiki.Nodes.Document;
                          Node   : in Wiki.Nodes.Node_Type);
+
+   --  Render a section header in the document.
+   procedure Render_Header (Engine : in out Html_Renderer;
+                            Header : in Wiki.Strings.WString;
+                            Level  : in Positive);
 
    --  Render a link.
    procedure Render_Link (Engine : in out Html_Renderer;
