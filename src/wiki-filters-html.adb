@@ -574,18 +574,61 @@ package body Wiki.Filters.Html is
             end case;
       end case;
    end Find_Tag;
+   --  Add a simple node such as N_LINE_BREAK, N_HORIZONTAL_RULE or N_PARAGRAPH to the document.
+   overriding
+   procedure Add_Node (Filter    : in out Html_Filter_Type;
+                       Document  : in out Wiki.Nodes.Document;
+                       Kind      : in Wiki.Nodes.Simple_Node_Kind);
 
    --  ------------------------------
-   --  Add a section header in the document.
+   --  Add a text content with the given format to the document.
    --  ------------------------------
    overriding
-   procedure Add_Header (Document : in out Html_Filter_Type;
-                         Header   : in Unbounded_Wide_Wide_String;
-                         Level    : in Positive) is
+   procedure Add_Text (Filter    : in out Html_Filter_Type;
+                       Document  : in out Wiki.Nodes.Document;
+                       Text      : in Wiki.Strings.WString;
+                       Format    : in Wiki.Nodes.Format_Map) is
    begin
-      Document.Flush_Stack;
-      Filter_Type (Document).Add_Header (Header, Level);
+      if Filter.Hide_Level > 0 then
+         return;
+      elsif not Filter.Stack.Is_Empty then
+         declare
+            Current_Tag : constant Html_Tag_Type := Filter.Stack.Last_Element;
+         begin
+            if No_End_Tag (Current_Tag) then
+               Filter_Type (Filter).Pop_Node (Current_Tag);
+               Filter.Stack.Delete_Last;
+            end if;
+         end;
+      end if;
+      Filter_Type (Filter).Add_Text (Document, Text, Format);
+   end Add_Text;
+
+   --  ------------------------------
+   --  Add a section header with the given level in the document.
+   --  ------------------------------
+   overriding
+   procedure Add_Header (Filter    : in out Html_Filter_Type;
+                         Document  : in out Wiki.Nodes.Document;
+                         Header    : in Wiki.Strings.WString;
+                         Level     : in Natural) is
+   begin
+      Filter.Flush_Stack;
+      Filter_Type (Filter).Add_Header (Document, Header, Level);
    end Add_Header;
+
+   --  Push a HTML node with the given tag to the document.
+   overriding
+   procedure Push_Node (Filter     : in out Html_Filter_Type;
+                        Document   : in out Wiki.Nodes.Document;
+                        Tag        : in Wiki.Nodes.Html_Tag_Type;
+                        Attributes : in out Wiki.Attributes.Attribute_List_Type);
+
+   --  Pop a HTML node with the given tag.
+   overrifing
+   procedure Pop_Node (Filter   : in out Html_Filter_Type;
+                       Document : in out Wiki.Nodes.Document;
+                        Tag     : in Wiki.Nodes.Html_Tag_Type);
 
    --  Add a text block with the given format.
    overriding
