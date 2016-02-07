@@ -617,39 +617,71 @@ package body Wiki.Filters.Html is
       Filter_Type (Filter).Add_Header (Document, Header, Level);
    end Add_Header;
 
+   --  ------------------------------
    --  Push a HTML node with the given tag to the document.
+   --  ------------------------------
    overriding
    procedure Push_Node (Filter     : in out Html_Filter_Type;
                         Document   : in out Wiki.Nodes.Document;
                         Tag        : in Wiki.Nodes.Html_Tag_Type;
-                        Attributes : in out Wiki.Attributes.Attribute_List_Type);
+                        Attributes : in out Wiki.Attributes.Attribute_List_Type) is
+      Current_Tag : Html_Tag_Type;
+   begin
+      while not Filter.Stack.Is_Empty loop
+         Current_Tag := Filter.Stack.Last_Element;
+         if Need_Close (Tag, Current_Tag) then
+            if Filter.Hide_Level = 0 then
+               Filter_Type (Filter).Pop_Node (Document, Current_Tag);
+            end if;
+            Filter.Stack.Delete_Last;
+         end if;
+         exit when not No_End_Tag (Current_Tag);
+      end loop;
+      if Filter.Hidden (Tag) then
+         Filter.Hide_Level := Filter.Hide_Level + 1;
+      elsif not Filter.Allowed (Tag) then
+         return;
+      end if;
+      Filter.Stack.Append (Tag);
+      if Filter.Hide_Level = 0 then
+         Filter_Type (Filter).Push_Node (Document, Tag, Attributes);
+      end if;
+   end Push_Node;
 
+   --  ------------------------------
    --  Pop a HTML node with the given tag.
-   overrifing
+   --  ------------------------------
+   overriding
    procedure Pop_Node (Filter   : in out Html_Filter_Type;
                        Document : in out Wiki.Nodes.Document;
-                        Tag     : in Wiki.Nodes.Html_Tag_Type);
-
-   --  Add a text block with the given format.
-   overriding
-   procedure Add_Text (Document : in out Html_Filter_Type;
-                       Text     : in Unbounded_Wide_Wide_String;
-                       Format   : in Wiki.Documents.Format_Map) is
+                       Tag      : in Wiki.Nodes.Html_Tag_Type) is
+      Current_Tag : Html_Tag_Type;
    begin
-      if Document.Hide_Level > 0 then
+      if Filter.Stack.Is_Empty then
          return;
-      elsif not Document.Stack.Is_Empty then
-         declare
-            Current_Tag : constant Html_Tag_Type := Document.Stack.Last_Element;
-         begin
-            if No_End_Tag (Current_Tag) then
-               Filter_Type (Document).End_Element (Tag_Names (Current_Tag));
-               Document.Stack.Delete_Last;
-            end if;
-         end;
+      elsif not Filter.Allowed (Tag) and not Filter.Hidden (Tag) then
+         return;
       end if;
-      Filter_Type (Document).Add_Text (Text, Format);
-   end Add_Text;
+
+      --  Emit a end tag element until we find our matching tag and the top most tag
+      --  allows the end tag to be omitted (ex: a td, tr, td, dd, ...).
+      while not Filter.Stack.Is_Empty loop
+         Current_Tag := Filter.Stack.Last_Element;
+         exit when Current_Tag = Tag or not Tag_Omission (Current_Tag);
+         if Filter.Hide_Level = 0 then
+            Filter_Type (Filter).Pop_Node (Document, Current_Tag);
+         end if;
+         Filter.Stack.Delete_Last;
+      end loop;
+
+      if Filter.Hide_Level = 0 then
+         Filter_Type (Filter).Pop_Node (Document, Tag);
+      end if;
+      if Filter.Hidden (Current_Tag) then
+         Filter.Hide_Level := Filter.Hide_Level - 1;
+      end if;
+      Filter.Stack.Delete_Last;
+   end Pop_Node;
 
    --  Add a link.
    overriding
@@ -706,66 +738,6 @@ package body Wiki.Filters.Html is
          end case;
       end if;
    end Need_Close;
-
-   overriding
-   procedure Start_Element (Document   : in out Html_Filter_Type;
-                            Name       : in Unbounded_Wide_Wide_String;
-                            Attributes : in Wiki.Attributes.Attribute_List_Type) is
-      Tag         : constant Html_Tag_Type := Find_Tag (To_Wide_Wide_String (Name));
-      Current_Tag : Html_Tag_Type;
-   begin
-      while not Document.Stack.Is_Empty loop
-         Current_Tag := Document.Stack.Last_Element;
-         if Need_Close (Tag, Current_Tag) then
-            if Document.Hide_Level = 0 then
-               Filter_Type (Document).End_Element (Tag_Names (Current_Tag));
-            end if;
-            Document.Stack.Delete_Last;
-         end if;
-         exit when not No_End_Tag (Current_Tag);
-      end loop;
-      if Document.Hidden (Tag) then
-         Document.Hide_Level := Document.Hide_Level + 1;
-      elsif not Document.Allowed (Tag) then
-         return;
-      end if;
-      Document.Stack.Append (Tag);
-      if Document.Hide_Level = 0 then
-         Filter_Type (Document).Start_Element (Name, Attributes);
-      end if;
-   end Start_Element;
-
-   overriding
-   procedure End_Element (Document : in out Html_Filter_Type;
-                          Name     : in Unbounded_Wide_Wide_String) is
-      Tag         : constant Html_Tag_Type := Find_Tag (To_Wide_Wide_String (Name));
-      Current_Tag : Html_Tag_Type;
-   begin
-      if Document.Stack.Is_Empty then
-         return;
-      elsif not Document.Allowed (Tag) and not Document.Hidden (Tag) then
-         return;
-      end if;
-
-      --  Emit a end tag element until we find our matching tag and the top most tag
-      --  allows the end tag to be omitted (ex: a td, tr, td, dd, ...).
-      while not Document.Stack.Is_Empty loop
-         Current_Tag := Document.Stack.Last_Element;
-         exit when Current_Tag = Tag or not Tag_Omission (Current_Tag);
-         if Document.Hide_Level = 0 then
-            Filter_Type (Document).End_Element (Tag_Names (Current_Tag));
-         end if;
-         Document.Stack.Delete_Last;
-      end loop;
-
-      if Document.Hide_Level = 0 then
-         Filter_Type (Document).End_Element (Name);
-      end if;
-      if Document.Hidden (Current_Tag) then
-         Document.Hide_Level := Document.Hide_Level - 1;
-      end if;
-      Document.Stack.Delete_Last;
-   end End_Element;
 
    --  ------------------------------
    --  Flush the HTML element that have not yet been closed.
