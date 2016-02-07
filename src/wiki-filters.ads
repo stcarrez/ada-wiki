@@ -78,7 +78,7 @@ package Wiki.Filters is
    --  Pop a HTML node with the given tag.
    procedure Pop_Node (Filter   : in out Filter_Type;
                        Document : in out Wiki.Nodes.Document;
-                        Tag     : in Wiki.Nodes.Html_Tag_Type);
+                       Tag      : in Wiki.Nodes.Html_Tag_Type);
 
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
@@ -92,18 +92,16 @@ package Wiki.Filters is
                             Ordered  : in Boolean);
 
    --  Add a link.
-   procedure Add_Link (Document : in out Filter_Type;
-                       Name     : in Unbounded_Wide_Wide_String;
-                       Link     : in Unbounded_Wide_Wide_String;
-                       Language : in Unbounded_Wide_Wide_String;
-                       Title    : in Unbounded_Wide_Wide_String);
+   procedure Add_Link (Filter     : in out Filter_Type;
+                       Document   : in out Wiki.Nodes.Document;
+                       Name       : in Wiki.Strings.WString;
+                       Attributes : in out Wiki.Attributes.Attribute_List_Type);
 
    --  Add an image.
-   procedure Add_Image (Document    : in out Filter_Type;
-                        Link        : in Unbounded_Wide_Wide_String;
-                        Alt         : in Unbounded_Wide_Wide_String;
-                        Position    : in Unbounded_Wide_Wide_String;
-                        Description : in Unbounded_Wide_Wide_String);
+   procedure Add_Image (Filter     : in out Filter_Type;
+                        Document   : in out Wiki.Nodes.Document;
+                        Name       : in Wiki.Strings.WString;
+                        Attributes : in out Wiki.Attributes.Attribute_List_Type);
 
    --  Add a quote.
    procedure Add_Quote (Document : in out Filter_Type;
