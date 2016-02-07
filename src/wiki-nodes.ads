@@ -17,6 +17,7 @@
 -----------------------------------------------------------------------
 with Wiki.Attributes;
 with Wiki.Documents;
+with Wiki.Strings;
 package Wiki.Nodes is
 
    pragma Preelaborate;
@@ -33,10 +34,7 @@ package Wiki.Nodes is
                       N_TAG_START,
                       N_INDENT,
                       N_TEXT,
-                      N_LINK,
-                      N_TABLE,
-                      N_ROW,
-                      N_COLUMN);
+                      N_LINK);
 
    --  Node kinds which are simple markers in the document.
    subtype Simple_Node_Kind is Node_Kind range N_LINE_BREAK .. N_PARAGRAPH;
@@ -170,6 +168,11 @@ package Wiki.Nodes is
    procedure Add_Tag (Document   : in out Wiki.Nodes.Document;
                       Tag        : in Html_Tag_Type;
                       Attributes : in Wiki.Attributes.Attribute_List_Type);
+
+   --  Append the text with the given format at end of the document.
+   procedure Append (Into   : in out Document;
+                     Text   : in Wiki.Strings.WString;
+                     Format : in Format_Map);
 
    --     procedure Add_Text (Doc  : in out Document;
 --                         Text : in WString);
