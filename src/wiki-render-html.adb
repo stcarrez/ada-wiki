@@ -255,17 +255,22 @@ package body Wiki.Render.Html is
       Exists : Boolean;
       Link   : Unbounded_Wide_Wide_String := Wiki.Attributes.Get_Unbounded_Wide_Value (Attr, "href");
       URI    : Unbounded_Wide_Wide_String;
+
+      procedure Render_Attribute (Name  : in String;
+                                  Value : in Wide_Wide_String) is
+      begin
+         if Name = "hreflang" or Name = "title" or Name = "rel" or Name = "target"
+         or Name = "style" or Name = "class" then
+            Engine.Output.Write_Wide_Attribute (Name, Value);
+         end if;
+      end Render_Attribute;
+
    begin
       Engine.Open_Paragraph;
       Engine.Output.Start_Element ("a");
-      if Length (Title) > 0 then
-         Document.Output.Write_Wide_Attribute ("title", Title);
-      end if;
-      if Length (Language) > 0 then
-         Document.Output.Write_Wide_Attribute ("lang", Language);
-      end if;
       Engine.Links.Make_Page_Link (Link, URI, Exists);
       Engine.Output.Write_Wide_Attribute ("href", URI);
+      Wiki.Attributes.Iterate (Attr, Render_Attribute'Access);
       Engine.Output.Write_Wide_Text (Name);
       Engine.Output.End_Element ("a");
    end Render_Link;
