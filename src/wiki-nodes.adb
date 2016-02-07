@@ -552,9 +552,9 @@ package body Wiki.Nodes is
    --  ------------------------------
    --  Append a HTML tag start node to the document.
    --  ------------------------------
-   procedure Add_Tag (Document   : in out Wiki.Nodes.Document;
-                      Tag        : in Html_Tag_Type;
-                      Attributes : in Wiki.Attributes.Attribute_List_Type) is
+   procedure Push_Node (Document   : in out Wiki.Nodes.Document;
+                        Tag        : in Html_Tag_Type;
+                        Attributes : in Wiki.Attributes.Attribute_List_Type) is
       Node : constant Node_Type_Access := new Node_Type '(Kind       => N_TAG_START,
                                                           Len        => 0,
                                                           Tag_Start  => Tag,
@@ -564,15 +564,31 @@ package body Wiki.Nodes is
    begin
       Append (Document.Nodes, Node);
       Document.Current := Node;
-   end Add_Tag;
+   end Push_Node;
 
-   procedure End_Tag (Document : in out Wiki.Nodes.Document;
-                      Tag      : in Html_Tag_Type) is
+   --  ------------------------------
+   --  Pop the HTML tag.
+   --  ------------------------------
+   procedure Pop_Node (Document : in out Wiki.Nodes.Document;
+                       Tag      : in Html_Tag_Type) is
    begin
       if Document.Current /= null then
          Document.Current := Document.Current.Parent;
       end if;
-   end End_Tag;
+   end Pop_Node;
+
+   --  ------------------------------
+   --  Append a section header at end of the document.
+   --  ------------------------------
+   procedure Append (Into   : in out Document;
+                     Header : in Wiki.Strings.WString;
+                     Level  : in Positive) is
+   begin
+      Append (Into, new Node_Type '(Kind   => N_HEADER,
+                                    Len    => Header'Length,
+                                    Header => Header,
+                                    Level  => Level));
+   end Append;
 
    --  ------------------------------
    --  Append a node to the document.
