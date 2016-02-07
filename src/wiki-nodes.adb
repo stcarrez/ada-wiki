@@ -610,6 +610,17 @@ package body Wiki.Nodes is
    end Append;
 
    --  ------------------------------
+   --  Append the text with the given format at end of the document.
+   --  ------------------------------
+   procedure Append (Into   : in out Document;
+                     Text   : in Wiki.Strings.WString;
+                     Format : in Format_Map) is
+   begin
+      Append (Into, new Node_Type '(Kind => N_TEXT, Len => Text'Length,
+                                    Text => Text, Format => Format));
+   end Append;
+
+   --  ------------------------------
    --  Append a node to the node list.
    --  ------------------------------
    procedure Append (Into : in out Node_List;
