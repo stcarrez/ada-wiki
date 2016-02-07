@@ -73,7 +73,7 @@ package body Wiki.Filters is
       if Filter.Next /= null then
          Filter.Push_Node (Document, Tag, Attributes);
       else
-         Wiki.Nodes.Append (Document, Tag, Attributes);
+         Wiki.Nodes.Push_Node (Document, Tag, Attributes);
       end if;
    end Push_Node;
 
@@ -87,7 +87,7 @@ package body Wiki.Filters is
       if Filter.Next /= null then
          Filter.Pop_Node (Document, Tag);
       else
-         Wiki.Nodes.Append (Document, Tag);
+         Wiki.Nodes.Pop_Node (Document, Tag);
       end if;
    end Pop_Node;
 
