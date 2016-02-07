@@ -117,27 +117,31 @@ package body Wiki.Filters is
    --  ------------------------------
    --  Add a link.
    --  ------------------------------
-   overriding
-   procedure Add_Link (Document : in out Filter_Type;
-                       Name     : in Unbounded_Wide_Wide_String;
-                       Link     : in Unbounded_Wide_Wide_String;
-                       Language : in Unbounded_Wide_Wide_String;
-                       Title    : in Unbounded_Wide_Wide_String) is
+   procedure Add_Link (Filter     : in out Filter_Type;
+                       Document   : in out Wiki.Nodes.Document;
+                       Name       : in Wiki.Strings.WString;
+                       Attributes : in out Wiki.Attributes.Attribute_List_Type) is
    begin
-      Document.Document.Add_Link (Name, Link, Language, Title);
+      if Filter.Next /= null then
+         Filter.Add_Link (Document, Name, Attributes);
+      else
+         Wiki.Nodes.Add_Link (Document, Name, Attributes);
+      end if;
    end Add_Link;
 
    --  ------------------------------
    --  Add an image.
    --  ------------------------------
-   overriding
-   procedure Add_Image (Document    : in out Filter_Type;
-                        Link        : in Unbounded_Wide_Wide_String;
-                        Alt         : in Unbounded_Wide_Wide_String;
-                        Position    : in Unbounded_Wide_Wide_String;
-                        Description : in Unbounded_Wide_Wide_String) is
+   procedure Add_Image (Filter     : in out Filter_Type;
+                        Document   : in out Wiki.Nodes.Document;
+                        Name       : in Wiki.Strings.WString;
+                        Attributes : in out Wiki.Attributes.Attribute_List_Type) is
    begin
-      Document.Document.Add_Image (Link, Alt, Position, Description);
+      if Filter.Next /= null then
+         Filter.Add_Image (Document, Name, Attributes);
+      else
+         Wiki.Nodes.Add_Image (Document, Name, Attributes);
+      end if;
    end Add_Image;
 
    --  ------------------------------
