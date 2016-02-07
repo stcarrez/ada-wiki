@@ -52,8 +52,8 @@ package body Wiki.Render.Html is
    begin
       case Node.Kind is
          when Wiki.Nodes.N_HEADER =>
-            Engine.Add_Header (Header => Node.Header,
-                               Level  => Node.Level);
+            Engine.Render_Header (Header => Node.Header,
+                                  Level  => Node.Level);
 
          when Wiki.Nodes.N_LINE_BREAK =>
             Engine.Output.Start_Element ("br");
@@ -124,11 +124,11 @@ package body Wiki.Render.Html is
    end Render_Tag;
 
    --  ------------------------------
-   --  Add a section header in the document.
+   --  Render a section header in the document.
    --  ------------------------------
-   procedure Add_Header (Engine : in out Html_Renderer;
-                         Header : in Wiki.Strings.WString;
-                         Level  : in Positive) is
+   procedure Render_Header (Engine : in out Html_Renderer;
+                            Header : in Wiki.Strings.WString;
+                            Level  : in Positive) is
    begin
       Engine.Close_Paragraph;
       Engine.Add_Blockquote (0);
@@ -154,7 +154,7 @@ package body Wiki.Render.Html is
          when others =>
             Engine.Output.Write_Wide_Element ("h3", Header);
       end case;
-   end Add_Header;
+   end Render_Header;
 
    --  ------------------------------
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
