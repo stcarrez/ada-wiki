@@ -55,13 +55,6 @@ package Wiki.Render.Html is
                             Level    : in Positive;
                             Ordered  : in Boolean);
 
-   --  Add an image.
-   procedure Add_Image (Document    : in out Html_Renderer;
-                        Link        : in Unbounded_Wide_Wide_String;
-                        Alt         : in Unbounded_Wide_Wide_String;
-                        Position    : in Unbounded_Wide_Wide_String;
-                        Description : in Unbounded_Wide_Wide_String);
-
    --  Add a quote.
    procedure Add_Quote (Document : in out Html_Renderer;
                         Quote    : in Unbounded_Wide_Wide_String;
@@ -118,5 +111,11 @@ private
                           Doc    : in Wiki.Nodes.Document;
                           Title  : in Wiki.Strings.WString;
                           Attr   : in Wiki.Attributes.Attribute_List_Type);
+
+   --  Render an image.
+   procedure Render_Image (Engine : in out Html_Renderer;
+                           Doc    : in Wiki.Nodes.Document;
+                           Title  : in Wiki.Strings.WString;
+                           Attr   : in Wiki.Attributes.Attribute_List_Type);
 
 end Wiki.Render.Html;
