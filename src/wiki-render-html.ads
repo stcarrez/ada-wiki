@@ -60,13 +60,6 @@ package Wiki.Render.Html is
                             Level    : in Positive;
                             Ordered  : in Boolean);
 
-   --  Add a link.
-   procedure Add_Link (Document : in out Html_Renderer;
-                       Name     : in Unbounded_Wide_Wide_String;
-                       Link     : in Unbounded_Wide_Wide_String;
-                       Language : in Unbounded_Wide_Wide_String;
-                       Title    : in Unbounded_Wide_Wide_String);
-
    --  Add an image.
    procedure Add_Image (Document    : in out Html_Renderer;
                         Link        : in Unbounded_Wide_Wide_String;
@@ -119,5 +112,11 @@ private
    procedure Render_Tag (Engine : in out Html_Renderer;
                          Doc    : in Wiki.Nodes.Document;
                          Node   : in Wiki.Nodes.Node_Type);
+
+   --  Render a link.
+   procedure Render_Link (Engine : in out Html_Renderer;
+                          Doc    : in Wiki.Nodes.Document;
+                          Title  : in Wiki.Strings.WString;
+                          Attr   : in Wiki.Attributes.Attribute_List_Type);
 
 end Wiki.Render.Html;
