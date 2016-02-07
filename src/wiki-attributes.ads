@@ -50,7 +50,7 @@ package Wiki.Attributes is
    procedure Next (Position : in out Cursor);
 
    --  A list of attributes.
-   type Attribute_List_Type is limited private;
+   type Attribute_List_Type is private;
 
    --  Find the attribute with the given name.
    function Find (List : in Attribute_List_Type;
@@ -79,6 +79,11 @@ package Wiki.Attributes is
    --  Clear the list and remove all existing attributes.
    procedure Clear (List : in out Attribute_List_Type);
 
+   --  Iterate over the list attributes and call the <tt>Process</tt> procedure.
+   procedure Iterate (List    : in Attribute_List_Type;
+                      Process : not null access procedure (Name : in String;
+                                                           Value : in Wide_Wide_String));
+
 private
 
    type Attribute (Name_Length, Value_Length : Natural) is limited record
@@ -97,7 +102,7 @@ private
       Pos : Attribute_Vectors.Cursor;
    end record;
 
-   type Attribute_List_Type is limited new Ada.Finalization.Limited_Controlled with record
+   type Attribute_List_Type is new Ada.Finalization.Controlled with record
       List    : Attribute_Vector;
    end record;
 
