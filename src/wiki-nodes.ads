@@ -165,14 +165,23 @@ package Wiki.Nodes is
                      Kind : in Simple_Node_Kind);
 
    --  Append a HTML tag start node to the document.
-   procedure Add_Tag (Document   : in out Wiki.Nodes.Document;
-                      Tag        : in Html_Tag_Type;
-                      Attributes : in Wiki.Attributes.Attribute_List_Type);
+   procedure Push_Node (Document   : in out Wiki.Nodes.Document;
+                        Tag        : in Html_Tag_Type;
+                        Attributes : in Wiki.Attributes.Attribute_List_Type);
+
+   --  Pop the HTML tag.
+   procedure Pop_Node (Document : in out Wiki.Nodes.Document;
+                       Tag      : in Html_Tag_Type);
 
    --  Append the text with the given format at end of the document.
    procedure Append (Into   : in out Document;
                      Text   : in Wiki.Strings.WString;
                      Format : in Format_Map);
+
+   --  Append a section header at end of the document.
+   procedure Append (Into   : in out Document;
+                     Header : in Wiki.Strings.WString;
+                     Level  : in Positive);
 
    --     procedure Add_Text (Doc  : in out Document;
 --                         Text : in WString);
