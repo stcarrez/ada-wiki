@@ -82,13 +82,14 @@ package body Wiki.Render.Html is
             Engine.Output.Write (Node.Quote);
 
          when Wiki.Nodes.N_LINK =>
-            Engine.Add_Link (Node.Title, Node.Link_Attr);
-
-         when Wiki.Nodes.N_IMAGE =>
-            null;
+            if Node.Image then
+               Engine.Add_Link (Node.Title, Node.Link_Attr);
+            else
+               Engine.Render_Link (Doc, Node.Title, Node.Link_Attr);
+            end if;
 
          when Wiki.Nodes.N_BLOCKQUOTE =>
-            null;
+            Engine.Add_Blockquote (Node.Level);
 
          when Wiki.Nodes.N_TAG_START =>
             Engine.Render_Tag (Doc, Node);
@@ -99,6 +100,8 @@ package body Wiki.Render.Html is
    procedure Render_Tag (Engine : in out Html_Renderer;
                          Doc    : in Wiki.Nodes.Document;
                          Node   : in Wiki.Nodes.Node_Type) is
+      use type Wiki.Nodes.Html_Tag_Type;
+
       Name : constant Wiki.Nodes.String_Access := Wiki.Nodes.Get_Tag_Name (Node.Tag_Start);
       Iter : Wiki.Attributes.Cursor := Wiki.Attributes.First (Node.Attributes);
    begin
@@ -243,29 +246,29 @@ package body Wiki.Render.Html is
    end Open_Paragraph;
 
    --  ------------------------------
-   --  Add a link.
+   --  Render a link.
    --  ------------------------------
-   procedure Add_Link (Document : in out Html_Renderer;
-                       Name     : in Unbounded_Wide_Wide_String;
-                       Link     : in Unbounded_Wide_Wide_String;
-                       Language : in Unbounded_Wide_Wide_String;
-                       Title    : in Unbounded_Wide_Wide_String) is
+   procedure Render_Link (Engine : in out Html_Renderer;
+                          Doc    : in Wiki.Nodes.Document;
+                          Title  : in Wiki.Strings.WString;
+                          Attr   : in Wiki.Attributes.Attribute_List_Type) is
       Exists : Boolean;
+      Link   : Unbounded_Wide_Wide_String := Wiki.Attributes.Get_Unbounded_Wide_Value (Attr, "href");
       URI    : Unbounded_Wide_Wide_String;
    begin
-      Document.Open_Paragraph;
-      Document.Output.Start_Element ("a");
+      Engine.Open_Paragraph;
+      Engine.Output.Start_Element ("a");
       if Length (Title) > 0 then
          Document.Output.Write_Wide_Attribute ("title", Title);
       end if;
       if Length (Language) > 0 then
          Document.Output.Write_Wide_Attribute ("lang", Language);
       end if;
-      Document.Links.Make_Page_Link (Link, URI, Exists);
-      Document.Output.Write_Wide_Attribute ("href", URI);
-      Document.Output.Write_Wide_Text (Name);
-      Document.Output.End_Element ("a");
-   end Add_Link;
+      Engine.Links.Make_Page_Link (Link, URI, Exists);
+      Engine.Output.Write_Wide_Attribute ("href", URI);
+      Engine.Output.Write_Wide_Text (Name);
+      Engine.Output.End_Element ("a");
+   end Render_Link;
 
    --  ------------------------------
    --  Add an image.
