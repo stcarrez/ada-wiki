@@ -83,7 +83,7 @@ package body Wiki.Render.Html is
 
          when Wiki.Nodes.N_LINK =>
             if Node.Image then
-               Engine.Add_Link (Node.Title, Node.Link_Attr);
+               Engine.Render_Image (Doc, Node.Title, Node.Link_Attr);
             else
                Engine.Render_Link (Doc, Node.Title, Node.Link_Attr);
             end if;
@@ -253,7 +253,7 @@ package body Wiki.Render.Html is
                           Title  : in Wiki.Strings.WString;
                           Attr   : in Wiki.Attributes.Attribute_List_Type) is
       Exists : Boolean;
-      Link   : Unbounded_Wide_Wide_String := Wiki.Attributes.Get_Unbounded_Wide_Value (Attr, "href");
+      Link   : Unbounded_Wide_Wide_String := Wiki.Attributes.Get_Attribute (Attr, "href");
       URI    : Unbounded_Wide_Wide_String;
 
       procedure Render_Attribute (Name  : in String;
@@ -271,42 +271,45 @@ package body Wiki.Render.Html is
       Engine.Links.Make_Page_Link (Link, URI, Exists);
       Engine.Output.Write_Wide_Attribute ("href", URI);
       Wiki.Attributes.Iterate (Attr, Render_Attribute'Access);
-      Engine.Output.Write_Wide_Text (Name);
+      Engine.Output.Write_Wide_Text (Title);
       Engine.Output.End_Element ("a");
    end Render_Link;
 
    --  ------------------------------
-   --  Add an image.
+   --  Render an image.
    --  ------------------------------
-   procedure Add_Image (Document    : in out Html_Renderer;
-                        Link        : in Unbounded_Wide_Wide_String;
-                        Alt         : in Unbounded_Wide_Wide_String;
-                        Position    : in Unbounded_Wide_Wide_String;
-                        Description : in Unbounded_Wide_Wide_String) is
-      pragma Unreferenced (Position);
-
+   procedure Render_Image (Engine : in out Html_Renderer;
+                           Doc    : in Wiki.Nodes.Document;
+                           Title  : in Wiki.Strings.WString;
+                           Attr   : in Wiki.Attributes.Attribute_List_Type) is
+      Link   : Unbounded_Wide_Wide_String := Wiki.Attributes.Get_Attribute (Attr, "href");
       URI    : Unbounded_Wide_Wide_String;
       Width  : Natural;
       Height : Natural;
+
+      procedure Render_Attribute (Name  : in String;
+                                  Value : in Wide_Wide_String) is
+      begin
+         if Name = "alt" or Name = "longdesc"
+           or Name = "style" or Name = "class" then
+            Engine.Output.Write_Wide_Attribute (Name, Value);
+         end if;
+      end Render_Attribute;
+
    begin
-      Document.Open_Paragraph;
-      Document.Output.Start_Element ("img");
-      if Length (Alt) > 0 then
-         Document.Output.Write_Wide_Attribute ("alt", Alt);
-      end if;
-      if Length (Description) > 0 then
-         Document.Output.Write_Wide_Attribute ("longdesc", Description);
-      end if;
-      Document.Links.Make_Image_Link (Link, URI, Width, Height);
-      Document.Output.Write_Wide_Attribute ("src", URI);
+      Engine.Open_Paragraph;
+      Engine.Output.Start_Element ("img");
+      Engine.Links.Make_Image_Link (Link, URI, Width, Height);
+      Engine.Output.Write_Wide_Attribute ("src", URI);
       if Width > 0 then
-         Document.Output.Write_Attribute ("width", Natural'Image (Width));
+         Engine.Output.Write_Attribute ("width", Natural'Image (Width));
       end if;
       if Height > 0 then
-         Document.Output.Write_Attribute ("height", Natural'Image (Height));
+         Engine.Output.Write_Attribute ("height", Natural'Image (Height));
       end if;
-      Document.Output.End_Element ("img");
-   end Add_Image;
+      Wiki.Attributes.Iterate (Attr, Render_Attribute'Access);
+      Engine.Output.End_Element ("img");
+   end Render_Image;
 
    --  ------------------------------
    --  Add a quote.
