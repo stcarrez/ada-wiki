@@ -167,6 +167,22 @@ package body Wiki.Attributes is
    end Clear;
 
    --  ------------------------------
+   --  Iterate over the list attributes and call the <tt>Process</tt> procedure.
+   --  ------------------------------
+   procedure Iterate (List    : in Attribute_List_Type;
+                      Process : not null access procedure (Name : in String;
+                                                           Value : in Wide_Wide_String)) is
+      Iter : Attribute_Vectors.Cursor := List.List.First;
+      Item : Attribute_Access;
+   begin
+      while Attribute_Vectors.Has_Element (Iter) loop
+         Item := Attribute_Vectors.Element (Iter);
+         Process (Item.Name, Item.Value);
+         Attribute_Vectors.Next (Iter);
+      end loop;
+   end Iterate;
+
+   --  ------------------------------
    --  Finalize the attribute list releasing any storage.
    --  ------------------------------
    overriding
