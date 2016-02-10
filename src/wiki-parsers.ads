@@ -165,7 +165,7 @@ private
 
    procedure Start_Element (P          : in out Parser;
                             Tag        : in Wiki.Nodes.Html_Tag_Type;
-                            Attributes : in Wiki.Attributes.Attribute_List_Type);
+                            Attributes : in out Wiki.Attributes.Attribute_List_Type);
 
    procedure End_Element (P    : in out Parser;
                           Tag  : in Wiki.Nodes.Html_Tag_Type);
