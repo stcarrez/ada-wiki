@@ -79,14 +79,13 @@ package body Wiki.Render.Html is
 
          when Wiki.Nodes.N_QUOTE =>
             Engine.Open_Paragraph;
-            Engine.Output.Write (Node.Quote);
+            Engine.Output.Write (Node.Title);
 
          when Wiki.Nodes.N_LINK =>
-            if Node.Image then
-               Engine.Render_Image (Doc, Node.Title, Node.Link_Attr);
-            else
-               Engine.Render_Link (Doc, Node.Title, Node.Link_Attr);
-            end if;
+            Engine.Render_Link (Doc, Node.Title, Node.Link_Attr);
+
+         when Wiki.Nodes.N_IMAGE =>
+            Engine.Render_Image (Doc, Node.Title, Node.Link_Attr);
 
          when Wiki.Nodes.N_BLOCKQUOTE =>
             Engine.Add_Blockquote (Node.Level);
@@ -327,7 +326,7 @@ package body Wiki.Render.Html is
       if Length (Link) > 0 then
          Document.Output.Write_Wide_Attribute ("cite", Link);
       end if;
-      Document.Output.Write_Wide_Text (Quote);
+      --  Document.Output.Write_Wide_Text (Quote);
       Document.Output.End_Element ("q");
    end Add_Quote;
 
@@ -381,7 +380,7 @@ package body Wiki.Render.Html is
    begin
       Document.Close_Paragraph;
       if Format = "html" then
-         Document.Output.Write (Text);
+         Document.Output.Write (To_Wide_Wide_String (Text));
       else
          Document.Output.Start_Element ("pre");
 --         Document.Output.Write_Wide_Text (Text);
