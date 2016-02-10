@@ -232,7 +232,7 @@ package body Wiki.Parsers is
 
    procedure Start_Element (P          : in out Parser;
                             Tag        : in Wiki.Nodes.Html_Tag_Type;
-                            Attributes : in Wiki.Attributes.Attribute_List_Type) is
+                            Attributes : in out Wiki.Attributes.Attribute_List_Type) is
    begin
       Flush_Text (P);
       P.Filters.Push_Node (P.Document, Tag, Attributes);
@@ -395,7 +395,7 @@ package body Wiki.Parsers is
       P.Empty_Line := True;
 
       if not Is_Html then
-         P.Filters.Add_Preformatted (P.Text, Format);
+         --  P.Filters.Add_Preformatted (P.Document, To_Wide_Wide_String (P.Text), Format);
          Clear (P.Text);
          P.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
          P.In_Paragraph := True;
@@ -655,7 +655,7 @@ package body Wiki.Parsers is
       Wiki.Attributes.Clear (P.Attributes);
       Wiki.Attributes.Append (P.Attributes, "href", Link);
       Wiki.Attributes.Append (P.Attributes, "lang", Language);
-      P.Filters.Add_Quote (P.Document, Quote, P.Attributes);
+      P.Filters.Add_Quote (P.Document, To_Wide_Wide_String (Quote), P.Attributes);
       Peek (P, C);
       if C /= '}' then
          Put_Back (P, C);
