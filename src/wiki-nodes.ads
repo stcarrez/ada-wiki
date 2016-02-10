@@ -188,6 +188,11 @@ package Wiki.Nodes is
                        Name       : in Wiki.Strings.WString;
                        Attributes : in out Wiki.Attributes.Attribute_List_Type);
 
+   --  Add an image.
+   procedure Add_Image (Into       : in out Document;
+                        Name       : in Wiki.Strings.WString;
+                        Attributes : in out Wiki.Attributes.Attribute_List_Type);
+
    --     procedure Add_Text (Doc  : in out Document;
 --                         Text : in WString);
 
