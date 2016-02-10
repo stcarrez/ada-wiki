@@ -34,7 +34,8 @@ package Wiki.Nodes is
                       N_TAG_START,
                       N_INDENT,
                       N_TEXT,
-                      N_LINK);
+                      N_LINK,
+                      N_IMAGE);
 
    --  Node kinds which are simple markers in the document.
    subtype Simple_Node_Kind is Node_Kind range N_LINE_BREAK .. N_PARAGRAPH;
@@ -130,8 +131,7 @@ package Wiki.Nodes is
             Format : Format_Map;
             Text   : WString (1 .. Len);
 
-         when N_LINK =>
-            Image      : Boolean;
+         when N_LINK | N_IMAGE =>
             Link_Attr  : Wiki.Attributes.Attribute_List_Type;
             Title      : WString (1 .. Len);
 
