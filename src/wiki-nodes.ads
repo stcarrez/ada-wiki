@@ -183,6 +183,11 @@ package Wiki.Nodes is
                      Header : in Wiki.Strings.WString;
                      Level  : in Positive);
 
+   --  Add a link.
+   procedure Add_Link (Into       : in out Document;
+                       Name       : in Wiki.Strings.WString;
+                       Attributes : in out Wiki.Attributes.Attribute_List_Type);
+
    --     procedure Add_Text (Doc  : in out Document;
 --                         Text : in WString);
 
