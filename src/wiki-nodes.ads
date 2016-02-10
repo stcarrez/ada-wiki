@@ -131,13 +131,9 @@ package Wiki.Nodes is
             Format : Format_Map;
             Text   : WString (1 .. Len);
 
-         when N_LINK | N_IMAGE =>
+         when N_LINK | N_IMAGE | N_QUOTE =>
             Link_Attr  : Wiki.Attributes.Attribute_List_Type;
             Title      : WString (1 .. Len);
-
-         when N_QUOTE =>
-            Quote_Attr : Wiki.Attributes.Attribute_List_Type;
-            Quote      : WString (1 .. Len);
 
          when N_TAG_START =>
             Tag_Start  : Html_Tag_Type;
@@ -193,6 +189,10 @@ package Wiki.Nodes is
                         Name       : in Wiki.Strings.WString;
                         Attributes : in out Wiki.Attributes.Attribute_List_Type);
 
+   --  Add a quote.
+   procedure Add_Quote (Into       : in out Document;
+                        Name       : in Wiki.Strings.WString;
+                        Attributes : in out Wiki.Attributes.Attribute_List_Type);
    --     procedure Add_Text (Doc  : in out Document;
 --                         Text : in WString);
 
