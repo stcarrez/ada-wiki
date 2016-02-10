@@ -970,7 +970,7 @@ package body Wiki.Parsers is
       Flush_List (P);
       P.Empty_Line := True;
       P.Quote_Level := Level;
-      P.Filters.Add_Blockquote (Level);
+      P.Filters.Add_Blockquote (P.Document, Level);
 
       --  Ignore the first white space after the quote character.
       if C /= ' ' and C /= HT then
@@ -1030,7 +1030,7 @@ package body Wiki.Parsers is
 
          --  Finish the active blockquotes if a new paragraph is started on an empty line.
          if P.Quote_Level > 0 then
-            P.Filters.Add_Blockquote (0);
+            P.Filters.Add_Blockquote (P.Document, 0);
             P.Quote_Level := 0;
          end if;
          P.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
@@ -1043,7 +1043,7 @@ package body Wiki.Parsers is
       --  the blockquote.
       if P.Quote_Level > 0 and C /= '>' then
          Flush_Text (P);
-         P.Filters.Add_Blockquote (0);
+         P.Filters.Add_Blockquote (P.Document, 0);
          P.Quote_Level := 0;
       end if;
       P.Empty_Line := True;
