@@ -95,21 +95,31 @@ package body Wiki.Filters is
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
    --  ------------------------------
-   procedure Add_Blockquote (Document : in out Filter_Type;
+   procedure Add_Blockquote (Filter   : in out Filter_Type;
+                             Document : in out Wiki.Nodes.Document;
                              Level    : in Natural) is
    begin
-      Document.Document.Add_Blockquote (Level);
+      if Filter.Next /= null then
+         Filter.Next.Add_Blockquote (Document, Level);
+      else
+         Wiki.Nodes.Add_Blockquote (Document, Level);
+      end if;
    end Add_Blockquote;
 
    --  ------------------------------
    --  Add a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
    --  ------------------------------
-   procedure Add_List_Item (Document : in out Filter_Type;
+   procedure Add_List_Item (Filter   : in out Filter_Type;
+                            Document : in out Wiki.Nodes.Document;
                             Level    : in Positive;
                             Ordered  : in Boolean) is
    begin
-      Document.Document.Add_List_Item (Level, Ordered);
+      if Filter.Next /= null then
+         Filter.Next.Add_List_Item (Document, Level, Ordered);
+      else
+         Wiki.Nodes.Add_List_Item (Document, Level, Ordered);
+      end if;
    end Add_List_Item;
 
    --  ------------------------------
