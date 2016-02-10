@@ -395,7 +395,7 @@ package body Wiki.Parsers is
       P.Empty_Line := True;
 
       if not Is_Html then
-         P.Document.Add_Preformatted (P.Text, Format);
+         P.Filters.Add_Preformatted (P.Text, Format);
          Clear (P.Text);
          P.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
          P.In_Paragraph := True;
@@ -585,10 +585,13 @@ package body Wiki.Parsers is
       if Length (Link) = 0 then
          Link := Title;
       end if;
+      Wiki.Attributes.Append (P.Attributes, "href", Link);
+      Wiki.Attributes.Append (P.Attributes, "hreflang", Language);
+      Wiki.Attributes.Append (P.Attributes, "title", Link_Title);
       if Is_Image (P, To_Wide_Wide_String (Link)) then
-         P.Document.Add_Image (Title, Link, Language, Link_Title);
+         P.Filters.Add_Image (P.Document, To_Wide_Wide_String (Title), P.Attributes);
       else
-         P.Document.Add_Link (Title, Link, Language, Link_Title);
+         P.Filters.Add_Link (P.Document, To_Wide_Wide_String (Title), P.Attributes);
       end if;
       Peek (P, C);
       if not P.Is_Eof then
@@ -649,7 +652,10 @@ package body Wiki.Parsers is
          Put_Back (P, C);
       end if;
       Flush_Text (P);
-      P.Document.Add_Quote (Quote, Link, Language);
+      Wiki.Attributes.Clear (P.Attributes);
+      Wiki.Attributes.Append (P.Attributes, "href", Link);
+      Wiki.Attributes.Append (P.Attributes, "lang", Language);
+      P.Filters.Add_Quote (P.Document, Quote, P.Attributes);
       Peek (P, C);
       if C /= '}' then
          Put_Back (P, C);
@@ -743,7 +749,10 @@ package body Wiki.Parsers is
          Put_Back (P, C);
       end if;
       Flush_Text (P);
-      P.Document.Add_Image (Link, Alt, Position, Desc);
+      Wiki.Attributes.Append (P.Attributes, "src", Link);
+      Wiki.Attributes.Append (P.Attributes, "position", Position);
+      Wiki.Attributes.Append (P.Attributes, "longdesc", Desc);
+      P.Filters.Add_Image (P.Document, To_Wide_Wide_String (Alt), P.Attributes);
       Peek (P, C);
       if C /= ')' then
          Put_Back (P, C);
@@ -867,7 +876,7 @@ package body Wiki.Parsers is
          Level := Level + 1;
       end loop;
       Flush_Text (P);
-      P.Document.Add_List_Item (Level, Token = '#');
+      P.Filters.Add_List_Item (Level, Token = '#');
 
       --  Ignore the first white space after the list item.
       if C /= ' ' and C /= HT then
@@ -890,7 +899,7 @@ package body Wiki.Parsers is
          Level := Level + 1;
       end loop;
       Flush_Text (P);
-      P.Document.Add_List_Item (Level, Token = '#');
+      P.Filters.Add_List_Item (Level, Token = '#');
 
       --  Ignore the first white space after the list item.
       if C /= ' ' and C /= HT then
@@ -961,7 +970,7 @@ package body Wiki.Parsers is
       Flush_List (P);
       P.Empty_Line := True;
       P.Quote_Level := Level;
-      P.Document.Add_Blockquote (Level);
+      P.Filters.Add_Blockquote (Level);
 
       --  Ignore the first white space after the quote character.
       if C /= ' ' and C /= HT then
@@ -1021,7 +1030,7 @@ package body Wiki.Parsers is
 
          --  Finish the active blockquotes if a new paragraph is started on an empty line.
          if P.Quote_Level > 0 then
-            P.Document.Add_Blockquote (0);
+            P.Filters.Add_Blockquote (0);
             P.Quote_Level := 0;
          end if;
          P.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
@@ -1034,7 +1043,7 @@ package body Wiki.Parsers is
       --  the blockquote.
       if P.Quote_Level > 0 and C /= '>' then
          Flush_Text (P);
-         P.Document.Add_Blockquote (0);
+         P.Filters.Add_Blockquote (0);
          P.Quote_Level := 0;
       end if;
       P.Empty_Line := True;
@@ -1350,7 +1359,7 @@ package body Wiki.Parsers is
       end loop;
 
       Flush_Text (P);
-      P.Document.Finish;
+      P.Filters.Finish;
    end Parse_Token;
 
 end Wiki.Parsers;
