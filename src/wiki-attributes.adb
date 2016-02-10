@@ -135,6 +135,23 @@ package body Wiki.Attributes is
    end Append;
 
    --  ------------------------------
+   --  Append the attribute to the attribute list.
+   --  ------------------------------
+   procedure Append (List  : in out Attribute_List_Type;
+                     Name  : in String;
+                     Value : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String) is
+      Val : constant Wide_Wide_String
+        := To_Wide_Wide_String (Value);
+      Attr : constant Attribute_Access
+        := new Attribute '(Name_Length  => Name'Length,
+                           Value_Length => Val'Length,
+                           Name         => Name,
+                           Value        => Val);
+   begin
+      List.List.Append (Attr);
+   end Append;
+
+   --  ------------------------------
    --  Get the cursor to get access to the first attribute.
    --  ------------------------------
    function First (List : in Attribute_List_Type) return Cursor is
