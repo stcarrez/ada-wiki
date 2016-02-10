@@ -110,8 +110,9 @@ package Wiki.Filters is
                         Attributes : in out Wiki.Attributes.Attribute_List_Type);
 
    --  Add a text block that is pre-formatted.
-   procedure Add_Preformatted (Document : in out Filter_Type;
-                               Text     : in Unbounded_Wide_Wide_String;
+   procedure Add_Preformatted (Filter   : in out Filter_Type;
+                               Document : in out Wiki.Nodes.Document;
+                               Text     : in Wiki.Strings.WString;
                                Format   : in Unbounded_Wide_Wide_String);
 
    --  Finish the document after complete wiki text has been parsed.
