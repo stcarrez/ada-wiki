@@ -659,6 +659,17 @@ package body Wiki.Nodes is
    end Add_Image;
 
    --  ------------------------------
+   --  Add a quote.
+   --  ------------------------------
+   procedure Add_Quote (Into       : in out Document;
+                        Name       : in Wiki.Strings.WString;
+                        Attributes : in out Wiki.Attributes.Attribute_List_Type) is
+   begin
+      Append (Into, new Node_Type '(Kind => N_QUOTE, Len => Name'Length,
+                                    Title => Name, Link_Attr => Attributes));
+   end Add_Quote;
+
+   --  ------------------------------
    --  Append a node to the node list.
    --  ------------------------------
    procedure Append (Into : in out Node_List;
