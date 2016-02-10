@@ -670,6 +670,17 @@ package body Wiki.Nodes is
    end Add_Quote;
 
    --  ------------------------------
+   --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
+   --  The blockquote must be closed at the next header.
+   --  ------------------------------
+   procedure Add_Blockquote (Into     : in out Document;
+                             Level    : in Natural) is
+   begin
+      Append (Into, new Node_Type '(Kind => N_BLOCKQUOTE, Len => 0,
+                                    Level => Level, others => <>));
+   end Add_Blockquote;
+
+   --  ------------------------------
    --  Append a node to the node list.
    --  ------------------------------
    procedure Append (Into : in out Node_List;
