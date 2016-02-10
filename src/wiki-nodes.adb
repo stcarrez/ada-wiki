@@ -637,6 +637,17 @@ package body Wiki.Nodes is
    end Append;
 
    --  ------------------------------
+   --  Add a link.
+   --  ------------------------------
+   procedure Add_Link (Into       : in out Document;
+                       Name       : in Wiki.Strings.WString;
+                       Attributes : in out Wiki.Attributes.Attribute_List_Type) is
+   begin
+      Append (Into, new Node_Type '(Kind => N_LINK, Len => Name'Length,
+                                    Title => Name, Link_Attr => Attributes));
+   end Add_Link;
+
+   --  ------------------------------
    --  Append a node to the node list.
    --  ------------------------------
    procedure Append (Into : in out Node_List;
