@@ -670,6 +670,18 @@ package body Wiki.Nodes is
    end Add_Quote;
 
    --  ------------------------------
+   --  Add a list item (<li>).  Close the previous paragraph and list item if any.
+   --  The list item will be closed at the next list item, next paragraph or next header.
+   --  ------------------------------
+   procedure Add_List_Item (Into     : in out Document;
+                            Level    : in Positive;
+                            Ordered  : in Boolean) is
+   begin
+      Append (Into, new Node_Type '(Kind => N_INDENT, Len => 0,
+                                    Level => Level, others => <>));
+   end Add_List_Item;
+
+   --  ------------------------------
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
    --  ------------------------------
