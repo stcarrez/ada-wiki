@@ -194,6 +194,12 @@ package Wiki.Nodes is
                         Name       : in Wiki.Strings.WString;
                         Attributes : in out Wiki.Attributes.Attribute_List_Type);
 
+   --  Add a list item (<li>).  Close the previous paragraph and list item if any.
+   --  The list item will be closed at the next list item, next paragraph or next header.
+   procedure Add_List_Item (Into     : in out Document;
+                            Level    : in Positive;
+                            Ordered  : in Boolean);
+
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
    procedure Add_Blockquote (Into     : in out Document;
