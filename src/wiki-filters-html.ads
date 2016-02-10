@@ -40,6 +40,8 @@ private with Ada.Containers.Vectors;
 --
 package Wiki.Filters.Html is
 
+   use Wiki.Nodes;
+
    --  ------------------------------
    --  Filter type
    --  ------------------------------
@@ -73,26 +75,24 @@ package Wiki.Filters.Html is
                         Attributes : in out Wiki.Attributes.Attribute_List_Type);
 
    --  Pop a HTML node with the given tag.
-   overrifing
+   overriding
    procedure Pop_Node (Filter   : in out Html_Filter_Type;
                        Document : in out Wiki.Nodes.Document;
-                        Tag     : in Wiki.Nodes.Html_Tag_Type);
+                       Tag      : in Wiki.Nodes.Html_Tag_Type);
 
    --  Add a link.
    overriding
-   procedure Add_Link (Document : in out Html_Filter_Type;
-                       Name     : in Unbounded_Wide_Wide_String;
-                       Link     : in Unbounded_Wide_Wide_String;
-                       Language : in Unbounded_Wide_Wide_String;
-                       Title    : in Unbounded_Wide_Wide_String);
+   procedure Add_Link (Filter     : in out Html_Filter_Type;
+                       Document   : in out Wiki.Nodes.Document;
+                       Name       : in Wiki.Strings.WString;
+                       Attributes : in out Wiki.Attributes.Attribute_List_Type);
 
    --  Add an image.
    overriding
-   procedure Add_Image (Document    : in out Html_Filter_Type;
-                        Link        : in Unbounded_Wide_Wide_String;
-                        Alt         : in Unbounded_Wide_Wide_String;
-                        Position    : in Unbounded_Wide_Wide_String;
-                        Description : in Unbounded_Wide_Wide_String);
+   procedure Add_Image (Filter     : in out Html_Filter_Type;
+                        Document   : in out Wiki.Nodes.Document;
+                        Name       : in Wiki.Strings.WString;
+                        Attributes : in out Wiki.Attributes.Attribute_List_Type);
 
    --  Finish the document after complete wiki text has been parsed.
    overriding
