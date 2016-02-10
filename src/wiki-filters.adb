@@ -26,7 +26,7 @@ package body Wiki.Filters is
                        Kind      : in Wiki.Nodes.Simple_Node_Kind) is
    begin
       if Filter.Next /= null then
-         Filter.Add_Node (Document, Kind);
+         Filter.Next.Add_Node (Document, Kind);
       else
          Wiki.Nodes.Append (Document, Kind);
       end if;
@@ -41,7 +41,7 @@ package body Wiki.Filters is
                        Format    : in Wiki.Nodes.Format_Map) is
    begin
       if Filter.Next /= null then
-         Filter.Add_Text (Document, Text, Format);
+         Filter.Next.Add_Text (Document, Text, Format);
       else
          Wiki.Nodes.Append (Document, Text, Format);
       end if;
@@ -56,7 +56,7 @@ package body Wiki.Filters is
                          Level     : in Natural) is
    begin
       if Filter.Next /= null then
-         Filter.Add_Header (Document, Header, Level);
+         Filter.Next.Add_Header (Document, Header, Level);
       else
          Wiki.Nodes.Append (Document, Header, Level);
       end if;
@@ -71,7 +71,7 @@ package body Wiki.Filters is
                         Attributes : in out Wiki.Attributes.Attribute_List_Type) is
    begin
       if Filter.Next /= null then
-         Filter.Push_Node (Document, Tag, Attributes);
+         Filter.Next.Push_Node (Document, Tag, Attributes);
       else
          Wiki.Nodes.Push_Node (Document, Tag, Attributes);
       end if;
@@ -85,7 +85,7 @@ package body Wiki.Filters is
                        Tag     : in Wiki.Nodes.Html_Tag_Type) is
    begin
       if Filter.Next /= null then
-         Filter.Pop_Node (Document, Tag);
+         Filter.Next.Pop_Node (Document, Tag);
       else
          Wiki.Nodes.Pop_Node (Document, Tag);
       end if;
@@ -95,7 +95,6 @@ package body Wiki.Filters is
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
    --  ------------------------------
-   overriding
    procedure Add_Blockquote (Document : in out Filter_Type;
                              Level    : in Natural) is
    begin
@@ -106,7 +105,6 @@ package body Wiki.Filters is
    --  Add a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
    --  ------------------------------
-   overriding
    procedure Add_List_Item (Document : in out Filter_Type;
                             Level    : in Positive;
                             Ordered  : in Boolean) is
@@ -123,7 +121,7 @@ package body Wiki.Filters is
                        Attributes : in out Wiki.Attributes.Attribute_List_Type) is
    begin
       if Filter.Next /= null then
-         Filter.Add_Link (Document, Name, Attributes);
+         Filter.Next.Add_Link (Document, Name, Attributes);
       else
          Wiki.Nodes.Add_Link (Document, Name, Attributes);
       end if;
@@ -138,7 +136,7 @@ package body Wiki.Filters is
                         Attributes : in out Wiki.Attributes.Attribute_List_Type) is
    begin
       if Filter.Next /= null then
-         Filter.Add_Image (Document, Name, Attributes);
+         Filter.Next.Add_Image (Document, Name, Attributes);
       else
          Wiki.Nodes.Add_Image (Document, Name, Attributes);
       end if;
@@ -153,7 +151,7 @@ package body Wiki.Filters is
                         Attributes : in out Wiki.Attributes.Attribute_List_Type) is
    begin
       if Filter.Next /= null then
-         Filter.Add_Quote (Document, Name, Attributes);
+         Filter.Next.Add_Quote (Document, Name, Attributes);
       else
          Wiki.Nodes.Add_Quote (Document, Name, Attributes);
       end if;
@@ -168,7 +166,7 @@ package body Wiki.Filters is
                                Format   : in Unbounded_Wide_Wide_String) is
    begin
       if Filter.Next /= null then
-         Filter.Add_Preformatted (Document, Text, Format);
+         Filter.Next.Add_Preformatted (Document, Text, Format);
       else
          Wiki.Nodes.Add_Preformatted (Document, Text, Format);
       end if;
@@ -177,10 +175,11 @@ package body Wiki.Filters is
    --  ------------------------------
    --  Finish the document after complete wiki text has been parsed.
    --  ------------------------------
-   overriding
-   procedure Finish (Document : in out Filter_Type) is
+   procedure Finish (Filter : in out Filter_Type) is
    begin
-      Document.Document.Finish;
+      if Filter.Next /= null then
+         Filter.Next.Finish;
+      end if;
    end Finish;
 
 end Wiki.Filters;
