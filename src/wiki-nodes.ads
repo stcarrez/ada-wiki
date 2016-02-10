@@ -193,6 +193,12 @@ package Wiki.Nodes is
    procedure Add_Quote (Into       : in out Document;
                         Name       : in Wiki.Strings.WString;
                         Attributes : in out Wiki.Attributes.Attribute_List_Type);
+
+   --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
+   --  The blockquote must be closed at the next header.
+   procedure Add_Blockquote (Into     : in out Document;
+                             Level    : in Natural);
+
    --     procedure Add_Text (Doc  : in out Document;
 --                         Text : in WString);
 
