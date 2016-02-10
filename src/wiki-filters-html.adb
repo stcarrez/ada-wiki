@@ -574,11 +574,31 @@ package body Wiki.Filters.Html is
             end case;
       end case;
    end Find_Tag;
+
+   --  ------------------------------
    --  Add a simple node such as N_LINE_BREAK, N_HORIZONTAL_RULE or N_PARAGRAPH to the document.
+   --  ------------------------------
    overriding
    procedure Add_Node (Filter    : in out Html_Filter_Type;
                        Document  : in out Wiki.Nodes.Document;
-                       Kind      : in Wiki.Nodes.Simple_Node_Kind);
+                       Kind      : in Wiki.Nodes.Simple_Node_Kind) is
+     Tag : Html_Tag_Type;
+   begin
+     case Kind is
+        when N_LINE_BREAK =>
+           Tag := BR_TAG;
+
+        when N_PARAGRAPH =>
+           Tag := P_TAG;
+
+        when N_HORIZONTAL_RULE =>
+           Tag := HR_TAG;
+
+     end case;
+     if Filter.Allowed (Tag) then
+        Filter_Type (Filter).Add_Node (Document, Kind);
+     end if;
+   end Add_Node;
 
    --  ------------------------------
    --  Add a text content with the given format to the document.
@@ -683,29 +703,31 @@ package body Wiki.Filters.Html is
       Filter.Stack.Delete_Last;
    end Pop_Node;
 
+   --  ------------------------------
    --  Add a link.
+   --  ------------------------------
    overriding
-   procedure Add_Link (Document : in out Html_Filter_Type;
-                       Name     : in Unbounded_Wide_Wide_String;
-                       Link     : in Unbounded_Wide_Wide_String;
-                       Language : in Unbounded_Wide_Wide_String;
-                       Title    : in Unbounded_Wide_Wide_String) is
+   procedure Add_Link (Filter     : in out Html_Filter_Type;
+                       Document   : in out Wiki.Nodes.Document;
+                       Name       : in Wiki.Strings.WString;
+                       Attributes : in out Wiki.Attributes.Attribute_List_Type) is
    begin
-      if Document.Allowed (A_TAG) then
-         Filter_Type (Document).Add_Link (Name, Link, Language, Title);
+      if Filter.Allowed (A_TAG) then
+         Filter_Type (Filter).Add_Link (Document, Name, Attributes);
       end if;
    end Add_Link;
 
+   --  ------------------------------
    --  Add an image.
+   --  ------------------------------
    overriding
-   procedure Add_Image (Document    : in out Html_Filter_Type;
-                        Link        : in Unbounded_Wide_Wide_String;
-                        Alt         : in Unbounded_Wide_Wide_String;
-                        Position    : in Unbounded_Wide_Wide_String;
-                        Description : in Unbounded_Wide_Wide_String) is
+   procedure Add_Image (Filter     : in out Html_Filter_Type;
+                        Document   : in out Wiki.Nodes.Document;
+                        Name       : in Wiki.Strings.WString;
+                        Attributes : in out Wiki.Attributes.Attribute_List_Type) is
    begin
-      if Document.Allowed (IMG_TAG) then
-         Filter_Type (Document).Add_Image (Link, Alt, Position, Description);
+      if Filter.Allowed (IMG_TAG) then
+         Filter_Type (Filter).Add_Image (Document, Name, Attributes);
       end if;
    end Add_Image;
 
@@ -749,7 +771,7 @@ package body Wiki.Filters.Html is
             Tag : constant Html_Tag_Type := Document.Stack.Last_Element;
          begin
             if Document.Hide_Level = 0 then
-               Filter_Type (Document).End_Element (Tag_Names (Tag));
+               Filter_Type (Document).Pop_Node (Tag);
             end if;
             if Document.Hidden (Tag) then
                Document.Hide_Level := Document.Hide_Level - 1;
