@@ -147,13 +147,16 @@ package body Wiki.Filters is
    --  ------------------------------
    --  Add a quote.
    --  ------------------------------
-   overriding
-   procedure Add_Quote (Document : in out Filter_Type;
-                        Quote    : in Unbounded_Wide_Wide_String;
-                        Link     : in Unbounded_Wide_Wide_String;
-                        Language : in Unbounded_Wide_Wide_String) is
+   procedure Add_Quote (Filter     : in out Filter_Type;
+                        Document   : in out Wiki.Nodes.Document;
+                        Name       : in Wiki.Strings.WString;
+                        Attributes : in out Wiki.Attributes.Attribute_List_Type) is
    begin
-      Document.Document.Add_Quote (Quote, Link, Language);
+      if Filter.Next /= null then
+         Filter.Add_Quote (Document, Name, Attributes);
+      else
+         Wiki.Nodes.Add_Quote (Document, Name, Attributes);
+      end if;
    end Add_Quote;
 
    --  ------------------------------
