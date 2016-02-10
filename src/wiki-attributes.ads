@@ -70,6 +70,11 @@ package Wiki.Attributes is
                      Name  : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
                      Value : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String);
 
+   --  Append the attribute to the attribute list.
+   procedure Append (List  : in out Attribute_List_Type;
+                     Name  : in String;
+                     Value : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String);
+
    --  Get the cursor to get access to the first attribute.
    function First (List : in Attribute_List_Type) return Cursor;
 
