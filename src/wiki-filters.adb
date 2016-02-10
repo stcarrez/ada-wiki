@@ -162,12 +162,16 @@ package body Wiki.Filters is
    --  ------------------------------
    --  Add a text block that is pre-formatted.
    --  ------------------------------
-   overriding
-   procedure Add_Preformatted (Document : in out Filter_Type;
-                               Text     : in Unbounded_Wide_Wide_String;
+   procedure Add_Preformatted (Filter   : in out Filter_Type;
+                               Document : in out Wiki.Nodes.Document;
+                               Text     : in Wiki.Strings.WString;
                                Format   : in Unbounded_Wide_Wide_String) is
    begin
-      Document.Document.Add_Preformatted (Text, Format);
+      if Filter.Next /= null then
+         Filter.Add_Preformatted (Document, Text, Format);
+      else
+         Wiki.Nodes.Add_Preformatted (Document, Text, Format);
+      end if;
    end Add_Preformatted;
 
    --  ------------------------------
