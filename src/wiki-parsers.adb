@@ -876,7 +876,7 @@ package body Wiki.Parsers is
          Level := Level + 1;
       end loop;
       Flush_Text (P);
-      P.Filters.Add_List_Item (Level, Token = '#');
+      P.Filters.Add_List_Item (P.Document, Level, Token = '#');
 
       --  Ignore the first white space after the list item.
       if C /= ' ' and C /= HT then
@@ -899,7 +899,7 @@ package body Wiki.Parsers is
          Level := Level + 1;
       end loop;
       Flush_Text (P);
-      P.Filters.Add_List_Item (Level, Token = '#');
+      P.Filters.Add_List_Item (P.Document, Level, Token = '#');
 
       --  Ignore the first white space after the list item.
       if C /= ' ' and C /= HT then
