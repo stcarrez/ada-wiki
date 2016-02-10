@@ -116,7 +116,7 @@ package Wiki.Filters is
                                Format   : in Unbounded_Wide_Wide_String);
 
    --  Finish the document after complete wiki text has been parsed.
-   procedure Finish (Document : in out Filter_Type);
+   procedure Finish (Filter : in out Filter_Type);
 
 private
 
