@@ -104,10 +104,10 @@ package Wiki.Filters is
                         Attributes : in out Wiki.Attributes.Attribute_List_Type);
 
    --  Add a quote.
-   procedure Add_Quote (Document : in out Filter_Type;
-                        Quote    : in Unbounded_Wide_Wide_String;
-                        Link     : in Unbounded_Wide_Wide_String;
-                        Language : in Unbounded_Wide_Wide_String);
+   procedure Add_Quote (Filter     : in out Filter_Type;
+                        Document   : in out Wiki.Nodes.Document;
+                        Name       : in Wiki.Strings.WString;
+                        Attributes : in out Wiki.Attributes.Attribute_List_Type);
 
    --  Add a text block that is pre-formatted.
    procedure Add_Preformatted (Document : in out Filter_Type;
