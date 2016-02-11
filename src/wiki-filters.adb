@@ -185,10 +185,11 @@ package body Wiki.Filters is
    --  ------------------------------
    --  Finish the document after complete wiki text has been parsed.
    --  ------------------------------
-   procedure Finish (Filter : in out Filter_Type) is
+   procedure Finish (Filter   : in out Filter_Type;
+                     Document : in out Wiki.Nodes.Document) is
    begin
       if Filter.Next /= null then
-         Filter.Next.Finish;
+         Filter.Next.Finish (Document);
       end if;
    end Finish;
 
