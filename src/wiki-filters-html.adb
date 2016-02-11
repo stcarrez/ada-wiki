@@ -616,7 +616,7 @@ package body Wiki.Filters.Html is
             Current_Tag : constant Html_Tag_Type := Filter.Stack.Last_Element;
          begin
             if No_End_Tag (Current_Tag) then
-               Filter_Type (Filter).Pop_Node (Current_Tag);
+               Filter_Type (Filter).Pop_Node (Document, Current_Tag);
                Filter.Stack.Delete_Last;
             end if;
          end;
@@ -633,7 +633,7 @@ package body Wiki.Filters.Html is
                          Header    : in Wiki.Strings.WString;
                          Level     : in Natural) is
    begin
-      Filter.Flush_Stack;
+      Filter.Flush_Stack (Document);
       Filter_Type (Filter).Add_Header (Document, Header, Level);
    end Add_Header;
 
@@ -764,20 +764,21 @@ package body Wiki.Filters.Html is
    --  ------------------------------
    --  Flush the HTML element that have not yet been closed.
    --  ------------------------------
-   procedure Flush_Stack (Document : in out Html_Filter_Type) is
+   procedure Flush_Stack (Filter   : in out Html_Filter_Type;
+                          Document : in out Wiki.Nodes.Document) is
    begin
-      while not Document.Stack.Is_Empty loop
+      while not Filter.Stack.Is_Empty loop
          declare
-            Tag : constant Html_Tag_Type := Document.Stack.Last_Element;
+            Tag : constant Html_Tag_Type := Filter.Stack.Last_Element;
          begin
-            if Document.Hide_Level = 0 then
-               Filter_Type (Document).Pop_Node (Tag);
+            if Filter.Hide_Level = 0 then
+               Filter_Type (Filter).Pop_Node (Document, Tag);
             end if;
-            if Document.Hidden (Tag) then
-               Document.Hide_Level := Document.Hide_Level - 1;
+            if Filter.Hidden (Tag) then
+               Filter.Hide_Level := Filter.Hide_Level - 1;
             end if;
          end;
-         Document.Stack.Delete_Last;
+         Filter.Stack.Delete_Last;
       end loop;
    end Flush_Stack;
 
@@ -785,10 +786,11 @@ package body Wiki.Filters.Html is
    --  Finish the document after complete wiki text has been parsed.
    --  ------------------------------
    overriding
-   procedure Finish (Document : in out Html_Filter_Type) is
+   procedure Finish (Filter : in out Html_Filter_Type;
+                     Document : in out Wiki.Nodes.Document) is
    begin
-      Document.Flush_Stack;
-      Filter_Type (Document).Finish;
+      Filter.Flush_Stack (Document);
+      Filter_Type (Filter).Finish (Document);
    end Finish;
 
    --  ------------------------------
