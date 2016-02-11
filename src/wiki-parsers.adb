@@ -1359,7 +1359,7 @@ package body Wiki.Parsers is
       end loop;
 
       Flush_Text (P);
-      P.Filters.Finish;
+      P.Filters.Finish (P.Document);
    end Parse_Token;
 
 end Wiki.Parsers;
