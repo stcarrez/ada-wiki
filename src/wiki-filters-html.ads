@@ -96,7 +96,8 @@ package Wiki.Filters.Html is
 
    --  Finish the document after complete wiki text has been parsed.
    overriding
-   procedure Finish (Document : in out Html_Filter_Type);
+   procedure Finish (Filter   : in out Html_Filter_Type;
+                     Document : in out Wiki.Nodes.Document);
 
    --  Mark the HTML tag as being forbidden.
    procedure Forbidden (Filter : in out Html_Filter_Type;
@@ -116,7 +117,8 @@ package Wiki.Filters.Html is
                       Tag    : in Html_Tag_Type);
 
    --  Flush the HTML element that have not yet been closed.
-   procedure Flush_Stack (Document : in out Html_Filter_Type);
+   procedure Flush_Stack (Filter   : in out Html_Filter_Type;
+                          Document : in out Wiki.Nodes.Document);
 
 private
 
