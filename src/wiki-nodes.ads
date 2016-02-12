@@ -205,24 +205,15 @@ package Wiki.Nodes is
    procedure Add_Blockquote (Into     : in out Document;
                              Level    : in Natural);
 
-   --     procedure Add_Text (Doc  : in out Document;
---                         Text : in WString);
+   --  Add a text block that is pre-formatted.
+   procedure Add_Preformatted (Into     : in out Document;
+                               Text     : in Wiki.Strings.WString;
+                               Format   : in Wiki.Strings.WString);
 
---     type Renderer is limited interface;
---
---     procedure Render (Engine : in out Renderer;
---                       Doc    : in Document;
---                       Node   : in Node_Type) is abstract;
---
---     procedure Iterate (Doc     : in Document;
---                        Process : access procedure (Doc : in Document; Node : in Node_Type)) is
---        Node : Document_Node_Access := Doc.First;
---     begin
---        while Node /= null loop
---           Process (Doc, Node.Data);
---           Node := Node.Next;
---        end loop;
---     end Iterate;
+   --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
+   --  each node instance.
+   procedure Iterate (List    : in Node_List_Access;
+                      Process : not null access procedure (Node : in Node_Type));
 
 private
 
@@ -242,7 +233,7 @@ private
    type Node_List is limited record
       Current : Node_List_Block_Access;
       Length  : Natural := 0;
-      First   : Node_List_Block (NODE_LIST_BLOCK_SIZE);
+      First   : aliased Node_List_Block (NODE_LIST_BLOCK_SIZE);
    end record;
 
    --  Append a node to the node list.
