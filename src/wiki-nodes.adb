@@ -692,6 +692,14 @@ package body Wiki.Nodes is
                                     Level => Level, others => <>));
    end Add_Blockquote;
 
+   --  Add a text block that is pre-formatted.
+   procedure Add_Preformatted (Into     : in out Document;
+                               Text     : in Wiki.Strings.WString;
+                               Format   : in Wiki.Strings.WString) is
+   begin
+      null;
+   end Add_Preformatted;
+
    --  ------------------------------
    --  Append a node to the node list.
    --  ------------------------------
@@ -708,5 +716,22 @@ package body Wiki.Nodes is
       Block.List (Block.Last) := Node;
       Into.Length := Into.Length + 1;
    end Append;
+
+   --  ------------------------------
+   --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
+   --  each node instance.
+   --  ------------------------------
+   procedure Iterate (List    : in Node_List_Access;
+                      Process : not null access procedure (Node : in Node_Type)) is
+      Block : Node_List_Block_Access := List.First'Access;
+   begin
+      loop
+         for I in 1 .. Block.Last loop
+            Process (Block.List (I).all);
+         end loop;
+         Block := Block.Next;
+         exit when Block = null;
+      end loop;
+   end Iterate;
 
 end Wiki.Nodes;
