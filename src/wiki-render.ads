@@ -16,8 +16,6 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Strings.Wide_Wide_Unbounded;
-with Wiki.Documents;
-with Wiki.Attributes;
 with Wiki.Nodes;
 package Wiki.Render is
 
@@ -71,5 +69,10 @@ package Wiki.Render is
 
    --  Finish the rendering after complete wiki document nodes are rendered.
    procedure Finish (Document : in out Renderer) is abstract;
+
+   --  Render the list of nodes from the document.
+   procedure Render (Engine : in out Renderer'Class;
+                     Doc    : in Wiki.Nodes.Document;
+                     List   : in Wiki.Nodes.Node_List_Access);
 
 end Wiki.Render;
