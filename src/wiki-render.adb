@@ -47,4 +47,21 @@ package body Wiki.Render is
       Exists := True;
    end Make_Page_Link;
 
+   --  ------------------------------
+   --  Render the list of nodes from the document.
+   --  ------------------------------
+   procedure Render (Engine : in out Renderer'Class;
+                     Doc    : in Wiki.Nodes.Document;
+                     List   : in Wiki.Nodes.Node_List_Access) is
+      procedure Process (Node : in Wiki.Nodes.Node_Type);
+
+      procedure Process (Node : in Wiki.Nodes.Node_Type) is
+      begin
+         Engine.Render (Doc, Node);
+      end Process;
+
+   begin
+      Wiki.Nodes.Iterate (List, Process'Access);
+   end Render;
+
 end Wiki.Render;
