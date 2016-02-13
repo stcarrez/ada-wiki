@@ -16,13 +16,11 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Wiki.Attributes;
-with Wiki.Documents;
 with Wiki.Strings;
 package Wiki.Nodes is
 
    pragma Preelaborate;
 
-   subtype Format_Map is Wiki.Documents.Format_Map;
    subtype WString is Wide_Wide_String;
 
    type Node_Kind is (N_LINE_BREAK,
