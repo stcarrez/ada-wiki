@@ -38,7 +38,7 @@ package body Wiki.Filters is
    procedure Add_Text (Filter    : in out Filter_Type;
                        Document  : in out Wiki.Nodes.Document;
                        Text      : in Wiki.Strings.WString;
-                       Format    : in Wiki.Nodes.Format_Map) is
+                       Format    : in Wiki.Format_Map) is
    begin
       if Filter.Next /= null then
          Filter.Next.Add_Text (Document, Text, Format);
@@ -178,7 +178,7 @@ package body Wiki.Filters is
       if Filter.Next /= null then
          Filter.Next.Add_Preformatted (Document, Text, Format);
       else
-         Wiki.Nodes.Add_Preformatted (Document, Text, Format);
+         Wiki.Nodes.Add_Preformatted (Document, Text, To_Wide_Wide_String (Format));
       end if;
    end Add_Preformatted;
 
