@@ -1258,17 +1258,15 @@ package body Wiki.Parsers is
    procedure Add_Filter (Engine : in out Parser;
                          Filter : in Wiki.Filters.Filter_Type_Access) is
    begin
-      Engine.Filters := Filter;
+      Engine.Filters.Add_Filter (Filter);
    end Add_Filter;
 
    --  ------------------------------
    --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
-   --  specified in <b>Syntax</b> and invoke the document reader procedures defined
-   --  by <b>into</b>.
+   --  defined on the parser.
    --  ------------------------------
    procedure Parse (Engine : in out Parser;
-                    Text   : in Wide_Wide_String;
-                    Render : in Wiki.Render.Renderer_Access) is
+                    Text   : in Wide_Wide_String) is
 
       type Wide_Input is new Wiki.Streams.Input_Stream with record
          Pos : Positive;
@@ -1296,14 +1294,13 @@ package body Wiki.Parsers is
       Buffer : aliased Wide_Input;
    begin
       Buffer.Pos   := Text'First;
-      Engine.Parse (Buffer'Unchecked_Access, Render);
+      Engine.Parse (Buffer'Unchecked_Access);
    end Parse;
 
    --  Parse the wiki stream managed by <tt>Stream</tt> according to the wiki syntax configured
-   --  on the wiki engine.  The wiki is then rendered by using the renderer.
+   --  on the wiki engine.
    procedure Parse (Engine : in out Parser;
-                    Stream : in Wiki.Streams.Input_Stream_Access;
-                    Render : in Wiki.Render.Renderer_Access) is
+                    Stream : in Wiki.Streams.Input_Stream_Access) is
       P      : Parser;
    begin
       P.Empty_Line := True;
