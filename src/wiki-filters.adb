@@ -193,4 +193,14 @@ package body Wiki.Filters is
       end if;
    end Finish;
 
+   --  ------------------------------
+   --  Add the filter at beginning of the filter chain.
+   --  ------------------------------
+   procedure Add_Filter (Chain  : in out Filter_Chain;
+                         Filter : in Filter_Type_Access) is
+   begin
+      Filter.Next := Chain.Next;
+      Chain.Next := Filter;
+   end Add_Filter;
+
 end Wiki.Filters;
