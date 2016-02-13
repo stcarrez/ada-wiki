@@ -15,14 +15,14 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Strings.Wide_Wide_Unbounded;
 
-with Wiki.Documents;
 with Wiki.Attributes;
 with Wiki.Plugins;
 with Wiki.Filters;
 with Wiki.Strings;
 with Wiki.Nodes;
+with Wiki.Streams;
+with Wiki.Render;
 
 --  == Wiki Parsers ==
 --  The <b>Wikis.Parsers</b> package implements a parser for several well known wiki formats.
@@ -79,28 +79,19 @@ package Wiki.Parsers is
    --  text.
    procedure Parse (Engine : in out Parser;
                     Text   : in Wide_Wide_String;
-                    Into   : in Wiki.Documents.Document_Reader_Access);
+                    Render : in Wiki.Render.Renderer_Access);
 
-   --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
-   --  specified in <b>Syntax</b> and invoke the document reader procedures defined
-   --  by <b>into</b>.
-   procedure Parse (Into   : in Wiki.Documents.Document_Reader_Access;
-                    Text   : in Wide_Wide_String;
-                    Syntax : in Wiki_Syntax_Type := SYNTAX_MIX);
+   --  Parse the wiki stream managed by <tt>Stream</tt> according to the wiki syntax configured
+   --  on the wiki engine.  The wiki is then rendered by using the renderer.
+   procedure Parse (Engine : in out Parser;
+                    Stream : in Wiki.Streams.Input_Stream_Access;
+                    Render : in Wiki.Render.Renderer_Access);
 
 private
-
-   use Ada.Strings.Wide_Wide_Unbounded;
 
    HT : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#09#);
    LF : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#0A#);
    CR : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#0D#);
-
-   type Input is interface;
-   type Input_Access is access all Input'Class;
-   procedure Read_Char (From : in out Input;
-                        Token : out Wide_Wide_Character;
-                        Eof   : out Boolean) is abstract;
 
    type Parser is tagged limited record
       Pending             : Wide_Wide_Character;
@@ -108,8 +99,7 @@ private
       Syntax              : Wiki_Syntax_Type;
       Document            : Wiki.Nodes.Document;
       Filters             : Wiki.Filters.Filter_Type_Access;
---      Document            : Wiki.Documents.Document_Reader_Access;
-      Format              : Wiki.Documents.Format_Map;
+      Format              : Wiki.Format_Map;
       Text                : Wiki.Strings.BString (512);
       Token               : Wiki.Strings.BString (512);
       Empty_Line          : Boolean := True;
@@ -125,7 +115,7 @@ private
       Quote_Level         : Natural := 0;
       Escape_Char         : Wide_Wide_Character;
       List_Level          : Natural := 0;
-      Reader              : Input_Access := null;
+      Reader              : Wiki.Streams.Input_Stream_Access := null;
       Attributes          : Wiki.Attributes.Attribute_List_Type;
    end record;
 
