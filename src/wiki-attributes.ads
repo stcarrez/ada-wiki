@@ -18,6 +18,7 @@
 with Ada.Strings.Wide_Wide_Unbounded;
 private with Ada.Containers.Vectors;
 private with Ada.Finalization;
+private with Util.Refs;
 
 --  == Attributes ==
 --  The  <tt>Attributes</tt> package defines a simple management of attributes for
@@ -91,15 +92,22 @@ package Wiki.Attributes is
 
 private
 
-   type Attribute (Name_Length, Value_Length : Natural) is limited record
+   type Attribute (Name_Length, Value_Length : Natural) is limited
+   new Util.Refs.Ref_Entity with record
       Name   : String (1 .. Name_Length);
       Value  : Wide_Wide_String (1 .. Value_Length);
    end record;
    type Attribute_Access is access all Attribute;
 
+   package Attribute_Refs is new Util.Refs.Indefinite_References (Attribute, Attribute_Access);
+
+   use Attribute_Refs;
+
+   subtype Attribute_Ref is Attribute_Refs.Ref;
+
    package Attribute_Vectors is
      new Ada.Containers.Vectors (Index_Type   => Positive,
-                                 Element_Type => Attribute_Access);
+                                 Element_Type => Attribute_Ref);
 
    subtype Attribute_Vector is Attribute_Vectors.Vector;
 
