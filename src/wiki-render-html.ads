@@ -16,7 +16,6 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Wiki.Attributes;
-with Wiki.Documents;
 with Wiki.Streams.Html;
 with Wiki.Strings;
 
@@ -64,7 +63,7 @@ package Wiki.Render.Html is
    --  Add a text block with the given format.
    procedure Add_Text (Engine   : in out Html_Renderer;
                        Text     : in Wiki.Strings.WString;
-                       Format   : in Wiki.Documents.Format_Map);
+                       Format   : in Wiki.Format_Map);
 
    --  Add a text block that is pre-formatted.
    procedure Add_Preformatted (Document : in out Html_Renderer;
@@ -86,7 +85,7 @@ private
 
    type Html_Renderer is new Renderer with record
       Output         : Wiki.Streams.Html.Html_Output_Stream_Access := null;
-      Format         : Wiki.Documents.Format_Map := (others => False);
+      Format         : Wiki.Format_Map := (others => False);
       Links          : Link_Renderer_Access := Default_Links'Access;
       Has_Paragraph  : Boolean := False;
       Need_Paragraph : Boolean := False;
