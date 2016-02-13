@@ -734,4 +734,11 @@ package body Wiki.Nodes is
       end loop;
    end Iterate;
 
+   overriding
+   procedure Initialize (Doc : in out Document) is
+   begin
+      Doc.Nodes.Current := Doc.Nodes.First'Unchecked_Access;
+--      Doc.Current := Doc.Nodes.Current;
+   end Initialize;
+
 end Wiki.Nodes;
