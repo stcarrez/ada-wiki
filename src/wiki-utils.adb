@@ -18,7 +18,8 @@
 with Wiki.Render.Text;
 with Wiki.Render.Html;
 with Wiki.Filters.Html;
-with Wiki.Writers.Builders;
+with Wiki.Streams.Builders;
+with Wiki.Streams.Html.Builders;
 package body Wiki.Utils is
 
    --  ------------------------------
@@ -26,14 +27,16 @@ package body Wiki.Utils is
    --  ------------------------------
    function To_Html (Text   : in Wide_Wide_String;
                      Syntax : in Wiki.Parsers.Wiki_Syntax_Type) return String is
-      Writer   : aliased Wiki.Writers.Builders.Html_Writer_Type;
+      Stream   : aliased Wiki.Streams.Html.Builders.Html_Output_Builder_Stream;
       Renderer : aliased Wiki.Render.Html.Html_Renderer;
       Filter   : aliased Wiki.Filters.Html.Html_Filter_Type;
+      Engine   : Wiki.Parsers.Parser;
    begin
-      Renderer.Set_Writer (Writer'Unchecked_Access);
-      Filter.Set_Document (Renderer'Unchecked_Access);
-      Wiki.Parsers.Parse (Filter'Unchecked_Access, Text, Syntax);
-      return Writer.To_String;
+      Renderer.Set_Output_Stream (Stream'Unchecked_Access);
+      Engine.Add_Filter (Filter'Unchecked_Access);
+      Engine.Set_Syntax (Syntax);
+      Engine.Parse (Text, Renderer'Unchecked_Access);
+      return Stream.To_String;
    end To_Html;
 
    --  ------------------------------
@@ -42,12 +45,14 @@ package body Wiki.Utils is
    --  ------------------------------
    function To_Text (Text   : in Wide_Wide_String;
                      Syntax : in Wiki.Parsers.Wiki_Syntax_Type) return String is
-      Writer   : aliased Wiki.Writers.Builders.Writer_Builder_Type;
+      Stream   : aliased Wiki.Streams.Builders.Output_Builder_Stream;
       Renderer : aliased Wiki.Render.Text.Text_Renderer;
+      Engine   : Wiki.Parsers.Parser;
    begin
-      Renderer.Set_Writer (Writer'Unchecked_Access);
-      Wiki.Parsers.Parse (Renderer'Unchecked_Access, Text, Syntax);
-      return Writer.To_String;
+      Renderer.Set_Output_Stream (Stream'Unchecked_Access);
+      Engine.Set_Syntax (Syntax);
+      Engine.Parse (Text, Renderer'Unchecked_Access);
+      return Stream.To_String;
    end To_Text;
 
 end Wiki.Utils;
