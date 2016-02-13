@@ -120,10 +120,18 @@ package Wiki.Filters is
    procedure Finish (Filter   : in out Filter_Type;
                      Document : in out Wiki.Nodes.Document);
 
+   type Filter_Chain is new Filter_Type with private;
+
+   --  Add the filter at beginning of the filter chain.
+   procedure Add_Filter (Chain  : in out Filter_Chain;
+                         Filter : in Filter_Type_Access);
+
 private
 
    type Filter_Type is new Ada.Finalization.Limited_Controlled with record
       Next     : Filter_Type_Access;
    end record;
+
+   type Filter_Chain is new Filter_Type with null record;
 
 end Wiki.Filters;
