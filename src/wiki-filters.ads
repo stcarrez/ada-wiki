@@ -19,7 +19,6 @@ with Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Finalization;
 
 with Wiki.Attributes;
-with Wiki.Documents;
 with Wiki.Nodes;
 with Wiki.Strings;
 
@@ -61,7 +60,7 @@ package Wiki.Filters is
    procedure Add_Text (Filter    : in out Filter_Type;
                        Document  : in out Wiki.Nodes.Document;
                        Text      : in Wiki.Strings.WString;
-                       Format    : in Wiki.Nodes.Format_Map);
+                       Format    : in Wiki.Format_Map);
 
    --  Add a section header with the given level in the document.
    procedure Add_Header (Filter    : in out Filter_Type;
