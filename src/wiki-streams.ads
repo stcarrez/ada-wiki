@@ -25,7 +25,10 @@
 --  repeatedly while scanning the Wiki content.
 package Wiki.Streams is
 
+   pragma Preelaborate;
+
    type Input_Stream is limited interface;
+   type Input_Stream_Access is access all Input_Stream'Class;
 
    --  Read one character from the input stream and return False to the <tt>Eof</tt> indicator.
    --  When there is no character to read, return True in the <tt>Eof</tt> indicator.
