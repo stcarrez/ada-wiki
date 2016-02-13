@@ -16,13 +16,15 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Strings.Wide_Wide_Fixed;
+with Ada.Strings.Wide_Wide_Unbounded;
 
 with Wiki.Parsers.Html;
 with Wiki.Helpers;
 package body Wiki.Parsers is
 
-   use Wiki.Documents;
+   use Ada.Strings.Wide_Wide_Unbounded;
 
+   use Wiki.Nodes;
    use Wiki.Strings.Wide_Wide_Builders;
 
    --  Parse the beginning or the end of a double character sequence.  This procedure
@@ -170,7 +172,7 @@ package body Wiki.Parsers is
       else
 
          --  Get the next character.
-         P.Reader.Read_Char (Token, P.Is_Eof);
+         P.Reader.Read (Token, P.Is_Eof);
          if P.Is_Eof then
             Token := LF;
          end if;
@@ -1250,40 +1252,36 @@ package body Wiki.Parsers is
       Engine.Syntax := Syntax;
    end Set_Syntax;
 
+   --  ------------------------------
    --  Add a filter in the wiki engine.
+   --  ------------------------------
    procedure Add_Filter (Engine : in out Parser;
                          Filter : in Wiki.Filters.Filter_Type_Access) is
    begin
-      null;
+      Engine.Filters := Filter;
    end Add_Filter;
-
-   procedure Parse (Engine : in out Parser;
-                    Text   : in Wide_Wide_String;
-                    Into   : in Wiki.Documents.Document_Reader_Access) is
-   begin
-      null;
-   end Parse;
 
    --  ------------------------------
    --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
    --  specified in <b>Syntax</b> and invoke the document reader procedures defined
    --  by <b>into</b>.
    --  ------------------------------
-   procedure Parse (Into   : in Wiki.Documents.Document_Reader_Access;
+   procedure Parse (Engine : in out Parser;
                     Text   : in Wide_Wide_String;
-                    Syntax : in Wiki_Syntax_Type := SYNTAX_MIX) is
+                    Render : in Wiki.Render.Renderer_Access) is
 
-      type Wide_Input is new Input with record
+      type Wide_Input is new Wiki.Streams.Input_Stream with record
          Pos : Positive;
       end record;
 
-      procedure Read_Char (Buf    : in out Wide_Input;
-                           Token  : out Wide_Wide_Character;
-                           Is_Eof : out Boolean);
+      overriding
+      procedure Read (Buf    : in out Wide_Input;
+                      Token  : out Wide_Wide_Character;
+                      Is_Eof : out Boolean);
 
-      procedure Read_Char (Buf    : in out Wide_Input;
-                           Token  : out Wide_Wide_Character;
-                           Is_Eof : out Boolean) is
+      procedure Read (Buf    : in out Wide_Input;
+                      Token  : out Wide_Wide_Character;
+                      Is_Eof : out Boolean) is
       begin
          if Buf.Pos > Text'Last then
             Is_Eof := True;
@@ -1293,21 +1291,29 @@ package body Wiki.Parsers is
             Buf.Pos := Buf.Pos + 1;
             Is_Eof := False;
          end if;
-      end Read_Char;
+      end Read;
 
-      P      : Parser;
       Buffer : aliased Wide_Input;
    begin
       Buffer.Pos   := Text'First;
---      P.Document   := Into;
+      Engine.Parse (Buffer'Unchecked_Access, Render);
+   end Parse;
+
+   --  Parse the wiki stream managed by <tt>Stream</tt> according to the wiki syntax configured
+   --  on the wiki engine.  The wiki is then rendered by using the renderer.
+   procedure Parse (Engine : in out Parser;
+                    Stream : in Wiki.Streams.Input_Stream_Access;
+                    Render : in Wiki.Render.Renderer_Access) is
+      P      : Parser;
+   begin
       P.Empty_Line := True;
       P.Format     := (others => False);
       P.Is_Eof     := False;
       P.Has_Pending := False;
-      P.Reader      := Buffer'Unchecked_Access;
+      P.Reader      := Stream;
       P.Link_Double_Bracket := False;
       P.Escape_Char := '~';
-      case Syntax is
+      case P.Syntax is
          when SYNTAX_GOOGLE =>
             Parse_Token (P, Google_Wiki_Table);
 
