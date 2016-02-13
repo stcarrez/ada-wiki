@@ -58,7 +58,7 @@ package Wiki.Filters.Html is
    procedure Add_Text (Filter    : in out Html_Filter_Type;
                        Document  : in out Wiki.Nodes.Document;
                        Text      : in Wiki.Strings.WString;
-                       Format    : in Wiki.Nodes.Format_Map);
+                       Format    : in Wiki.Format_Map);
 
    --  Add a section header with the given level in the document.
    overriding
