@@ -20,8 +20,6 @@ package body Wiki.Filters.Html is
   function Need_Close (Tag         : in Html_Tag_Type;
                         Current_Tag : in Html_Tag_Type) return Boolean;
 
-   type Tag_Name_Array is array (Html_Tag_Type) of Unbounded_Wide_Wide_String;
-
    No_End_Tag   : constant Tag_Boolean_Array :=
      (
       BASE_TAG   => True,
@@ -93,7 +91,7 @@ package body Wiki.Filters.Html is
    procedure Add_Text (Filter    : in out Html_Filter_Type;
                        Document  : in out Wiki.Nodes.Document;
                        Text      : in Wiki.Strings.WString;
-                       Format    : in Wiki.Nodes.Format_Map) is
+                       Format    : in Wiki.Format_Map) is
    begin
       if Filter.Hide_Level > 0 then
          return;
