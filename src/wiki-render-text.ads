@@ -16,7 +16,6 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Wiki.Attributes;
-with Wiki.Documents;
 with Wiki.Streams;
 with Wiki.Strings;
 
@@ -85,7 +84,7 @@ private
 
    type Text_Renderer is new Wiki.Render.Renderer with record
       Output         : Streams.Output_Stream_Access := null;
-      Format         : Wiki.Documents.Format_Map := (others => False);
+      Format         : Wiki.Format_Map := (others => False);
       Has_Paragraph  : Boolean := False;
       Need_Paragraph : Boolean := False;
       Empty_Line     : Boolean := True;
