@@ -26,36 +26,36 @@ package body Wiki.Attributes is
    --  Get the attribute name.
    --  ------------------------------
    function Get_Name (Position : in Cursor) return String is
-      Attr : constant Attribute_Access := Attribute_Vectors.Element (Position.Pos);
+      Attr : constant Attribute_Ref := Attribute_Vectors.Element (Position.Pos);
    begin
-      return Attr.Name;
+      return Attr.Value.Name;
    end Get_Name;
 
    --  ------------------------------
    --  Get the attribute value.
    --  ------------------------------
    function Get_Value (Position : in Cursor) return String is
-      Attr : constant Attribute_Access := Attribute_Vectors.Element (Position.Pos);
+      Attr : constant Attribute_Ref := Attribute_Vectors.Element (Position.Pos);
    begin
-      return Ada.Characters.Conversions.To_String (Attr.Value);
+      return Ada.Characters.Conversions.To_String (Attr.Value.Value);
    end Get_Value;
 
    --  ------------------------------
    --  Get the attribute wide value.
    --  ------------------------------
    function Get_Wide_Value (Position : in Cursor) return Wide_Wide_String is
-      Attr : constant Attribute_Access := Attribute_Vectors.Element (Position.Pos);
+      Attr : constant Attribute_Ref := Attribute_Vectors.Element (Position.Pos);
    begin
-      return Attr.Value;
+      return Attr.Value.Value;
    end Get_Wide_Value;
 
    --  ------------------------------
    --  Get the attribute wide value.
    --  ------------------------------
    function Get_Unbounded_Wide_Value (Position : in Cursor) return Unbounded_Wide_Wide_String is
-      Attr : constant Attribute_Access := Attribute_Vectors.Element (Position.Pos);
+      Attr : constant Attribute_Ref := Attribute_Vectors.Element (Position.Pos);
    begin
-      return To_Unbounded_Wide_Wide_String (Attr.Value);
+      return To_Unbounded_Wide_Wide_String (Attr.Value.Value);
    end Get_Unbounded_Wide_Value;
 
    --  ------------------------------
@@ -83,9 +83,9 @@ package body Wiki.Attributes is
    begin
       while Attribute_Vectors.Has_Element (Iter) loop
          declare
-            Attr : constant Attribute_Access := Attribute_Vectors.Element (Iter);
+            Attr : constant Attribute_Ref := Attribute_Vectors.Element (Iter);
          begin
-            if Attr.Name = Name then
+            if Attr.Value.Name = Name then
                return Cursor '(Pos => Iter);
             end if;
          end;
@@ -115,12 +115,13 @@ package body Wiki.Attributes is
                      Name  : in Wide_Wide_String;
                      Value : in Wide_Wide_String) is
       Attr : constant Attribute_Access
-        := new Attribute '(Name_Length  => Name'Length,
+        := new Attribute '(Util.Refs.Ref_Entity with
+                           Name_Length  => Name'Length,
                            Value_Length => Value'Length,
                            Name         => Conversions.To_String (Name),
                            Value        => Value);
    begin
-      List.List.Append (Attr);
+      List.List.Append (Attribute_Refs.Create (Attr));
    end Append;
 
    --  ------------------------------
@@ -143,12 +144,13 @@ package body Wiki.Attributes is
       Val : constant Wide_Wide_String
         := To_Wide_Wide_String (Value);
       Attr : constant Attribute_Access
-        := new Attribute '(Name_Length  => Name'Length,
+        := new Attribute '(Util.Refs.Ref_Entity with
+                           Name_Length  => Name'Length,
                            Value_Length => Val'Length,
                            Name         => Name,
                            Value        => Val);
    begin
-      List.List.Append (Attr);
+      List.List.Append (Attribute_Refs.Create (Attr));
    end Append;
 
    --  ------------------------------
@@ -171,16 +173,17 @@ package body Wiki.Attributes is
    --  Clear the list and remove all existing attributes.
    --  ------------------------------
    procedure Clear (List : in out Attribute_List_Type) is
-      procedure Free is
-        new Ada.Unchecked_Deallocation (Object => Attribute,
-                                        Name   => Attribute_Access);
-      Item : Attribute_Access;
+--        procedure Free is
+--          new Ada.Unchecked_Deallocation (Object => Attribute,
+--                                          Name   => Attribute_Access);
+--        Item : Attribute_Access;
    begin
-      while not List.List.Is_Empty loop
-         Item := List.List.Last_Element;
-         List.List.Delete_Last;
-         Free (Item);
-      end loop;
+--        while not List.List.Is_Empty loop
+--           Item := List.List.Last_Element;
+--           List.List.Delete_Last;
+--           Free (Item);
+--        end loop;
+      List.List.Clear;
    end Clear;
 
    --  ------------------------------
@@ -190,11 +193,11 @@ package body Wiki.Attributes is
                       Process : not null access procedure (Name : in String;
                                                            Value : in Wide_Wide_String)) is
       Iter : Attribute_Vectors.Cursor := List.List.First;
-      Item : Attribute_Access;
+      Item : Attribute_Ref;
    begin
       while Attribute_Vectors.Has_Element (Iter) loop
          Item := Attribute_Vectors.Element (Iter);
-         Process (Item.Name, Item.Value);
+         Process (Item.Value.Name, Item.Value.Value);
          Attribute_Vectors.Next (Iter);
       end loop;
    end Iterate;
