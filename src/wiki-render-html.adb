@@ -339,23 +339,23 @@ package body Wiki.Render.Html is
    --  HTML_UNDERLINE   : aliased constant String := "ins";
    HTML_PREFORMAT   : aliased constant String := "pre";
 
-   type String_Array_Access is array (Documents.Format_Type) of Util.Strings.Name_Access;
+   type String_Array_Access is array (Format_Type) of Util.Strings.Name_Access;
 
    HTML_ELEMENT     : constant String_Array_Access :=
-     (Documents.BOLD        => HTML_BOLD'Access,
-      Documents.ITALIC      => HTML_ITALIC'Access,
-      Documents.CODE        => HTML_CODE'Access,
-      Documents.SUPERSCRIPT => HTML_SUPERSCRIPT'Access,
-      Documents.SUBSCRIPT   => HTML_SUBSCRIPT'Access,
-      Documents.STRIKEOUT   => HTML_STRIKEOUT'Access,
-      Documents.PREFORMAT   => HTML_PREFORMAT'Access);
+     (BOLD        => HTML_BOLD'Access,
+      ITALIC      => HTML_ITALIC'Access,
+      CODE        => HTML_CODE'Access,
+      SUPERSCRIPT => HTML_SUPERSCRIPT'Access,
+      SUBSCRIPT   => HTML_SUBSCRIPT'Access,
+      STRIKEOUT   => HTML_STRIKEOUT'Access,
+      PREFORMAT   => HTML_PREFORMAT'Access);
 
    --  ------------------------------
    --  Add a text block with the given format.
    --  ------------------------------
    procedure Add_Text (Engine   : in out Html_Renderer;
                        Text     : in Wiki.Strings.WString;
-                       Format   : in Wiki.Documents.Format_Map) is
+                       Format   : in Wiki.Format_Map) is
    begin
       Engine.Open_Paragraph;
       for I in Format'Range loop
