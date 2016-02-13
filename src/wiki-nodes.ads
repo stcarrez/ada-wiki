@@ -17,6 +17,7 @@
 -----------------------------------------------------------------------
 with Wiki.Attributes;
 with Wiki.Strings;
+with Ada.Finalization;
 package Wiki.Nodes is
 
    pragma Preelaborate;
@@ -238,9 +239,12 @@ private
    procedure Append (Into : in out Node_List;
                      Node : in Node_Type_Access);
 
-   type Document is limited record
+   type Document is limited new Ada.Finalization.Limited_Controlled with record
       Nodes   : Node_List;
       Current : Node_Type_Access;
    end record;
+
+   overriding
+   procedure Initialize (Doc : in out Document);
 
 end Wiki.Nodes;
