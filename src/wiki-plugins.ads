@@ -17,7 +17,7 @@
 -----------------------------------------------------------------------
 
 with Wiki.Attributes;
-with Wiki.Documents;
+with Wiki.Nodes;
 
 --  == Plugins ==
 --  The <b>Wiki.Plugins</b> package defines the plugin interface that is used by the wiki
@@ -32,7 +32,7 @@ package Wiki.Plugins is
 
    --  Expand the plugin configured with the parameters for the document.
    procedure Expand (Plugin   : in out Wiki_Plugin;
-                     Document : in out Wiki.Documents.Document_Reader'Class;
+                     Document : in out Wiki.Nodes.Document;
                      Params   : in out Wiki.Attributes.Attribute_List_Type) is abstract;
 
 end Wiki.Plugins;
