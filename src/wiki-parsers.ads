@@ -74,18 +74,15 @@ package Wiki.Parsers is
    procedure Add_Filter (Engine : in out Parser;
                          Filter : in Wiki.Filters.Filter_Type_Access);
 
-   --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax configured
-   --  on the wiki engine.  The document reader operations are invoked while parsing the wiki
-   --  text.
+   --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
+   --  defined on the parser.
    procedure Parse (Engine : in out Parser;
-                    Text   : in Wide_Wide_String;
-                    Render : in Wiki.Render.Renderer_Access);
+                    Text   : in Wide_Wide_String);
 
    --  Parse the wiki stream managed by <tt>Stream</tt> according to the wiki syntax configured
-   --  on the wiki engine.  The wiki is then rendered by using the renderer.
+   --  on the wiki engine.
    procedure Parse (Engine : in out Parser;
-                    Stream : in Wiki.Streams.Input_Stream_Access;
-                    Render : in Wiki.Render.Renderer_Access);
+                    Stream : in Wiki.Streams.Input_Stream_Access);
 
 private
 
@@ -98,7 +95,7 @@ private
       Has_Pending         : Boolean;
       Syntax              : Wiki_Syntax_Type;
       Document            : Wiki.Nodes.Document;
-      Filters             : Wiki.Filters.Filter_Type_Access;
+      Filters             : Wiki.Filters.Filter_Chain;
       Format              : Wiki.Format_Map;
       Text                : Wiki.Strings.BString (512);
       Token               : Wiki.Strings.BString (512);
