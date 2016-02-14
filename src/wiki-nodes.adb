@@ -551,7 +551,7 @@ package body Wiki.Nodes is
                                                           Children   => null,
                                                           Parent     => Document.Current);
    begin
-      Append (Document.Nodes, Node);
+      Append (Document.Nodes.Value.all, Node);
       Document.Current := Node;
    end Push_Node;
 
@@ -586,10 +586,11 @@ package body Wiki.Nodes is
                      Node : in Node_Type_Access) is
    begin
       if Into.Current = null then
-         Append (Into.Nodes, Node);
+         Append (Into.Nodes.Value.all, Node);
       else
          if Into.Current.Children = null then
             Into.Current.Children := new Node_List;
+            Into.Current.Children.Current := Into.Current.Children.First'Access;
          end if;
          Append (Into.Current.Children.all, Node);
       end if;
@@ -729,7 +730,7 @@ package body Wiki.Nodes is
    --  ------------------------------
    procedure Iterate (Doc     : in Document;
                       Process : not null access procedure (Node : in Node_Type)) is
-      Block : Node_List_Block_Access := Doc.Nodes.First'Unrestricted_Access;
+      Block : Node_List_Block_Access := Doc.Nodes.Value.First'Access;
    begin
       loop
          for I in 1 .. Block.Last loop
@@ -743,7 +744,8 @@ package body Wiki.Nodes is
    overriding
    procedure Initialize (Doc : in out Document) is
    begin
-      Doc.Nodes.Current := Doc.Nodes.First'Unchecked_Access;
+      Doc.Nodes := Node_List_Refs.Create;
+      Doc.Nodes.Value.Current := Doc.Nodes.Value.First'Access;
 --      Doc.Current := Doc.Nodes.Current;
    end Initialize;
 
