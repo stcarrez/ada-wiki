@@ -22,7 +22,6 @@ with Wiki.Filters;
 with Wiki.Strings;
 with Wiki.Nodes;
 with Wiki.Streams;
-with Wiki.Render;
 
 --  == Wiki Parsers ==
 --  The <b>Wikis.Parsers</b> package implements a parser for several well known wiki formats.
@@ -77,12 +76,14 @@ package Wiki.Parsers is
    --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
    --  defined on the parser.
    procedure Parse (Engine : in out Parser;
-                    Text   : in Wide_Wide_String);
+                    Text   : in Wide_Wide_String;
+                    Doc    : in out Wiki.Nodes.Document);
 
    --  Parse the wiki stream managed by <tt>Stream</tt> according to the wiki syntax configured
    --  on the wiki engine.
    procedure Parse (Engine : in out Parser;
-                    Stream : in Wiki.Streams.Input_Stream_Access);
+                    Stream : in Wiki.Streams.Input_Stream_Access;
+                    Doc    : in out Wiki.Nodes.Document);
 
 private
 
