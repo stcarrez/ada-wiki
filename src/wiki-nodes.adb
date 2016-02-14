@@ -539,17 +539,6 @@ package body Wiki.Nodes is
    end Find_Tag;
 
    --  ------------------------------
-   --  Create a text node.
-   --  ------------------------------
-   function Create_Text (Text : in WString) return Node_Type_Access is
-   begin
-      return new Node_Type '(Kind => N_TEXT,
-                             Len  => Text'Length,
-                             Text => Text,
-                             others => <>);
-   end Create_Text;
-
-   --  ------------------------------
    --  Append a HTML tag start node to the document.
    --  ------------------------------
    procedure Push_Node (Document   : in out Wiki.Nodes.Document;

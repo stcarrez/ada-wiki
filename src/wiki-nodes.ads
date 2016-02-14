@@ -146,9 +146,6 @@ package Wiki.Nodes is
       end case;
    end record;
 
-   --  Create a text node.
-   function Create_Text (Text : in WString) return Node_Type_Access;
-
    type Document is limited private;
 
    --  Append a node to the document.
