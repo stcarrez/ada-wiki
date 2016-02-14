@@ -53,6 +53,8 @@ package body Wiki.Render is
    procedure Render (Engine : in out Renderer'Class;
                      Doc    : in Wiki.Nodes.Document;
                      List   : in Wiki.Nodes.Node_List_Access) is
+      use type Wiki.Nodes.Node_List_Access;
+
       procedure Process (Node : in Wiki.Nodes.Node_Type);
 
       procedure Process (Node : in Wiki.Nodes.Node_Type) is
@@ -61,7 +63,9 @@ package body Wiki.Render is
       end Process;
 
    begin
-      Wiki.Nodes.Iterate (List, Process'Access);
+      if List /= null then
+         Wiki.Nodes.Iterate (List, Process'Access);
+      end if;
    end Render;
 
    --  ------------------------------
