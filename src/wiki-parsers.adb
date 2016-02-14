@@ -1266,7 +1266,8 @@ package body Wiki.Parsers is
    --  defined on the parser.
    --  ------------------------------
    procedure Parse (Engine : in out Parser;
-                    Text   : in Wide_Wide_String) is
+                    Text   : in Wide_Wide_String;
+                    Doc    : in out Wiki.Nodes.Document) is
 
       type Wide_Input is new Wiki.Streams.Input_Stream with record
          Pos : Positive;
@@ -1294,56 +1295,58 @@ package body Wiki.Parsers is
       Buffer : aliased Wide_Input;
    begin
       Buffer.Pos   := Text'First;
-      Engine.Parse (Buffer'Unchecked_Access);
+      Engine.Parse (Buffer'Unchecked_Access, Doc);
    end Parse;
 
    --  Parse the wiki stream managed by <tt>Stream</tt> according to the wiki syntax configured
    --  on the wiki engine.
    procedure Parse (Engine : in out Parser;
-                    Stream : in Wiki.Streams.Input_Stream_Access) is
-      P      : Parser;
+                    Stream : in Wiki.Streams.Input_Stream_Access;
+                    Doc    : in out Wiki.Nodes.Document) is
    begin
-      P.Empty_Line := True;
-      P.Format     := (others => False);
-      P.Is_Eof     := False;
-      P.Has_Pending := False;
-      P.Reader      := Stream;
-      P.Link_Double_Bracket := False;
-      P.Escape_Char := '~';
-      case P.Syntax is
+      Engine.Document   := Doc;
+      Engine.Empty_Line := True;
+      Engine.Format     := (others => False);
+      Engine.Is_Eof     := False;
+      Engine.Has_Pending := False;
+      Engine.Reader      := Stream;
+      Engine.Link_Double_Bracket := False;
+      Engine.Escape_Char := '~';
+      case Engine.Syntax is
          when SYNTAX_GOOGLE =>
-            Parse_Token (P, Google_Wiki_Table);
+            Parse_Token (Engine, Google_Wiki_Table);
 
          when SYNTAX_DOTCLEAR =>
-            P.Is_Dotclear := True;
-            P.Escape_Char := '\';
-            P.Header_Offset := -6;
-            P.Link_Title_First := True;
-            Parse_Token (P, Dotclear_Wiki_Table);
+            Engine.Is_Dotclear := True;
+            Engine.Escape_Char := '\';
+            Engine.Header_Offset := -6;
+            Engine.Link_Title_First := True;
+            Parse_Token (Engine, Dotclear_Wiki_Table);
 
          when SYNTAX_CREOLE =>
-            P.Link_Double_Bracket := True;
-            Parse_Token (P, Creole_Wiki_Table);
+            Engine.Link_Double_Bracket := True;
+            Parse_Token (Engine, Creole_Wiki_Table);
 
          when SYNTAX_PHPBB =>
-            Parse_Token (P, Mediawiki_Wiki_Table);
+            Parse_Token (Engine, Mediawiki_Wiki_Table);
 
          when SYNTAX_MEDIA_WIKI =>
-            P.Link_Double_Bracket := True;
-            P.Check_Image_Link := True;
-            Parse_Token (P, Mediawiki_Wiki_Table);
+            Engine.Link_Double_Bracket := True;
+            Engine.Check_Image_Link := True;
+            Parse_Token (Engine, Mediawiki_Wiki_Table);
 
          when SYNTAX_MARKDOWN =>
-            Parse_Token (P, Markdown_Wiki_Table);
+            Parse_Token (Engine, Markdown_Wiki_Table);
 
          when SYNTAX_MIX =>
-            P.Is_Dotclear := True;
-            Parse_Token (P, Misc_Wiki_Table);
+            Engine.Is_Dotclear := True;
+            Parse_Token (Engine, Misc_Wiki_Table);
 
          when SYNTAX_HTML =>
-            Parse_Token (P, Html_Table);
+            Parse_Token (Engine, Html_Table);
 
       end case;
+      Doc := Engine.Document;
    end Parse;
 
    procedure Parse_Token (P     : in out Parser;
