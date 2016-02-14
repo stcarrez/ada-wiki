@@ -214,6 +214,11 @@ package Wiki.Nodes is
    procedure Iterate (List    : in Node_List_Access;
                       Process : not null access procedure (Node : in Node_Type));
 
+   --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
+   --  each node instance.
+   procedure Iterate (Doc     : in Document;
+                      Process : not null access procedure (Node : in Node_Type));
+
 private
 
    NODE_LIST_BLOCK_SIZE : constant Positive := 20;
