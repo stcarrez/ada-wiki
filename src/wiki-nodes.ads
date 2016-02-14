@@ -18,6 +18,7 @@
 with Wiki.Attributes;
 with Wiki.Strings;
 with Ada.Finalization;
+with Util.Refs;
 package Wiki.Nodes is
 
    pragma Preelaborate;
@@ -146,7 +147,7 @@ package Wiki.Nodes is
       end case;
    end record;
 
-   type Document is limited private;
+   type Document is tagged private;
 
    --  Append a node to the document.
    procedure Append (Into : in out Document;
@@ -231,7 +232,7 @@ private
       List  : Node_Array (1 .. Max);
    end record;
 
-   type Node_List is limited record
+   type Node_List is limited new Util.Refs.Ref_Entity with record
       Current : Node_List_Block_Access;
       Length  : Natural := 0;
       First   : aliased Node_List_Block (NODE_LIST_BLOCK_SIZE);
@@ -241,8 +242,12 @@ private
    procedure Append (Into : in out Node_List;
                      Node : in Node_Type_Access);
 
-   type Document is limited new Ada.Finalization.Limited_Controlled with record
-      Nodes   : Node_List;
+   package Node_List_Refs is new Util.Refs.References (Node_List, Node_List_Access);
+
+   subtype Node_List_Ref is  Node_List_Refs.Ref;
+
+   type Document is new Ada.Finalization.Controlled with record
+      Nodes   : Node_List_Ref;
       Current : Node_Type_Access;
    end record;
 
