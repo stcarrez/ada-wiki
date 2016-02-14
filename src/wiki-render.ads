@@ -35,7 +35,7 @@ package Wiki.Render is
 
    --  Get the page link that must be rendered from the wiki page link.
    procedure Make_Page_Link (Renderer : in Link_Renderer;
-                             Link     : in Unbounded_Wide_Wide_String;
+                             Link     : in Wide_Wide_String;
                              URI      : out Unbounded_Wide_Wide_String;
                              Exists   : out Boolean) is abstract;
 
@@ -52,7 +52,7 @@ package Wiki.Render is
    --  Get the page link that must be rendered from the wiki page link.
    overriding
    procedure Make_Page_Link (Renderer : in Default_Link_Renderer;
-                             Link     : in Unbounded_Wide_Wide_String;
+                             Link     : in Wide_Wide_String;
                              URI      : out Unbounded_Wide_Wide_String;
                              Exists   : out Boolean);
 
@@ -74,5 +74,9 @@ package Wiki.Render is
    procedure Render (Engine : in out Renderer'Class;
                      Doc    : in Wiki.Nodes.Document;
                      List   : in Wiki.Nodes.Node_List_Access);
+
+   --  Render the document.
+   procedure Render (Engine : in out Renderer'Class;
+                     Doc    : in Wiki.Nodes.Document);
 
 end Wiki.Render;
