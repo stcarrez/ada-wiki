@@ -38,12 +38,12 @@ package body Wiki.Render is
    --  ------------------------------
    overriding
    procedure Make_Page_Link (Renderer : in Default_Link_Renderer;
-                             Link     : in Unbounded_Wide_Wide_String;
+                             Link     : in Wide_Wide_String;
                              URI      : out Unbounded_Wide_Wide_String;
                              Exists   : out Boolean) is
       pragma Unreferenced (Renderer);
    begin
-      URI    := Link;
+      URI    := To_Unbounded_Wide_Wide_String (Link);
       Exists := True;
    end Make_Page_Link;
 
@@ -62,6 +62,21 @@ package body Wiki.Render is
 
    begin
       Wiki.Nodes.Iterate (List, Process'Access);
+   end Render;
+
+   --  ------------------------------
+   --  Render the document.
+   --  ------------------------------
+   procedure Render (Engine : in out Renderer'Class;
+                     Doc    : in Wiki.Nodes.Document) is
+      procedure Process (Node : in Wiki.Nodes.Node_Type);
+
+      procedure Process (Node : in Wiki.Nodes.Node_Type) is
+      begin
+         Engine.Render (Doc, Node);
+      end Process;
+   begin
+      Wiki.Nodes.Iterate (Doc, Process'Access);
    end Render;
 
 end Wiki.Render;
