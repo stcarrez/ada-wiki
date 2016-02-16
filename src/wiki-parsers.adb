@@ -588,6 +588,7 @@ package body Wiki.Parsers is
       if Length (Link) = 0 then
          Link := Title;
       end if;
+      Wiki.Attributes.Clear (P.Attributes);
       Wiki.Attributes.Append (P.Attributes, "href", Link);
       Wiki.Attributes.Append (P.Attributes, "hreflang", Language);
       Wiki.Attributes.Append (P.Attributes, "title", Link_Title);
@@ -656,7 +657,7 @@ package body Wiki.Parsers is
       end if;
       Flush_Text (P);
       Wiki.Attributes.Clear (P.Attributes);
-      Wiki.Attributes.Append (P.Attributes, "href", Link);
+      Wiki.Attributes.Append (P.Attributes, "cite", Link);
       Wiki.Attributes.Append (P.Attributes, "lang", Language);
       P.Filters.Add_Quote (P.Document, To_Wide_Wide_String (Quote), P.Attributes);
       Peek (P, C);
@@ -752,6 +753,7 @@ package body Wiki.Parsers is
          Put_Back (P, C);
       end if;
       Flush_Text (P);
+      Wiki.Attributes.Clear (P.Attributes);
       Wiki.Attributes.Append (P.Attributes, "src", Link);
       Wiki.Attributes.Append (P.Attributes, "position", Position);
       Wiki.Attributes.Append (P.Attributes, "longdesc", Desc);
