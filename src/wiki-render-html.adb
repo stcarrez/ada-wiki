@@ -78,8 +78,7 @@ package body Wiki.Render.Html is
                              Format => Node.Format);
 
          when Wiki.Nodes.N_QUOTE =>
-            Engine.Open_Paragraph;
-            Engine.Output.Write (Node.Title);
+            Engine.Render_Quote (Doc, Node.Title, Node.Link_Attr);
 
          when Wiki.Nodes.N_LINK =>
             Engine.Render_Link (Doc, Node.Title, Node.Link_Attr);
@@ -318,24 +317,31 @@ package body Wiki.Render.Html is
    end Render_Image;
 
    --  ------------------------------
-   --  Add a quote.
+   --  Render a quote.
    --  ------------------------------
-   procedure Add_Quote (Document : in out Html_Renderer;
-                        Quote    : in Unbounded_Wide_Wide_String;
-                        Link     : in Unbounded_Wide_Wide_String;
-                        Language : in Unbounded_Wide_Wide_String) is
+   procedure Render_Quote (Engine : in out Html_Renderer;
+                           Doc    : in Wiki.Nodes.Document;
+                           Title  : in Wiki.Strings.WString;
+                           Attr   : in Wiki.Attributes.Attribute_List_Type) is
+
+      procedure Render_Attribute (Name  : in String;
+                                  Value : in Wide_Wide_String) is
+      begin
+         if Value'Length = 0 then
+            return;
+
+         elsif Name = "cite" or Name = "title" or Name = "lang" or Name = "style" or Name = "class" then
+            Engine.Output.Write_Wide_Attribute (Name, Value);
+         end if;
+      end Render_Attribute;
+
    begin
-      Document.Open_Paragraph;
-      Document.Output.Start_Element ("q");
-      if Length (Language) > 0 then
-         Document.Output.Write_Wide_Attribute ("lang", Language);
-      end if;
-      if Length (Link) > 0 then
-         Document.Output.Write_Wide_Attribute ("cite", Link);
-      end if;
-      --  Document.Output.Write_Wide_Text (Quote);
-      Document.Output.End_Element ("q");
-   end Add_Quote;
+      Engine.Open_Paragraph;
+      Engine.Output.Start_Element ("q");
+      Wiki.Attributes.Iterate (Attr, Render_Attribute'Access);
+      Engine.Output.Write_Wide_Text (Title);
+      Engine.Output.End_Element ("q");
+   end Render_Quote;
 
    HTML_BOLD        : aliased constant String := "b";
    HTML_ITALIC      : aliased constant String := "i";
