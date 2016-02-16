@@ -474,6 +474,7 @@ package body Wiki.Parsers is
       Iterate (P.Text, Add_Header'Access);
       P.Empty_Line   := True;
       P.In_Paragraph := False;
+      Clear (P.Text);
    end Parse_Header;
 
    --  ------------------------------
