@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-html -- Wiki HTML renderer
---  Copyright (C) 2011, 2012, 2013, 2015 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,12 +53,6 @@ package Wiki.Render.Html is
    procedure Add_List_Item (Document : in out Html_Renderer;
                             Level    : in Positive;
                             Ordered  : in Boolean);
-
-   --  Add a quote.
-   procedure Add_Quote (Document : in out Html_Renderer;
-                        Quote    : in Unbounded_Wide_Wide_String;
-                        Link     : in Unbounded_Wide_Wide_String;
-                        Language : in Unbounded_Wide_Wide_String);
 
    --  Add a text block with the given format.
    procedure Add_Text (Engine   : in out Html_Renderer;
@@ -113,6 +107,12 @@ private
 
    --  Render an image.
    procedure Render_Image (Engine : in out Html_Renderer;
+                           Doc    : in Wiki.Nodes.Document;
+                           Title  : in Wiki.Strings.WString;
+                           Attr   : in Wiki.Attributes.Attribute_List_Type);
+
+   --  Render a quote.
+   procedure Render_Quote (Engine : in out Html_Renderer;
                            Doc    : in Wiki.Nodes.Document;
                            Title  : in Wiki.Strings.WString;
                            Attr   : in Wiki.Attributes.Attribute_List_Type);
