@@ -251,14 +251,23 @@ package body Wiki.Render.Html is
                           Doc    : in Wiki.Nodes.Document;
                           Title  : in Wiki.Strings.WString;
                           Attr   : in Wiki.Attributes.Attribute_List_Type) is
-      Exists : Boolean;
-      Link   : Unbounded_Wide_Wide_String := Wiki.Attributes.Get_Attribute (Attr, "href");
-      URI    : Unbounded_Wide_Wide_String;
 
       procedure Render_Attribute (Name  : in String;
                                   Value : in Wide_Wide_String) is
       begin
-         if Name = "hreflang" or Name = "title" or Name = "rel" or Name = "target"
+         if Name = "href" then
+            declare
+               URI    : Unbounded_Wide_Wide_String;
+               Exists : Boolean;
+            begin
+               Engine.Links.Make_Page_Link (Value, URI, Exists);
+               Engine.Output.Write_Wide_Attribute ("href", URI);
+            end;
+
+         elsif Value'Length = 0 then
+            return;
+
+         elsif Name = "hreflang" or Name = "title" or Name = "rel" or Name = "target"
          or Name = "style" or Name = "class" then
             Engine.Output.Write_Wide_Attribute (Name, Value);
          end if;
@@ -267,8 +276,6 @@ package body Wiki.Render.Html is
    begin
       Engine.Open_Paragraph;
       Engine.Output.Start_Element ("a");
-      Engine.Links.Make_Page_Link (Link, URI, Exists);
-      Engine.Output.Write_Wide_Attribute ("href", URI);
       Wiki.Attributes.Iterate (Attr, Render_Attribute'Access);
       Engine.Output.Write_Wide_Text (Title);
       Engine.Output.End_Element ("a");
