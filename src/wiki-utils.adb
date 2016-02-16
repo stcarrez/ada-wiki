@@ -20,6 +20,7 @@ with Wiki.Render.Html;
 with Wiki.Filters.Html;
 with Wiki.Streams.Builders;
 with Wiki.Streams.Html.Builders;
+with Wiki.Nodes;
 package body Wiki.Utils is
 
    --  ------------------------------
@@ -29,13 +30,15 @@ package body Wiki.Utils is
                      Syntax : in Wiki.Parsers.Wiki_Syntax_Type) return String is
       Stream   : aliased Wiki.Streams.Html.Builders.Html_Output_Builder_Stream;
       Renderer : aliased Wiki.Render.Html.Html_Renderer;
+      Doc      : Wiki.Nodes.Document;
       Filter   : aliased Wiki.Filters.Html.Html_Filter_Type;
       Engine   : Wiki.Parsers.Parser;
    begin
       Renderer.Set_Output_Stream (Stream'Unchecked_Access);
       Engine.Add_Filter (Filter'Unchecked_Access);
       Engine.Set_Syntax (Syntax);
-      Engine.Parse (Text, Renderer'Unchecked_Access);
+      Engine.Parse (Text, Doc);
+      Renderer.Render (Doc);
       return Stream.To_String;
    end To_Html;
 
@@ -46,12 +49,14 @@ package body Wiki.Utils is
    function To_Text (Text   : in Wide_Wide_String;
                      Syntax : in Wiki.Parsers.Wiki_Syntax_Type) return String is
       Stream   : aliased Wiki.Streams.Builders.Output_Builder_Stream;
+      Doc      : Wiki.Nodes.Document;
       Renderer : aliased Wiki.Render.Text.Text_Renderer;
       Engine   : Wiki.Parsers.Parser;
    begin
       Renderer.Set_Output_Stream (Stream'Unchecked_Access);
       Engine.Set_Syntax (Syntax);
-      Engine.Parse (Text, Renderer'Unchecked_Access);
+      Engine.Parse (Text, Doc);
+      Renderer.Render (Doc);
       return Stream.To_String;
    end To_Text;
 
