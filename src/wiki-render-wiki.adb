@@ -54,101 +54,132 @@ package body Wiki.Render.Wiki is
    IMG_START_MEDIAWIKI       : aliased constant Wide_Wide_String := "[[File:";
    IMG_END_MEDIAWIKI         : aliased constant Wide_Wide_String := "]]";
 
-   Empty_Formats : constant Documents.Format_Map := (others => False);
+   Empty_Formats : constant Format_Map := (others => False);
 
    --  Set the output writer.
-   procedure Set_Writer (Document : in out Wiki_Renderer;
-                         Writer   : in Writers.Writer_Type_Access;
-                         Format   : in Parsers.Wiki_Syntax_Type) is
+   procedure Set_Output_Stream (Engine : in out Wiki_Renderer;
+                                Stream : in Streams.Output_Stream_Access;
+                                Format : in Parsers.Wiki_Syntax_Type) is
    begin
-      Document.Writer := Writer;
-      Document.Syntax := Format;
+      Engine.Output := Stream;
+      Engine.Syntax := Format;
       case Format is
          when Parsers.SYNTAX_DOTCLEAR =>
-            Document.Style_Start_Tags (Documents.BOLD)   := BOLD_CREOLE'Access;
-            Document.Style_End_Tags (Documents.BOLD)     := BOLD_CREOLE'Access;
-            Document.Tags (Header_Start) := HEADER_DOTCLEAR'Access;
-            Document.Tags (Line_Break)   := LINE_BREAK_CREOLE'Access;
-            Document.Tags (Img_Start)    := IMG_START_DOTCLEAR'Access;
-            Document.Tags (Img_End)      := IMG_END_DOTCLEAR'Access;
-            Document.Tags (Link_Start)   := LINK_START_DOTCLEAR'Access;
-            Document.Tags (Link_End)     := LINK_END_DOTCLEAR'Access;
-            Document.Tags (Link_Separator)  := LINK_SEPARATOR_CREOLE'Access;
-            Document.Tags (Preformat_Start) := PREFORMAT_START_DOTCLEAR'Access;
-            Document.Tags (Preformat_End)   := PREFORMAT_END_DOTCLEAR'Access;
-            Document.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
-            Document.Tags (List_Item)       := LIST_ITEM_CREOLE'Access;
-            Document.Tags (List_Ordered_Item) := LIST_ORDERED_ITEM_CREOLE'Access;
-            Document.Tags (Escape_Rule)       := ESCAPE_DOTCLEAR'Access;
-            Document.Invert_Header_Level := True;
-            Document.Allow_Link_Language := True;
-            Document.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("-+_*{}][/=\");
+            Engine.Style_Start_Tags (BOLD)   := BOLD_CREOLE'Access;
+            Engine.Style_End_Tags (BOLD)     := BOLD_CREOLE'Access;
+            Engine.Tags (Header_Start) := HEADER_DOTCLEAR'Access;
+            Engine.Tags (Line_Break)   := LINE_BREAK_CREOLE'Access;
+            Engine.Tags (Img_Start)    := IMG_START_DOTCLEAR'Access;
+            Engine.Tags (Img_End)      := IMG_END_DOTCLEAR'Access;
+            Engine.Tags (Link_Start)   := LINK_START_DOTCLEAR'Access;
+            Engine.Tags (Link_End)     := LINK_END_DOTCLEAR'Access;
+            Engine.Tags (Link_Separator)  := LINK_SEPARATOR_CREOLE'Access;
+            Engine.Tags (Preformat_Start) := PREFORMAT_START_DOTCLEAR'Access;
+            Engine.Tags (Preformat_End)   := PREFORMAT_END_DOTCLEAR'Access;
+            Engine.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
+            Engine.Tags (List_Item)       := LIST_ITEM_CREOLE'Access;
+            Engine.Tags (List_Ordered_Item) := LIST_ORDERED_ITEM_CREOLE'Access;
+            Engine.Tags (Escape_Rule)       := ESCAPE_DOTCLEAR'Access;
+            Engine.Invert_Header_Level := True;
+            Engine.Allow_Link_Language := True;
+            Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("-+_*{}][/=\");
 
          when Parsers.SYNTAX_MEDIA_WIKI =>
-            Document.Style_Start_Tags (Documents.BOLD)   := BOLD_MEDIAWIKI'Access;
-            Document.Style_End_Tags (Documents.BOLD)     := BOLD_MEDIAWIKI'Access;
-            Document.Tags (Header_Start) := HEADER_CREOLE'Access;
-            Document.Tags (Header_End)   := HEADER_CREOLE'Access;
-            Document.Tags (Line_Break)   := LINE_BREAK_MEDIAWIKI'Access;
-            Document.Tags (Img_Start)    := IMG_START_MEDIAWIKI'Access;
-            Document.Tags (Img_End)      := IMG_END_MEDIAWIKI'Access;
-            Document.Tags (Link_Start)   := LINK_START_CREOLE'Access;
-            Document.Tags (Link_End)     := LINK_END_CREOLE'Access;
-            Document.Tags (Link_Separator)  := LINK_SEPARATOR_CREOLE'Access;
-            Document.Tags (List_Item)       := LIST_ITEM_CREOLE'Access;
-            Document.Tags (List_Ordered_Item) := LIST_ORDERED_ITEM_CREOLE'Access;
-            Document.Tags (Preformat_Start) := PREFORMAT_START_MEDIAWIKI'Access;
-            Document.Tags (Preformat_End)   := PREFORMAT_END_MEDIAWIKI'Access;
-            Document.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
-            Document.Tags (Escape_Rule)     := ESCAPE_CREOLE'Access;
-            Document.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("'+_-*(){}][!");
+            Engine.Style_Start_Tags (BOLD)   := BOLD_MEDIAWIKI'Access;
+            Engine.Style_End_Tags (BOLD)     := BOLD_MEDIAWIKI'Access;
+            Engine.Tags (Header_Start) := HEADER_CREOLE'Access;
+            Engine.Tags (Header_End)   := HEADER_CREOLE'Access;
+            Engine.Tags (Line_Break)   := LINE_BREAK_MEDIAWIKI'Access;
+            Engine.Tags (Img_Start)    := IMG_START_MEDIAWIKI'Access;
+            Engine.Tags (Img_End)      := IMG_END_MEDIAWIKI'Access;
+            Engine.Tags (Link_Start)   := LINK_START_CREOLE'Access;
+            Engine.Tags (Link_End)     := LINK_END_CREOLE'Access;
+            Engine.Tags (Link_Separator)  := LINK_SEPARATOR_CREOLE'Access;
+            Engine.Tags (List_Item)       := LIST_ITEM_CREOLE'Access;
+            Engine.Tags (List_Ordered_Item) := LIST_ORDERED_ITEM_CREOLE'Access;
+            Engine.Tags (Preformat_Start) := PREFORMAT_START_MEDIAWIKI'Access;
+            Engine.Tags (Preformat_End)   := PREFORMAT_END_MEDIAWIKI'Access;
+            Engine.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
+            Engine.Tags (Escape_Rule)     := ESCAPE_CREOLE'Access;
+            Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("'+_-*(){}][!");
 
          when others =>
-            Document.Style_Start_Tags (Documents.BOLD)   := BOLD_CREOLE'Access;
-            Document.Style_End_Tags (Documents.BOLD)     := BOLD_CREOLE'Access;
-            Document.Tags (Header_Start) := HEADER_CREOLE'Access;
-            Document.Tags (Header_End)   := HEADER_CREOLE'Access;
-            Document.Tags (Line_Break)   := LINE_BREAK_CREOLE'Access;
-            Document.Tags (Img_Start)    := IMG_START_CREOLE'Access;
-            Document.Tags (Img_End)      := IMG_END_CREOLE'Access;
-            Document.Tags (Link_Start)   := LINK_START_CREOLE'Access;
-            Document.Tags (Link_End)     := LINK_END_CREOLE'Access;
-            Document.Tags (Link_Separator)  := LINK_SEPARATOR_CREOLE'Access;
-            Document.Tags (List_Item)       := LIST_ITEM_CREOLE'Access;
-            Document.Tags (List_Ordered_Item) := LIST_ORDERED_ITEM_CREOLE'Access;
-            Document.Tags (Preformat_Start) := PREFORMAT_START_CREOLE'Access;
-            Document.Tags (Preformat_End)   := PREFORMAT_END_CREOLE'Access;
-            Document.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
-            Document.Tags (Escape_Rule)     := ESCAPE_CREOLE'Access;
-            Document.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("'+_-*(){}][!");
+            Engine.Style_Start_Tags (BOLD)   := BOLD_CREOLE'Access;
+            Engine.Style_End_Tags (BOLD)     := BOLD_CREOLE'Access;
+            Engine.Tags (Header_Start) := HEADER_CREOLE'Access;
+            Engine.Tags (Header_End)   := HEADER_CREOLE'Access;
+            Engine.Tags (Line_Break)   := LINE_BREAK_CREOLE'Access;
+            Engine.Tags (Img_Start)    := IMG_START_CREOLE'Access;
+            Engine.Tags (Img_End)      := IMG_END_CREOLE'Access;
+            Engine.Tags (Link_Start)   := LINK_START_CREOLE'Access;
+            Engine.Tags (Link_End)     := LINK_END_CREOLE'Access;
+            Engine.Tags (Link_Separator)  := LINK_SEPARATOR_CREOLE'Access;
+            Engine.Tags (List_Item)       := LIST_ITEM_CREOLE'Access;
+            Engine.Tags (List_Ordered_Item) := LIST_ORDERED_ITEM_CREOLE'Access;
+            Engine.Tags (Preformat_Start) := PREFORMAT_START_CREOLE'Access;
+            Engine.Tags (Preformat_End)   := PREFORMAT_END_CREOLE'Access;
+            Engine.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
+            Engine.Tags (Escape_Rule)     := ESCAPE_CREOLE'Access;
+            Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("'+_-*(){}][!");
 
       end case;
-   end Set_Writer;
+   end Set_Output_Stream;
 
    --  ------------------------------
    --  Emit a new line.
    --  ------------------------------
-   procedure New_Line (Document : in out Wiki_Renderer) is
+   procedure New_Line (Engine : in out Wiki_Renderer) is
    begin
-      Document.Writer.Write (LF);
-      Document.Empty_Line := True;
+      Engine.Output.Write (LF);
+      Engine.Empty_Line := True;
    end New_Line;
+
+   --  Render the node instance from the document.
+   overriding
+   procedure Render (Engine : in out Wiki_Renderer;
+                     Doc    : in Nodes.Document;
+                     Node   : in Nodes.Node_Type) is
+      use type Nodes.Html_Tag_Type;
+      use type Nodes.Node_List_Access;
+   begin
+      case Node.Kind is
+         when Nodes.N_HEADER =>
+            Engine.Render_Header (Node.Header, Node.Level);
+
+         when Nodes.N_LINE_BREAK =>
+            Engine.Output.Write (Engine.Tags (Line_Break).all);
+            Engine.Empty_Line := False;
+
+         when Nodes.N_HORIZONTAL_RULE =>
+            Engine.Close_Paragraph;
+            Engine.Output.Write (Engine.Tags (Horizontal_Rule).all);
+
+         when Nodes.N_PARAGRAPH =>
+            Engine.Close_Paragraph;
+
+         when Nodes.N_TEXT =>
+            Engine.Render_Text (Node.Text, Node.Format);
+
+         when Nodes.N_TAG_START =>
+            Engine.Render_Tag (Doc, Node);
+
+      end case;
+   end Render;
 
    --  ------------------------------
    --  Add a section header in the document.
    --  ------------------------------
-   overriding
-   procedure Add_Header (Document : in out Wiki_Renderer;
-                         Header   : in Unbounded_Wide_Wide_String;
-                         Level    : in Positive) is
+   procedure Render_Header (Engine : in out Wiki_Renderer;
+                            Header : in Wide_Wide_String;
+                            Level  : in Positive) is
       Count : Natural := Level;
    begin
-      Document.Set_Format (Empty_Formats);
-      if not Document.Empty_Line then
-         Document.Writer.Write (LF);
+      Engine.Set_Format (Empty_Formats);
+      if not Engine.Empty_Line then
+         Engine.Output.Write (LF);
       end if;
-      Document.Close_Paragraph;
-      if Document.Invert_Header_Level then
+      Engine.Close_Paragraph;
+      if Engine.Invert_Header_Level then
          if Count > 5 then
             Count := 5;
          end if;
@@ -157,47 +188,35 @@ package body Wiki.Render.Wiki is
          Count := 6;
       end if;
       for I in 1 .. Count loop
-         Document.Writer.Write (Document.Tags (Header_Start).all);
+         Engine.Output.Write (Engine.Tags (Header_Start).all);
       end loop;
-      Document.Writer.Write (' ');
-      Document.Writer.Write (Header);
-      if Document.Tags (Header_End)'Length > 0 then
-         Document.Writer.Write (' ');
+      Engine.Output.Write (' ');
+      Engine.Output.Write (Header);
+      if Engine.Tags (Header_End)'Length > 0 then
+         Engine.Output.Write (' ');
          for I in 1 .. Level loop
-            Document.Writer.Write (Document.Tags (Header_End).all);
+            Engine.Output.Write (Engine.Tags (Header_End).all);
          end loop;
       end if;
-      Document.New_Line;
-   end Add_Header;
-
-   --  ------------------------------
-   --  Add a line break (<br>).
-   --  ------------------------------
-   overriding
-   procedure Add_Line_Break (Document : in out Wiki_Renderer) is
-   begin
-      Document.Writer.Write (Document.Tags (Line_Break).all);
-      Document.Empty_Line := False;
-   end Add_Line_Break;
+      Engine.New_Line;
+   end Render_Header;
 
    --  ------------------------------
    --  Add a paragraph (<p>).  Close the previous paragraph if any.
    --  The paragraph must be closed at the next paragraph or next header.
    --  ------------------------------
-   overriding
-   procedure Add_Paragraph (Document : in out Wiki_Renderer) is
+   procedure Add_Paragraph (Engine : in out Wiki_Renderer) is
    begin
-      Document.Close_Paragraph;
-      if not Document.Empty_Line then
-         Document.New_Line;
+      Engine.Close_Paragraph;
+      if not Engine.Empty_Line then
+         Engine.New_Line;
       end if;
-      Document.New_Line;
+      Engine.New_Line;
    end Add_Paragraph;
 
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
-   overriding
-   procedure Add_Blockquote (Document : in out Wiki_Renderer;
+   procedure Add_Blockquote (Engine : in out Wiki_Renderer;
                              Level    : in Natural) is
    begin
       null;
@@ -207,79 +226,65 @@ package body Wiki.Render.Wiki is
    --  Add a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
    --  ------------------------------
-   overriding
-   procedure Add_List_Item (Document : in out Wiki_Renderer;
+   procedure Add_List_Item (Engine : in out Wiki_Renderer;
                             Level    : in Positive;
                             Ordered  : in Boolean) is
    begin
-      Document.Close_Paragraph;
-      Document.Writer.Write (Document.Tags (List_Start).all);
+      Engine.Close_Paragraph;
+      Engine.Output.Write (Engine.Tags (List_Start).all);
       for I in 1 .. Level loop
          if Ordered then
-            Document.Writer.Write (Document.Tags (List_Ordered_Item).all);
+            Engine.Output.Write (Engine.Tags (List_Ordered_Item).all);
          else
-            Document.Writer.Write (Document.Tags (List_Item).all);
+            Engine.Output.Write (Engine.Tags (List_Item).all);
          end if;
       end loop;
-      Document.Writer.Write (' ');
+      Engine.Output.Write (' ');
    end Add_List_Item;
-
-   --  ------------------------------
-   --  Add an horizontal rule (<hr>).
-   --  ------------------------------
-   overriding
-   procedure Add_Horizontal_Rule (Document : in out Wiki_Renderer) is
-   begin
-      Document.Close_Paragraph;
-      Document.Writer.Write (Document.Tags (Horizontal_Rule).all);
-   end Add_Horizontal_Rule;
 
    --  ------------------------------
    --  Add a link.
    --  ------------------------------
-   overriding
-   procedure Add_Link (Document : in out Wiki_Renderer;
+   procedure Add_Link (Engine : in out Wiki_Renderer;
                        Name     : in Unbounded_Wide_Wide_String;
                        Link     : in Unbounded_Wide_Wide_String;
                        Language : in Unbounded_Wide_Wide_String;
                        Title    : in Unbounded_Wide_Wide_String) is
       pragma Unreferenced (Title);
    begin
-      Document.Writer.Write (Document.Tags (Link_Start).all);
-      Document.Writer.Write (Link);
+      Engine.Output.Write (Engine.Tags (Link_Start).all);
+      Engine.Output.Write (Link);
       if Length (Name) > 0 then
-         Document.Writer.Write (Document.Tags (Link_Separator).all);
-         Document.Writer.Write (Name);
+         Engine.Output.Write (Engine.Tags (Link_Separator).all);
+         Engine.Output.Write (Name);
       end if;
-      if Document.Allow_Link_Language and Length (Language) > 0 then
-         Document.Writer.Write (Document.Tags (Link_Separator).all);
+      if Engine.Allow_Link_Language and Length (Language) > 0 then
+         Engine.Output.Write (Engine.Tags (Link_Separator).all);
       end if;
-      Document.Writer.Write (Document.Tags (Link_End).all);
-      Document.Empty_Line := False;
+      Engine.Output.Write (Engine.Tags (Link_End).all);
+      Engine.Empty_Line := False;
    end Add_Link;
 
    --  Add an image.
-   overriding
-   procedure Add_Image (Document    : in out Wiki_Renderer;
+   procedure Add_Image (Engine    : in out Wiki_Renderer;
                         Link        : in Unbounded_Wide_Wide_String;
                         Alt         : in Unbounded_Wide_Wide_String;
                         Position    : in Unbounded_Wide_Wide_String;
                         Description : in Unbounded_Wide_Wide_String) is
       pragma Unreferenced (Position, Description);
    begin
-      Document.Writer.Write (Document.Tags (Img_Start).all);
-      Document.Writer.Write (Link);
+      Engine.Output.Write (Engine.Tags (Img_Start).all);
+      Engine.Output.Write (Link);
       if Length (Alt) > 0 then
-         Document.Writer.Write (Document.Tags (Link_Separator).all);
-         Document.Writer.Write (Alt);
+         Engine.Output.Write (Engine.Tags (Link_Separator).all);
+         Engine.Output.Write (Alt);
       end if;
-      Document.Writer.Write (Document.Tags (Img_End).all);
-      Document.Empty_Line := False;
+      Engine.Output.Write (Engine.Tags (Img_End).all);
+      Engine.Empty_Line := False;
    end Add_Image;
 
    --  Add a quote.
-   overriding
-   procedure Add_Quote (Document : in out Wiki_Renderer;
+   procedure Add_Quote (Engine : in out Wiki_Renderer;
                         Quote    : in Unbounded_Wide_Wide_String;
                         Link     : in Unbounded_Wide_Wide_String;
                         Language : in Unbounded_Wide_Wide_String) is
@@ -288,89 +293,85 @@ package body Wiki.Render.Wiki is
    end Add_Quote;
 
    --  Set the text style format.
-   procedure Set_Format (Document : in out Wiki_Renderer;
-                         Format   : in Documents.Format_Map) is
+   procedure Set_Format (Engine : in out Wiki_Renderer;
+                         Format : in Format_Map) is
       F : Boolean;
    begin
       for I in Format'Range loop
-         F := Format (I) or Document.Current_Style (I);
-         if Document.Format (I) /= F then
+         F := Format (I) or Engine.Current_Style (I);
+         if Engine.Format (I) /= F then
             if F then
-               Document.Writer.Write (Document.Style_Start_Tags (I).all);
-               Document.Format (I) := True;
+               Engine.Output.Write (Engine.Style_Start_Tags (I).all);
+               Engine.Format (I) := True;
             else
-               Document.Writer.Write (Document.Style_End_Tags (I).all);
-               Document.Format (I) := False;
+               Engine.Output.Write (Engine.Style_End_Tags (I).all);
+               Engine.Format (I) := False;
             end if;
          end if;
       end loop;
    end Set_Format;
 
    --  Add a text block with the given format.
-   overriding
-   procedure Add_Text (Document : in out Wiki_Renderer;
-                       Text     : in Unbounded_Wide_Wide_String;
-                       Format   : in Documents.Format_Map) is
-      use type Documents.Format_Map;
-
-      Content      : constant Wide_Wide_String := To_Wide_Wide_String (Text);
-      Start        : Natural := Content'First;
-      Last         : Natural := Content'Last;
+   procedure Render_Text (Engine : in out Wiki_Renderer;
+                          Text     : in Wide_Wide_String;
+                          Format   : in Format_Map) is
+      Start        : Natural := Text'First;
+      Last         : Natural := Text'Last;
       Apply_Format : Boolean := True;
       Check_Escape : Boolean := True;
    begin
-      if Document.Keep_Content or Document.Empty_Line then
-         while Start <= Content'Last and then Helpers.Is_Space_Or_Newline (Content (Start)) loop
+      if Engine.Keep_Content or Engine.Empty_Line then
+         while Start <= Text'Last and then Helpers.Is_Space_Or_Newline (Text (Start)) loop
             Start := Start + 1;
          end loop;
       end if;
-      if Document.Keep_Content then
-         while Last >= Start and then Helpers.Is_Space_Or_Newline (Content (Last)) loop
+      if Engine.Keep_Content then
+         while Last >= Start and then Helpers.Is_Space_Or_Newline (Text (Last)) loop
             Last := Last - 1;
          end loop;
-         Append (Document.Content, Content (Start .. Last));
+         Append (Engine.Content, Text (Start .. Last));
       else
          for I in Start .. Last loop
-            if Ada.Wide_Wide_Characters.Handling.Is_Line_Terminator (Content (I)) then
-               if Document.Empty_Line = False then
-                  if Apply_Format and then Document.Format /= Empty_Formats then
-                     Document.Set_Format (Empty_Formats);
+            if Ada.Wide_Wide_Characters.Handling.Is_Line_Terminator (Text (I)) then
+               if Engine.Empty_Line = False then
+                  if Apply_Format and then Engine.Format /= Empty_Formats then
+                     Engine.Set_Format (Empty_Formats);
                   end if;
-                  Document.Writer.Write (LF);
-                  Document.Empty_Line := True;
+                  Engine.Output.Write (LF);
+                  Engine.Empty_Line := True;
                end if;
-            elsif not Document.Empty_Line or else not Helpers.Is_Space (Content (I)) then
-               if Document.In_List then
-                  if Document.UL_List_Level > Document.OL_List_Level then
-                     Document.Add_List_Item (Document.UL_List_Level, False);
+            elsif not Engine.Empty_Line or else not Helpers.Is_Space (Text (I)) then
+               if Engine.In_List then
+                  if Engine.UL_List_Level > Engine.OL_List_Level then
+                     Engine.Add_List_Item (Engine.UL_List_Level, False);
                   else
-                     Document.Add_List_Item (Document.OL_List_Level, True);
+                     Engine.Add_List_Item (Engine.OL_List_Level, True);
                   end if;
-                  Document.In_List := False;
+                  Engine.In_List := False;
                end if;
                if Apply_Format then
-                  Document.Set_Format (Format);
+                  Engine.Set_Format (Format);
                   Apply_Format := False;
                end if;
                if Check_Escape then
-                  if Ada.Strings.Wide_Wide_Maps.Is_In (Content (I), Document.Escape_Set) then
-                     Document.Writer.Write (Document.Tags (Escape_Rule).all);
+                  if Ada.Strings.Wide_Wide_Maps.Is_In (Text (I), Engine.Escape_Set) then
+                     Engine.Output.Write (Engine.Tags (Escape_Rule).all);
                      Check_Escape := False;
                   end if;
                else
                   Check_Escape := True;
                end if;
-               Document.Writer.Write (Content (I));
-               Document.Empty_Line := False;
+               Engine.Output.Write (Text (I));
+               Engine.Empty_Line := False;
             end if;
          end loop;
       end if;
-   end Add_Text;
+   end Render_Text;
 
    --  ------------------------------
    --  Add a text block that is pre-formatted.
    --  ------------------------------
-   procedure Add_Preformatted (Document : in out Wiki_Renderer;
+   procedure Add_Preformatted (Engine : in out Wiki_Renderer;
                                Text     : in Unbounded_Wide_Wide_String;
                                Format   : in Unbounded_Wide_Wide_String) is
       pragma Unreferenced (Format);
@@ -378,8 +379,8 @@ package body Wiki.Render.Wiki is
       Content       : constant Wide_Wide_String := To_Wide_Wide_String (Text);
       Col           : Natural := 2;
    begin
-      Document.New_Line;
-      Document.Writer.Write (Document.Tags (Preformat_Start).all);
+      Engine.New_Line;
+      Engine.Output.Write (Engine.Tags (Preformat_Start).all);
       for I in Content'Range loop
          if Ada.Wide_Wide_Characters.Handling.Is_Line_Terminator (Content (I)) then
             Col := 0;
@@ -387,201 +388,196 @@ package body Wiki.Render.Wiki is
             Col := Col + 1;
          end if;
          if I = Content'First and then Col > 0 then
-            Document.Writer.Write (LF);
+            Engine.Output.Write (LF);
             Col := 0;
          end if;
-         Document.Writer.Write (Content (I));
+         Engine.Output.Write (Content (I));
       end loop;
       if Col /= 0 then
-         Document.New_Line;
+         Engine.New_Line;
       end if;
-      Document.Writer.Write (Document.Tags (Preformat_End).all);
-      Document.New_Line;
-      Document.Empty_Line := True;
+      Engine.Output.Write (Engine.Tags (Preformat_End).all);
+      Engine.New_Line;
+      Engine.Empty_Line := True;
    end Add_Preformatted;
 
-   procedure Start_Keep_Content (Document : in out Wiki_Renderer) is
+   procedure Start_Keep_Content (Engine : in out Wiki_Renderer) is
    begin
-      Document.Keep_Content := True;
-      Document.Content := To_Unbounded_Wide_Wide_String ("");
+      Engine.Keep_Content := True;
+      Engine.Content := To_Unbounded_Wide_Wide_String ("");
    end Start_Keep_Content;
 
-   overriding
-   procedure Start_Element (Document   : in out Wiki_Renderer;
-                            Name       : in Unbounded_Wide_Wide_String;
-                            Attributes : in Attribute_List_Type) is
-      use type Filters.Html.Html_Tag_Type;
+   procedure Render_Tag (Engine : in out Wiki_Renderer;
+                         Doc    : in Nodes.Document;
+                         Node   : in Nodes.Node_Type) is
+      use type Nodes.Html_Tag_Type;
 
-      Tag : constant Filters.Html.Html_Tag_Type := Filters.Html.Find_Tag (Name);
    begin
-      case Tag is
-         when Filters.Html.BR_TAG =>
-            Document.Add_Line_Break;
+      case Node.Tag_Start is
+         when Nodes.BR_TAG =>
+            Engine.Output.Write (Engine.Tags (Line_Break).all);
+            Engine.Empty_Line := False;
+            return;
 
-         when Filters.Html.HR_TAG =>
-            Document.Add_Horizontal_Rule;
+         when Nodes.HR_TAG =>
+            Engine.Close_Paragraph;
+            Engine.Output.Write (Engine.Tags (Horizontal_Rule).all);
+            return;
 
-         when Filters.Html.H1_TAG | Filters.Html.H2_TAG
-            | Filters.Html.H3_TAG | Filters.Html.H4_TAG
-            | Filters.Html.H5_TAG | Filters.Html.H6_TAG =>
-            Document.Start_Keep_Content;
+         when Nodes.H1_TAG | Nodes.H2_TAG
+            | Nodes.H3_TAG | Nodes.H4_TAG
+            | Nodes.H5_TAG | Nodes.H6_TAG =>
+            Engine.Start_Keep_Content;
 
-         when Filters.Html.IMG_TAG =>
-            Document.Add_Image (Link        => Get_Attribute (Attributes, "src"),
+         when Nodes.IMG_TAG =>
+            Engine.Add_Image (Link        => Get_Attribute (Attributes, "src"),
                                 Alt         => Get_Attribute (Attributes, "alt"),
                                 Position    => Null_Unbounded_Wide_Wide_String,
                                 Description => Null_Unbounded_Wide_Wide_String);
 
-         when Filters.Html.A_TAG =>
-            Document.Link_Href := Get_Attribute (Attributes, "href");
-            Document.Link_Title := Get_Attribute (Attributes, "title");
-            Document.Link_Lang := Get_Attribute (Attributes, "lang");
-            Document.Start_Keep_Content;
+         when Nodes.A_TAG =>
+            Engine.Link_Href := Get_Attribute (Attributes, "href");
+            Engine.Link_Title := Get_Attribute (Attributes, "title");
+            Engine.Link_Lang := Get_Attribute (Attributes, "lang");
+            Engine.Start_Keep_Content;
 
-         when Filters.Html.B_TAG | Filters.Html.EM_TAG | Filters.Html.STRONG_TAG =>
-            if not Document.Keep_Content then
-               Document.Current_Style (Documents.BOLD) := True;
+         when Nodes.B_TAG | Nodes.EM_TAG | Nodes.STRONG_TAG =>
+            if not Engine.Keep_Content then
+               Engine.Current_Style (BOLD) := True;
             end if;
 
-         when Filters.Html.I_TAG =>
-            if not Document.Keep_Content then
-               Document.Current_Style (Documents.ITALIC) := True;
+         when Nodes.I_TAG =>
+            if not Engine.Keep_Content then
+               Engine.Current_Style (ITALIC) := True;
             end if;
 
-         when Filters.Html.U_TAG =>
-            if not Document.Keep_Content then
-               Document.Current_Style (Documents.CODE) := True;
+         when Nodes.U_TAG =>
+            if not Engine.Keep_Content then
+               Engine.Current_Style (CODE) := True;
             end if;
 
-         when Filters.Html.SUP_TAG =>
-            if not Document.Keep_Content then
-               Document.Current_Style (Documents.SUPERSCRIPT) := True;
+         when Nodes.SUP_TAG =>
+            if not Engine.Keep_Content then
+               Engine.Current_Style (SUPERSCRIPT) := True;
             end if;
 
-         when Filters.Html.SUB_TAG =>
-            if not Document.Keep_Content then
-               Document.Current_Style (Documents.SUBSCRIPT) := True;
+         when Nodes.SUB_TAG =>
+            if not Engine.Keep_Content then
+               Engine.Current_Style (SUBSCRIPT) := True;
             end if;
 
-         when Filters.Html.P_TAG =>
-            Document.New_Line;
+         when Nodes.P_TAG =>
+            Engine.New_Line;
 
-         when Filters.Html.PRE_TAG =>
-            Document.Start_Keep_Content;
+         when Nodes.PRE_TAG =>
+            Engine.Start_Keep_Content;
 
-         when Filters.Html.UL_TAG =>
-            Document.UL_List_Level := Document.UL_List_Level + 1;
+         when Nodes.UL_TAG =>
+            Engine.UL_List_Level := Engine.UL_List_Level + 1;
 
-         when Filters.Html.OL_TAG =>
-            Document.OL_List_Level := Document.OL_List_Level + 1;
+         when Nodes.OL_TAG =>
+            Engine.OL_List_Level := Engine.OL_List_Level + 1;
 
-         when Filters.Html.LI_TAG =>
-            Document.In_List := True;
+         when Nodes.LI_TAG =>
+            Engine.In_List := True;
 
          when others =>
             null;
 
       end case;
-   end Start_Element;
+      Engine.Render (Doc, Node.Children);
 
-   overriding
-   procedure End_Element (Document : in out Wiki_Renderer;
-                          Name     : in Unbounded_Wide_Wide_String) is
-      use type Filters.Html.Html_Tag_Type;
+      case Node.Tag_Start is
+         when Nodes.H1_TAG =>
+            Engine.Render_Header (To_Wide_Wide_String (Engine.Content), 1);
+            Engine.Keep_Content := False;
 
-      Tag : constant Filters.Html.Html_Tag_Type := Filters.Html.Find_Tag (Name);
-   begin
-      case Tag is
-         when Filters.Html.H1_TAG =>
-            Document.Add_Header (Document.Content, 1);
-            Document.Keep_Content := False;
+         when Nodes.H2_TAG =>
+            Engine.Render_Header (To_Wide_Wide_String (Engine.Content), 2);
+            Engine.Keep_Content := False;
 
-         when Filters.Html.H2_TAG =>
-            Document.Add_Header (Document.Content, 2);
-            Document.Keep_Content := False;
+         when Nodes.H3_TAG =>
+            Engine.Render_Header (To_Wide_Wide_String (Engine.Content), 3);
+            Engine.Keep_Content := False;
 
-         when Filters.Html.H3_TAG =>
-            Document.Add_Header (Document.Content, 3);
-            Document.Keep_Content := False;
+         when Nodes.H4_TAG =>
+            Engine.Render_Header (To_Wide_Wide_String (Engine.Content), 4);
+            Engine.Keep_Content := False;
 
-         when Filters.Html.H4_TAG =>
-            Document.Add_Header (Document.Content, 4);
-            Document.Keep_Content := False;
+         when Nodes.H5_TAG =>
+            Engine.Render_Header (To_Wide_Wide_String (Engine.Content), 5);
+            Engine.Keep_Content := False;
 
-         when Filters.Html.H5_TAG =>
-            Document.Add_Header (Document.Content, 5);
-            Document.Keep_Content := False;
+         when Nodes.H6_TAG =>
+            Engine.Render_Header (To_Wide_Wide_String (Engine.Content), 6);
+            Engine.Keep_Content := False;
 
-         when Filters.Html.H6_TAG =>
-            Document.Add_Header (Document.Content, 6);
-            Document.Keep_Content := False;
+         when Nodes.A_TAG =>
+            Engine.Add_Link (Name     => Engine.Content,
+                               Link     => Engine.Link_Href,
+                               Language => Engine.Link_Lang,
+                               Title    => Engine.Link_Title);
+            Engine.Keep_Content := False;
 
-         when Filters.Html.A_TAG =>
-            Document.Add_Link (Name     => Document.Content,
-                               Link     => Document.Link_Href,
-                               Language => Document.Link_Lang,
-                               Title    => Document.Link_Title);
-            Document.Keep_Content := False;
-
-         when Filters.Html.B_TAG | Filters.Html.EM_TAG | Filters.Html.STRONG_TAG =>
-            if not Document.Keep_Content then
-               Document.Current_Style (Documents.BOLD) := False;
+         when Nodes.B_TAG | Nodes.EM_TAG | Nodes.STRONG_TAG =>
+            if not Engine.Keep_Content then
+               Engine.Current_Style (BOLD) := False;
             end if;
 
-         when Filters.Html.I_TAG =>
-            if not Document.Keep_Content then
-               Document.Current_Style (Documents.ITALIC) := False;
+         when Nodes.I_TAG =>
+            if not Engine.Keep_Content then
+               Engine.Current_Style (ITALIC) := False;
             end if;
 
-         when Filters.Html.U_TAG =>
-            if not Document.Keep_Content then
-               Document.Current_Style (Documents.CODE) := False;
+         when Nodes.U_TAG =>
+            if not Engine.Keep_Content then
+               Engine.Current_Style (CODE) := False;
             end if;
 
-         when Filters.Html.SUP_TAG =>
-            if not Document.Keep_Content then
-               Document.Current_Style (Documents.SUPERSCRIPT) := False;
+         when Nodes.SUP_TAG =>
+            if not Engine.Keep_Content then
+               Engine.Current_Style (SUPERSCRIPT) := False;
             end if;
 
-         when Filters.Html.SUB_TAG =>
-            if not Document.Keep_Content then
-               Document.Current_Style (Documents.SUBSCRIPT) := False;
+         when Nodes.SUB_TAG =>
+            if not Engine.Keep_Content then
+               Engine.Current_Style (SUBSCRIPT) := False;
             end if;
 
-         when Filters.Html.PRE_TAG =>
-            Document.Add_Preformatted (Document.Content, Null_Unbounded_Wide_Wide_String);
-            Document.Keep_Content := False;
+         when Nodes.PRE_TAG =>
+            Engine.Add_Preformatted (Engine.Content, Null_Unbounded_Wide_Wide_String);
+            Engine.Keep_Content := False;
 
-         when Filters.Html.UL_TAG =>
-            Document.UL_List_Level := Document.UL_List_Level - 1;
+         when Nodes.UL_TAG =>
+            Engine.UL_List_Level := Engine.UL_List_Level - 1;
 
-         when Filters.Html.OL_TAG =>
-            Document.OL_List_Level := Document.OL_List_Level - 1;
+         when Nodes.OL_TAG =>
+            Engine.OL_List_Level := Engine.OL_List_Level - 1;
 
-         when Filters.Html.LI_TAG =>
-            Document.In_List := False;
+         when Nodes.LI_TAG =>
+            Engine.In_List := False;
 
          when others =>
             null;
 
       end case;
-   end End_Element;
+   end Render_Tag;
 
    --  Finish the document after complete wiki text has been parsed.
    overriding
-   procedure Finish (Document : in out Wiki_Renderer) is
+   procedure Finish (Engine : in out Wiki_Renderer) is
    begin
-      Document.Set_Format (Empty_Formats);
+      Engine.Set_Format (Empty_Formats);
    end Finish;
 
-   procedure Close_Paragraph (Document : in out Wiki_Renderer) is
+   procedure Close_Paragraph (Engine : in out Wiki_Renderer) is
    begin
-      if not Document.Empty_Line then
-         Document.New_Line;
+      if not Engine.Empty_Line then
+         Engine.New_Line;
       end if;
    end Close_Paragraph;
 
-   procedure Open_Paragraph (Document : in out Wiki_Renderer) is
+   procedure Open_Paragraph (Engine : in out Wiki_Renderer) is
    begin
       null;
    end Open_Paragraph;
