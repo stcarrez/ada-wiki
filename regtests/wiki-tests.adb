@@ -25,9 +25,9 @@ with Util.Measures;
 
 with Wiki.Render.Wiki;
 with Wiki.Filters.Html;
-with Wiki.Writers.Builders;
+with Wiki.Streams.Html.Builders;
 with Wiki.Utils;
-package body Wiki.Writers.Tests is
+package body Wiki.Tests is
 
    use Ada.Strings.Unbounded;
    use type Wiki.Parsers.Wiki_Syntax_Type;
@@ -235,4 +235,4 @@ package body Wiki.Writers.Tests is
       Add_Import_Tests;
    end Add_Tests;
 
-end Wiki.Writers.Tests;
+end Wiki.Tests;
