@@ -26,7 +26,9 @@ with Util.Measures;
 with Wiki.Render.Wiki;
 with Wiki.Filters.Html;
 with Wiki.Streams.Html.Builders;
+with Wiki.Streams.Builders;
 with Wiki.Utils;
+with Wiki.Nodes;
 package body Wiki.Tests is
 
    use Ada.Strings.Unbounded;
@@ -51,13 +53,16 @@ package body Wiki.Tests is
          if T.Source = Wiki.Parsers.SYNTAX_HTML then
             declare
                Html_Filter : aliased Wiki.Filters.Html.Html_Filter_Type;
-               Writer      : aliased Wiki.Writers.Builders.Writer_Builder_Type;
+               Writer      : aliased Wiki.Streams.Builders.Output_Builder_Stream;
                Renderer    : aliased Wiki.Render.Wiki.Wiki_Renderer;
+               Doc         : Wiki.Nodes.Document;
+               Engine      : Wiki.Parsers.Parser;
             begin
-               Renderer.Set_Writer (Writer'Unchecked_Access, T.Format);
-               Html_Filter.Set_Document (Renderer'Unchecked_Access);
-               Wiki.Parsers.Parse (Html_Filter'Unchecked_Access, To_Wide (To_String (Content)),
-                                   Wiki.Parsers.SYNTAX_HTML);
+               Renderer.Set_Output_Stream (Writer'Unchecked_Access, T.Format);
+               Engine.Add_Filter (Html_Filter'Unchecked_Access);
+               Engine.Set_Syntax (Wiki.Parsers.SYNTAX_HTML);
+               Engine.Parse (To_Wide (To_String (Content)), Doc);
+               Renderer.Render (Doc);
                Content := To_Unbounded_String (Writer.To_String);
             end;
          elsif T.Is_Html then
