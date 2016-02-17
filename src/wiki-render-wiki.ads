@@ -19,7 +19,7 @@ with Ada.Strings.Wide_Wide_Maps;
 
 with Wiki.Documents;
 with Wiki.Attributes;
-with Wiki.Writers;
+with Wiki.Streams;
 with Wiki.Parsers;
 
 --  == Wiki Renderer ==
@@ -32,96 +32,79 @@ package Wiki.Render.Wiki is
    --  ------------------------------
    --  Wiki to HTML writer
    --  ------------------------------
-   type Wiki_Renderer is new Standard.Wiki.Documents.Document_Reader with private;
+   type Wiki_Renderer is new Renderer with private;
 
-   --  Set the output writer.
-   procedure Set_Writer (Document : in out Wiki_Renderer;
-                         Writer   : in Writers.Writer_Type_Access;
-                         Format   : in Parsers.Wiki_Syntax_Type);
+   --  Set the output stream.
+   procedure Set_Output_Stream (Engine   : in out Wiki_Renderer;
+                                Stream   : in Streams.Output_Stream_Access;
+                                Format   : in Parsers.Wiki_Syntax_Type);
+
+   --  Render the node instance from the document.
+   overriding
+   procedure Render (Engine : in out Wiki_Renderer;
+                     Doc    : in Nodes.Document;
+                     Node   : in Nodes.Node_Type);
 
    --  Add a section header in the document.
-   overriding
-   procedure Add_Header (Document : in out Wiki_Renderer;
-                         Header   : in Unbounded_Wide_Wide_String;
-                         Level    : in Positive);
-
-   --  Add a line break (<br>).
-   overriding
-   procedure Add_Line_Break (Document : in out Wiki_Renderer);
+   procedure Render_Header (Engine : in out Wiki_Renderer;
+                            Header : in Wide_Wide_String;
+                            Level  : in Positive);
 
    --  Add a paragraph (<p>).  Close the previous paragraph if any.
    --  The paragraph must be closed at the next paragraph or next header.
-   overriding
-   procedure Add_Paragraph (Document : in out Wiki_Renderer);
+   procedure Add_Paragraph (Engine : in out Wiki_Renderer);
 
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
-   overriding
-   procedure Add_Blockquote (Document : in out Wiki_Renderer;
+   procedure Add_Blockquote (Engine : in out Wiki_Renderer;
                              Level    : in Natural);
 
    --  Add a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
-   overriding
-   procedure Add_List_Item (Document : in out Wiki_Renderer;
+   procedure Add_List_Item (Engine : in out Wiki_Renderer;
                             Level    : in Positive;
                             Ordered  : in Boolean);
 
-   --  Add an horizontal rule (<hr>).
-   overriding
-   procedure Add_Horizontal_Rule (Document : in out Wiki_Renderer);
-
    --  Add a link.
-   overriding
-   procedure Add_Link (Document : in out Wiki_Renderer;
+   procedure Add_Link (Engine : in out Wiki_Renderer;
                        Name     : in Unbounded_Wide_Wide_String;
                        Link     : in Unbounded_Wide_Wide_String;
                        Language : in Unbounded_Wide_Wide_String;
                        Title    : in Unbounded_Wide_Wide_String);
 
    --  Add an image.
-   overriding
-   procedure Add_Image (Document    : in out Wiki_Renderer;
+   procedure Add_Image (Engine    : in out Wiki_Renderer;
                         Link        : in Unbounded_Wide_Wide_String;
                         Alt         : in Unbounded_Wide_Wide_String;
                         Position    : in Unbounded_Wide_Wide_String;
                         Description : in Unbounded_Wide_Wide_String);
 
    --  Add a quote.
-   overriding
-   procedure Add_Quote (Document : in out Wiki_Renderer;
+   procedure Add_Quote (Engine : in out Wiki_Renderer;
                         Quote    : in Unbounded_Wide_Wide_String;
                         Link     : in Unbounded_Wide_Wide_String;
                         Language : in Unbounded_Wide_Wide_String);
 
    --  Add a text block with the given format.
-   overriding
-   procedure Add_Text (Document : in out Wiki_Renderer;
-                       Text     : in Unbounded_Wide_Wide_String;
-                       Format   : in Documents.Format_Map);
+   procedure Render_Text (Engine : in out Wiki_Renderer;
+                          Text   : in Wide_Wide_String;
+                          Format : in Format_Map);
 
    --  Add a text block that is pre-formatted.
-   procedure Add_Preformatted (Document : in out Wiki_Renderer;
+   procedure Add_Preformatted (Engine : in out Wiki_Renderer;
                                Text     : in Unbounded_Wide_Wide_String;
                                Format   : in Unbounded_Wide_Wide_String);
 
-   overriding
-   procedure Start_Element (Document   : in out Wiki_Renderer;
-                            Name       : in Unbounded_Wide_Wide_String;
-                            Attributes : in Attribute_List_Type);
-
-   overriding
-   procedure End_Element (Document : in out Wiki_Renderer;
-                          Name     : in Unbounded_Wide_Wide_String);
-
+   procedure Render_Tag (Engine : in out Wiki_Renderer;
+                         Doc    : in Nodes.Document;
+                         Node   : in Nodes.Node_Type);
 
    --  Finish the document after complete wiki text has been parsed.
-   overriding
-   procedure Finish (Document : in out Wiki_Renderer);
+   procedure Finish (Engine : in out Wiki_Renderer);
 
    --  Set the text style format.
-   procedure Set_Format (Document : in out Wiki_Renderer;
-                         Format   : in Documents.Format_Map);
+   procedure Set_Format (Engine : in out Wiki_Renderer;
+                         Format   : in Format_Map);
 
 private
 
@@ -138,23 +121,23 @@ private
 
    type Wiki_Tag_Array is array (Wiki_Tag_Type) of Wide_String_Access;
 
-   type Wiki_Format_Array is array (Documents.Format_Type) of Wide_String_Access;
+   type Wiki_Format_Array is array (Format_Type) of Wide_String_Access;
 
    --  Emit a new line.
-   procedure New_Line (Document : in out Wiki_Renderer);
+   procedure New_Line (Engine : in out Wiki_Renderer);
 
-   procedure Close_Paragraph (Document : in out Wiki_Renderer);
-   procedure Open_Paragraph (Document : in out Wiki_Renderer);
-   procedure Start_Keep_Content (Document : in out Wiki_Renderer);
+   procedure Close_Paragraph (Engine : in out Wiki_Renderer);
+   procedure Open_Paragraph (Engine : in out Wiki_Renderer);
+   procedure Start_Keep_Content (Engine : in out Wiki_Renderer);
 
    type List_Style_Array is array (1 .. 32) of Boolean;
 
    EMPTY_TAG : aliased constant Wide_Wide_String := "";
 
-   type Wiki_Renderer is new Documents.Document_Reader with record
-      Writer              : Writers.Writer_Type_Access := null;
+   type Wiki_Renderer is new Renderer with record
+      Output              : Streams.Output_Stream_Access := null;
       Syntax              : Parsers.Wiki_Syntax_Type := Parsers.SYNTAX_CREOLE;
-      Format              : Documents.Format_Map := (others => False);
+      Format              : Format_Map := (others => False);
       Tags                : Wiki_Tag_Array := (others => EMPTY_TAG'Access);
       Style_Start_Tags    : Wiki_Format_Array := (others => EMPTY_TAG'Access);
       Style_End_Tags      : Wiki_Format_Array := (others => EMPTY_TAG'Access);
@@ -171,7 +154,7 @@ private
       Quote_Level         : Natural := 0;
       UL_List_Level       : Natural := 0;
       OL_List_Level       : Natural := 0;
-      Current_Style       : Documents.Format_Map := (others => False);
+      Current_Style       : Format_Map := (others => False);
       Content             : Unbounded_Wide_Wide_String;
       Link_Href           : Unbounded_Wide_Wide_String;
       Link_Title          : Unbounded_Wide_Wide_String;
