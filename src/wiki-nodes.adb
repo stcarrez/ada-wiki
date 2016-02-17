@@ -745,7 +745,7 @@ package body Wiki.Nodes is
                                                           Children   => null,
                                                           Parent     => Document.Current);
    begin
-      Append (Document.Nodes.Value.all, Node);
+      Append (Document, Node);
       Document.Current := Node;
    end Push_Node;
 
