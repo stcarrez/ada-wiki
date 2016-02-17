@@ -163,6 +163,9 @@ package body Wiki.Render.Wiki is
          when Nodes.N_TAG_START =>
             Engine.Render_Tag (Doc, Node);
 
+         when others =>
+            null;
+
       end case;
    end Render;
 
@@ -253,10 +256,10 @@ package body Wiki.Render.Wiki is
       pragma Unreferenced (Title);
    begin
       Engine.Output.Write (Engine.Tags (Link_Start).all);
-      Engine.Output.Write (Link);
+      Engine.Output.Write (To_Wide_Wide_String (Link));
       if Length (Name) > 0 then
          Engine.Output.Write (Engine.Tags (Link_Separator).all);
-         Engine.Output.Write (Name);
+         Engine.Output.Write (To_Wide_Wide_String (Name));
       end if;
       if Engine.Allow_Link_Language and Length (Language) > 0 then
          Engine.Output.Write (Engine.Tags (Link_Separator).all);
@@ -274,10 +277,10 @@ package body Wiki.Render.Wiki is
       pragma Unreferenced (Position, Description);
    begin
       Engine.Output.Write (Engine.Tags (Img_Start).all);
-      Engine.Output.Write (Link);
+      Engine.Output.Write (To_Wide_Wide_String (Link));
       if Length (Alt) > 0 then
          Engine.Output.Write (Engine.Tags (Link_Separator).all);
-         Engine.Output.Write (Alt);
+         Engine.Output.Write (To_Wide_Wide_String (Alt));
       end if;
       Engine.Output.Write (Engine.Tags (Img_End).all);
       Engine.Empty_Line := False;
@@ -430,15 +433,15 @@ package body Wiki.Render.Wiki is
             Engine.Start_Keep_Content;
 
          when Nodes.IMG_TAG =>
-            Engine.Add_Image (Link        => Get_Attribute (Attributes, "src"),
-                                Alt         => Get_Attribute (Attributes, "alt"),
-                                Position    => Null_Unbounded_Wide_Wide_String,
-                                Description => Null_Unbounded_Wide_Wide_String);
+            Engine.Add_Image (Link        => Get_Attribute (Node.Attributes, "src"),
+                              Alt         => Get_Attribute (Node.Attributes, "alt"),
+                              Position    => Null_Unbounded_Wide_Wide_String,
+                              Description => Null_Unbounded_Wide_Wide_String);
 
          when Nodes.A_TAG =>
-            Engine.Link_Href := Get_Attribute (Attributes, "href");
-            Engine.Link_Title := Get_Attribute (Attributes, "title");
-            Engine.Link_Lang := Get_Attribute (Attributes, "lang");
+            Engine.Link_Href := Get_Attribute (Node.Attributes, "href");
+            Engine.Link_Title := Get_Attribute (Node.Attributes, "title");
+            Engine.Link_Lang := Get_Attribute (Node.Attributes, "lang");
             Engine.Start_Keep_Content;
 
          when Nodes.B_TAG | Nodes.EM_TAG | Nodes.STRONG_TAG =>
