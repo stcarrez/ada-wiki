@@ -20,7 +20,7 @@ with Util.Tests;
 
 with Ada.Strings.Unbounded;
 with Wiki.Parsers;
-package Wiki.Writers.Tests is
+package Wiki.Tests is
 
    procedure Add_Tests (Suite : in Util.Tests.Access_Test_Suite);
 
@@ -47,4 +47,4 @@ package Wiki.Writers.Tests is
    --  Test rendering a wiki text in HTML or text.
    procedure Test_Render (T : in out Test);
 
-end Wiki.Writers.Tests;
+end Wiki.Tests;
