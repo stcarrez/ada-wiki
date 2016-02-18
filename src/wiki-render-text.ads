@@ -42,10 +42,10 @@ package Wiki.Render.Text is
    --  Add a line break (<br>).
    procedure Add_Line_Break (Document : in out Text_Renderer);
 
-   --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
+   --  Render a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
-   procedure Add_Blockquote (Document : in out Text_Renderer;
-                             Level    : in Natural);
+   procedure Render_Blockquote (Engine : in out Text_Renderer;
+                                Level  : in Natural);
 
    --  Render a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
@@ -65,10 +65,10 @@ package Wiki.Render.Text is
                         Position    : in Unbounded_Wide_Wide_String;
                         Description : in Unbounded_Wide_Wide_String);
 
-   --  Add a text block that is pre-formatted.
-   procedure Add_Preformatted (Document : in out Text_Renderer;
-                               Text     : in Unbounded_Wide_Wide_String;
-                               Format   : in Unbounded_Wide_Wide_String);
+   --  Render a text block that is pre-formatted.
+   procedure Render_Preformatted (Engine   : in out Text_Renderer;
+                                  Text     : in Wiki.Strings.WString;
+                                  Format   : in Wiki.Strings.WString);
 
    --  Finish the document after complete wiki text has been parsed.
    overriding
