@@ -65,25 +65,20 @@ package Wiki.Render.Wiki is
                             Level    : in Positive;
                             Ordered  : in Boolean);
 
-   --  Add a link.
-   procedure Add_Link (Engine : in out Wiki_Renderer;
-                       Name     : in Unbounded_Wide_Wide_String;
-                       Link     : in Unbounded_Wide_Wide_String;
-                       Language : in Unbounded_Wide_Wide_String;
-                       Title    : in Unbounded_Wide_Wide_String);
+   --  Render a link.
+   procedure Render_Link (Engine : in out Wiki_Renderer;
+                          Name     : in WString;
+                          Attrs    : in Attributes.Attribute_List_Type);
 
-   --  Add an image.
-   procedure Add_Image (Engine    : in out Wiki_Renderer;
-                        Link        : in Unbounded_Wide_Wide_String;
-                        Alt         : in Unbounded_Wide_Wide_String;
-                        Position    : in Unbounded_Wide_Wide_String;
-                        Description : in Unbounded_Wide_Wide_String);
+   --  Render an image.
+   procedure Render_Image (Engine : in out Wiki_Renderer;
+                           Link   : in WString;
+                           Attrs  : in Attributes.Attribute_List_Type);
 
-   --  Add a quote.
-   procedure Add_Quote (Engine : in out Wiki_Renderer;
-                        Quote    : in Unbounded_Wide_Wide_String;
-                        Link     : in Unbounded_Wide_Wide_String;
-                        Language : in Unbounded_Wide_Wide_String);
+   --  Render a quote.
+   procedure Render_Quote (Engine : in out Wiki_Renderer;
+                           Title  : in WString;
+                           Attrs  : in Attributes.Attribute_List_Type);
 
    --  Add a text block with the given format.
    procedure Render_Text (Engine : in out Wiki_Renderer;
