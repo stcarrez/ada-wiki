@@ -160,6 +160,15 @@ package body Wiki.Render.Wiki is
          when Nodes.N_TEXT =>
             Engine.Render_Text (Node.Text, Node.Format);
 
+         when Nodes.N_LINK =>
+            Engine.Render_Link (Node.Title, Node.Link_Attr);
+
+         when Nodes.N_IMAGE =>
+            Engine.Render_Image (Node.Title, Node.Link_Attr);
+
+         when Nodes.N_QUOTE =>
+            Engine.Render_Quote (Node.Title, Node.Link_Attr);
+
          when Nodes.N_TAG_START =>
             Engine.Render_Tag (Doc, Node);
 
@@ -246,54 +255,51 @@ package body Wiki.Render.Wiki is
    end Add_List_Item;
 
    --  ------------------------------
-   --  Add a link.
+   --  Render a link.
    --  ------------------------------
-   procedure Add_Link (Engine : in out Wiki_Renderer;
-                       Name     : in Unbounded_Wide_Wide_String;
-                       Link     : in Unbounded_Wide_Wide_String;
-                       Language : in Unbounded_Wide_Wide_String;
-                       Title    : in Unbounded_Wide_Wide_String) is
-      pragma Unreferenced (Title);
+   procedure Render_Link (Engine   : in out Wiki_Renderer;
+                          Name     : in WString;
+                          Attrs    : in Attributes.Attribute_List) is
+      Link : constant WString := Get_Attribute (Attrs, "href");
+      Lang : constant WString := Get_Attribute (Attrs, "lang");
    begin
       Engine.Output.Write (Engine.Tags (Link_Start).all);
-      Engine.Output.Write (To_Wide_Wide_String (Link));
-      if Length (Name) > 0 then
+      Engine.Output.Write (Link);
+      if Name'Length > 0 then
          Engine.Output.Write (Engine.Tags (Link_Separator).all);
-         Engine.Output.Write (To_Wide_Wide_String (Name));
+         Engine.Output.Write (Name);
       end if;
-      if Engine.Allow_Link_Language and Length (Language) > 0 then
+      if Engine.Allow_Link_Language and Language'Length > 0 then
          Engine.Output.Write (Engine.Tags (Link_Separator).all);
+         Engine.Output.Write (Language);
       end if;
       Engine.Output.Write (Engine.Tags (Link_End).all);
       Engine.Empty_Line := False;
-   end Add_Link;
+   end Render_Link;
 
-   --  Add an image.
-   procedure Add_Image (Engine    : in out Wiki_Renderer;
-                        Link        : in Unbounded_Wide_Wide_String;
-                        Alt         : in Unbounded_Wide_Wide_String;
-                        Position    : in Unbounded_Wide_Wide_String;
-                        Description : in Unbounded_Wide_Wide_String) is
-      pragma Unreferenced (Position, Description);
+   --  Render an image.
+   procedure Render_Image (Engine : in out Wiki_Renderer;
+                           Link   : in WString;
+                           Attrs  : in Attributes.Attribute_List) is
+      Alt : constant WString := Get_Attributes (Attrs, "alt");
    begin
       Engine.Output.Write (Engine.Tags (Img_Start).all);
-      Engine.Output.Write (To_Wide_Wide_String (Link));
-      if Length (Alt) > 0 then
+      Engine.Output.Write (Link);
+      if Alt'Length > 0 then
          Engine.Output.Write (Engine.Tags (Link_Separator).all);
-         Engine.Output.Write (To_Wide_Wide_String (Alt));
+         Engine.Output.Write (Alt);
       end if;
       Engine.Output.Write (Engine.Tags (Img_End).all);
       Engine.Empty_Line := False;
-   end Add_Image;
+   end Render_Image;
 
-   --  Add a quote.
-   procedure Add_Quote (Engine : in out Wiki_Renderer;
-                        Quote    : in Unbounded_Wide_Wide_String;
-                        Link     : in Unbounded_Wide_Wide_String;
-                        Language : in Unbounded_Wide_Wide_String) is
+   --  Render a quote.
+   procedure Render_Quote (Engine : in out Wiki_Renderer;
+                           Title  : in WString;
+                           Attrs  : in Attributes.Attribute_List_Type) is
    begin
       null;
-   end Add_Quote;
+   end Render_Quote;
 
    --  Set the text style format.
    procedure Set_Format (Engine : in out Wiki_Renderer;
@@ -433,15 +439,10 @@ package body Wiki.Render.Wiki is
             Engine.Start_Keep_Content;
 
          when Nodes.IMG_TAG =>
-            Engine.Add_Image (Link        => Get_Attribute (Node.Attributes, "src"),
-                              Alt         => Get_Attribute (Node.Attributes, "alt"),
-                              Position    => Null_Unbounded_Wide_Wide_String,
-                              Description => Null_Unbounded_Wide_Wide_String);
+            Engine.Render_Image (Link  => Get_Attribute (Node.Attributes, "src"),
+                                 Attrs => Node.Attributes);
 
-         when Nodes.A_TAG =>
-            Engine.Link_Href := Get_Attribute (Node.Attributes, "href");
-            Engine.Link_Title := Get_Attribute (Node.Attributes, "title");
-            Engine.Link_Lang := Get_Attribute (Node.Attributes, "lang");
+         when Nodes.A_TAG | Nodes.Q_TAG =>
             Engine.Start_Keep_Content;
 
          when Nodes.B_TAG | Nodes.EM_TAG | Nodes.STRONG_TAG =>
@@ -516,10 +517,13 @@ package body Wiki.Render.Wiki is
             Engine.Keep_Content := False;
 
          when Nodes.A_TAG =>
-            Engine.Add_Link (Name     => Engine.Content,
-                               Link     => Engine.Link_Href,
-                               Language => Engine.Link_Lang,
-                               Title    => Engine.Link_Title);
+            Engine.Render_Link (Name     => To_Wide_Wide_String (Engine.Content),
+                                Attrs    => Node.Attributes);
+            Engine.Keep_Content := False;
+
+         when Nodes.Q_TAG =>
+            Engine.Render_Quote (Name     => To_Wide_Wide_String (Engine.Content),
+                                 Attrs    => Node.Attributes);
             Engine.Keep_Content := False;
 
          when Nodes.B_TAG | Nodes.EM_TAG | Nodes.STRONG_TAG =>
