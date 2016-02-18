@@ -47,17 +47,17 @@ package body Wiki.Render.Text is
    end Add_Line_Break;
 
    --  ------------------------------
-   --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
+   --  Render a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
    --  ------------------------------
-   procedure Add_Blockquote (Document : in out Text_Renderer;
-                             Level    : in Natural) is
+   procedure Render_Blockquote (Engine : in out Text_Renderer;
+                                Level  : in Natural) is
    begin
-      Document.Close_Paragraph;
+      Engine.Close_Paragraph;
       for I in 1 .. Level loop
-         Document.Output.Write ("  ");
+         Engine.Output.Write ("  ");
       end loop;
-   end Add_Blockquote;
+   end Render_Blockquote;
 
    --  ------------------------------
    --  Render a list item (<li>).  Close the previous paragraph and list item if any.
@@ -127,17 +127,17 @@ package body Wiki.Render.Text is
    end Add_Image;
 
    --  ------------------------------
-   --  Add a text block that is pre-formatted.
+   --  Render a text block that is pre-formatted.
    --  ------------------------------
-   procedure Add_Preformatted (Document : in out Text_Renderer;
-                               Text     : in Unbounded_Wide_Wide_String;
-                               Format   : in Unbounded_Wide_Wide_String) is
+   procedure Render_Preformatted (Engine : in out Text_Renderer;
+                                  Text   : in Wiki.Strings.WString;
+                                  Format : in Wiki.Strings.WString) is
       pragma Unreferenced (Format);
    begin
-      Document.Close_Paragraph;
---        Document.Output.Write (Text);
-      Document.Empty_Line := False;
-   end Add_Preformatted;
+      Engine.Close_Paragraph;
+      Engine.Output.Write (Text);
+      Engine.Empty_Line := False;
+   end Render_Preformatted;
 
    --  Render the node instance from the document.
    overriding
@@ -172,6 +172,9 @@ package body Wiki.Render.Text is
          when Wiki.Nodes.N_INDENT =>
             Engine.Indent_Level := Node.Level;
 
+         when Wiki.Nodes.N_BLOCKQUOTE =>
+            Engine.Render_Blockquote (Node.Level);
+
          when Wiki.Nodes.N_LIST =>
             Engine.Render_List_Item (Node.Level, False);
 
@@ -195,8 +198,8 @@ package body Wiki.Render.Text is
          when Wiki.Nodes.N_LINK =>
             Engine.Add_Link (Node.Title, Node.Link_Attr);
 
-         when Wiki.Nodes.N_BLOCKQUOTE =>
-            null;
+         when Wiki.Nodes.N_PREFORMAT =>
+            Engine.Render_Preformatted (Node.Preformatted, "");
 
          when Wiki.Nodes.N_TAG_START =>
             if Node.Children /= null then
