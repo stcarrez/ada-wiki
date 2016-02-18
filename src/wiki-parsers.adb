@@ -596,7 +596,7 @@ package body Wiki.Parsers is
       end if;
       Wiki.Attributes.Clear (P.Attributes);
       Wiki.Attributes.Append (P.Attributes, "href", Link);
-      Wiki.Attributes.Append (P.Attributes, "hreflang", Language);
+      Wiki.Attributes.Append (P.Attributes, "lang", Language);
       Wiki.Attributes.Append (P.Attributes, "title", Link_Title);
       if Is_Image (P, To_Wide_Wide_String (Link)) then
          P.Filters.Add_Image (P.Document, To_Wide_Wide_String (Title), P.Attributes);
