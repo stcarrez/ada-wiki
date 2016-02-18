@@ -861,8 +861,13 @@ package body Wiki.Nodes is
                             Level    : in Positive;
                             Ordered  : in Boolean) is
    begin
-      Append (Into, new Node_Type '(Kind => N_INDENT, Len => 0,
-                                    Level => Level, others => <>));
+      if Ordered then
+         Append (Into, new Node_Type '(Kind => N_NUM_LIST, Len => 0,
+                                       Level => Level, others => <>));
+      else
+         Append (Into, new Node_Type '(Kind => N_LIST, Len => 0,
+                                       Level => Level, others => <>));
+      end if;
    end Add_List_Item;
 
    --  ------------------------------
@@ -881,7 +886,8 @@ package body Wiki.Nodes is
                                Text     : in Wiki.Strings.WString;
                                Format   : in Wiki.Strings.WString) is
    begin
-      null;
+      Append (Into, new Node_Type '(Kind => N_PREFORMAT, Len => Text'Length,
+                                    Preformatted => Text, others => <>));
    end Add_Preformatted;
 
    --  ------------------------------
@@ -940,7 +946,6 @@ package body Wiki.Nodes is
    begin
       Doc.Nodes := Node_List_Refs.Create;
       Doc.Nodes.Value.Current := Doc.Nodes.Value.First'Access;
---      Doc.Current := Doc.Nodes.Current;
    end Initialize;
 
 end Wiki.Nodes;
