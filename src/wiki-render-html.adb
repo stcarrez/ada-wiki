@@ -70,11 +70,17 @@ package body Wiki.Render.Html is
             Engine.Need_Paragraph := True;
 
          when Wiki.Nodes.N_PREFORMAT =>
-            Engine.Render_Preformatted (Doc, Node.Preformatted, "");
+            Engine.Render_Preformatted (Node.Preformatted, "");
 
          when Wiki.Nodes.N_INDENT =>
             -- Engine.Indent_Level := Node.Level;
             null;
+
+         when Wiki.Nodes.N_LIST =>
+            Engine.Render_List_Item (Node.Level, False);
+
+         when Wiki.Nodes.N_NUM_LIST =>
+            Engine.Render_List_Item (Node.Level, True);
 
          when Wiki.Nodes.N_TEXT =>
             Engine.Add_Text (Text   => Node.Text,
@@ -179,33 +185,33 @@ package body Wiki.Render.Html is
    end Add_Blockquote;
 
    --  ------------------------------
-   --  Add a list item (<li>).  Close the previous paragraph and list item if any.
+   --  Render a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
    --  ------------------------------
-   procedure Add_List_Item (Document : in out Html_Renderer;
-                            Level    : in Positive;
-                            Ordered  : in Boolean) is
+   procedure Render_List_Item (Engine   : in out Html_Renderer;
+                               Level    : in Positive;
+                               Ordered  : in Boolean) is
    begin
-      if Document.Has_Paragraph then
-         Document.Output.End_Element ("p");
-         Document.Has_Paragraph := False;
+      if Engine.Has_Paragraph then
+         Engine.Output.End_Element ("p");
+         Engine.Has_Paragraph := False;
       end if;
-      if Document.Has_Item then
-         Document.Output.End_Element ("li");
-         Document.Has_Item := False;
+      if Engine.Has_Item then
+         Engine.Output.End_Element ("li");
+         Engine.Has_Item := False;
       end if;
-      Document.Need_Paragraph := False;
-      Document.Open_Paragraph;
-      while Document.Current_Level < Level loop
+      Engine.Need_Paragraph := False;
+      Engine.Open_Paragraph;
+      while Engine.Current_Level < Level loop
          if Ordered then
-            Document.Output.Start_Element ("ol");
+            Engine.Output.Start_Element ("ol");
          else
-            Document.Output.Start_Element ("ul");
+            Engine.Output.Start_Element ("ul");
          end if;
-         Document.Current_Level := Document.Current_Level + 1;
-         Document.List_Styles (Document.Current_Level) := Ordered;
+         Engine.Current_Level := Engine.Current_Level + 1;
+         Engine.List_Styles (Engine.Current_Level) := Ordered;
       end loop;
-   end Add_List_Item;
+   end Render_List_Item;
 
    procedure Close_Paragraph (Document : in out Html_Renderer) is
    begin
@@ -269,7 +275,7 @@ package body Wiki.Render.Html is
          elsif Value'Length = 0 then
             return;
 
-         elsif Name = "hreflang" or Name = "title" or Name = "rel" or Name = "target"
+         elsif Name = "lang" or Name = "title" or Name = "rel" or Name = "target"
          or Name = "style" or Name = "class" then
             Engine.Output.Write_Wide_Attribute (Name, Value);
          end if;
@@ -392,7 +398,7 @@ package body Wiki.Render.Html is
    --  ------------------------------
    procedure Render_Preformatted (Engine : in out Html_Renderer;
                                   Text   : in Wiki.Strings.WString;
-                                  Format : in Unbounded_Wide_Wide_String) is
+                                  Format : in Wiki.Strings.WString) is
    begin
       Engine.Close_Paragraph;
       if Format = "html" then
