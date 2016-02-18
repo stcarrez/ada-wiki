@@ -32,6 +32,7 @@ package Wiki.Nodes is
                       N_BLOCKQUOTE,
                       N_QUOTE,
                       N_TAG_START,
+                      N_PREFORMAT,
                       N_INDENT,
                       N_TEXT,
                       N_LINK,
@@ -140,6 +141,9 @@ package Wiki.Nodes is
             Attributes : Wiki.Attributes.Attribute_List_Type;
             Children   : Node_List_Access;
             Parent     : Node_Type_Access;
+
+         when N_PREFORMAT =>
+            Preformatted : WString (1 .. Len);
 
          when others =>
             null;
