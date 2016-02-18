@@ -21,6 +21,7 @@ with Wiki.Documents;
 with Wiki.Attributes;
 with Wiki.Streams;
 with Wiki.Parsers;
+with Wiki.Strings;
 
 --  == Wiki Renderer ==
 --  The <tt>Wiki_Renderer</tt> allows to render a wiki document into another wiki content.
@@ -67,17 +68,17 @@ package Wiki.Render.Wiki is
 
    --  Render a link.
    procedure Render_Link (Engine : in out Wiki_Renderer;
-                          Name     : in WString;
+                          Name     : in Strings.WString;
                           Attrs    : in Attributes.Attribute_List_Type);
 
    --  Render an image.
    procedure Render_Image (Engine : in out Wiki_Renderer;
-                           Link   : in WString;
+                           Link   : in Strings.WString;
                            Attrs  : in Attributes.Attribute_List_Type);
 
    --  Render a quote.
    procedure Render_Quote (Engine : in out Wiki_Renderer;
-                           Title  : in WString;
+                           Title  : in Strings.WString;
                            Attrs  : in Attributes.Attribute_List_Type);
 
    --  Add a text block with the given format.
