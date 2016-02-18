@@ -61,6 +61,10 @@ package Wiki.Attributes is
    function Get_Attribute (List : in Attribute_List_Type;
                            Name : in String) return Unbounded_Wide_Wide_String;
 
+   --  Find the attribute with the given name and return its value.
+   function Get_Attribute (List : in Attribute_List_Type;
+                           Name : in String) return Wide_Wide_String;
+
    --  Append the attribute to the attribute list.
    procedure Append (List  : in out Attribute_List_Type;
                      Name  : in Wide_Wide_String;
