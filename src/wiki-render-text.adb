@@ -60,20 +60,20 @@ package body Wiki.Render.Text is
    end Add_Blockquote;
 
    --  ------------------------------
-   --  Add a list item (<li>).  Close the previous paragraph and list item if any.
+   --  Render a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
    --  ------------------------------
-   procedure Add_List_Item (Document : in out Text_Renderer;
-                            Level    : in Positive;
-                            Ordered  : in Boolean) is
+   procedure Render_List_Item (Engine   : in out Text_Renderer;
+                               Level    : in Positive;
+                               Ordered  : in Boolean) is
       pragma Unreferenced (Level, Ordered);
    begin
-      if not Document.Empty_Line then
-         Document.Add_Line_Break;
+      if not Engine.Empty_Line then
+         Engine.Add_Line_Break;
       end if;
-      Document.Need_Paragraph := False;
-      Document.Open_Paragraph;
-   end Add_List_Item;
+      Engine.Need_Paragraph := False;
+      Engine.Open_Paragraph;
+   end Render_List_Item;
 
    procedure Close_Paragraph (Document : in out Text_Renderer) is
    begin
@@ -172,6 +172,12 @@ package body Wiki.Render.Text is
          when Wiki.Nodes.N_INDENT =>
             Engine.Indent_Level := Node.Level;
 
+         when Wiki.Nodes.N_LIST =>
+            Engine.Render_List_Item (Node.Level, False);
+
+         when Wiki.Nodes.N_NUM_LIST =>
+            Engine.Render_List_Item (Node.Level, True);
+
          when Wiki.Nodes.N_TEXT =>
             if Engine.Empty_Line and Engine.Indent_Level /= 0 then
                for I in 1 .. Engine.Indent_Level loop
@@ -183,14 +189,11 @@ package body Wiki.Render.Text is
 
          when Wiki.Nodes.N_QUOTE =>
             Engine.Open_Paragraph;
-            Engine.Output.Write (Node.Quote);
+            Engine.Output.Write (Node.Title);
             Engine.Empty_Line := False;
 
          when Wiki.Nodes.N_LINK =>
             Engine.Add_Link (Node.Title, Node.Link_Attr);
-
-         when Wiki.Nodes.N_IMAGE =>
-            null;
 
          when Wiki.Nodes.N_BLOCKQUOTE =>
             null;
@@ -219,9 +222,12 @@ package body Wiki.Render.Text is
                end if;
             end if;
 
+         when others =>
+            null;
+
       end case;
    end Render;
---
+
    --  ------------------------------
    --  Finish the document after complete wiki text has been parsed.
    --  ------------------------------
