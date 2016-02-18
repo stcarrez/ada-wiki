@@ -59,10 +59,10 @@ package Wiki.Render.Html is
                        Text     : in Wiki.Strings.WString;
                        Format   : in Wiki.Format_Map);
 
-   --  Add a text block that is pre-formatted.
-   procedure Add_Preformatted (Document : in out Html_Renderer;
-                               Text     : in Unbounded_Wide_Wide_String;
-                               Format   : in Unbounded_Wide_Wide_String);
+   --  Render a text block that is pre-formatted.
+   procedure Render_Preformatted (Engine : in out Html_Renderer;
+                                  Text   : in Wiki.Strings.WString;
+                                  Format : in Unbounded_Wide_Wide_String);
 
    --  Finish the document after complete wiki text has been parsed.
    overriding
