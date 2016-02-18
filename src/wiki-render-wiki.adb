@@ -258,10 +258,10 @@ package body Wiki.Render.Wiki is
    --  Render a link.
    --  ------------------------------
    procedure Render_Link (Engine   : in out Wiki_Renderer;
-                          Name     : in WString;
-                          Attrs    : in Attributes.Attribute_List) is
-      Link : constant WString := Get_Attribute (Attrs, "href");
-      Lang : constant WString := Get_Attribute (Attrs, "lang");
+                          Name     : in Strings.WString;
+                          Attrs    : in Attributes.Attribute_List_Type) is
+      Link : constant Strings.WString := Attributes.Get_Wide_Value (Attrs, "href");
+      Lang : constant Strings.WString := Attributes.Get_Wide_Value (Attrs, "lang");
    begin
       Engine.Output.Write (Engine.Tags (Link_Start).all);
       Engine.Output.Write (Link);
@@ -279,9 +279,9 @@ package body Wiki.Render.Wiki is
 
    --  Render an image.
    procedure Render_Image (Engine : in out Wiki_Renderer;
-                           Link   : in WString;
-                           Attrs  : in Attributes.Attribute_List) is
-      Alt : constant WString := Get_Attributes (Attrs, "alt");
+                           Link   : in Strings.WString;
+                           Attrs  : in Attributes.Attribute_List_Type) is
+      Alt : constant Strings.WString := Get_Attributes (Attrs, "alt");
    begin
       Engine.Output.Write (Engine.Tags (Img_Start).all);
       Engine.Output.Write (Link);
@@ -295,7 +295,7 @@ package body Wiki.Render.Wiki is
 
    --  Render a quote.
    procedure Render_Quote (Engine : in out Wiki_Renderer;
-                           Title  : in WString;
+                           Title  : in Strings.WString;
                            Attrs  : in Attributes.Attribute_List_Type) is
    begin
       null;
