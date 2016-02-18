@@ -69,6 +69,9 @@ package body Wiki.Render.Html is
             Engine.Close_Paragraph;
             Engine.Need_Paragraph := True;
 
+         when Wiki.Nodes.N_PREFORMAT =>
+            Engine.Render_Preformatted (Doc, Node.Preformatted, "");
+
          when Wiki.Nodes.N_INDENT =>
             -- Engine.Indent_Level := Node.Level;
             null;
@@ -385,21 +388,21 @@ package body Wiki.Render.Html is
    end Add_Text;
 
    --  ------------------------------
-   --  Add a text block that is pre-formatted.
+   --  Render a text block that is pre-formatted.
    --  ------------------------------
-   procedure Add_Preformatted (Document : in out Html_Renderer;
-                               Text     : in Unbounded_Wide_Wide_String;
-                               Format   : in Unbounded_Wide_Wide_String) is
+   procedure Render_Preformatted (Engine : in out Html_Renderer;
+                                  Text   : in Wiki.Strings.WString;
+                                  Format : in Unbounded_Wide_Wide_String) is
    begin
-      Document.Close_Paragraph;
+      Engine.Close_Paragraph;
       if Format = "html" then
-         Document.Output.Write (To_Wide_Wide_String (Text));
+         Engine.Output.Write (Text);
       else
-         Document.Output.Start_Element ("pre");
---         Document.Output.Write_Wide_Text (Text);
-         Document.Output.End_Element ("pre");
+         Engine.Output.Start_Element ("pre");
+         Engine.Output.Write_Wide_Text (Text);
+         Engine.Output.End_Element ("pre");
       end if;
-   end Add_Preformatted;
+   end Render_Preformatted;
 
    --  ------------------------------
    --  Finish the document after complete wiki text has been parsed.
