@@ -33,6 +33,8 @@ package Wiki.Nodes is
                       N_QUOTE,
                       N_TAG_START,
                       N_PREFORMAT,
+                      N_LIST,
+                      N_NUM_LIST,
                       N_INDENT,
                       N_TEXT,
                       N_LINK,
@@ -124,7 +126,7 @@ package Wiki.Nodes is
 
    type Node_Type (Kind : Node_Kind; Len : Natural) is limited record
       case Kind is
-         when N_HEADER | N_BLOCKQUOTE | N_INDENT =>
+         when N_HEADER | N_BLOCKQUOTE | N_INDENT | N_LIST | N_NUM_LIST =>
             Level  : Natural := 0;
             Header : WString (1 .. Len);
 
