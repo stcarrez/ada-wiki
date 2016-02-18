@@ -295,6 +295,12 @@ package body Wiki.Parsers is
       Format     : Unbounded_Wide_Wide_String;
       Col        : Natural;
       Is_Html    : Boolean := False;
+
+      procedure Add_Preformatted (Content : in Wiki.Strings.WString) is
+      begin
+         P.Filters.Add_Preformatted (P.Document, Content, Format);
+      end Add_Preformatted;
+
    begin
       if Token /= ' ' then
          Peek (P, C);
@@ -397,7 +403,7 @@ package body Wiki.Parsers is
       P.Empty_Line := True;
 
       if not Is_Html then
-         --  P.Filters.Add_Preformatted (P.Document, To_Wide_Wide_String (P.Text), Format);
+         Iterate (P.Text, Add_Preformatted'Access);
          Clear (P.Text);
          P.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
          P.In_Paragraph := True;
