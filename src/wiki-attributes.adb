@@ -109,6 +109,20 @@ package body Wiki.Attributes is
    end Get_Attribute;
 
    --  ------------------------------
+   --  Find the attribute with the given name and return its value.
+   --  ------------------------------
+   function Get_Attribute (List : in Attribute_List_Type;
+                           Name : in String) return Wide_Wide_String is
+      Attr : constant Cursor := Find (List, Name);
+   begin
+      if Has_Element (Attr) then
+         return Get_Wide_Value (Attr);
+      else
+         return "";
+      end if;
+   end Get_Attribute;
+
+   --  ------------------------------
    --  Append the attribute to the attribute list.
    --  ------------------------------
    procedure Append (List  : in out Attribute_List_Type;
