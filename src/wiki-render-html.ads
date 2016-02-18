@@ -48,11 +48,11 @@ package Wiki.Render.Html is
    procedure Add_Blockquote (Document : in out Html_Renderer;
                              Level    : in Natural);
 
-   --  Add a list item (<li>).  Close the previous paragraph and list item if any.
+   --  Render a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
-   procedure Add_List_Item (Document : in out Html_Renderer;
-                            Level    : in Positive;
-                            Ordered  : in Boolean);
+   procedure Render_List_Item (Engine   : in out Html_Renderer;
+                               Level    : in Positive;
+                               Ordered  : in Boolean);
 
    --  Add a text block with the given format.
    procedure Add_Text (Engine   : in out Html_Renderer;
@@ -62,7 +62,7 @@ package Wiki.Render.Html is
    --  Render a text block that is pre-formatted.
    procedure Render_Preformatted (Engine : in out Html_Renderer;
                                   Text   : in Wiki.Strings.WString;
-                                  Format : in Unbounded_Wide_Wide_String);
+                                  Format : in Wiki.Strings.WString);
 
    --  Finish the document after complete wiki text has been parsed.
    overriding
