@@ -47,11 +47,11 @@ package Wiki.Render.Text is
    procedure Add_Blockquote (Document : in out Text_Renderer;
                              Level    : in Natural);
 
-   --  Add a list item (<li>).  Close the previous paragraph and list item if any.
+   --  Render a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
-   procedure Add_List_Item (Document : in out Text_Renderer;
-                            Level    : in Positive;
-                            Ordered  : in Boolean);
+   procedure Render_List_Item (Engine   : in out Text_Renderer;
+                               Level    : in Positive;
+                               Ordered  : in Boolean);
 
    --  Add a link.
    procedure Add_Link (Document : in out Text_Renderer;
