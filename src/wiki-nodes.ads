@@ -244,6 +244,10 @@ private
       First   : aliased Node_List_Block (NODE_LIST_BLOCK_SIZE);
    end record;
 
+   --  Finalize the node list to release the allocated memory.
+   overriding
+   procedure Finalize (List : in out Node_List);
+
    --  Append a node to the node list.
    procedure Append (Into : in out Node_List;
                      Node : in Node_Type_Access);
