@@ -34,10 +34,10 @@ package body Wiki.Render.Html is
    --  ------------------------------
    --  Set the link renderer.
    --  ------------------------------
-   procedure Set_Link_Renderer (Document : in out Html_Renderer;
+   procedure Set_Link_Renderer (Engine : in out Html_Renderer;
                                 Links    : in Link_Renderer_Access) is
    begin
-      Document.Links := Links;
+      Engine.Links := Links;
    end Set_Link_Renderer;
 
    --  ------------------------------
@@ -167,20 +167,20 @@ package body Wiki.Render.Html is
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
    --  ------------------------------
-   procedure Add_Blockquote (Document : in out Html_Renderer;
+   procedure Add_Blockquote (Engine : in out Html_Renderer;
                              Level    : in Natural) is
    begin
-      if Document.Quote_Level /= Level then
-         Document.Close_Paragraph;
-         Document.Need_Paragraph := True;
+      if Engine.Quote_Level /= Level then
+         Engine.Close_Paragraph;
+         Engine.Need_Paragraph := True;
       end if;
-      while Document.Quote_Level < Level loop
-         Document.Output.Start_Element ("blockquote");
-         Document.Quote_Level := Document.Quote_Level + 1;
+      while Engine.Quote_Level < Level loop
+         Engine.Output.Start_Element ("blockquote");
+         Engine.Quote_Level := Engine.Quote_Level + 1;
       end loop;
-      while Document.Quote_Level > Level loop
-         Document.Output.End_Element ("blockquote");
-         Document.Quote_Level := Document.Quote_Level - 1;
+      while Engine.Quote_Level > Level loop
+         Engine.Output.End_Element ("blockquote");
+         Engine.Quote_Level := Engine.Quote_Level - 1;
       end loop;
    end Add_Blockquote;
 
@@ -213,42 +213,42 @@ package body Wiki.Render.Html is
       end loop;
    end Render_List_Item;
 
-   procedure Close_Paragraph (Document : in out Html_Renderer) is
+   procedure Close_Paragraph (Engine : in out Html_Renderer) is
    begin
-      if Document.Html_Level > 0 then
+      if Engine.Html_Level > 0 then
          return;
       end if;
-      if Document.Has_Paragraph then
-         Document.Output.End_Element ("p");
+      if Engine.Has_Paragraph then
+         Engine.Output.End_Element ("p");
       end if;
-      if Document.Has_Item then
-         Document.Output.End_Element ("li");
+      if Engine.Has_Item then
+         Engine.Output.End_Element ("li");
       end if;
-      while Document.Current_Level > 0 loop
-         if Document.List_Styles (Document.Current_Level) then
-            Document.Output.End_Element ("ol");
+      while Engine.Current_Level > 0 loop
+         if Engine.List_Styles (Engine.Current_Level) then
+            Engine.Output.End_Element ("ol");
          else
-            Document.Output.End_Element ("ul");
+            Engine.Output.End_Element ("ul");
          end if;
-         Document.Current_Level := Document.Current_Level - 1;
+         Engine.Current_Level := Engine.Current_Level - 1;
       end loop;
-      Document.Has_Paragraph := False;
-      Document.Has_Item := False;
+      Engine.Has_Paragraph := False;
+      Engine.Has_Item := False;
    end Close_Paragraph;
 
-   procedure Open_Paragraph (Document : in out Html_Renderer) is
+   procedure Open_Paragraph (Engine : in out Html_Renderer) is
    begin
-      if Document.Html_Level > 0 then
+      if Engine.Html_Level > 0 then
          return;
       end if;
-      if Document.Need_Paragraph then
-         Document.Output.Start_Element ("p");
-         Document.Has_Paragraph  := True;
-         Document.Need_Paragraph := False;
+      if Engine.Need_Paragraph then
+         Engine.Output.Start_Element ("p");
+         Engine.Has_Paragraph  := True;
+         Engine.Need_Paragraph := False;
       end if;
-      if Document.Current_Level > 0 and not Document.Has_Item then
-         Document.Output.Start_Element ("li");
-         Document.Has_Item := True;
+      if Engine.Current_Level > 0 and not Engine.Has_Item then
+         Engine.Output.Start_Element ("li");
+         Engine.Has_Item := True;
       end if;
    end Open_Paragraph;
 
@@ -296,15 +296,30 @@ package body Wiki.Render.Html is
                            Doc    : in Wiki.Nodes.Document;
                            Title  : in Wiki.Strings.WString;
                            Attr   : in Wiki.Attributes.Attribute_List_Type) is
-      Link   : Unbounded_Wide_Wide_String := Wiki.Attributes.Get_Attribute (Attr, "href");
-      URI    : Unbounded_Wide_Wide_String;
-      Width  : Natural;
-      Height : Natural;
 
       procedure Render_Attribute (Name  : in String;
                                   Value : in Wide_Wide_String) is
       begin
-         if Name = "alt" or Name = "longdesc"
+         if Name = "src" then
+            declare
+               URI    : Unbounded_Wide_Wide_String;
+               Width  : Natural;
+               Height : Natural;
+            begin
+               Engine.Links.Make_Image_Link (Value, URI, Width, Height);
+               Engine.Output.Write_Wide_Attribute ("src", URI);
+               if Width > 0 then
+                  Engine.Output.Write_Attribute ("width", Natural'Image (Width));
+               end if;
+               if Height > 0 then
+                  Engine.Output.Write_Attribute ("height", Natural'Image (Height));
+               end if;
+            end;
+
+         elsif Value'Length = 0 then
+            return;
+
+         elsif Name = "alt" or Name = "longdesc"
            or Name = "style" or Name = "class" then
             Engine.Output.Write_Wide_Attribute (Name, Value);
          end if;
@@ -313,14 +328,7 @@ package body Wiki.Render.Html is
    begin
       Engine.Open_Paragraph;
       Engine.Output.Start_Element ("img");
-      Engine.Links.Make_Image_Link (Link, URI, Width, Height);
-      Engine.Output.Write_Wide_Attribute ("src", URI);
-      if Width > 0 then
-         Engine.Output.Write_Attribute ("width", Natural'Image (Width));
-      end if;
-      if Height > 0 then
-         Engine.Output.Write_Attribute ("height", Natural'Image (Height));
-      end if;
+      Engine.Output.Write_Wide_Attribute ("alt", Title);
       Wiki.Attributes.Iterate (Attr, Render_Attribute'Access);
       Engine.Output.End_Element ("img");
    end Render_Image;
@@ -414,10 +422,10 @@ package body Wiki.Render.Html is
    --  Finish the document after complete wiki text has been parsed.
    --  ------------------------------
    overriding
-   procedure Finish (Document : in out Html_Renderer) is
+   procedure Finish (Engine : in out Html_Renderer) is
    begin
-      Document.Close_Paragraph;
-      Document.Add_Blockquote (0);
+      Engine.Close_Paragraph;
+      Engine.Add_Blockquote (0);
    end Finish;
 
 end Wiki.Render.Html;

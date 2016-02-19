@@ -34,7 +34,7 @@ package Wiki.Render.Html is
                                 Stream : in Wiki.Streams.Html.Html_Output_Stream_Access);
 
    --  Set the link renderer.
-   procedure Set_Link_Renderer (Document : in out Html_Renderer;
+   procedure Set_Link_Renderer (Engine : in out Html_Renderer;
                                 Links    : in Link_Renderer_Access);
 
    --  Render the node instance from the document.
@@ -45,7 +45,7 @@ package Wiki.Render.Html is
 
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
-   procedure Add_Blockquote (Document : in out Html_Renderer;
+   procedure Add_Blockquote (Engine : in out Html_Renderer;
                              Level    : in Natural);
 
    --  Render a list item (<li>).  Close the previous paragraph and list item if any.
@@ -66,12 +66,12 @@ package Wiki.Render.Html is
 
    --  Finish the document after complete wiki text has been parsed.
    overriding
-   procedure Finish (Document : in out Html_Renderer);
+   procedure Finish (Engine : in out Html_Renderer);
 
 private
 
-   procedure Close_Paragraph (Document : in out Html_Renderer);
-   procedure Open_Paragraph (Document : in out Html_Renderer);
+   procedure Close_Paragraph (Engine : in out Html_Renderer);
+   procedure Open_Paragraph (Engine : in out Html_Renderer);
 
    type List_Style_Array is array (1 .. 32) of Boolean;
 
