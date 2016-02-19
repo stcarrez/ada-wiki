@@ -16,6 +16,7 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Wide_Wide_Characters.Handling;
+with Ada.Unchecked_Deallocation;
 package body Wiki.Nodes is
 
    type Tag_Array is array (Html_Tag_Type) of String_Access;
@@ -906,6 +907,47 @@ package body Wiki.Nodes is
       Block.List (Block.Last) := Node;
       Into.Length := Into.Length + 1;
    end Append;
+
+   --  Finalize the node list to release the allocated memory.
+   overriding
+   procedure Finalize (List : in out Node_List) is
+      procedure Free is
+    new Ada.Unchecked_Deallocation (Node_List_Block, Node_List_Block_Access);
+
+      procedure Free is
+        new Ada.Unchecked_Deallocation (Node_Type, Node_Type_Access);
+
+      procedure Free is
+        new Ada.Unchecked_Deallocation (Node_List, Node_List_Access);
+
+      procedure Release (List : in out Node_List_Block_Access);
+
+      procedure Free_Block (Block : in out Node_List_Block) is
+      begin
+         for I in 1 .. Block.Last loop
+            if Block.List (I).Kind = N_TAG_START then
+               Free (Block.List (I).Children);
+            end if;
+            Free (Block.List (I));
+         end loop;
+      end Free_Block;
+
+      procedure Release (List : in out Node_List_Block_Access) is
+         Next  : Node_List_Block_Access := List;
+         Block : Node_List_Block_Access;
+      begin
+         while Next /= null loop
+            Block := Next;
+            Free_Block (Block.all);
+            Next := Next.Next;
+            Free (Block);
+         end loop;
+      end Release;
+
+   begin
+      Release (List.First.Next);
+      Free_Block (List.First);
+   end Finalize;
 
    --  ------------------------------
    --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
