@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render -- Wiki renderer
---  Copyright (C) 2015 Stephane Carrez
+--  Copyright (C) 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ package Wiki.Render is
 
    --  Get the image link that must be rendered from the wiki image link.
    procedure Make_Image_Link (Renderer : in Link_Renderer;
-                              Link     : in Unbounded_Wide_Wide_String;
+                              Link     : in Wide_Wide_String;
                               URI      : out Unbounded_Wide_Wide_String;
                               Width    : out Natural;
                               Height   : out Natural) is abstract;
@@ -44,7 +44,7 @@ package Wiki.Render is
    --  Get the image link that must be rendered from the wiki image link.
    overriding
    procedure Make_Image_Link (Renderer : in Default_Link_Renderer;
-                              Link     : in Unbounded_Wide_Wide_String;
+                              Link     : in Wide_Wide_String;
                               URI      : out Unbounded_Wide_Wide_String;
                               Width    : out Natural;
                               Height   : out Natural);
