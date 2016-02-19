@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render -- Wiki renderer
---  Copyright (C) 2015 Stephane Carrez
+--  Copyright (C) 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,13 +22,13 @@ package body Wiki.Render is
    --  ------------------------------
    overriding
    procedure Make_Image_Link (Renderer : in Default_Link_Renderer;
-                              Link     : in Unbounded_Wide_Wide_String;
+                              Link     : in Wide_Wide_String;
                               URI      : out Unbounded_Wide_Wide_String;
                               Width    : out Natural;
                               Height   : out Natural) is
       pragma Unreferenced (Renderer);
    begin
-      URI    := Link;
+      URI    := To_Unbounded_Wide_Wide_String (Link);
       Width  := 0;
       Height := 0;
    end Make_Image_Link;
