@@ -16,10 +16,13 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Characters.Conversions;
+with Ada.Strings.Wide_Wide_Unbounded;
 
 with Wiki.Helpers;
 with Wiki.Parsers.Html.Entities;
 package body Wiki.Parsers.Html is
+
+   use Ada.Strings.Wide_Wide_Unbounded;
 
    --  Parse an HTML attribute
    procedure Parse_Attribute_Name (P    : in out Parser;
