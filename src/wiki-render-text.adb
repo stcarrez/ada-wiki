@@ -96,7 +96,7 @@ package body Wiki.Render.Text is
    --  ------------------------------
    procedure Add_Link (Document : in out Text_Renderer;
                        Title    : in Wiki.Strings.WString;
-                       Attr     : in Wiki.Attributes.Attribute_List_Type) is
+                       Attr     : in Wiki.Attributes.Attribute_List) is
    begin
       Document.Open_Paragraph;
       if Title'Length /= 0 then

@@ -56,7 +56,7 @@ package Wiki.Render.Text is
    --  Add a link.
    procedure Add_Link (Document : in out Text_Renderer;
                        Title    : in Wiki.Strings.WString;
-                       Attr     : in Wiki.Attributes.Attribute_List_Type);
+                       Attr     : in Wiki.Attributes.Attribute_List);
 
    --  Add an image.
    procedure Add_Image (Document    : in out Text_Renderer;
