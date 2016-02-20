@@ -36,7 +36,7 @@ package Wiki.Render.Text is
    --  Render the node instance from the document.
    overriding
    procedure Render (Engine : in out Text_Renderer;
-                     Doc    : in Wiki.Nodes.Document;
+                     Doc    : in Wiki.Documents.Document;
                      Node   : in Wiki.Nodes.Node_Type);
 
    --  Add a line break (<br>).
