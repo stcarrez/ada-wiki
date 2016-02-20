@@ -43,6 +43,7 @@ package Wiki.Nodes is
    --  Node kinds which are simple markers in the document.
    subtype Simple_Node_Kind is Node_Kind range N_LINE_BREAK .. N_PARAGRAPH;
 
+   type Node_List_Ref is private;
 
    type Node_List is limited private;
    type Node_List_Access is access all Node_List;
@@ -80,6 +81,14 @@ package Wiki.Nodes is
    end record;
 
    type Document is tagged private;
+
+   --  Append a node to the document.
+   procedure Append (Into : in out Node_List;
+                     Node : in Node_Type_Access);
+
+   --  Append a node to the node list.
+   procedure Append (Into : in out Node_List_Ref;
+                     Node : in Node_Type_Access);
 
    --  Append a node to the document.
    procedure Append (Into : in out Document;
@@ -146,6 +155,11 @@ package Wiki.Nodes is
 
    --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
    --  each node instance.
+   procedure Iterate (List    : in Node_List_Ref;
+                      Process : not null access procedure (Node : in Node_Type));
+
+   --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
+   --  each node instance.
    procedure Iterate (Doc     : in Document;
                       Process : not null access procedure (Node : in Node_Type));
 
@@ -175,12 +189,12 @@ private
    procedure Finalize (List : in out Node_List);
 
    --  Append a node to the node list.
-   procedure Append (Into : in out Node_List;
-                     Node : in Node_Type_Access);
+--   procedure Append (Into : in out Node_List;
+--                     Node : in Node_Type_Access);
 
    package Node_List_Refs is new Util.Refs.References (Node_List, Node_List_Access);
 
-   subtype Node_List_Ref is  Node_List_Refs.Ref;
+   type Node_List_Ref is new Node_List_Refs.Ref with null record;
 
    type Document is new Ada.Finalization.Controlled with record
       Nodes   : Node_List_Ref;

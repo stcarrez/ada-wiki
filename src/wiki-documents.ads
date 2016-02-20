@@ -15,88 +15,92 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Strings.Wide_Wide_Unbounded;
+with Ada.Finalization;
+
+with Wiki.Strings;
 with Wiki.Attributes;
+
+with Wiki.Nodes;
 package Wiki.Documents is
 
    pragma Preelaborate;
 
-   use Ada.Strings.Wide_Wide_Unbounded;
-
-   type Format_Type is (BOLD, ITALIC, CODE, SUPERSCRIPT, SUBSCRIPT, STRIKEOUT, PREFORMAT);
-
-   type Format_Map is array (Format_Type) of Boolean;
-
    --  ------------------------------
-   --  Document reader
+   --  A Wiki Document
    --  ------------------------------
-   type Document_Reader is limited interface;
-   type Document_Reader_Access is access all Document_Reader'Class;
+   type Document is tagged private;
 
-   --  Add a section header in the document.
-   procedure Add_Header (Document : in out Document_Reader;
-                         Header   : in Unbounded_Wide_Wide_String;
-                         Level    : in Positive) is abstract;
+   --  Append a simple node such as N_LINE_BREAK, N_HORIZONTAL_RULE or N_PARAGRAPH.
+   procedure Append (Into : in out Document;
+                     Kind : in Wiki.Nodes.Simple_Node_Kind);
 
-   --  Add a line break (<br>).
-   procedure Add_Line_Break (Document : in out Document_Reader) is abstract;
+   --  Append a HTML tag start node to the document.
+   procedure Push_Node (Into       : in out Document;
+                        Tag        : in Html_Tag;
+                        Attributes : in Wiki.Attributes.Attribute_List);
 
-   --  Add a paragraph (<p>).  Close the previous paragraph if any.
-   --  The paragraph must be closed at the next paragraph or next header.
-   procedure Add_Paragraph (Document : in out Document_Reader) is abstract;
+   --  Pop the HTML tag.
+   procedure Pop_Node (From : in out Document;
+                       Tag  : in Html_Tag);
 
-   --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
-   --  The blockquote must be closed at the next header.
-   procedure Add_Blockquote (Document : in out Document_Reader;
-                             Level    : in Natural) is abstract;
+   --  Append the text with the given format at end of the document.
+   procedure Append (Into   : in out Document;
+                     Text   : in Wiki.Strings.WString;
+                     Format : in Format_Map);
+
+   --  Append a section header at end of the document.
+   procedure Append (Into   : in out Document;
+                     Header : in Wiki.Strings.WString;
+                     Level  : in Positive);
+
+   --  Add a link.
+   procedure Add_Link (Into       : in out Document;
+                       Name       : in Wiki.Strings.WString;
+                       Attributes : in out Wiki.Attributes.Attribute_List);
+
+   --  Add an image.
+   procedure Add_Image (Into       : in out Document;
+                        Name       : in Wiki.Strings.WString;
+                        Attributes : in out Wiki.Attributes.Attribute_List);
+
+   --  Add a quote.
+   procedure Add_Quote (Into       : in out Document;
+                        Name       : in Wiki.Strings.WString;
+                        Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Add a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
-   procedure Add_List_Item (Document : in out Document_Reader;
+   procedure Add_List_Item (Into     : in out Document;
                             Level    : in Positive;
-                            Ordered  : in Boolean) is abstract;
+                            Ordered  : in Boolean);
 
-   --  Add an horizontal rule (<hr>).
-   procedure Add_Horizontal_Rule (Document : in out Document_Reader) is abstract;
-
-   --  Add a link.
-   procedure Add_Link (Document : in out Document_Reader;
-                       Name     : in Unbounded_Wide_Wide_String;
-                       Link     : in Unbounded_Wide_Wide_String;
-                       Language : in Unbounded_Wide_Wide_String;
-                       Title    : in Unbounded_Wide_Wide_String) is abstract;
-
-   --  Add an image.
-   procedure Add_Image (Document    : in out Document_Reader;
-                        Link        : in Unbounded_Wide_Wide_String;
-                        Alt         : in Unbounded_Wide_Wide_String;
-                        Position    : in Unbounded_Wide_Wide_String;
-                        Description : in Unbounded_Wide_Wide_String) is abstract;
-
-   --  Add a quote.
-   procedure Add_Quote (Document : in out Document_Reader;
-                        Quote    : in Unbounded_Wide_Wide_String;
-                        Link     : in Unbounded_Wide_Wide_String;
-                        Language : in Unbounded_Wide_Wide_String) is abstract;
-
-   --  Add a text block with the given format.
-   procedure Add_Text (Document : in out Document_Reader;
-                       Text     : in Unbounded_Wide_Wide_String;
-                       Format   : in Format_Map) is abstract;
+   --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
+   --  The blockquote must be closed at the next header.
+   procedure Add_Blockquote (Into     : in out Document;
+                             Level    : in Natural);
 
    --  Add a text block that is pre-formatted.
-   procedure Add_Preformatted (Document : in out Document_Reader;
-                               Text     : in Unbounded_Wide_Wide_String;
-                               Format   : in Unbounded_Wide_Wide_String) is abstract;
+   procedure Add_Preformatted (Into     : in out Document;
+                               Text     : in Wiki.Strings.WString;
+                               Format   : in Wiki.Strings.WString);
 
-   procedure Start_Element (Document   : in out Document_Reader;
-                            Name       : in Unbounded_Wide_Wide_String;
-                            Attributes : in Wiki.Attributes.Attribute_List_Type) is abstract;
+   --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
+   --  each node instance.
+   procedure Iterate (Doc     : in Document;
+                      Process : not null access procedure (Node : in Wiki.Nodes.Node_Type));
 
-   procedure End_Element (Document : in out Document_Reader;
-                          Name     : in Unbounded_Wide_Wide_String) is abstract;
+private
 
-   --  Finish the document after complete wiki text has been parsed.
-   procedure Finish (Document : in out Document_Reader) is abstract;
+   --  Append a node to the document.
+   procedure Append (Into : in out Document;
+                     Node : in Wiki.Nodes.Node_Type_Access);
+
+   type Document is new Ada.Finalization.Controlled with record
+      Nodes   : Wiki.Nodes.Node_List_Ref;
+      Current : Wiki.Nodes.Node_Type_Access;
+   end record;
+
+   overriding
+   procedure Initialize (Doc : in out Document);
 
 end Wiki.Documents;
