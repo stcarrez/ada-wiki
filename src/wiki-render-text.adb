@@ -144,7 +144,7 @@ package body Wiki.Render.Text is
    procedure Render (Engine : in out Text_Renderer;
                      Doc    : in Wiki.Nodes.Document;
                      Node   : in Wiki.Nodes.Node_Type) is
-      use type Wiki.Nodes.Html_Tag_Type;
+      use type Wiki.Html_Tag;
       use type Wiki.Nodes.Node_List_Access;
    begin
       case Node.Kind is
@@ -203,13 +203,13 @@ package body Wiki.Render.Text is
 
          when Wiki.Nodes.N_TAG_START =>
             if Node.Children /= null then
-               if Node.Tag_Start = Wiki.Nodes.DT_TAG then
+               if Node.Tag_Start = Wiki.DT_TAG then
                   Engine.Close_Paragraph;
                   Engine.Indent_Level := 0;
                   Engine.Render (Doc, Node.Children);
                   Engine.Close_Paragraph;
                   Engine.Indent_Level := 0;
-               elsif Node.Tag_Start = Wiki.Nodes.DD_TAG then
+               elsif Node.Tag_Start = Wiki.DD_TAG then
                   Engine.Close_Paragraph;
                   Engine.Empty_Line := True;
                   Engine.Indent_Level := 4;
@@ -218,7 +218,7 @@ package body Wiki.Render.Text is
                   Engine.Indent_Level := 0;
                else
                   Engine.Render (Doc, Node.Children);
-                  if Node.Tag_Start = Wiki.Nodes.DL_TAG then
+                  if Node.Tag_Start = Wiki.DL_TAG then
                      Engine.Close_Paragraph;
                      Engine.New_Line;
                   end if;
