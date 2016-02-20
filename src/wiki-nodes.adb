@@ -23,7 +23,7 @@ package body Wiki.Nodes is
    --  ------------------------------
    procedure Push_Node (Document   : in out Wiki.Nodes.Document;
                         Tag        : in Html_Tag;
-                        Attributes : in Wiki.Attributes.Attribute_List_Type) is
+                        Attributes : in Wiki.Attributes.Attribute_List) is
       Node : constant Node_Type_Access := new Node_Type '(Kind       => N_TAG_START,
                                                           Len        => 0,
                                                           Tag_Start  => Tag,
@@ -111,7 +111,7 @@ package body Wiki.Nodes is
    --  ------------------------------
    procedure Add_Link (Into       : in out Document;
                        Name       : in Wiki.Strings.WString;
-                       Attributes : in out Wiki.Attributes.Attribute_List_Type) is
+                       Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       Append (Into, new Node_Type '(Kind => N_LINK, Len => Name'Length,
                                     Title => Name, Link_Attr => Attributes));
@@ -122,7 +122,7 @@ package body Wiki.Nodes is
    --  ------------------------------
    procedure Add_Image (Into       : in out Document;
                         Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List_Type) is
+                        Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       Append (Into, new Node_Type '(Kind => N_IMAGE, Len => Name'Length,
                                     Title => Name, Link_Attr => Attributes));
@@ -133,7 +133,7 @@ package body Wiki.Nodes is
    --  ------------------------------
    procedure Add_Quote (Into       : in out Document;
                         Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List_Type) is
+                        Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       Append (Into, new Node_Type '(Kind => N_QUOTE, Len => Name'Length,
                                     Title => Name, Link_Attr => Attributes));

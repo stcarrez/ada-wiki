@@ -61,12 +61,12 @@ package Wiki.Nodes is
             Text   : WString (1 .. Len);
 
          when N_LINK | N_IMAGE | N_QUOTE =>
-            Link_Attr  : Wiki.Attributes.Attribute_List_Type;
+            Link_Attr  : Wiki.Attributes.Attribute_List;
             Title      : WString (1 .. Len);
 
          when N_TAG_START =>
             Tag_Start  : Html_Tag;
-            Attributes : Wiki.Attributes.Attribute_List_Type;
+            Attributes : Wiki.Attributes.Attribute_List;
             Children   : Node_List_Access;
             Parent     : Node_Type_Access;
 
@@ -92,7 +92,7 @@ package Wiki.Nodes is
    --  Append a HTML tag start node to the document.
    procedure Push_Node (Document   : in out Wiki.Nodes.Document;
                         Tag        : in Html_Tag;
-                        Attributes : in Wiki.Attributes.Attribute_List_Type);
+                        Attributes : in Wiki.Attributes.Attribute_List);
 
    --  Pop the HTML tag.
    procedure Pop_Node (Document : in out Wiki.Nodes.Document;
@@ -111,17 +111,17 @@ package Wiki.Nodes is
    --  Add a link.
    procedure Add_Link (Into       : in out Document;
                        Name       : in Wiki.Strings.WString;
-                       Attributes : in out Wiki.Attributes.Attribute_List_Type);
+                       Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Add an image.
    procedure Add_Image (Into       : in out Document;
                         Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List_Type);
+                        Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Add a quote.
    procedure Add_Quote (Into       : in out Document;
                         Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List_Type);
+                        Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Add a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
