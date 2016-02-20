@@ -51,7 +51,7 @@ package body Wiki.Render is
    --  Render the list of nodes from the document.
    --  ------------------------------
    procedure Render (Engine : in out Renderer'Class;
-                     Doc    : in Wiki.Nodes.Document;
+                     Doc    : in Wiki.Documents.Document;
                      List   : in Wiki.Nodes.Node_List_Access) is
       use type Wiki.Nodes.Node_List_Access;
 
@@ -72,7 +72,7 @@ package body Wiki.Render is
    --  Render the document.
    --  ------------------------------
    procedure Render (Engine : in out Renderer'Class;
-                     Doc    : in Wiki.Nodes.Document) is
+                     Doc    : in Wiki.Documents.Document) is
       procedure Process (Node : in Wiki.Nodes.Node_Type);
 
       procedure Process (Node : in Wiki.Nodes.Node_Type) is
@@ -80,7 +80,7 @@ package body Wiki.Render is
          Engine.Render (Doc, Node);
       end Process;
    begin
-      Wiki.Nodes.Iterate (Doc, Process'Access);
+      Doc.Iterate (Process'Access);
       Engine.Finish;
    end Render;
 

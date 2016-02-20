@@ -17,6 +17,7 @@
 -----------------------------------------------------------------------
 with Ada.Strings.Wide_Wide_Unbounded;
 with Wiki.Nodes;
+with Wiki.Documents;
 package Wiki.Render is
 
    pragma Preelaborate;
@@ -64,7 +65,7 @@ package Wiki.Render is
 
    --  Render the node instance from the document.
    procedure Render (Engine : in out Renderer;
-                     Doc    : in Wiki.Nodes.Document;
+                     Doc    : in Wiki.Documents.Document;
                      Node   : in Wiki.Nodes.Node_Type) is abstract;
 
    --  Finish the rendering after complete wiki document nodes are rendered.
@@ -72,11 +73,11 @@ package Wiki.Render is
 
    --  Render the list of nodes from the document.
    procedure Render (Engine : in out Renderer'Class;
-                     Doc    : in Wiki.Nodes.Document;
+                     Doc    : in Wiki.Documents.Document;
                      List   : in Wiki.Nodes.Node_List_Access);
 
    --  Render the document.
    procedure Render (Engine : in out Renderer'Class;
-                     Doc    : in Wiki.Nodes.Document);
+                     Doc    : in Wiki.Documents.Document);
 
 end Wiki.Render;
