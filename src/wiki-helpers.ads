@@ -21,6 +21,7 @@ package Wiki.Helpers is
    pragma Preelaborate;
 
    LF : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#0A#);
+   CR : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#0D#);
    HT : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#09#);
 
    --  Returns True if the character is a space or tab.
