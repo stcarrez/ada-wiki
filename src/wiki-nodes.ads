@@ -43,80 +43,6 @@ package Wiki.Nodes is
    --  Node kinds which are simple markers in the document.
    subtype Simple_Node_Kind is Node_Kind range N_LINE_BREAK .. N_PARAGRAPH;
 
-     --  The possible HTML tags as described in HTML5 specification.
-   type Html_Tag_Type is
-     (
-      --  Section 4.1 The root element
-      HTML_TAG,
-
-      --  Section 4.2 Document metadata
-      HEAD_TAG, TITLE_TAG, BASE_TAG, LINK_TAG, META_TAG, STYLE_TAG,
-
-      --  Section 4.3 Sections
-      BODY_TAG, ARTICLE_TAG, SECTION_TAG, NAV_TAG, ASIDE_TAG,
-      H1_TAG, H2_TAG, H3_TAG, H4_TAG, H5_TAG, H6_TAG,
-      HEADER_TAG, FOOTER_TAG,
-      ADDRESS_TAG,
-
-      --  Section 4.4 Grouping content
-      P_TAG, HR_TAG, PRE_TAG, BLOCKQUOTE_TAG,
-      OL_TAG, UL_TAG, LI_TAG,
-      DL_TAG, DT_TAG, DD_TAG,
-      FIGURE_TAG, FIGCAPTION_TAG,
-      DIV_TAG, MAIN_TAG,
-
-      --  Section 4.5 Text-level semantics
-      A_TAG, EM_TAG, STRONG_TAG, SMALL_TAG,
-      S_TAG, CITE_TAG, Q_TAG, DFN_TAG, ABBR_TAG,
-      DATA_TAG, TIME_TAG, CODE_TAG, VAR_TAG, SAMP_TAG,
-      KBD_TAG, SUB_TAG, SUP_TAG,
-      I_TAG, B_TAG, U_TAG,
-      MARK_TAG, RUBY_TAG, RB_TAG, RT_TAG, RTC_TAG,
-      RP_TAG, BDI_TAG, BDO_TAG, SPAN_TAG,
-      BR_TAG, WBR_TAG,
-
-      --  Section 4.6 Edits
-      INS_TAG, DEL_TAG,
-
-      --  Section 4.7 Embedded content
-      IMG_TAG,
-      IFRAME_TAG,
-      EMBED_TAG,
-      OBJECT_TAG,
-      PARAM_TAG,
-      VIDEO_TAG,
-      AUDIO_TAG,
-      SOURCE_TAG,
-      TRACK_TAG,
-      MAP_TAG,
-      AREA_TAG,
-
-      --  Section 4.9 Tabular data
-      TABLE_TAG, CAPTION_TAG, COLGROUP_TAG, COL_TAG,
-      TBODY_TAG, THEAD_TAG, TFOOT_TAG,
-      TR_TAG, TD_TAG, TH_TAG,
-
-      --  Section 4.10 Forms
-      FORM_TAG, LABEL_TAG, INPUT_TAG,
-      BUTTON_TAG, SELECT_TAG, DATALIST_TAG, OPTGROUP_TAG,
-      OPTION_TAG, TEXTAREA_TAG, KEYGEN_TAG, OUTPUT_TAG,
-      PROGRESS_TAG, METER_TAG, FIELDSET_TAG, LEGEND_TAG,
-
-      --  Section 4.11 Scripting
-      SCRIPT_TAG, NOSCRIPT_TAG,
-      TEMPLATE_TAG, CANVAS_TAG,
-
-      --  Unknown tags
-      UNKNOWN_TAG
-     );
-
-   --  Find the tag from the tag name.
-   function Find_Tag (Name : in Wide_Wide_String) return Html_Tag_Type;
-
-   type String_Access is access constant String;
-
-   --  Get the HTML tag name.
-   function Get_Tag_Name (Tag : in Html_Tag_Type) return String_Access;
 
    type Node_List is limited private;
    type Node_List_Access is access all Node_List;
@@ -139,7 +65,7 @@ package Wiki.Nodes is
             Title      : WString (1 .. Len);
 
          when N_TAG_START =>
-            Tag_Start  : Html_Tag_Type;
+            Tag_Start  : Html_Tag;
             Attributes : Wiki.Attributes.Attribute_List_Type;
             Children   : Node_List_Access;
             Parent     : Node_Type_Access;
@@ -165,12 +91,12 @@ package Wiki.Nodes is
 
    --  Append a HTML tag start node to the document.
    procedure Push_Node (Document   : in out Wiki.Nodes.Document;
-                        Tag        : in Html_Tag_Type;
+                        Tag        : in Html_Tag;
                         Attributes : in Wiki.Attributes.Attribute_List_Type);
 
    --  Pop the HTML tag.
    procedure Pop_Node (Document : in out Wiki.Nodes.Document;
-                       Tag      : in Html_Tag_Type);
+                       Tag      : in Html_Tag);
 
    --  Append the text with the given format at end of the document.
    procedure Append (Into   : in out Document;
