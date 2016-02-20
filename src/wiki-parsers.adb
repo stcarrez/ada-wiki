@@ -1277,7 +1277,7 @@ package body Wiki.Parsers is
    --  ------------------------------
    procedure Parse (Engine : in out Parser;
                     Text   : in Wide_Wide_String;
-                    Doc    : in out Wiki.Nodes.Document) is
+                    Doc    : in out Wiki.Documents.Document) is
 
       type Wide_Input is new Wiki.Streams.Input_Stream with record
          Pos : Positive;
@@ -1312,7 +1312,7 @@ package body Wiki.Parsers is
    --  on the wiki engine.
    procedure Parse (Engine : in out Parser;
                     Stream : in Wiki.Streams.Input_Stream_Access;
-                    Doc    : in out Wiki.Nodes.Document) is
+                    Doc    : in out Wiki.Documents.Document) is
    begin
       Engine.Document   := Doc;
       Engine.Empty_Line := True;

@@ -21,6 +21,7 @@ with Wiki.Plugins;
 with Wiki.Filters;
 with Wiki.Strings;
 with Wiki.Nodes;
+with Wiki.Documents;
 with Wiki.Streams;
 
 --  == Wiki Parsers ==
@@ -50,13 +51,13 @@ package Wiki.Parsers is
    --  defined on the parser.
    procedure Parse (Engine : in out Parser;
                     Text   : in Wide_Wide_String;
-                    Doc    : in out Wiki.Nodes.Document);
+                    Doc    : in out Wiki.Documents.Document);
 
    --  Parse the wiki stream managed by <tt>Stream</tt> according to the wiki syntax configured
    --  on the wiki engine.
    procedure Parse (Engine : in out Parser;
                     Stream : in Wiki.Streams.Input_Stream_Access;
-                    Doc    : in out Wiki.Nodes.Document);
+                    Doc    : in out Wiki.Documents.Document);
 
 private
 
@@ -64,7 +65,7 @@ private
       Pending             : Wide_Wide_Character;
       Has_Pending         : Boolean;
       Syntax              : Wiki_Syntax;
-      Document            : Wiki.Nodes.Document;
+      Document            : Wiki.Documents.Document;
       Filters             : Wiki.Filters.Filter_Chain;
       Format              : Wiki.Format_Map;
       Text                : Wiki.Strings.BString (512);
