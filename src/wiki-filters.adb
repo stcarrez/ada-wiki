@@ -67,7 +67,7 @@ package body Wiki.Filters is
    --  ------------------------------
    procedure Push_Node (Filter     : in out Filter_Type;
                         Document   : in out Wiki.Nodes.Document;
-                        Tag        : in Wiki.Nodes.Html_Tag_Type;
+                        Tag        : in Wiki.Html_Tag;
                         Attributes : in out Wiki.Attributes.Attribute_List_Type) is
    begin
       if Filter.Next /= null then
@@ -82,7 +82,7 @@ package body Wiki.Filters is
    --  ------------------------------
    procedure Pop_Node (Filter   : in out Filter_Type;
                        Document : in out Wiki.Nodes.Document;
-                       Tag     : in Wiki.Nodes.Html_Tag_Type) is
+                       Tag     : in Wiki.Html_Tag) is
    begin
       if Filter.Next /= null then
          Filter.Next.Pop_Node (Document, Tag);

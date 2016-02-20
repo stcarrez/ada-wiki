@@ -71,13 +71,13 @@ package Wiki.Filters is
    --  Push a HTML node with the given tag to the document.
    procedure Push_Node (Filter     : in out Filter_Type;
                         Document   : in out Wiki.Nodes.Document;
-                        Tag        : in Wiki.Nodes.Html_Tag_Type;
+                        Tag        : in Wiki.Html_Tag;
                         Attributes : in out Wiki.Attributes.Attribute_List_Type);
 
    --  Pop a HTML node with the given tag.
    procedure Pop_Node (Filter   : in out Filter_Type;
                        Document : in out Wiki.Nodes.Document;
-                       Tag      : in Wiki.Nodes.Html_Tag_Type);
+                       Tag      : in Wiki.Html_Tag);
 
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
