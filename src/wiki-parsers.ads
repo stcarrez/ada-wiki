@@ -87,10 +87,6 @@ package Wiki.Parsers is
 
 private
 
-   HT : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#09#);
-   LF : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#0A#);
-   CR : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#0D#);
-
    type Parser is tagged limited record
       Pending             : Wide_Wide_Character;
       Has_Pending         : Boolean;
