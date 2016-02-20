@@ -115,6 +115,15 @@ package body Wiki.Render.Html is
       if Node.Tag_Start = Wiki.Nodes.P_TAG then
          Engine.Has_Paragraph := True;
          Engine.Need_Paragraph := False;
+      elsif Node.Tag_Start = Wiki.Nodes.UL_TAG
+        or Node.Tag_Start = Wiki.Nodes.OL_TAG
+        or Node.Tag_Start = Wiki.Nodes.DL_Tag
+        or Node.Tag_Start = Wiki.Nodes.DT_TAG
+        or Node.Tag_Start = Wiki.Nodes.DD_TAG
+        or Node.Tag_Start = Wiki.Nodes.LI_TAG
+        or Node.Tag_Start = Wiki.Nodes.TABLE_TAG then
+         Engine.Close_Paragraph;
+         Engine.Need_Paragraph := False;
       end if;
       Engine.Output.Start_Element (Name.all);
       while Wiki.Attributes.Has_Element (Iter) loop
@@ -328,7 +337,9 @@ package body Wiki.Render.Html is
    begin
       Engine.Open_Paragraph;
       Engine.Output.Start_Element ("img");
-      Engine.Output.Write_Wide_Attribute ("alt", Title);
+      if Title'Length > 0 then
+         Engine.Output.Write_Wide_Attribute ("alt", Title);
+      end if;
       Wiki.Attributes.Iterate (Attr, Render_Attribute'Access);
       Engine.Output.End_Element ("img");
    end Render_Image;
