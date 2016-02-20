@@ -21,11 +21,11 @@ package Wiki.Utils is
 
    --  Render the wiki text according to the wiki syntax in HTML into a string.
    function To_Html (Text   : in Wide_Wide_String;
-                     Syntax : in Wiki.Parsers.Wiki_Syntax_Type) return String;
+                     Syntax : in Wiki.Wiki_Syntax) return String;
 
    --  Render the wiki text according to the wiki syntax in text into a string.
    --  Wiki formatting and decoration are removed.
    function To_Text (Text   : in Wide_Wide_String;
-                     Syntax : in Wiki.Parsers.Wiki_Syntax_Type) return String;
+                     Syntax : in Wiki.Wiki_Syntax) return String;
 
 end Wiki.Utils;
