@@ -159,7 +159,7 @@ begin
             declare
                Value : constant String := Util.Strings.Transforms.To_Upper_Case (Parameter);
             begin
-               Html_Filter.Hide (Wiki.Nodes.Html_Tag_Type'Value (Value & "_TAG"));
+               Html_Filter.Hide (Wiki.Html_Tag'Value (Value & "_TAG"));
             exception
                when Constraint_Error =>
                   Ada.Text_IO.Put_Line ("Invalid tag " & Value);

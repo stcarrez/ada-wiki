@@ -26,12 +26,13 @@ with Util.Files;
 
 with Wiki.Utils;
 with Wiki.Parsers;
-
+with Wiki.Nodes;
 procedure Render is
 
    use GNAT.Command_Line;
    use Ada.Strings.Unbounded;
    use Ada.Characters.Conversions;
+   use Wiki.Nodes;
 
    procedure Usage;
 
