@@ -18,33 +18,6 @@
 with Ada.Wide_Wide_Characters.Handling;
 with Ada.Unchecked_Deallocation;
 package body Wiki.Nodes is
-   --  ------------------------------
-   --  Append a HTML tag start node to the document.
-   --  ------------------------------
-   procedure Push_Node (Document   : in out Wiki.Nodes.Document;
-                        Tag        : in Html_Tag;
-                        Attributes : in Wiki.Attributes.Attribute_List) is
-      Node : constant Node_Type_Access := new Node_Type '(Kind       => N_TAG_START,
-                                                          Len        => 0,
-                                                          Tag_Start  => Tag,
-                                                          Attributes => Attributes,
-                                                          Children   => null,
-                                                          Parent     => Document.Current);
-   begin
-      Append (Document, Node);
-      Document.Current := Node;
-   end Push_Node;
-
-   --  ------------------------------
-   --  Pop the HTML tag.
-   --  ------------------------------
-   procedure Pop_Node (Document : in out Wiki.Nodes.Document;
-                       Tag      : in Html_Tag) is
-   begin
-      if Document.Current /= null then
-         Document.Current := Document.Current.Parent;
-      end if;
-   end Pop_Node;
 
    --  ------------------------------
    --  Append a section header at end of the document.

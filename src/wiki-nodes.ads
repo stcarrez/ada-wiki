@@ -98,15 +98,6 @@ package Wiki.Nodes is
    procedure Append (Into : in out Document;
                      Kind : in Simple_Node_Kind);
 
-   --  Append a HTML tag start node to the document.
-   procedure Push_Node (Document   : in out Wiki.Nodes.Document;
-                        Tag        : in Html_Tag;
-                        Attributes : in Wiki.Attributes.Attribute_List);
-
-   --  Pop the HTML tag.
-   procedure Pop_Node (Document : in out Wiki.Nodes.Document;
-                       Tag      : in Html_Tag);
-
    --  Append the text with the given format at end of the document.
    procedure Append (Into   : in out Document;
                      Text   : in Wiki.Strings.WString;
