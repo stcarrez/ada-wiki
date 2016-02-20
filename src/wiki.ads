@@ -20,6 +20,33 @@ package Wiki is
 
    pragma Preelaborate;
 
+   --  Defines the possible wiki syntax supported by the parser.
+   type Wiki_Syntax
+      is (
+         --  Google wiki syntax http://code.google.com/p/support/wiki/WikiSyntax
+         SYNTAX_GOOGLE,
+
+         --  Creole wiki syntax http://www.wikicreole.org/wiki/Creole1.0
+         SYNTAX_CREOLE,
+
+         --  Dotclear syntax http://dotclear.org/documentation/2.0/usage/syntaxes
+         SYNTAX_DOTCLEAR,
+
+         --  PhpBB syntax http://wiki.phpbb.com/Help:Formatting
+         SYNTAX_PHPBB,
+
+         --  MediaWiki syntax http://www.mediawiki.org/wiki/Help:Formatting
+         SYNTAX_MEDIA_WIKI,
+
+         --  Markdown
+         SYNTAX_MARKDOWN,
+
+         --  A mix of the above
+         SYNTAX_MIX,
+
+         --  The input is plain possibly incorrect HTML.
+         SYNTAX_HTML);
+
    type Format_Type is (BOLD, ITALIC, CODE, SUPERSCRIPT, SUBSCRIPT, STRIKEOUT, PREFORMAT);
 
    type Format_Map is array (Format_Type) of Boolean;

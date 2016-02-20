@@ -31,33 +31,6 @@ package Wiki.Parsers is
 
    pragma Preelaborate;
 
-   --  Defines the possible wiki syntax supported by the parser.
-   type Wiki_Syntax_Type
-     is (
-         --  Google wiki syntax http://code.google.com/p/support/wiki/WikiSyntax
-         SYNTAX_GOOGLE,
-
-         --  Creole wiki syntax http://www.wikicreole.org/wiki/Creole1.0
-         SYNTAX_CREOLE,
-
-         --  Dotclear syntax http://dotclear.org/documentation/2.0/usage/syntaxes
-         SYNTAX_DOTCLEAR,
-
-         --  PhpBB syntax http://wiki.phpbb.com/Help:Formatting
-         SYNTAX_PHPBB,
-
-         --  MediaWiki syntax http://www.mediawiki.org/wiki/Help:Formatting
-         SYNTAX_MEDIA_WIKI,
-
-         --  Markdown
-         SYNTAX_MARKDOWN,
-
-         --  A mix of the above
-         SYNTAX_MIX,
-
-         --  The input is plain possibly incorrect HTML.
-         SYNTAX_HTML);
-
    type Parser is tagged limited private;
 
    --  Add the plugin to the wiki engine.
@@ -67,7 +40,7 @@ package Wiki.Parsers is
 
    --  Set the wiki syntax that the wiki engine must use.
    procedure Set_Syntax (Engine : in out Parser;
-                         Syntax : in Wiki_Syntax_Type := SYNTAX_MIX);
+                         Syntax : in Wiki_Syntax := SYNTAX_MIX);
 
    --  Add a filter in the wiki engine.
    procedure Add_Filter (Engine : in out Parser;
@@ -90,7 +63,7 @@ private
    type Parser is tagged limited record
       Pending             : Wide_Wide_Character;
       Has_Pending         : Boolean;
-      Syntax              : Wiki_Syntax_Type;
+      Syntax              : Wiki_Syntax;
       Document            : Wiki.Nodes.Document;
       Filters             : Wiki.Filters.Filter_Chain;
       Format              : Wiki.Format_Map;
