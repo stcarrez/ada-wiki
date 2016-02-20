@@ -29,10 +29,12 @@ with Util.Strings.Transforms;
 
 with Wiki.Parsers;
 with Wiki.Filters.Html;
-with Wiki.Writers.Builders;
+with Wiki.Streams.Builders;
+with Wiki.Streams.Html.Builders;
 with Wiki.Render.Html;
 with Wiki.Render.Text;
 with Wiki.Render.Wiki;
+with Wiki.Nodes;
 
 procedure Import is
 
@@ -63,39 +65,42 @@ procedure Import is
    end Usage;
 
    procedure Parse (Content : in String) is
+      Doc    : Wiki.Nodes.Document;
+      Engine : Wiki.Parsers.Parser;
    begin
+      Engine.Add_Filter (Html_Filter'Unchecked_Access);
       if Wiki_Mode then
          declare
-            Writer   : aliased Wiki.Writers.Builders.Writer_Builder_Type;
+            Stream   : aliased Wiki.Streams.Builders.Output_Builder_Stream;
             Renderer : aliased Wiki.Render.Wiki.Wiki_Renderer;
          begin
-            Renderer.Set_Writer (Writer'Unchecked_Access, Syntax);
-            Html_Filter.Set_Document (Renderer'Unchecked_Access);
-            Wiki.Parsers.Parse (Html_Filter'Unchecked_Access,
-                                To_Wide_Wide_String (Content), Wiki.Parsers.SYNTAX_HTML);
-            Ada.Text_IO.Put_Line (Writer.To_String);
+            Engine.Set_Syntax (Wiki.Parsers.SYNTAX_HTML);
+            Engine.Parse (To_Wide_Wide_String (Content), Doc);
+            Renderer.Set_Output_Stream (Stream'Unchecked_Access, Syntax);
+            Renderer.Render (Doc);
+            Ada.Text_IO.Put_Line (Stream.To_String);
          end;
       elsif Html_Mode then
          declare
-            Writer   : aliased Wiki.Writers.Builders.Html_Writer_Type;
+            Stream   : aliased Wiki.Streams.Html.Builders.Html_Output_Builder_Stream;
             Renderer : aliased Wiki.Render.Html.Html_Renderer;
          begin
-            Renderer.Set_Writer (Writer'Unchecked_Access);
-            Html_Filter.Set_Document (Renderer'Unchecked_Access);
-            Wiki.Parsers.Parse (Html_Filter'Unchecked_Access,
-                                To_Wide_Wide_String (Content), Syntax);
-            Ada.Text_IO.Put_Line (Writer.To_String);
+            Engine.Set_Syntax (Syntax);
+            Engine.Parse (To_Wide_Wide_String (Content), Doc);
+            Renderer.Set_Output_Stream (Stream'Unchecked_Access);
+            Renderer.Render (Doc);
+            Ada.Text_IO.Put_Line (Stream.To_String);
          end;
       else
          declare
-            Writer   : aliased Wiki.Writers.Builders.Writer_Builder_Type;
+            Stream   : aliased Wiki.Streams.Builders.Output_Builder_Stream;
             Renderer : aliased Wiki.Render.Text.Text_Renderer;
          begin
-            Renderer.Set_Writer (Writer'Unchecked_Access);
-            Html_Filter.Set_Document (Renderer'Unchecked_Access);
-            Wiki.Parsers.Parse (Html_Filter'Unchecked_Access,
-                                To_Wide_Wide_String (Content), Syntax);
-            Ada.Text_IO.Put_Line (Writer.To_String);
+            Engine.Set_Syntax (Syntax);
+            Engine.Parse (To_Wide_Wide_String (Content), Doc);
+            Renderer.Set_Output_Stream (Stream'Unchecked_Access);
+            Renderer.Render (Doc);
+            Ada.Text_IO.Put_Line (Stream.To_String);
          end;
       end if;
    end Parse;
@@ -154,7 +159,7 @@ begin
             declare
                Value : constant String := Util.Strings.Transforms.To_Upper_Case (Parameter);
             begin
-               Html_Filter.Hide (Wiki.Filters.Html.Html_Tag_Type'Value (Value & "_TAG"));
+               Html_Filter.Hide (Wiki.Nodes.Html_Tag_Type'Value (Value & "_TAG"));
             exception
                when Constraint_Error =>
                   Ada.Text_IO.Put_Line ("Invalid tag " & Value);
