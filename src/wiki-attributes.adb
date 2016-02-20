@@ -77,7 +77,7 @@ package body Wiki.Attributes is
    --  ------------------------------
    --  Find the attribute with the given name.
    --  ------------------------------
-   function Find (List : in Attribute_List_Type;
+   function Find (List : in Attribute_List;
                   Name : in String) return Cursor is
       Iter : Attribute_Vectors.Cursor := List.List.First;
    begin
@@ -97,7 +97,7 @@ package body Wiki.Attributes is
    --  ------------------------------
    --  Find the attribute with the given name and return its value.
    --  ------------------------------
-   function Get_Attribute (List : in Attribute_List_Type;
+   function Get_Attribute (List : in Attribute_List;
                            Name : in String) return Unbounded_Wide_Wide_String is
       Attr : constant Cursor := Find (List, Name);
    begin
@@ -111,7 +111,7 @@ package body Wiki.Attributes is
    --  ------------------------------
    --  Find the attribute with the given name and return its value.
    --  ------------------------------
-   function Get_Attribute (List : in Attribute_List_Type;
+   function Get_Attribute (List : in Attribute_List;
                            Name : in String) return Wide_Wide_String is
       Attr : constant Cursor := Find (List, Name);
    begin
@@ -125,7 +125,7 @@ package body Wiki.Attributes is
    --  ------------------------------
    --  Append the attribute to the attribute list.
    --  ------------------------------
-   procedure Append (List  : in out Attribute_List_Type;
+   procedure Append (List  : in out Attribute_List;
                      Name  : in Wide_Wide_String;
                      Value : in Wide_Wide_String) is
       Attr : constant Attribute_Access
@@ -141,7 +141,7 @@ package body Wiki.Attributes is
    --  ------------------------------
    --  Append the attribute to the attribute list.
    --  ------------------------------
-   procedure Append (List  : in out Attribute_List_Type;
+   procedure Append (List  : in out Attribute_List;
                      Name  : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
                      Value : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String) is
    begin
@@ -152,7 +152,7 @@ package body Wiki.Attributes is
    --  ------------------------------
    --  Append the attribute to the attribute list.
    --  ------------------------------
-   procedure Append (List  : in out Attribute_List_Type;
+   procedure Append (List  : in out Attribute_List;
                      Name  : in String;
                      Value : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String) is
       Val : constant Wide_Wide_String
@@ -170,7 +170,7 @@ package body Wiki.Attributes is
    --  ------------------------------
    --  Get the cursor to get access to the first attribute.
    --  ------------------------------
-   function First (List : in Attribute_List_Type) return Cursor is
+   function First (List : in Attribute_List) return Cursor is
    begin
       return Cursor '(Pos => List.List.First);
    end First;
@@ -178,7 +178,7 @@ package body Wiki.Attributes is
    --  ------------------------------
    --  Get the number of attributes in the list.
    --  ------------------------------
-   function Length (List : in Attribute_List_Type) return Natural is
+   function Length (List : in Attribute_List) return Natural is
    begin
       return Natural (List.List.Length);
    end Length;
@@ -186,7 +186,7 @@ package body Wiki.Attributes is
    --  ------------------------------
    --  Clear the list and remove all existing attributes.
    --  ------------------------------
-   procedure Clear (List : in out Attribute_List_Type) is
+   procedure Clear (List : in out Attribute_List) is
 --        procedure Free is
 --          new Ada.Unchecked_Deallocation (Object => Attribute,
 --                                          Name   => Attribute_Access);
@@ -203,7 +203,7 @@ package body Wiki.Attributes is
    --  ------------------------------
    --  Iterate over the list attributes and call the <tt>Process</tt> procedure.
    --  ------------------------------
-   procedure Iterate (List    : in Attribute_List_Type;
+   procedure Iterate (List    : in Attribute_List;
                       Process : not null access procedure (Name : in String;
                                                            Value : in Wide_Wide_String)) is
       Iter : Attribute_Vectors.Cursor := List.List.First;
@@ -220,7 +220,7 @@ package body Wiki.Attributes is
    --  Finalize the attribute list releasing any storage.
    --  ------------------------------
    overriding
-   procedure Finalize (List : in out Attribute_List_Type) is
+   procedure Finalize (List : in out Attribute_List) is
    begin
       List.Clear;
    end Finalize;

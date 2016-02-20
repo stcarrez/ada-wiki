@@ -22,7 +22,7 @@ private with Util.Refs;
 
 --  == Attributes ==
 --  The  <tt>Attributes</tt> package defines a simple management of attributes for
---  the wiki document parser.  Attribute lists are described by the <tt>Attribute_List_Type</tt>
+--  the wiki document parser.  Attribute lists are described by the <tt>Attribute_List</tt>
 --  with some operations to append or query for an attribute.
 package Wiki.Attributes is
 
@@ -51,46 +51,46 @@ package Wiki.Attributes is
    procedure Next (Position : in out Cursor);
 
    --  A list of attributes.
-   type Attribute_List_Type is private;
+   type Attribute_List is private;
 
    --  Find the attribute with the given name.
-   function Find (List : in Attribute_List_Type;
+   function Find (List : in Attribute_List;
                   Name : in String) return Cursor;
 
    --  Find the attribute with the given name and return its value.
-   function Get_Attribute (List : in Attribute_List_Type;
+   function Get_Attribute (List : in Attribute_List;
                            Name : in String) return Unbounded_Wide_Wide_String;
 
    --  Find the attribute with the given name and return its value.
-   function Get_Attribute (List : in Attribute_List_Type;
+   function Get_Attribute (List : in Attribute_List;
                            Name : in String) return Wide_Wide_String;
 
    --  Append the attribute to the attribute list.
-   procedure Append (List  : in out Attribute_List_Type;
+   procedure Append (List  : in out Attribute_List;
                      Name  : in Wide_Wide_String;
                      Value : in Wide_Wide_String);
 
    --  Append the attribute to the attribute list.
-   procedure Append (List  : in out Attribute_List_Type;
+   procedure Append (List  : in out Attribute_List;
                      Name  : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
                      Value : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String);
 
    --  Append the attribute to the attribute list.
-   procedure Append (List  : in out Attribute_List_Type;
+   procedure Append (List  : in out Attribute_List;
                      Name  : in String;
                      Value : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String);
 
    --  Get the cursor to get access to the first attribute.
-   function First (List : in Attribute_List_Type) return Cursor;
+   function First (List : in Attribute_List) return Cursor;
 
    --  Get the number of attributes in the list.
-   function Length (List : in Attribute_List_Type) return Natural;
+   function Length (List : in Attribute_List) return Natural;
 
    --  Clear the list and remove all existing attributes.
-   procedure Clear (List : in out Attribute_List_Type);
+   procedure Clear (List : in out Attribute_List);
 
    --  Iterate over the list attributes and call the <tt>Process</tt> procedure.
-   procedure Iterate (List    : in Attribute_List_Type;
+   procedure Iterate (List    : in Attribute_List;
                       Process : not null access procedure (Name : in String;
                                                            Value : in Wide_Wide_String));
 
@@ -119,12 +119,12 @@ private
       Pos : Attribute_Vectors.Cursor;
    end record;
 
-   type Attribute_List_Type is new Ada.Finalization.Controlled with record
+   type Attribute_List is new Ada.Finalization.Controlled with record
       List    : Attribute_Vector;
    end record;
 
    --  Finalize the attribute list releasing any storage.
    overriding
-   procedure Finalize (List : in out Attribute_List_Type);
+   procedure Finalize (List : in out Attribute_List);
 
 end Wiki.Attributes;
