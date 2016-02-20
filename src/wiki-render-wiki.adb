@@ -20,7 +20,7 @@ with Ada.Wide_Wide_Characters.Handling;
 with Wiki.Helpers;
 package body Wiki.Render.Wiki is
 
-   LF : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#0A#);
+   use Helpers;
 
    HEADER_CREOLE             : aliased constant Wide_Wide_String := "=";
    BOLD_CREOLE               : aliased constant Wide_Wide_String := "**";
