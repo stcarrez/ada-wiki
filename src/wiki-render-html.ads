@@ -103,18 +103,18 @@ private
    procedure Render_Link (Engine : in out Html_Renderer;
                           Doc    : in Wiki.Nodes.Document;
                           Title  : in Wiki.Strings.WString;
-                          Attr   : in Wiki.Attributes.Attribute_List_Type);
+                          Attr   : in Wiki.Attributes.Attribute_List);
 
    --  Render an image.
    procedure Render_Image (Engine : in out Html_Renderer;
                            Doc    : in Wiki.Nodes.Document;
                            Title  : in Wiki.Strings.WString;
-                           Attr   : in Wiki.Attributes.Attribute_List_Type);
+                           Attr   : in Wiki.Attributes.Attribute_List);
 
    --  Render a quote.
    procedure Render_Quote (Engine : in out Html_Renderer;
                            Doc    : in Wiki.Nodes.Document;
                            Title  : in Wiki.Strings.WString;
-                           Attr   : in Wiki.Attributes.Attribute_List_Type);
+                           Attr   : in Wiki.Attributes.Attribute_List);
 
 end Wiki.Render.Html;

@@ -267,7 +267,7 @@ package body Wiki.Render.Html is
    procedure Render_Link (Engine : in out Html_Renderer;
                           Doc    : in Wiki.Nodes.Document;
                           Title  : in Wiki.Strings.WString;
-                          Attr   : in Wiki.Attributes.Attribute_List_Type) is
+                          Attr   : in Wiki.Attributes.Attribute_List) is
 
       procedure Render_Attribute (Name  : in String;
                                   Value : in Wide_Wide_String) is
@@ -304,7 +304,7 @@ package body Wiki.Render.Html is
    procedure Render_Image (Engine : in out Html_Renderer;
                            Doc    : in Wiki.Nodes.Document;
                            Title  : in Wiki.Strings.WString;
-                           Attr   : in Wiki.Attributes.Attribute_List_Type) is
+                           Attr   : in Wiki.Attributes.Attribute_List) is
 
       procedure Render_Attribute (Name  : in String;
                                   Value : in Wide_Wide_String) is
@@ -350,7 +350,7 @@ package body Wiki.Render.Html is
    procedure Render_Quote (Engine : in out Html_Renderer;
                            Doc    : in Wiki.Nodes.Document;
                            Title  : in Wiki.Strings.WString;
-                           Attr   : in Wiki.Attributes.Attribute_List_Type) is
+                           Attr   : in Wiki.Attributes.Attribute_List) is
 
       procedure Render_Attribute (Name  : in String;
                                   Value : in Wide_Wide_String) is
