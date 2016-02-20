@@ -234,7 +234,7 @@ package body Wiki.Parsers is
 
    procedure Start_Element (P          : in out Parser;
                             Tag        : in Wiki.Html_Tag;
-                            Attributes : in out Wiki.Attributes.Attribute_List_Type) is
+                            Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       Flush_Text (P);
       P.Filters.Push_Node (P.Document, Tag, Attributes);

@@ -114,7 +114,7 @@ private
       Escape_Char         : Wide_Wide_Character;
       List_Level          : Natural := 0;
       Reader              : Wiki.Streams.Input_Stream_Access := null;
-      Attributes          : Wiki.Attributes.Attribute_List_Type;
+      Attributes          : Wiki.Attributes.Attribute_List;
    end record;
 
    type Parser_Handler is access procedure (P     : in out Parser;
@@ -153,7 +153,7 @@ private
 
    procedure Start_Element (P          : in out Parser;
                             Tag        : in Wiki.Html_Tag;
-                            Attributes : in out Wiki.Attributes.Attribute_List_Type);
+                            Attributes : in out Wiki.Attributes.Attribute_List);
 
    procedure End_Element (P    : in out Parser;
                           Tag  : in Wiki.Html_Tag);
