@@ -71,14 +71,14 @@ package Wiki.Filters.Html is
    overriding
    procedure Push_Node (Filter     : in out Html_Filter_Type;
                         Document   : in out Wiki.Nodes.Document;
-                        Tag        : in Wiki.Nodes.Html_Tag_Type;
+                        Tag        : in Wiki.Html_Tag;
                         Attributes : in out Wiki.Attributes.Attribute_List_Type);
 
    --  Pop a HTML node with the given tag.
    overriding
    procedure Pop_Node (Filter   : in out Html_Filter_Type;
                        Document : in out Wiki.Nodes.Document;
-                       Tag      : in Wiki.Nodes.Html_Tag_Type);
+                       Tag      : in Wiki.Html_Tag);
 
    --  Add a link.
    overriding
@@ -101,20 +101,20 @@ package Wiki.Filters.Html is
 
    --  Mark the HTML tag as being forbidden.
    procedure Forbidden (Filter : in out Html_Filter_Type;
-                        Tag    : in Html_Tag_Type);
+                        Tag    : in Html_Tag);
 
    --  Mark the HTML tag as being allowed.
    procedure Allowed (Filter : in out Html_Filter_Type;
-                      Tag    : in Html_Tag_Type);
+                      Tag    : in Html_Tag);
 
    --  Mark the HTML tag as being hidden.  The tag and its inner content including the text
    --  will be removed and not passed to the final document.
    procedure Hide (Filter : in out Html_Filter_Type;
-                   Tag    : in Html_Tag_Type);
+                   Tag    : in Html_Tag);
 
    --  Mark the HTML tag as being visible.
    procedure Visible (Filter : in out Html_Filter_Type;
-                      Tag    : in Html_Tag_Type);
+                      Tag    : in Html_Tag);
 
    --  Flush the HTML element that have not yet been closed.
    procedure Flush_Stack (Filter   : in out Html_Filter_Type;
@@ -124,24 +124,24 @@ private
 
    use Wiki.Nodes;
 
-   type Tag_Boolean_Array is array (Html_Tag_Type) of Boolean;
+   type Tag_Boolean_Array is array (Html_Tag) of Boolean;
 
    package Tag_Vectors is
      new Ada.Containers.Vectors (Index_Type   => Positive,
-                                 Element_Type => Html_Tag_Type);
+                                 Element_Type => Html_Tag);
 
    subtype Tag_Vector is Tag_Vectors.Vector;
    subtype Tag_Cursor is Tag_Vectors.Cursor;
 
    type Html_Filter_Type is new Filter_Type with record
-      Allowed    : Tag_Boolean_Array := (UNKNOWN_TAG => False,
-                                         SCRIPT_TAG  => False,
-                                         HTML_TAG    => False,
-                                         HEAD_TAG    => False,
-                                         BODY_TAG    => False,
-                                         META_TAG    => False,
-                                         TITLE_TAG   => False,
-                                         others      => True);
+      Allowed    : Tag_Boolean_Array := (UNKNOWN_TAG   => False,
+                                         SCRIPT_TAG    => False,
+                                         ROOT_HTML_TAG => False,
+                                         HEAD_TAG      => False,
+                                         BODY_TAG      => False,
+                                         META_TAG      => False,
+                                         TITLE_TAG     => False,
+                                         others        => True);
 
       Hidden     : Tag_Boolean_Array := (UNKNOWN_TAG => False,
                                          SCRIPT_TAG  => True,

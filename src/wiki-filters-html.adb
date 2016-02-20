@@ -17,8 +17,8 @@
 -----------------------------------------------------------------------
 with Ada.Wide_Wide_Characters.Handling;
 package body Wiki.Filters.Html is
-  function Need_Close (Tag         : in Html_Tag_Type;
-                        Current_Tag : in Html_Tag_Type) return Boolean;
+  function Need_Close (Tag         : in Html_Tag;
+                        Current_Tag : in Html_Tag) return Boolean;
 
    No_End_Tag   : constant Tag_Boolean_Array :=
      (
@@ -66,7 +66,7 @@ package body Wiki.Filters.Html is
    procedure Add_Node (Filter    : in out Html_Filter_Type;
                        Document  : in out Wiki.Nodes.Document;
                        Kind      : in Wiki.Nodes.Simple_Node_Kind) is
-     Tag : Html_Tag_Type;
+     Tag : Html_Tag;
    begin
      case Kind is
         when N_LINE_BREAK =>
@@ -97,7 +97,7 @@ package body Wiki.Filters.Html is
          return;
       elsif not Filter.Stack.Is_Empty then
          declare
-            Current_Tag : constant Html_Tag_Type := Filter.Stack.Last_Element;
+            Current_Tag : constant Html_Tag := Filter.Stack.Last_Element;
          begin
             if No_End_Tag (Current_Tag) then
                Filter_Type (Filter).Pop_Node (Document, Current_Tag);
@@ -127,9 +127,9 @@ package body Wiki.Filters.Html is
    overriding
    procedure Push_Node (Filter     : in out Html_Filter_Type;
                         Document   : in out Wiki.Nodes.Document;
-                        Tag        : in Wiki.Nodes.Html_Tag_Type;
+                        Tag        : in Wiki.Html_Tag;
                         Attributes : in out Wiki.Attributes.Attribute_List_Type) is
-      Current_Tag : Html_Tag_Type;
+      Current_Tag : Html_Tag;
    begin
       while not Filter.Stack.Is_Empty loop
          Current_Tag := Filter.Stack.Last_Element;
@@ -158,8 +158,8 @@ package body Wiki.Filters.Html is
    overriding
    procedure Pop_Node (Filter   : in out Html_Filter_Type;
                        Document : in out Wiki.Nodes.Document;
-                       Tag      : in Wiki.Nodes.Html_Tag_Type) is
-      Current_Tag : Html_Tag_Type;
+                       Tag      : in Wiki.Html_Tag) is
+      Current_Tag : Html_Tag;
    begin
       if Filter.Stack.Is_Empty then
          return;
@@ -220,8 +220,8 @@ package body Wiki.Filters.Html is
    --  decide whether the current tag must be closed or not.
    --  Returns True if the current tag must be closed.
    --  ------------------------------
-   function Need_Close (Tag         : in Html_Tag_Type;
-                        Current_Tag : in Html_Tag_Type) return Boolean is
+   function Need_Close (Tag         : in Html_Tag;
+                        Current_Tag : in Html_Tag) return Boolean is
    begin
       if No_End_Tag (Current_Tag) then
          return True;
@@ -253,7 +253,7 @@ package body Wiki.Filters.Html is
    begin
       while not Filter.Stack.Is_Empty loop
          declare
-            Tag : constant Html_Tag_Type := Filter.Stack.Last_Element;
+            Tag : constant Html_Tag := Filter.Stack.Last_Element;
          begin
             if Filter.Hide_Level = 0 then
                Filter_Type (Filter).Pop_Node (Document, Tag);
@@ -281,7 +281,7 @@ package body Wiki.Filters.Html is
    --  Mark the HTML tag as being forbidden.
    --  ------------------------------
    procedure Forbidden (Filter : in out Html_Filter_Type;
-                        Tag    : in Html_Tag_Type) is
+                        Tag    : in Html_Tag) is
    begin
       Filter.Allowed (Tag) := False;
    end Forbidden;
@@ -290,7 +290,7 @@ package body Wiki.Filters.Html is
    --  Mark the HTML tag as being allowed.
    --  ------------------------------
    procedure Allowed (Filter : in out Html_Filter_Type;
-                      Tag    : in Html_Tag_Type) is
+                      Tag    : in Html_Tag) is
    begin
       Filter.Allowed (Tag) := True;
    end Allowed;
@@ -300,7 +300,7 @@ package body Wiki.Filters.Html is
    --  will be removed and not passed to the final document.
    --  ------------------------------
    procedure Hide (Filter : in out Html_Filter_Type;
-                   Tag    : in Html_Tag_Type) is
+                   Tag    : in Html_Tag) is
    begin
       Filter.Hidden (Tag) := True;
    end Hide;
@@ -309,7 +309,7 @@ package body Wiki.Filters.Html is
    --  Mark the HTML tag as being visible.
    --  ------------------------------
    procedure Visible (Filter : in out Html_Filter_Type;
-                      Tag    : in Html_Tag_Type) is
+                      Tag    : in Html_Tag) is
    begin
       Filter.Hidden (Tag) := False;
    end Visible;
