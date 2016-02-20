@@ -1257,7 +1257,7 @@ package body Wiki.Parsers is
 
    --  Set the wiki syntax that the wiki engine must use.
    procedure Set_Syntax (Engine : in out Parser;
-                         Syntax : in Wiki_Syntax_Type := SYNTAX_MIX) is
+                         Syntax : in Wiki_Syntax := SYNTAX_MIX) is
    begin
       Engine.Syntax := Syntax;
    end Set_Syntax;
