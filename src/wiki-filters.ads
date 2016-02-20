@@ -19,6 +19,7 @@ with Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Finalization;
 
 with Wiki.Attributes;
+with Wiki.Documents;
 with Wiki.Nodes;
 with Wiki.Strings;
 
@@ -53,72 +54,72 @@ package Wiki.Filters is
 
    --  Add a simple node such as N_LINE_BREAK, N_HORIZONTAL_RULE or N_PARAGRAPH to the document.
    procedure Add_Node (Filter    : in out Filter_Type;
-                       Document  : in out Wiki.Nodes.Document;
+                       Document  : in out Wiki.Documents.Document;
                        Kind      : in Wiki.Nodes.Simple_Node_Kind);
 
    --  Add a text content with the given format to the document.
    procedure Add_Text (Filter    : in out Filter_Type;
-                       Document  : in out Wiki.Nodes.Document;
+                       Document  : in out Wiki.Documents.Document;
                        Text      : in Wiki.Strings.WString;
                        Format    : in Wiki.Format_Map);
 
    --  Add a section header with the given level in the document.
    procedure Add_Header (Filter    : in out Filter_Type;
-                         Document  : in out Wiki.Nodes.Document;
+                         Document  : in out Wiki.Documents.Document;
                          Header    : in Wiki.Strings.WString;
                          Level     : in Natural);
 
    --  Push a HTML node with the given tag to the document.
    procedure Push_Node (Filter     : in out Filter_Type;
-                        Document   : in out Wiki.Nodes.Document;
+                        Document   : in out Wiki.Documents.Document;
                         Tag        : in Wiki.Html_Tag;
                         Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Pop a HTML node with the given tag.
    procedure Pop_Node (Filter   : in out Filter_Type;
-                       Document : in out Wiki.Nodes.Document;
+                       Document : in out Wiki.Documents.Document;
                        Tag      : in Wiki.Html_Tag);
 
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
    procedure Add_Blockquote (Filter   : in out Filter_Type;
-                             Document : in out Wiki.Nodes.Document;
+                             Document : in out Wiki.Documents.Document;
                              Level    : in Natural);
 
    --  Add a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
    procedure Add_List_Item (Filter   : in out Filter_Type;
-                            Document : in out Wiki.Nodes.Document;
+                            Document : in out Wiki.Documents.Document;
                             Level    : in Positive;
                             Ordered  : in Boolean);
 
    --  Add a link.
    procedure Add_Link (Filter     : in out Filter_Type;
-                       Document   : in out Wiki.Nodes.Document;
+                       Document   : in out Wiki.Documents.Document;
                        Name       : in Wiki.Strings.WString;
                        Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Add an image.
    procedure Add_Image (Filter     : in out Filter_Type;
-                        Document   : in out Wiki.Nodes.Document;
+                        Document   : in out Wiki.Documents.Document;
                         Name       : in Wiki.Strings.WString;
                         Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Add a quote.
    procedure Add_Quote (Filter     : in out Filter_Type;
-                        Document   : in out Wiki.Nodes.Document;
+                        Document   : in out Wiki.Documents.Document;
                         Name       : in Wiki.Strings.WString;
                         Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Add a text block that is pre-formatted.
    procedure Add_Preformatted (Filter   : in out Filter_Type;
-                               Document : in out Wiki.Nodes.Document;
+                               Document : in out Wiki.Documents.Document;
                                Text     : in Wiki.Strings.WString;
                                Format   : in Unbounded_Wide_Wide_String);
 
    --  Finish the document after complete wiki text has been parsed.
    procedure Finish (Filter   : in out Filter_Type;
-                     Document : in out Wiki.Nodes.Document);
+                     Document : in out Wiki.Documents.Document);
 
    type Filter_Chain is new Filter_Type with private;
 

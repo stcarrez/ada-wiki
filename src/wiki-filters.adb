@@ -22,13 +22,13 @@ package body Wiki.Filters is
    --  Add a simple node such as N_LINE_BREAK, N_HORIZONTAL_RULE or N_PARAGRAPH to the document.
    --  ------------------------------
    procedure Add_Node (Filter    : in out Filter_Type;
-                       Document  : in out Wiki.Nodes.Document;
+                       Document  : in out Wiki.Documents.Document;
                        Kind      : in Wiki.Nodes.Simple_Node_Kind) is
    begin
       if Filter.Next /= null then
          Filter.Next.Add_Node (Document, Kind);
       else
-         Wiki.Nodes.Append (Document, Kind);
+         Document.Append (Kind);
       end if;
    end Add_Node;
 
@@ -36,14 +36,14 @@ package body Wiki.Filters is
    --  Add a text content with the given format to the document.
    --  ------------------------------
    procedure Add_Text (Filter    : in out Filter_Type;
-                       Document  : in out Wiki.Nodes.Document;
+                       Document  : in out Wiki.Documents.Document;
                        Text      : in Wiki.Strings.WString;
                        Format    : in Wiki.Format_Map) is
    begin
       if Filter.Next /= null then
          Filter.Next.Add_Text (Document, Text, Format);
       else
-         Wiki.Nodes.Append (Document, Text, Format);
+         Wiki.Documents.Append (Document, Text, Format);
       end if;
    end Add_Text;
 
@@ -51,14 +51,14 @@ package body Wiki.Filters is
    --  Add a section header with the given level in the document.
    --  ------------------------------
    procedure Add_Header (Filter    : in out Filter_Type;
-                         Document  : in out Wiki.Nodes.Document;
+                         Document  : in out Wiki.Documents.Document;
                          Header    : in Wiki.Strings.WString;
                          Level     : in Natural) is
    begin
       if Filter.Next /= null then
          Filter.Next.Add_Header (Document, Header, Level);
       else
-         Wiki.Nodes.Append (Document, Header, Level);
+         Wiki.Documents.Append (Document, Header, Level);
       end if;
    end Add_Header;
 
@@ -66,14 +66,14 @@ package body Wiki.Filters is
    --  Push a HTML node with the given tag to the document.
    --  ------------------------------
    procedure Push_Node (Filter     : in out Filter_Type;
-                        Document   : in out Wiki.Nodes.Document;
+                        Document   : in out Wiki.Documents.Document;
                         Tag        : in Wiki.Html_Tag;
                         Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       if Filter.Next /= null then
          Filter.Next.Push_Node (Document, Tag, Attributes);
       else
-         Wiki.Nodes.Push_Node (Document, Tag, Attributes);
+         Document.Push_Node (Tag, Attributes);
       end if;
    end Push_Node;
 
@@ -81,13 +81,13 @@ package body Wiki.Filters is
    --  Pop a HTML node with the given tag.
    --  ------------------------------
    procedure Pop_Node (Filter   : in out Filter_Type;
-                       Document : in out Wiki.Nodes.Document;
+                       Document : in out Wiki.Documents.Document;
                        Tag     : in Wiki.Html_Tag) is
    begin
       if Filter.Next /= null then
          Filter.Next.Pop_Node (Document, Tag);
       else
-         Wiki.Nodes.Pop_Node (Document, Tag);
+         Document.Pop_Node (Tag);
       end if;
    end Pop_Node;
 
@@ -96,13 +96,13 @@ package body Wiki.Filters is
    --  The blockquote must be closed at the next header.
    --  ------------------------------
    procedure Add_Blockquote (Filter   : in out Filter_Type;
-                             Document : in out Wiki.Nodes.Document;
+                             Document : in out Wiki.Documents.Document;
                              Level    : in Natural) is
    begin
       if Filter.Next /= null then
          Filter.Next.Add_Blockquote (Document, Level);
       else
-         Wiki.Nodes.Add_Blockquote (Document, Level);
+         Document.Add_Blockquote (Level);
       end if;
    end Add_Blockquote;
 
@@ -111,14 +111,14 @@ package body Wiki.Filters is
    --  The list item will be closed at the next list item, next paragraph or next header.
    --  ------------------------------
    procedure Add_List_Item (Filter   : in out Filter_Type;
-                            Document : in out Wiki.Nodes.Document;
+                            Document : in out Wiki.Documents.Document;
                             Level    : in Positive;
                             Ordered  : in Boolean) is
    begin
       if Filter.Next /= null then
          Filter.Next.Add_List_Item (Document, Level, Ordered);
       else
-         Wiki.Nodes.Add_List_Item (Document, Level, Ordered);
+         Document.Add_List_Item (Level, Ordered);
       end if;
    end Add_List_Item;
 
@@ -126,14 +126,14 @@ package body Wiki.Filters is
    --  Add a link.
    --  ------------------------------
    procedure Add_Link (Filter     : in out Filter_Type;
-                       Document   : in out Wiki.Nodes.Document;
+                       Document   : in out Wiki.Documents.Document;
                        Name       : in Wiki.Strings.WString;
                        Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       if Filter.Next /= null then
          Filter.Next.Add_Link (Document, Name, Attributes);
       else
-         Wiki.Nodes.Add_Link (Document, Name, Attributes);
+         Document.Add_Link (Name, Attributes);
       end if;
    end Add_Link;
 
@@ -141,14 +141,14 @@ package body Wiki.Filters is
    --  Add an image.
    --  ------------------------------
    procedure Add_Image (Filter     : in out Filter_Type;
-                        Document   : in out Wiki.Nodes.Document;
+                        Document   : in out Wiki.Documents.Document;
                         Name       : in Wiki.Strings.WString;
                         Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       if Filter.Next /= null then
          Filter.Next.Add_Image (Document, Name, Attributes);
       else
-         Wiki.Nodes.Add_Image (Document, Name, Attributes);
+         Document.Add_Image (Name, Attributes);
       end if;
    end Add_Image;
 
@@ -156,14 +156,14 @@ package body Wiki.Filters is
    --  Add a quote.
    --  ------------------------------
    procedure Add_Quote (Filter     : in out Filter_Type;
-                        Document   : in out Wiki.Nodes.Document;
+                        Document   : in out Wiki.Documents.Document;
                         Name       : in Wiki.Strings.WString;
                         Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       if Filter.Next /= null then
          Filter.Next.Add_Quote (Document, Name, Attributes);
       else
-         Wiki.Nodes.Add_Quote (Document, Name, Attributes);
+         Document.Add_Quote (Name, Attributes);
       end if;
    end Add_Quote;
 
@@ -171,14 +171,14 @@ package body Wiki.Filters is
    --  Add a text block that is pre-formatted.
    --  ------------------------------
    procedure Add_Preformatted (Filter   : in out Filter_Type;
-                               Document : in out Wiki.Nodes.Document;
+                               Document : in out Wiki.Documents.Document;
                                Text     : in Wiki.Strings.WString;
                                Format   : in Unbounded_Wide_Wide_String) is
    begin
       if Filter.Next /= null then
          Filter.Next.Add_Preformatted (Document, Text, Format);
       else
-         Wiki.Nodes.Add_Preformatted (Document, Text, To_Wide_Wide_String (Format));
+         Document.Add_Preformatted (Text, To_Wide_Wide_String (Format));
       end if;
    end Add_Preformatted;
 
@@ -186,7 +186,7 @@ package body Wiki.Filters is
    --  Finish the document after complete wiki text has been parsed.
    --  ------------------------------
    procedure Finish (Filter   : in out Filter_Type;
-                     Document : in out Wiki.Nodes.Document) is
+                     Document : in out Wiki.Documents.Document) is
    begin
       if Filter.Next /= null then
          Filter.Next.Finish (Document);
