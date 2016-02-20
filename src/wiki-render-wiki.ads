@@ -69,17 +69,17 @@ package Wiki.Render.Wiki is
    --  Render a link.
    procedure Render_Link (Engine : in out Wiki_Renderer;
                           Name     : in Strings.WString;
-                          Attrs    : in Attributes.Attribute_List_Type);
+                          Attrs    : in Attributes.Attribute_List);
 
    --  Render an image.
    procedure Render_Image (Engine : in out Wiki_Renderer;
                            Link   : in Strings.WString;
-                           Attrs  : in Attributes.Attribute_List_Type);
+                           Attrs  : in Attributes.Attribute_List);
 
    --  Render a quote.
    procedure Render_Quote (Engine : in out Wiki_Renderer;
                            Title  : in Strings.WString;
-                           Attrs  : in Attributes.Attribute_List_Type);
+                           Attrs  : in Attributes.Attribute_List);
 
    --  Add a text block with the given format.
    procedure Render_Text (Engine : in out Wiki_Renderer;
