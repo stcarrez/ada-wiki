@@ -24,6 +24,7 @@ package body Wiki.Parsers is
 
    use Ada.Strings.Wide_Wide_Unbounded;
 
+   use Wiki.Helpers;
    use Wiki.Nodes;
    use Wiki.Strings.Wide_Wide_Builders;
 
