@@ -133,10 +133,12 @@ package body Wiki.Render.Wiki is
       Engine.Empty_Line := True;
    end New_Line;
 
+   --  ------------------------------
    --  Render the node instance from the document.
+   --  ------------------------------
    overriding
    procedure Render (Engine : in out Wiki_Renderer;
-                     Doc    : in Nodes.Document;
+                     Doc    : in Documents.Document;
                      Node   : in Nodes.Node_Type) is
       use type Nodes.Node_List_Access;
    begin
@@ -415,7 +417,7 @@ package body Wiki.Render.Wiki is
    end Start_Keep_Content;
 
    procedure Render_Tag (Engine : in out Wiki_Renderer;
-                         Doc    : in Nodes.Document;
+                         Doc    : in Documents.Document;
                          Node   : in Nodes.Node_Type) is
    begin
       case Node.Tag_Start is

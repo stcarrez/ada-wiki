@@ -20,7 +20,6 @@ with Ada.Strings.Wide_Wide_Maps;
 with Wiki.Documents;
 with Wiki.Attributes;
 with Wiki.Streams;
-with Wiki.Parsers;
 with Wiki.Strings;
 
 --  == Wiki Renderer ==
@@ -43,7 +42,7 @@ package Wiki.Render.Wiki is
    --  Render the node instance from the document.
    overriding
    procedure Render (Engine : in out Wiki_Renderer;
-                     Doc    : in Nodes.Document;
+                     Doc    : in Documents.Document;
                      Node   : in Nodes.Node_Type);
 
    --  Add a section header in the document.
@@ -92,7 +91,7 @@ package Wiki.Render.Wiki is
                                Format   : in Unbounded_Wide_Wide_String);
 
    procedure Render_Tag (Engine : in out Wiki_Renderer;
-                         Doc    : in Nodes.Document;
+                         Doc    : in Documents.Document;
                          Node   : in Nodes.Node_Type);
 
    --  Finish the document after complete wiki text has been parsed.
