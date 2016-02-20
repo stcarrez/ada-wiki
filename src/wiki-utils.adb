@@ -15,12 +15,13 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
+with Wiki.Parsers;
 with Wiki.Render.Text;
 with Wiki.Render.Html;
 with Wiki.Filters.Html;
 with Wiki.Streams.Builders;
 with Wiki.Streams.Html.Builders;
-with Wiki.Nodes;
+with Wiki.Documents;
 package body Wiki.Utils is
 
    --  ------------------------------
@@ -30,7 +31,7 @@ package body Wiki.Utils is
                      Syntax : in Wiki.Wiki_Syntax) return String is
       Stream   : aliased Wiki.Streams.Html.Builders.Html_Output_Builder_Stream;
       Renderer : aliased Wiki.Render.Html.Html_Renderer;
-      Doc      : Wiki.Nodes.Document;
+      Doc      : Wiki.Documents.Document;
       Filter   : aliased Wiki.Filters.Html.Html_Filter_Type;
       Engine   : Wiki.Parsers.Parser;
    begin
@@ -49,7 +50,7 @@ package body Wiki.Utils is
    function To_Text (Text   : in Wide_Wide_String;
                      Syntax : in Wiki.Wiki_Syntax) return String is
       Stream   : aliased Wiki.Streams.Builders.Output_Builder_Stream;
-      Doc      : Wiki.Nodes.Document;
+      Doc      : Wiki.Documents.Document;
       Renderer : aliased Wiki.Render.Text.Text_Renderer;
       Engine   : Wiki.Parsers.Parser;
    begin
