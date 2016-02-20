@@ -38,7 +38,7 @@ package Wiki.Render.Wiki is
    --  Set the output stream.
    procedure Set_Output_Stream (Engine   : in out Wiki_Renderer;
                                 Stream   : in Streams.Output_Stream_Access;
-                                Format   : in Parsers.Wiki_Syntax_Type);
+                                Format   : in Wiki_Syntax);
 
    --  Render the node instance from the document.
    overriding
@@ -132,7 +132,7 @@ private
 
    type Wiki_Renderer is new Renderer with record
       Output              : Streams.Output_Stream_Access := null;
-      Syntax              : Parsers.Wiki_Syntax_Type := Parsers.SYNTAX_CREOLE;
+      Syntax              : Wiki_Syntax := SYNTAX_CREOLE;
       Format              : Format_Map := (others => False);
       Tags                : Wiki_Tag_Array := (others => EMPTY_TAG'Access);
       Style_Start_Tags    : Wiki_Format_Array := (others => EMPTY_TAG'Access);

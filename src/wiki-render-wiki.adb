@@ -58,12 +58,12 @@ package body Wiki.Render.Wiki is
    --  Set the output writer.
    procedure Set_Output_Stream (Engine : in out Wiki_Renderer;
                                 Stream : in Streams.Output_Stream_Access;
-                                Format : in Parsers.Wiki_Syntax_Type) is
+                                Format : in Wiki_Syntax) is
    begin
       Engine.Output := Stream;
       Engine.Syntax := Format;
       case Format is
-         when Parsers.SYNTAX_DOTCLEAR =>
+         when SYNTAX_DOTCLEAR =>
             Engine.Style_Start_Tags (BOLD)   := BOLD_CREOLE'Access;
             Engine.Style_End_Tags (BOLD)     := BOLD_CREOLE'Access;
             Engine.Tags (Header_Start) := HEADER_DOTCLEAR'Access;
@@ -83,7 +83,7 @@ package body Wiki.Render.Wiki is
             Engine.Allow_Link_Language := True;
             Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("-+_*{}][/=\");
 
-         when Parsers.SYNTAX_MEDIA_WIKI =>
+         when SYNTAX_MEDIA_WIKI =>
             Engine.Style_Start_Tags (BOLD)   := BOLD_MEDIAWIKI'Access;
             Engine.Style_End_Tags (BOLD)     := BOLD_MEDIAWIKI'Access;
             Engine.Tags (Header_Start) := HEADER_CREOLE'Access;
