@@ -68,7 +68,7 @@ package body Wiki.Filters is
    procedure Push_Node (Filter     : in out Filter_Type;
                         Document   : in out Wiki.Nodes.Document;
                         Tag        : in Wiki.Html_Tag;
-                        Attributes : in out Wiki.Attributes.Attribute_List_Type) is
+                        Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       if Filter.Next /= null then
          Filter.Next.Push_Node (Document, Tag, Attributes);
@@ -128,7 +128,7 @@ package body Wiki.Filters is
    procedure Add_Link (Filter     : in out Filter_Type;
                        Document   : in out Wiki.Nodes.Document;
                        Name       : in Wiki.Strings.WString;
-                       Attributes : in out Wiki.Attributes.Attribute_List_Type) is
+                       Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       if Filter.Next /= null then
          Filter.Next.Add_Link (Document, Name, Attributes);
@@ -143,7 +143,7 @@ package body Wiki.Filters is
    procedure Add_Image (Filter     : in out Filter_Type;
                         Document   : in out Wiki.Nodes.Document;
                         Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List_Type) is
+                        Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       if Filter.Next /= null then
          Filter.Next.Add_Image (Document, Name, Attributes);
@@ -158,7 +158,7 @@ package body Wiki.Filters is
    procedure Add_Quote (Filter     : in out Filter_Type;
                         Document   : in out Wiki.Nodes.Document;
                         Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List_Type) is
+                        Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       if Filter.Next /= null then
          Filter.Next.Add_Quote (Document, Name, Attributes);

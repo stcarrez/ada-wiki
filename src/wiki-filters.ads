@@ -72,7 +72,7 @@ package Wiki.Filters is
    procedure Push_Node (Filter     : in out Filter_Type;
                         Document   : in out Wiki.Nodes.Document;
                         Tag        : in Wiki.Html_Tag;
-                        Attributes : in out Wiki.Attributes.Attribute_List_Type);
+                        Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Pop a HTML node with the given tag.
    procedure Pop_Node (Filter   : in out Filter_Type;
@@ -96,19 +96,19 @@ package Wiki.Filters is
    procedure Add_Link (Filter     : in out Filter_Type;
                        Document   : in out Wiki.Nodes.Document;
                        Name       : in Wiki.Strings.WString;
-                       Attributes : in out Wiki.Attributes.Attribute_List_Type);
+                       Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Add an image.
    procedure Add_Image (Filter     : in out Filter_Type;
                         Document   : in out Wiki.Nodes.Document;
                         Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List_Type);
+                        Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Add a quote.
    procedure Add_Quote (Filter     : in out Filter_Type;
                         Document   : in out Wiki.Nodes.Document;
                         Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List_Type);
+                        Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Add a text block that is pre-formatted.
    procedure Add_Preformatted (Filter   : in out Filter_Type;
