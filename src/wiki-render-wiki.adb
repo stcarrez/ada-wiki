@@ -17,7 +17,6 @@
 -----------------------------------------------------------------------
 with Ada.Wide_Wide_Characters.Handling;
 
-with Wiki.Filters.Html;
 with Wiki.Helpers;
 package body Wiki.Render.Wiki is
 
@@ -139,7 +138,6 @@ package body Wiki.Render.Wiki is
    procedure Render (Engine : in out Wiki_Renderer;
                      Doc    : in Nodes.Document;
                      Node   : in Nodes.Node_Type) is
-      use type Nodes.Html_Tag_Type;
       use type Nodes.Node_List_Access;
    begin
       case Node.Kind is
@@ -419,70 +417,68 @@ package body Wiki.Render.Wiki is
    procedure Render_Tag (Engine : in out Wiki_Renderer;
                          Doc    : in Nodes.Document;
                          Node   : in Nodes.Node_Type) is
-      use type Nodes.Html_Tag_Type;
-
    begin
       case Node.Tag_Start is
-         when Nodes.BR_TAG =>
+         when BR_TAG =>
             Engine.Output.Write (Engine.Tags (Line_Break).all);
             Engine.Empty_Line := False;
             return;
 
-         when Nodes.HR_TAG =>
+         when HR_TAG =>
             Engine.Close_Paragraph;
             Engine.Output.Write (Engine.Tags (Horizontal_Rule).all);
             return;
 
-         when Nodes.H1_TAG | Nodes.H2_TAG
-            | Nodes.H3_TAG | Nodes.H4_TAG
-            | Nodes.H5_TAG | Nodes.H6_TAG =>
+         when H1_TAG | H2_TAG
+            | H3_TAG | H4_TAG
+            | H5_TAG | H6_TAG =>
             Engine.Start_Keep_Content;
 
-         when Nodes.IMG_TAG =>
+         when IMG_TAG =>
             Engine.Render_Image (Link  => Get_Attribute (Node.Attributes, "src"),
                                  Attrs => Node.Attributes);
 
-         when Nodes.A_TAG | Nodes.Q_TAG =>
+         when A_TAG | Q_TAG =>
             Engine.Start_Keep_Content;
 
-         when Nodes.B_TAG | Nodes.EM_TAG | Nodes.STRONG_TAG =>
+         when B_TAG | EM_TAG | STRONG_TAG =>
             if not Engine.Keep_Content then
                Engine.Current_Style (BOLD) := True;
             end if;
 
-         when Nodes.I_TAG =>
+         when I_TAG =>
             if not Engine.Keep_Content then
                Engine.Current_Style (ITALIC) := True;
             end if;
 
-         when Nodes.U_TAG =>
+         when U_TAG =>
             if not Engine.Keep_Content then
                Engine.Current_Style (CODE) := True;
             end if;
 
-         when Nodes.SUP_TAG =>
+         when SUP_TAG =>
             if not Engine.Keep_Content then
                Engine.Current_Style (SUPERSCRIPT) := True;
             end if;
 
-         when Nodes.SUB_TAG =>
+         when SUB_TAG =>
             if not Engine.Keep_Content then
                Engine.Current_Style (SUBSCRIPT) := True;
             end if;
 
-         when Nodes.P_TAG =>
+         when P_TAG =>
             Engine.New_Line;
 
-         when Nodes.PRE_TAG =>
+         when PRE_TAG =>
             Engine.Start_Keep_Content;
 
-         when Nodes.UL_TAG =>
+         when UL_TAG =>
             Engine.UL_List_Level := Engine.UL_List_Level + 1;
 
-         when Nodes.OL_TAG =>
+         when OL_TAG =>
             Engine.OL_List_Level := Engine.OL_List_Level + 1;
 
-         when Nodes.LI_TAG =>
+         when LI_TAG =>
             Engine.In_List := True;
 
          when others =>
@@ -492,76 +488,76 @@ package body Wiki.Render.Wiki is
       Engine.Render (Doc, Node.Children);
 
       case Node.Tag_Start is
-         when Nodes.H1_TAG =>
+         when H1_TAG =>
             Engine.Render_Header (To_Wide_Wide_String (Engine.Content), 1);
             Engine.Keep_Content := False;
 
-         when Nodes.H2_TAG =>
+         when H2_TAG =>
             Engine.Render_Header (To_Wide_Wide_String (Engine.Content), 2);
             Engine.Keep_Content := False;
 
-         when Nodes.H3_TAG =>
+         when H3_TAG =>
             Engine.Render_Header (To_Wide_Wide_String (Engine.Content), 3);
             Engine.Keep_Content := False;
 
-         when Nodes.H4_TAG =>
+         when H4_TAG =>
             Engine.Render_Header (To_Wide_Wide_String (Engine.Content), 4);
             Engine.Keep_Content := False;
 
-         when Nodes.H5_TAG =>
+         when H5_TAG =>
             Engine.Render_Header (To_Wide_Wide_String (Engine.Content), 5);
             Engine.Keep_Content := False;
 
-         when Nodes.H6_TAG =>
+         when H6_TAG =>
             Engine.Render_Header (To_Wide_Wide_String (Engine.Content), 6);
             Engine.Keep_Content := False;
 
-         when Nodes.A_TAG =>
+         when A_TAG =>
             Engine.Render_Link (Name     => To_Wide_Wide_String (Engine.Content),
                                 Attrs    => Node.Attributes);
             Engine.Keep_Content := False;
 
-         when Nodes.Q_TAG =>
+         when Q_TAG =>
             Engine.Render_Quote (Title    => To_Wide_Wide_String (Engine.Content),
                                  Attrs    => Node.Attributes);
             Engine.Keep_Content := False;
 
-         when Nodes.B_TAG | Nodes.EM_TAG | Nodes.STRONG_TAG =>
+         when B_TAG | EM_TAG | STRONG_TAG =>
             if not Engine.Keep_Content then
                Engine.Current_Style (BOLD) := False;
             end if;
 
-         when Nodes.I_TAG =>
+         when I_TAG =>
             if not Engine.Keep_Content then
                Engine.Current_Style (ITALIC) := False;
             end if;
 
-         when Nodes.U_TAG =>
+         when U_TAG =>
             if not Engine.Keep_Content then
                Engine.Current_Style (CODE) := False;
             end if;
 
-         when Nodes.SUP_TAG =>
+         when SUP_TAG =>
             if not Engine.Keep_Content then
                Engine.Current_Style (SUPERSCRIPT) := False;
             end if;
 
-         when Nodes.SUB_TAG =>
+         when SUB_TAG =>
             if not Engine.Keep_Content then
                Engine.Current_Style (SUBSCRIPT) := False;
             end if;
 
-         when Nodes.PRE_TAG =>
+         when PRE_TAG =>
             Engine.Add_Preformatted (Engine.Content, Null_Unbounded_Wide_Wide_String);
             Engine.Keep_Content := False;
 
-         when Nodes.UL_TAG =>
+         when UL_TAG =>
             Engine.UL_List_Level := Engine.UL_List_Level - 1;
 
-         when Nodes.OL_TAG =>
+         when OL_TAG =>
             Engine.OL_List_Level := Engine.OL_List_Level - 1;
 
-         when Nodes.LI_TAG =>
+         when LI_TAG =>
             Engine.In_List := False;
 
          when others =>
