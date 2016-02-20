@@ -152,10 +152,10 @@ private
                       Link : in Wide_Wide_String) return Boolean;
 
    procedure Start_Element (P          : in out Parser;
-                            Tag        : in Wiki.Nodes.Html_Tag_Type;
+                            Tag        : in Wiki.Html_Tag;
                             Attributes : in out Wiki.Attributes.Attribute_List_Type);
 
    procedure End_Element (P    : in out Parser;
-                          Tag  : in Wiki.Nodes.Html_Tag_Type);
+                          Tag  : in Wiki.Html_Tag);
 
 end Wiki.Parsers;

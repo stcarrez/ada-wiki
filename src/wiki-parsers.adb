@@ -212,7 +212,7 @@ package body Wiki.Parsers is
    procedure Flush_List (P : in out Parser) is
    begin
       if P.In_List then
-         P.Filters.Pop_Node (P.Document, Wiki.Nodes.DL_TAG);
+         P.Filters.Pop_Node (P.Document, Wiki.DL_TAG);
          P.In_List := False;
       end if;
    end Flush_List;
@@ -233,7 +233,7 @@ package body Wiki.Parsers is
    end Skip_Spaces;
 
    procedure Start_Element (P          : in out Parser;
-                            Tag        : in Wiki.Nodes.Html_Tag_Type;
+                            Tag        : in Wiki.Html_Tag;
                             Attributes : in out Wiki.Attributes.Attribute_List_Type) is
    begin
       Flush_Text (P);
@@ -241,7 +241,7 @@ package body Wiki.Parsers is
    end Start_Element;
 
    procedure End_Element (P    : in out Parser;
-                          Tag  : in Wiki.Nodes.Html_Tag_Type) is
+                          Tag  : in Wiki.Html_Tag) is
    begin
       Flush_Text (P);
       P.Filters.Pop_Node (P.Document, Tag);
@@ -933,10 +933,10 @@ package body Wiki.Parsers is
       Flush_Text (P);
       Wiki.Attributes.Clear (P.Attributes);
       if not P.In_List then
-         P.Filters.Push_Node (P.Document, Wiki.Nodes.DL_TAG, P.Attributes);
+         P.Filters.Push_Node (P.Document, Wiki.DL_TAG, P.Attributes);
          P.In_List := True;
       end if;
-      P.Filters.Push_Node (P.Document, Wiki.Nodes.DT_TAG, P.Attributes);
+      P.Filters.Push_Node (P.Document, Wiki.DT_TAG, P.Attributes);
    end Parse_Item;
 
    --  ------------------------------
@@ -953,7 +953,7 @@ package body Wiki.Parsers is
       end if;
       Flush_Text (P);
       Wiki.Attributes.Clear (P.Attributes);
-      P.Filters.Push_Node (P.Document, Wiki.Nodes.DD_TAG, P.Attributes);
+      P.Filters.Push_Node (P.Document, Wiki.DD_TAG, P.Attributes);
    end Parse_Definition;
 
    --  ------------------------------
