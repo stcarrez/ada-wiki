@@ -178,7 +178,7 @@ package body Wiki.Parsers.Html is
    procedure Parse_Element (P : in out Parser) is
       Name : Unbounded_Wide_Wide_String;
       C    : Wide_Wide_Character;
-      Tag  : Wiki.Nodes.Html_Tag_Type;
+      Tag  : Wiki.Html_Tag;
    begin
       Peek (P, C);
       if C = '!' then
@@ -194,7 +194,7 @@ package body Wiki.Parsers.Html is
          Put_Back (P, C);
       end if;
       Parse_Attribute_Name (P, Name);
-      Tag := Wiki.Nodes.Find_Tag (To_Wide_Wide_String (Name));
+      Tag := Wiki.Find_Tag (To_Wide_Wide_String (Name));
       if C = '/' then
          Skip_Spaces (P);
          Peek (P, C);
