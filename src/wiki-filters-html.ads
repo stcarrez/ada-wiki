@@ -50,54 +50,54 @@ package Wiki.Filters.Html is
    --  Add a simple node such as N_LINE_BREAK, N_HORIZONTAL_RULE or N_PARAGRAPH to the document.
    overriding
    procedure Add_Node (Filter    : in out Html_Filter_Type;
-                       Document  : in out Wiki.Nodes.Document;
+                       Document  : in out Wiki.Documents.Document;
                        Kind      : in Wiki.Nodes.Simple_Node_Kind);
 
    --  Add a text content with the given format to the document.
    overriding
    procedure Add_Text (Filter    : in out Html_Filter_Type;
-                       Document  : in out Wiki.Nodes.Document;
+                       Document  : in out Wiki.Documents.Document;
                        Text      : in Wiki.Strings.WString;
                        Format    : in Wiki.Format_Map);
 
    --  Add a section header with the given level in the document.
    overriding
    procedure Add_Header (Filter    : in out Html_Filter_Type;
-                         Document  : in out Wiki.Nodes.Document;
+                         Document  : in out Wiki.Documents.Document;
                          Header    : in Wiki.Strings.WString;
                          Level     : in Natural);
 
    --  Push a HTML node with the given tag to the document.
    overriding
    procedure Push_Node (Filter     : in out Html_Filter_Type;
-                        Document   : in out Wiki.Nodes.Document;
+                        Document   : in out Wiki.Documents.Document;
                         Tag        : in Wiki.Html_Tag;
                         Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Pop a HTML node with the given tag.
    overriding
    procedure Pop_Node (Filter   : in out Html_Filter_Type;
-                       Document : in out Wiki.Nodes.Document;
+                       Document : in out Wiki.Documents.Document;
                        Tag      : in Wiki.Html_Tag);
 
    --  Add a link.
    overriding
    procedure Add_Link (Filter     : in out Html_Filter_Type;
-                       Document   : in out Wiki.Nodes.Document;
+                       Document   : in out Wiki.Documents.Document;
                        Name       : in Wiki.Strings.WString;
                        Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Add an image.
    overriding
    procedure Add_Image (Filter     : in out Html_Filter_Type;
-                        Document   : in out Wiki.Nodes.Document;
+                        Document   : in out Wiki.Documents.Document;
                         Name       : in Wiki.Strings.WString;
                         Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Finish the document after complete wiki text has been parsed.
    overriding
    procedure Finish (Filter   : in out Html_Filter_Type;
-                     Document : in out Wiki.Nodes.Document);
+                     Document : in out Wiki.Documents.Document);
 
    --  Mark the HTML tag as being forbidden.
    procedure Forbidden (Filter : in out Html_Filter_Type;
@@ -118,7 +118,7 @@ package Wiki.Filters.Html is
 
    --  Flush the HTML element that have not yet been closed.
    procedure Flush_Stack (Filter   : in out Html_Filter_Type;
-                          Document : in out Wiki.Nodes.Document);
+                          Document : in out Wiki.Documents.Document);
 
 private
 

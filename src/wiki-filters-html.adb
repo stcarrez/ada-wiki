@@ -64,7 +64,7 @@ package body Wiki.Filters.Html is
    --  ------------------------------
    overriding
    procedure Add_Node (Filter    : in out Html_Filter_Type;
-                       Document  : in out Wiki.Nodes.Document;
+                       Document  : in out Wiki.Documents.Document;
                        Kind      : in Wiki.Nodes.Simple_Node_Kind) is
      Tag : Html_Tag;
    begin
@@ -89,7 +89,7 @@ package body Wiki.Filters.Html is
    --  ------------------------------
    overriding
    procedure Add_Text (Filter    : in out Html_Filter_Type;
-                       Document  : in out Wiki.Nodes.Document;
+                       Document  : in out Wiki.Documents.Document;
                        Text      : in Wiki.Strings.WString;
                        Format    : in Wiki.Format_Map) is
    begin
@@ -113,7 +113,7 @@ package body Wiki.Filters.Html is
    --  ------------------------------
    overriding
    procedure Add_Header (Filter    : in out Html_Filter_Type;
-                         Document  : in out Wiki.Nodes.Document;
+                         Document  : in out Wiki.Documents.Document;
                          Header    : in Wiki.Strings.WString;
                          Level     : in Natural) is
    begin
@@ -126,7 +126,7 @@ package body Wiki.Filters.Html is
    --  ------------------------------
    overriding
    procedure Push_Node (Filter     : in out Html_Filter_Type;
-                        Document   : in out Wiki.Nodes.Document;
+                        Document   : in out Wiki.Documents.Document;
                         Tag        : in Wiki.Html_Tag;
                         Attributes : in out Wiki.Attributes.Attribute_List) is
       Current_Tag : Html_Tag;
@@ -157,7 +157,7 @@ package body Wiki.Filters.Html is
    --  ------------------------------
    overriding
    procedure Pop_Node (Filter   : in out Html_Filter_Type;
-                       Document : in out Wiki.Nodes.Document;
+                       Document : in out Wiki.Documents.Document;
                        Tag      : in Wiki.Html_Tag) is
       Current_Tag : Html_Tag;
    begin
@@ -192,7 +192,7 @@ package body Wiki.Filters.Html is
    --  ------------------------------
    overriding
    procedure Add_Link (Filter     : in out Html_Filter_Type;
-                       Document   : in out Wiki.Nodes.Document;
+                       Document   : in out Wiki.Documents.Document;
                        Name       : in Wiki.Strings.WString;
                        Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
@@ -206,7 +206,7 @@ package body Wiki.Filters.Html is
    --  ------------------------------
    overriding
    procedure Add_Image (Filter     : in out Html_Filter_Type;
-                        Document   : in out Wiki.Nodes.Document;
+                        Document   : in out Wiki.Documents.Document;
                         Name       : in Wiki.Strings.WString;
                         Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
@@ -249,7 +249,7 @@ package body Wiki.Filters.Html is
    --  Flush the HTML element that have not yet been closed.
    --  ------------------------------
    procedure Flush_Stack (Filter   : in out Html_Filter_Type;
-                          Document : in out Wiki.Nodes.Document) is
+                          Document : in out Wiki.Documents.Document) is
    begin
       while not Filter.Stack.Is_Empty loop
          declare
@@ -271,7 +271,7 @@ package body Wiki.Filters.Html is
    --  ------------------------------
    overriding
    procedure Finish (Filter : in out Html_Filter_Type;
-                     Document : in out Wiki.Nodes.Document) is
+                     Document : in out Wiki.Documents.Document) is
    begin
       Filter.Flush_Stack (Document);
       Filter_Type (Filter).Finish (Document);
