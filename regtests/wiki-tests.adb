@@ -29,10 +29,10 @@ with Wiki.Streams.Html.Builders;
 with Wiki.Streams.Builders;
 with Wiki.Utils;
 with Wiki.Nodes;
+with Wiki.Parsers;
 package body Wiki.Tests is
 
    use Ada.Strings.Unbounded;
-   use type Wiki.Parsers.Wiki_Syntax_Type;
 
    --  ------------------------------
    --  Test rendering a wiki text in HTML or text.
@@ -50,7 +50,7 @@ package body Wiki.Tests is
       declare
          Time : Util.Measures.Stamp;
       begin
-         if T.Source = Wiki.Parsers.SYNTAX_HTML then
+         if T.Source = Wiki.SYNTAX_HTML then
             declare
                Html_Filter : aliased Wiki.Filters.Html.Html_Filter_Type;
                Writer      : aliased Wiki.Streams.Builders.Output_Builder_Stream;
@@ -60,7 +60,7 @@ package body Wiki.Tests is
             begin
                Renderer.Set_Output_Stream (Writer'Unchecked_Access, T.Format);
                Engine.Add_Filter (Html_Filter'Unchecked_Access);
-               Engine.Set_Syntax (Wiki.Parsers.SYNTAX_HTML);
+               Engine.Set_Syntax (Wiki.SYNTAX_HTML);
                Engine.Parse (To_Wide (To_String (Content)), Doc);
                Renderer.Render (Doc);
                Content := To_Unbounded_String (Writer.To_String);
@@ -89,7 +89,7 @@ package body Wiki.Tests is
    overriding
    function Name (T : in Test) return Util.Tests.Message_String is
    begin
-      if T.Source = Wiki.Parsers.SYNTAX_HTML then
+      if T.Source = Wiki.SYNTAX_HTML then
          return Util.Tests.Format ("Test IMPORT " & To_String (T.Name));
       elsif T.Is_Html then
          return Util.Tests.Format ("Test HTML " & To_String (T.Name));
@@ -114,7 +114,7 @@ package body Wiki.Tests is
       procedure Add_Wiki_Tests;
       function Create_Test (Name    : in String;
                             Path    : in String;
-                            Format  : in Wiki.Parsers.Wiki_Syntax_Type;
+                            Format  : in Wiki.Wiki_Syntax;
                             Prefix  : in String;
                             Is_Html : in Boolean) return Test_Case_Access;
 
@@ -128,7 +128,7 @@ package body Wiki.Tests is
 
       function Create_Test (Name    : in String;
                             Path    : in String;
-                            Format  : in Wiki.Parsers.Wiki_Syntax_Type;
+                            Format  : in Wiki.Wiki_Syntax;
                             Prefix  : in String;
                             Is_Html : in Boolean) return Test_Case_Access is
          Tst    : Test_Case_Access;
@@ -159,23 +159,23 @@ package body Wiki.Tests is
                Simple : constant String := Simple_Name (Ent);
                Ext    : constant String := Ada.Directories.Extension (Simple);
                Tst    : Test_Case_Access;
-               Format : Wiki.Parsers.Wiki_Syntax_Type;
+               Format : Wiki.Wiki_Syntax;
             begin
                if Simple /= "." and then Simple /= ".."
                  and then Simple /= ".svn" and then Simple (Simple'Last) /= '~'
                then
                   if Ext = "wiki" then
-                     Format := Wiki.Parsers.SYNTAX_GOOGLE;
+                     Format := Wiki.SYNTAX_GOOGLE;
                   elsif Ext = "dotclear" then
-                     Format := Wiki.Parsers.SYNTAX_DOTCLEAR;
+                     Format := Wiki.SYNTAX_DOTCLEAR;
                   elsif Ext = "creole" then
-                     Format := Wiki.Parsers.SYNTAX_CREOLE;
+                     Format := Wiki.SYNTAX_CREOLE;
                   elsif Ext = "phpbb" then
-                     Format := Wiki.Parsers.SYNTAX_PHPBB;
+                     Format := Wiki.SYNTAX_PHPBB;
                   elsif Ext = "mediawiki" then
-                     Format := Wiki.Parsers.SYNTAX_MEDIA_WIKI;
+                     Format := Wiki.SYNTAX_MEDIA_WIKI;
                   else
-                     Format := Wiki.Parsers.SYNTAX_MIX;
+                     Format := Wiki.SYNTAX_MIX;
                   end if;
 
                   Tst := Create_Test (Simple, Path & "/" & Simple, Format, "/wiki-html/", True);
@@ -207,17 +207,17 @@ package body Wiki.Tests is
                if Simple /= "." and then Simple /= ".."
                  and then Simple /= ".svn" and then Simple (Simple'Last) /= '~'
                then
-                  for Syntax in Wiki.Parsers.Wiki_Syntax_Type'Range loop
+                  for Syntax in Wiki.Wiki_Syntax'Range loop
                      case Syntax is
-                        when Wiki.Parsers.SYNTAX_CREOLE =>
+                        when Wiki.SYNTAX_CREOLE =>
                            Tst := Create_Test (Name & ".creole", Path & "/" & Simple,
                                                Syntax, "/wiki-import/", True);
 
-                        when Wiki.Parsers.SYNTAX_DOTCLEAR =>
+                        when Wiki.SYNTAX_DOTCLEAR =>
                            Tst := Create_Test (Name & ".dotclear", Path & "/" & Simple,
                                                Syntax, "/wiki-import/", True);
 
-                        when Wiki.Parsers.SYNTAX_MEDIA_WIKI =>
+                        when Wiki.SYNTAX_MEDIA_WIKI =>
                            Tst := Create_Test (Name & ".mediawiki", Path & "/" & Simple,
                                                Syntax, "/wiki-import/", True);
 
@@ -226,7 +226,7 @@ package body Wiki.Tests is
 
                      end case;
                      if Tst /= null then
-                        Tst.Source := Wiki.Parsers.SYNTAX_HTML;
+                        Tst.Source := Wiki.SYNTAX_HTML;
                         Suite.Add_Test (Tst.all'Access);
                      end if;
                   end loop;

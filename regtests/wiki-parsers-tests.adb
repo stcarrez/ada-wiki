@@ -19,7 +19,10 @@
 with Util.Test_Caller;
 
 with Wiki.Utils;
+with Wiki.Helpers;
 package body Wiki.Parsers.Tests is
+
+   use Wiki.Helpers;
 
    package Caller is new Util.Test_Caller (Test, "Wikis.Parsers");
 

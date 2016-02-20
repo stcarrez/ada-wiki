@@ -19,7 +19,6 @@
 with Util.Tests;
 
 with Ada.Strings.Unbounded;
-with Wiki.Parsers;
 package Wiki.Tests is
 
    procedure Add_Tests (Suite : in Util.Tests.Access_Test_Suite);
@@ -30,8 +29,8 @@ package Wiki.Tests is
       File    : Ada.Strings.Unbounded.Unbounded_String;
       Expect  : Ada.Strings.Unbounded.Unbounded_String;
       Result  : Ada.Strings.Unbounded.Unbounded_String;
-      Source  : Wiki.Parsers.Wiki_Syntax_Type;
-      Format  : Wiki.Parsers.Wiki_Syntax_Type;
+      Source  : Wiki.Wiki_Syntax;
+      Format  : Wiki.Wiki_Syntax;
       Is_Html : Boolean := False;
    end record;
    type Test_Case_Access is access all Test;
