@@ -28,7 +28,7 @@ package body Wiki.Filters.Html.Tests is
    package Caller is new Util.Test_Caller (Test, "Wikis.Filters.Html");
 
    procedure Assert_Equals is
-      new Util.Assertions.Assert_Equals_T (Html_Tag_Type);
+      new Util.Assertions.Assert_Equals_T (Html_Tag);
 
    procedure Add_Tests (Suite : in Util.Tests.Access_Test_Suite) is
    begin
@@ -41,12 +41,12 @@ package body Wiki.Filters.Html.Tests is
    --  ------------------------------
    procedure Test_Find_Tag (T : in out Test) is
    begin
-      for I in Html_Tag_Type'Range loop
+      for I in Html_Tag'Range loop
          declare
-            Name  : constant String := Html_Tag_Type'Image (I);
-            Wname : constant Wide_Wide_String := Html_Tag_Type'Wide_Wide_Image (I);
+            Name  : constant String := Html_Tag'Image (I);
+            Wname : constant Wide_Wide_String := Html_Tag'Wide_Wide_Image (I);
             Pos   : constant Natural := Util.Strings.Index (Name, '_');
-            Tag   : constant Html_Tag_Type := Find_Tag (Wname (Wname'First .. Pos - 1));
+            Tag   : constant Html_Tag := Find_Tag (Wname (Wname'First .. Pos - 1));
          begin
             Log.Info ("Checking tag {0}", Name);
             Assert_Equals (T, I, Tag, "Find_Tag failed");
