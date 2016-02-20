@@ -40,7 +40,7 @@ package Wiki.Render.Html is
    --  Render the node instance from the document.
    overriding
    procedure Render (Engine : in out Html_Renderer;
-                     Doc    : in Wiki.Nodes.Document;
+                     Doc    : in Wiki.Documents.Document;
                      Node   : in Wiki.Nodes.Node_Type);
 
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
@@ -91,7 +91,7 @@ private
    end record;
 
    procedure Render_Tag (Engine : in out Html_Renderer;
-                         Doc    : in Wiki.Nodes.Document;
+                         Doc    : in Wiki.Documents.Document;
                          Node   : in Wiki.Nodes.Node_Type);
 
    --  Render a section header in the document.
@@ -101,19 +101,19 @@ private
 
    --  Render a link.
    procedure Render_Link (Engine : in out Html_Renderer;
-                          Doc    : in Wiki.Nodes.Document;
+                          Doc    : in Wiki.Documents.Document;
                           Title  : in Wiki.Strings.WString;
                           Attr   : in Wiki.Attributes.Attribute_List);
 
    --  Render an image.
    procedure Render_Image (Engine : in out Html_Renderer;
-                           Doc    : in Wiki.Nodes.Document;
+                           Doc    : in Wiki.Documents.Document;
                            Title  : in Wiki.Strings.WString;
                            Attr   : in Wiki.Attributes.Attribute_List);
 
    --  Render a quote.
    procedure Render_Quote (Engine : in out Html_Renderer;
-                           Doc    : in Wiki.Nodes.Document;
+                           Doc    : in Wiki.Documents.Document;
                            Title  : in Wiki.Strings.WString;
                            Attr   : in Wiki.Attributes.Attribute_List);
 

@@ -45,7 +45,7 @@ package body Wiki.Render.Html is
    --  ------------------------------
    overriding
    procedure Render (Engine : in out Html_Renderer;
-                     Doc    : in Wiki.Nodes.Document;
+                     Doc    : in Wiki.Documents.Document;
                      Node   : in Wiki.Nodes.Node_Type) is
       use type Wiki.Html_Tag;
       use type Wiki.Nodes.Node_List_Access;
@@ -105,7 +105,7 @@ package body Wiki.Render.Html is
    end Render;
 
    procedure Render_Tag (Engine : in out Html_Renderer;
-                         Doc    : in Wiki.Nodes.Document;
+                         Doc    : in Wiki.Documents.Document;
                          Node   : in Wiki.Nodes.Node_Type) is
       use type Wiki.Html_Tag;
 
@@ -265,7 +265,7 @@ package body Wiki.Render.Html is
    --  Render a link.
    --  ------------------------------
    procedure Render_Link (Engine : in out Html_Renderer;
-                          Doc    : in Wiki.Nodes.Document;
+                          Doc    : in Wiki.Documents.Document;
                           Title  : in Wiki.Strings.WString;
                           Attr   : in Wiki.Attributes.Attribute_List) is
 
@@ -302,7 +302,7 @@ package body Wiki.Render.Html is
    --  Render an image.
    --  ------------------------------
    procedure Render_Image (Engine : in out Html_Renderer;
-                           Doc    : in Wiki.Nodes.Document;
+                           Doc    : in Wiki.Documents.Document;
                            Title  : in Wiki.Strings.WString;
                            Attr   : in Wiki.Attributes.Attribute_List) is
 
@@ -348,7 +348,7 @@ package body Wiki.Render.Html is
    --  Render a quote.
    --  ------------------------------
    procedure Render_Quote (Engine : in out Html_Renderer;
-                           Doc    : in Wiki.Nodes.Document;
+                           Doc    : in Wiki.Documents.Document;
                            Title  : in Wiki.Strings.WString;
                            Attr   : in Wiki.Attributes.Attribute_List) is
 
