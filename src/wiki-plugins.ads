@@ -33,6 +33,6 @@ package Wiki.Plugins is
    --  Expand the plugin configured with the parameters for the document.
    procedure Expand (Plugin   : in out Wiki_Plugin;
                      Document : in out Wiki.Nodes.Document;
-                     Params   : in out Wiki.Attributes.Attribute_List_Type) is abstract;
+                     Params   : in out Wiki.Attributes.Attribute_List) is abstract;
 
 end Wiki.Plugins;
