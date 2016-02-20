@@ -47,7 +47,7 @@ package body Wiki.Render.Html is
    procedure Render (Engine : in out Html_Renderer;
                      Doc    : in Wiki.Nodes.Document;
                      Node   : in Wiki.Nodes.Node_Type) is
-      use type Wiki.Nodes.Html_Tag_Type;
+      use type Wiki.Html_Tag;
       use type Wiki.Nodes.Node_List_Access;
    begin
       case Node.Kind is
@@ -107,21 +107,21 @@ package body Wiki.Render.Html is
    procedure Render_Tag (Engine : in out Html_Renderer;
                          Doc    : in Wiki.Nodes.Document;
                          Node   : in Wiki.Nodes.Node_Type) is
-      use type Wiki.Nodes.Html_Tag_Type;
+      use type Wiki.Html_Tag;
 
-      Name : constant Wiki.Nodes.String_Access := Wiki.Nodes.Get_Tag_Name (Node.Tag_Start);
+      Name : constant Wiki.String_Access := Wiki.Get_Tag_Name (Node.Tag_Start);
       Iter : Wiki.Attributes.Cursor := Wiki.Attributes.First (Node.Attributes);
    begin
-      if Node.Tag_Start = Wiki.Nodes.P_TAG then
+      if Node.Tag_Start = Wiki.P_TAG then
          Engine.Has_Paragraph := True;
          Engine.Need_Paragraph := False;
-      elsif Node.Tag_Start = Wiki.Nodes.UL_TAG
-        or Node.Tag_Start = Wiki.Nodes.OL_TAG
-        or Node.Tag_Start = Wiki.Nodes.DL_Tag
-        or Node.Tag_Start = Wiki.Nodes.DT_TAG
-        or Node.Tag_Start = Wiki.Nodes.DD_TAG
-        or Node.Tag_Start = Wiki.Nodes.LI_TAG
-        or Node.Tag_Start = Wiki.Nodes.TABLE_TAG then
+      elsif Node.Tag_Start = Wiki.UL_TAG
+        or Node.Tag_Start = Wiki.OL_TAG
+        or Node.Tag_Start = Wiki.DL_Tag
+        or Node.Tag_Start = Wiki.DT_TAG
+        or Node.Tag_Start = Wiki.DD_TAG
+        or Node.Tag_Start = Wiki.LI_TAG
+        or Node.Tag_Start = Wiki.TABLE_TAG then
          Engine.Close_Paragraph;
          Engine.Need_Paragraph := False;
       end if;
@@ -132,7 +132,7 @@ package body Wiki.Render.Html is
          Wiki.Attributes.Next (Iter);
       end loop;
       Engine.Render (Doc, Node.Children);
-      if Node.Tag_Start = Wiki.Nodes.P_TAG then
+      if Node.Tag_Start = Wiki.P_TAG then
          Engine.Has_Paragraph := False;
          Engine.Need_Paragraph := True;
       end if;
