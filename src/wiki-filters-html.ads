@@ -72,7 +72,7 @@ package Wiki.Filters.Html is
    procedure Push_Node (Filter     : in out Html_Filter_Type;
                         Document   : in out Wiki.Nodes.Document;
                         Tag        : in Wiki.Html_Tag;
-                        Attributes : in out Wiki.Attributes.Attribute_List_Type);
+                        Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Pop a HTML node with the given tag.
    overriding
@@ -85,14 +85,14 @@ package Wiki.Filters.Html is
    procedure Add_Link (Filter     : in out Html_Filter_Type;
                        Document   : in out Wiki.Nodes.Document;
                        Name       : in Wiki.Strings.WString;
-                       Attributes : in out Wiki.Attributes.Attribute_List_Type);
+                       Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Add an image.
    overriding
    procedure Add_Image (Filter     : in out Html_Filter_Type;
                         Document   : in out Wiki.Nodes.Document;
                         Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List_Type);
+                        Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Finish the document after complete wiki text has been parsed.
    overriding

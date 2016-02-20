@@ -128,7 +128,7 @@ package body Wiki.Filters.Html is
    procedure Push_Node (Filter     : in out Html_Filter_Type;
                         Document   : in out Wiki.Nodes.Document;
                         Tag        : in Wiki.Html_Tag;
-                        Attributes : in out Wiki.Attributes.Attribute_List_Type) is
+                        Attributes : in out Wiki.Attributes.Attribute_List) is
       Current_Tag : Html_Tag;
    begin
       while not Filter.Stack.Is_Empty loop
@@ -194,7 +194,7 @@ package body Wiki.Filters.Html is
    procedure Add_Link (Filter     : in out Html_Filter_Type;
                        Document   : in out Wiki.Nodes.Document;
                        Name       : in Wiki.Strings.WString;
-                       Attributes : in out Wiki.Attributes.Attribute_List_Type) is
+                       Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       if Filter.Allowed (A_TAG) then
          Filter_Type (Filter).Add_Link (Document, Name, Attributes);
@@ -208,7 +208,7 @@ package body Wiki.Filters.Html is
    procedure Add_Image (Filter     : in out Html_Filter_Type;
                         Document   : in out Wiki.Nodes.Document;
                         Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List_Type) is
+                        Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       if Filter.Allowed (IMG_TAG) then
          Filter_Type (Filter).Add_Image (Document, Name, Attributes);
