@@ -106,23 +106,6 @@ package body Wiki.Nodes is
       end loop;
    end Iterate;
 
-   --  ------------------------------
-   --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
-   --  each node instance.
-   --  ------------------------------
---     procedure Iterate (Doc     : in Document;
---                        Process : not null access procedure (Node : in Node_Type)) is
---        Block : Node_List_Block_Access := Doc.Nodes.Value.First'Access;
---     begin
---        loop
---           for I in 1 .. Block.Last loop
---              Process (Block.List (I).all);
---           end loop;
---           Block := Block.Next;
---           exit when Block = null;
---        end loop;
---     end Iterate;
-
    --  Append a node to the node list.
    procedure Append (Into : in out Node_List_Ref;
                      Node : in Node_Type_Access) is
