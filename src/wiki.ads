@@ -126,4 +126,45 @@ package Wiki is
    --  Get the HTML tag name.
    function Get_Tag_Name (Tag : in Html_Tag) return String_Access;
 
+   type Tag_Boolean_Array is array (Html_Tag) of Boolean;
+
+   No_End_Tag   : constant Tag_Boolean_Array :=
+     (
+      BASE_TAG   => True,
+      LINK_TAG   => True,
+      META_TAG   => True,
+      IMG_TAG    => True,
+      HR_TAG     => True,
+      BR_TAG     => True,
+      WBR_TAG    => True,
+      INPUT_TAG  => True,
+      KEYGEN_TAG => True,
+      others     => False);
+
+   Tag_Omission : constant Tag_Boolean_Array :=
+     (
+      --  Section 4.4 Grouping content
+      LI_TAG    => True,
+      DT_TAG    => True,
+      DD_TAG    => True,
+
+      --  Section 4.5 Text-level semantics
+      RB_TAG    => True,
+      RT_TAG    => True,
+      RTC_TAG   => True,
+      RP_TAG    => True,
+
+      --  Section 4.9 Tabular data
+      TH_TAG    => True,
+      TD_TAG    => True,
+      TR_TAG    => True,
+      TBODY_TAG => True,
+      THEAD_TAG => True,
+      TFOOT_TAG => True,
+
+      OPTGROUP_TAG => True,
+      OPTION_TAG   => True,
+
+      others    => False);
+
 end Wiki;
