@@ -129,7 +129,9 @@ package body Wiki.Nodes is
    begin
       if Into.Is_Null then
          Node_List_Refs.Ref (Into) := Node_List_Refs.Create;
+         Into.Value.Current := Into.Value.First'Access;
       end if;
+      Append (Into.Value.all, Node);
    end Append;
 
    --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
@@ -141,13 +143,5 @@ package body Wiki.Nodes is
          Iterate (List.Value, Process);
       end if;
    end Iterate;
-
---
---     overriding
---     procedure Initialize (Doc : in out Document) is
---     begin
---  --      Doc.Nodes := Node_List_Refs.Create;
---        Doc.Nodes.Value.Current := Doc.Nodes.Value.First'Access;
---     end Initialize;
 
 end Wiki.Nodes;
