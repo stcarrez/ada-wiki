@@ -38,4 +38,10 @@ package Wiki.Helpers is
    --  The extension case is ignored.
    function Is_Image_Extension (Ext : in Wide_Wide_String) return Boolean;
 
+   --  Given the current tag on the top of the stack and the new tag that will be pushed,
+   --  decide whether the current tag must be closed or not.
+   --  Returns True if the current tag must be closed.
+   function Need_Close (Tag         : in Html_Tag;
+                        Current_Tag : in Html_Tag) return Boolean;
+
 end Wiki.Helpers;
