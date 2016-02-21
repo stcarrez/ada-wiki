@@ -20,7 +20,6 @@ with Wiki.Attributes;
 with Wiki.Plugins;
 with Wiki.Filters;
 with Wiki.Strings;
-with Wiki.Nodes;
 with Wiki.Documents;
 with Wiki.Streams;
 
