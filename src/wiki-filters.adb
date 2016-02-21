@@ -173,12 +173,12 @@ package body Wiki.Filters is
    procedure Add_Preformatted (Filter   : in out Filter_Type;
                                Document : in out Wiki.Documents.Document;
                                Text     : in Wiki.Strings.WString;
-                               Format   : in Unbounded_Wide_Wide_String) is
+                               Format   : in Wiki.Strings.WString) is
    begin
       if Filter.Next /= null then
          Filter.Next.Add_Preformatted (Document, Text, Format);
       else
-         Document.Add_Preformatted (Text, To_Wide_Wide_String (Format));
+         Document.Add_Preformatted (Text, Format);
       end if;
    end Add_Preformatted;
 
