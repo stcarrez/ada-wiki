@@ -28,7 +28,7 @@ with Wiki.Filters.Html;
 with Wiki.Streams.Html.Builders;
 with Wiki.Streams.Builders;
 with Wiki.Utils;
-with Wiki.Nodes;
+with Wiki.Documents;
 with Wiki.Parsers;
 package body Wiki.Tests is
 
@@ -55,7 +55,7 @@ package body Wiki.Tests is
                Html_Filter : aliased Wiki.Filters.Html.Html_Filter_Type;
                Writer      : aliased Wiki.Streams.Builders.Output_Builder_Stream;
                Renderer    : aliased Wiki.Render.Wiki.Wiki_Renderer;
-               Doc         : Wiki.Nodes.Document;
+               Doc         : Wiki.Documents.Document;
                Engine      : Wiki.Parsers.Parser;
             begin
                Renderer.Set_Output_Stream (Writer'Unchecked_Access, T.Format);
