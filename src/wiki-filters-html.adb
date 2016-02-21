@@ -15,9 +15,9 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Wide_Wide_Characters.Handling;
 package body Wiki.Filters.Html is
-  function Need_Close (Tag         : in Html_Tag;
+
+   function Need_Close (Tag         : in Html_Tag;
                         Current_Tag : in Html_Tag) return Boolean;
 
    No_End_Tag   : constant Tag_Boolean_Array :=
@@ -66,22 +66,22 @@ package body Wiki.Filters.Html is
    procedure Add_Node (Filter    : in out Html_Filter_Type;
                        Document  : in out Wiki.Documents.Document;
                        Kind      : in Wiki.Nodes.Simple_Node_Kind) is
-     Tag : Html_Tag;
+      Tag : Html_Tag;
    begin
-     case Kind is
-        when N_LINE_BREAK =>
-           Tag := BR_TAG;
+      case Kind is
+         when N_LINE_BREAK =>
+            Tag := BR_TAG;
 
-        when N_PARAGRAPH =>
-           Tag := P_TAG;
+         when N_PARAGRAPH =>
+            Tag := P_TAG;
 
-        when N_HORIZONTAL_RULE =>
-           Tag := HR_TAG;
+         when N_HORIZONTAL_RULE =>
+            Tag := HR_TAG;
 
-     end case;
-     if Filter.Allowed (Tag) then
-        Filter_Type (Filter).Add_Node (Document, Kind);
-     end if;
+      end case;
+      if Filter.Allowed (Tag) then
+         Filter_Type (Filter).Add_Node (Document, Kind);
+      end if;
    end Add_Node;
 
    --  ------------------------------
