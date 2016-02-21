@@ -17,13 +17,10 @@
 -----------------------------------------------------------------------
 with Wiki.Attributes;
 with Wiki.Strings;
-with Ada.Finalization;
 with Util.Refs;
 package Wiki.Nodes is
 
    pragma Preelaborate;
-
-   subtype WString is Wide_Wide_String;
 
    type Node_Kind is (N_LINE_BREAK,
                       N_HORIZONTAL_RULE,
@@ -55,15 +52,15 @@ package Wiki.Nodes is
       case Kind is
          when N_HEADER | N_BLOCKQUOTE | N_INDENT | N_LIST | N_NUM_LIST =>
             Level  : Natural := 0;
-            Header : WString (1 .. Len);
+            Header : Wiki.Strings.WString (1 .. Len);
 
          when N_TEXT =>
             Format : Format_Map;
-            Text   : WString (1 .. Len);
+            Text   : Wiki.Strings.WString (1 .. Len);
 
          when N_LINK | N_IMAGE | N_QUOTE =>
             Link_Attr  : Wiki.Attributes.Attribute_List;
-            Title      : WString (1 .. Len);
+            Title      : Wiki.Strings.WString (1 .. Len);
 
          when N_TAG_START =>
             Tag_Start  : Html_Tag;
@@ -72,15 +69,13 @@ package Wiki.Nodes is
             Parent     : Node_Type_Access;
 
          when N_PREFORMAT =>
-            Preformatted : WString (1 .. Len);
+            Preformatted : Wiki.Strings.WString (1 .. Len);
 
          when others =>
             null;
 
       end case;
    end record;
-
-   type Document is tagged private;
 
    --  Append a node to the document.
    procedure Append (Into : in out Node_List;
@@ -90,55 +85,6 @@ package Wiki.Nodes is
    procedure Append (Into : in out Node_List_Ref;
                      Node : in Node_Type_Access);
 
-   --  Append a node to the document.
-   procedure Append (Into : in out Document;
-                     Node : in Node_Type_Access);
-
-   --  Append a simple node such as N_LINE_BREAK, N_HORIZONTAL_RULE or N_PARAGRAPH.
-   procedure Append (Into : in out Document;
-                     Kind : in Simple_Node_Kind);
-
-   --  Append the text with the given format at end of the document.
-   procedure Append (Into   : in out Document;
-                     Text   : in Wiki.Strings.WString;
-                     Format : in Format_Map);
-
-   --  Append a section header at end of the document.
-   procedure Append (Into   : in out Document;
-                     Header : in Wiki.Strings.WString;
-                     Level  : in Positive);
-
-   --  Add a link.
-   procedure Add_Link (Into       : in out Document;
-                       Name       : in Wiki.Strings.WString;
-                       Attributes : in out Wiki.Attributes.Attribute_List);
-
-   --  Add an image.
-   procedure Add_Image (Into       : in out Document;
-                        Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List);
-
-   --  Add a quote.
-   procedure Add_Quote (Into       : in out Document;
-                        Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List);
-
-   --  Add a list item (<li>).  Close the previous paragraph and list item if any.
-   --  The list item will be closed at the next list item, next paragraph or next header.
-   procedure Add_List_Item (Into     : in out Document;
-                            Level    : in Positive;
-                            Ordered  : in Boolean);
-
-   --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
-   --  The blockquote must be closed at the next header.
-   procedure Add_Blockquote (Into     : in out Document;
-                             Level    : in Natural);
-
-   --  Add a text block that is pre-formatted.
-   procedure Add_Preformatted (Into     : in out Document;
-                               Text     : in Wiki.Strings.WString;
-                               Format   : in Wiki.Strings.WString);
-
    --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
    --  each node instance.
    procedure Iterate (List    : in Node_List_Access;
@@ -147,11 +93,6 @@ package Wiki.Nodes is
    --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
    --  each node instance.
    procedure Iterate (List    : in Node_List_Ref;
-                      Process : not null access procedure (Node : in Node_Type));
-
-   --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
-   --  each node instance.
-   procedure Iterate (Doc     : in Document;
                       Process : not null access procedure (Node : in Node_Type));
 
 private
@@ -186,13 +127,5 @@ private
    package Node_List_Refs is new Util.Refs.References (Node_List, Node_List_Access);
 
    type Node_List_Ref is new Node_List_Refs.Ref with null record;
-
-   type Document is new Ada.Finalization.Controlled with record
-      Nodes   : Node_List_Ref;
-      Current : Node_Type_Access;
-   end record;
-
-   overriding
-   procedure Initialize (Doc : in out Document);
 
 end Wiki.Nodes;
