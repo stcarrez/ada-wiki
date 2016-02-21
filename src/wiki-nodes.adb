@@ -19,21 +19,17 @@ with Ada.Unchecked_Deallocation;
 package body Wiki.Nodes is
 
    --  ------------------------------
-   --  Append a node to the document.
+   --  Append a node to the tag node.
    --  ------------------------------
---     procedure Append (Into : in out Document;
---                       Node : in Node_Type_Access) is
---     begin
---        if Into.Current = null then
---           Append (Into.Nodes.Value.all, Node);
---        else
---           if Into.Current.Children = null then
---              Into.Current.Children := new Node_List;
---              Into.Current.Children.Current := Into.Current.Children.First'Access;
---           end if;
---           Append (Into.Current.Children.all, Node);
---        end if;
---     end Append;
+   procedure Append (Into : in Node_Type_Access;
+                     Node : in Node_Type_Access) is
+   begin
+      if Into.Children = null then
+         Into.Children := new Node_List;
+         Into.Children.Current := Into.Children.First'Access;
+      end if;
+      Append (Into.Children.all, Node);
+   end Append;
 
    --  ------------------------------
    --  Append a node to the node list.
