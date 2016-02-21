@@ -20,6 +20,7 @@ with Ada.Strings.Wide_Wide_Unbounded;
 
 with Wiki.Parsers.Html;
 with Wiki.Helpers;
+with Wiki.Nodes;
 package body Wiki.Parsers is
 
    use Ada.Strings.Wide_Wide_Unbounded;
@@ -195,7 +196,7 @@ package body Wiki.Parsers is
    --  ------------------------------
    procedure Flush_Text (P : in out Parser) is
 
-      procedure Add_Text (Content : in Wiki.Nodes.WString) is
+      procedure Add_Text (Content : in Wiki.Strings.WString) is
       begin
          P.Filters.Add_Text (P.Document, Content, P.Format);
       end Add_Text;
