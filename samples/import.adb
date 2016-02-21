@@ -27,14 +27,14 @@ with Util.Streams.Pipes;
 with Util.Streams.Buffered;
 with Util.Strings.Transforms;
 
-with Wiki.Parsers;
 with Wiki.Filters.Html;
 with Wiki.Streams.Builders;
 with Wiki.Streams.Html.Builders;
 with Wiki.Render.Html;
 with Wiki.Render.Text;
 with Wiki.Render.Wiki;
-with Wiki.Nodes;
+with Wiki.Documents;
+with Wiki.Parsers;
 
 procedure Import is
 
@@ -51,7 +51,7 @@ procedure Import is
    Count       : Natural := 0;
    Html_Mode   : Boolean := True;
    Wiki_Mode   : Boolean := False;
-   Syntax      : Wiki.Parsers.Wiki_Syntax_Type := Wiki.Parsers.SYNTAX_MARKDOWN;
+   Syntax      : Wiki.Wiki_Syntax := Wiki.SYNTAX_MARKDOWN;
 
    procedure Usage is
    begin
@@ -65,7 +65,7 @@ procedure Import is
    end Usage;
 
    procedure Parse (Content : in String) is
-      Doc    : Wiki.Nodes.Document;
+      Doc    : Wiki.Documents.Document;
       Engine : Wiki.Parsers.Parser;
    begin
       Engine.Add_Filter (Html_Filter'Unchecked_Access);
@@ -74,7 +74,7 @@ procedure Import is
             Stream   : aliased Wiki.Streams.Builders.Output_Builder_Stream;
             Renderer : aliased Wiki.Render.Wiki.Wiki_Renderer;
          begin
-            Engine.Set_Syntax (Wiki.Parsers.SYNTAX_HTML);
+            Engine.Set_Syntax (Wiki.SYNTAX_HTML);
             Engine.Parse (To_Wide_Wide_String (Content), Doc);
             Renderer.Set_Output_Stream (Stream'Unchecked_Access, Syntax);
             Renderer.Render (Doc);
@@ -137,19 +137,19 @@ begin
    loop
       case Getopt ("m M d c t f:") is
          when 'm' =>
-            Syntax := Wiki.Parsers.SYNTAX_MARKDOWN;
+            Syntax := Wiki.SYNTAX_MARKDOWN;
             Wiki_Mode := True;
 
          when 'M' =>
-            Syntax := Wiki.Parsers.SYNTAX_MEDIA_WIKI;
+            Syntax := Wiki.SYNTAX_MEDIA_WIKI;
             Wiki_Mode := True;
 
          when 'c' =>
-            Syntax := Wiki.Parsers.SYNTAX_CREOLE;
+            Syntax := Wiki.SYNTAX_CREOLE;
             Wiki_Mode := True;
 
          when 'd' =>
-            Syntax := Wiki.Parsers.SYNTAX_DOTCLEAR;
+            Syntax := Wiki.SYNTAX_DOTCLEAR;
             Wiki_Mode := True;
 
          when 't' =>

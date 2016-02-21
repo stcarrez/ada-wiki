@@ -25,14 +25,12 @@ with GNAT.Command_Line;
 with Util.Files;
 
 with Wiki.Utils;
-with Wiki.Parsers;
-with Wiki.Nodes;
+
 procedure Render is
 
    use GNAT.Command_Line;
    use Ada.Strings.Unbounded;
    use Ada.Characters.Conversions;
-   use Wiki.Nodes;
 
    procedure Usage;
 
@@ -49,21 +47,21 @@ procedure Render is
 
    Count     : Natural := 0;
    Html_Mode : Boolean := True;
-   Syntax    : Wiki.Parsers.Wiki_Syntax_Type := Wiki.Parsers.SYNTAX_MARKDOWN;
+   Syntax    : Wiki.Wiki_Syntax := Wiki.SYNTAX_MARKDOWN;
 begin
    loop
       case Getopt ("m M d c t") is
          when 'm' =>
-            Syntax := Wiki.Parsers.SYNTAX_MARKDOWN;
+            Syntax := Wiki.SYNTAX_MARKDOWN;
 
          when 'M' =>
-            Syntax := Wiki.Parsers.SYNTAX_MEDIA_WIKI;
+            Syntax := Wiki.SYNTAX_MEDIA_WIKI;
 
          when 'c' =>
-            Syntax := Wiki.Parsers.SYNTAX_CREOLE;
+            Syntax := Wiki.SYNTAX_CREOLE;
 
          when 'd' =>
-            Syntax := Wiki.Parsers.SYNTAX_DOTCLEAR;
+            Syntax := Wiki.SYNTAX_DOTCLEAR;
 
          when 't' =>
             Html_Mode := False;
