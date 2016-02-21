@@ -122,8 +122,6 @@ private
 
    use Wiki.Nodes;
 
-   type Tag_Boolean_Array is array (Html_Tag) of Boolean;
-
    package Tag_Vectors is
      new Ada.Containers.Vectors (Index_Type   => Positive,
                                  Element_Type => Html_Tag);
