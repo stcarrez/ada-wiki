@@ -71,12 +71,7 @@ package body Wiki.Documents is
       if Into.Current = null then
          Append (Into.Nodes, Node);
       else
-         if Into.Current.Children = null then
-            Into.Current.Children := new Node_List;
-            --  Into.Current.Children.Current := Into.Current.Children.First'Access;
-            --  Into.Current.Children.Parent := Into.Current;
-         end if;
-         Append (Into.Current.Children.all, Node);
+         Append (Into.Current, Node);
       end if;
    end Append;
 
@@ -189,13 +184,5 @@ package body Wiki.Documents is
    begin
       Iterate (Doc.Nodes, Process);
    end Iterate;
-
-   overriding
-   procedure Initialize (Doc : in out Document) is
-   begin
---      Doc.Nodes := Node_List_Refs.Create;
-  --    Doc.Nodes.Value.Current := Doc.Nodes.Value.First'Access;
-     null;
-   end Initialize;
 
 end Wiki.Documents;
