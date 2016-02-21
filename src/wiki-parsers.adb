@@ -300,7 +300,7 @@ package body Wiki.Parsers is
 
       procedure Add_Preformatted (Content : in Wiki.Strings.WString) is
       begin
-         P.Filters.Add_Preformatted (P.Document, Content, Format);
+         P.Filters.Add_Preformatted (P.Document, Content, To_Wide_Wide_String (Format));
       end Add_Preformatted;
 
    begin
