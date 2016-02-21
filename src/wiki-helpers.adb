@@ -59,4 +59,34 @@ package body Wiki.Helpers is
       return S = ".png" or S = ".jpg" or S = ".gif" or S = ".jpeg";
    end Is_Image_Extension;
 
+   --  ------------------------------
+   --  Given the current tag on the top of the stack and the new tag that will be pushed,
+   --  decide whether the current tag must be closed or not.
+   --  Returns True if the current tag must be closed.
+   --  ------------------------------
+   function Need_Close (Tag         : in Html_Tag;
+                        Current_Tag : in Html_Tag) return Boolean is
+   begin
+      if No_End_Tag (Current_Tag) then
+         return True;
+      elsif Current_Tag = Tag and Tag_Omission (Current_Tag) then
+         return True;
+      else
+         case Current_Tag is
+            when DT_TAG | DD_TAG =>
+               return Tag = DD_TAG or Tag = DL_TAG or Tag = DT_TAG;
+
+            when TD_TAG =>
+               return Tag = TD_TAG or Tag = TR_TAG or Tag = TH_TAG;
+
+            when TR_TAG =>
+               return False;
+
+            when others =>
+               return False;
+
+         end case;
+      end if;
+   end Need_Close;
+
 end Wiki.Helpers;
