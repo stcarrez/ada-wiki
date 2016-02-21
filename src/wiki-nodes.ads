@@ -77,6 +77,10 @@ package Wiki.Nodes is
       end case;
    end record;
 
+   --  Append a node to the tag node.
+   procedure Append (Into : in Node_Type_Access;
+                     Node : in Node_Type_Access);
+
    --  Append a node to the document.
    procedure Append (Into : in out Node_List;
                      Node : in Node_Type_Access);
