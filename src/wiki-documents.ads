@@ -15,11 +15,9 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Finalization;
 
 with Wiki.Strings;
 with Wiki.Attributes;
-
 with Wiki.Nodes;
 package Wiki.Documents is
 
@@ -95,12 +93,9 @@ private
    procedure Append (Into : in out Document;
                      Node : in Wiki.Nodes.Node_Type_Access);
 
-   type Document is new Ada.Finalization.Controlled with record
+   type Document is tagged record
       Nodes   : Wiki.Nodes.Node_List_Ref;
       Current : Wiki.Nodes.Node_Type_Access;
    end record;
-
-   overriding
-   procedure Initialize (Doc : in out Document);
 
 end Wiki.Documents;
