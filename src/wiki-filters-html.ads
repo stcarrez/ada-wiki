@@ -40,8 +40,6 @@ private with Ada.Containers.Vectors;
 --
 package Wiki.Filters.Html is
 
-   use Wiki.Nodes;
-
    --  ------------------------------
    --  Filter type
    --  ------------------------------
