@@ -49,7 +49,9 @@ package body Wiki.Filters.Html.Tests is
             Tag   : constant Html_Tag := Find_Tag (Wname (Wname'First .. Pos - 1));
          begin
             Log.Info ("Checking tag {0}", Name);
-            Assert_Equals (T, I, Tag, "Find_Tag failed");
+            if I /= ROOT_HTML_TAG then
+               Assert_Equals (T, I, Tag, "Find_Tag failed");
+            end if;
 
             Assert_Equals (T, UNKNOWN_TAG, Find_Tag (Wname (Wname'First .. Pos - 1) & "x"),
                           "Find_Tag must return UNKNOWN_TAG");
