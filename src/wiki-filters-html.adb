@@ -15,49 +15,8 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
+with Wiki.Helpers;
 package body Wiki.Filters.Html is
-
-   function Need_Close (Tag         : in Html_Tag;
-                        Current_Tag : in Html_Tag) return Boolean;
-
-   No_End_Tag   : constant Tag_Boolean_Array :=
-     (
-      BASE_TAG   => True,
-      LINK_TAG   => True,
-      META_TAG   => True,
-      IMG_TAG    => True,
-      HR_TAG     => True,
-      BR_TAG     => True,
-      WBR_TAG    => True,
-      INPUT_TAG  => True,
-      KEYGEN_TAG => True,
-      others     => False);
-
-   Tag_Omission : constant Tag_Boolean_Array :=
-     (
-      --  Section 4.4 Grouping content
-      LI_TAG    => True,
-      DT_TAG    => True,
-      DD_TAG    => True,
-
-      --  Section 4.5 Text-level semantics
-      RB_TAG    => True,
-      RT_TAG    => True,
-      RTC_TAG   => True,
-      RP_TAG    => True,
-
-      --  Section 4.9 Tabular data
-      TH_TAG    => True,
-      TD_TAG    => True,
-      TR_TAG    => True,
-      TBODY_TAG => True,
-      THEAD_TAG => True,
-      TFOOT_TAG => True,
-
-      OPTGROUP_TAG => True,
-      OPTION_TAG   => True,
-
-      others    => False);
 
    --  ------------------------------
    --  Add a simple node such as N_LINE_BREAK, N_HORIZONTAL_RULE or N_PARAGRAPH to the document.
@@ -133,7 +92,7 @@ package body Wiki.Filters.Html is
    begin
       while not Filter.Stack.Is_Empty loop
          Current_Tag := Filter.Stack.Last_Element;
-         if Need_Close (Tag, Current_Tag) then
+         if Wiki.Helpers.Need_Close (Tag, Current_Tag) then
             if Filter.Hide_Level = 0 then
                Filter_Type (Filter).Pop_Node (Document, Current_Tag);
             end if;
@@ -214,36 +173,6 @@ package body Wiki.Filters.Html is
          Filter_Type (Filter).Add_Image (Document, Name, Attributes);
       end if;
    end Add_Image;
-
-   --  ------------------------------
-   --  Given the current tag on the top of the stack and the new tag that will be pushed,
-   --  decide whether the current tag must be closed or not.
-   --  Returns True if the current tag must be closed.
-   --  ------------------------------
-   function Need_Close (Tag         : in Html_Tag;
-                        Current_Tag : in Html_Tag) return Boolean is
-   begin
-      if No_End_Tag (Current_Tag) then
-         return True;
-      elsif Current_Tag = Tag and Tag_Omission (Current_Tag) then
-         return True;
-      else
-         case Current_Tag is
-            when DT_TAG | DD_TAG =>
-               return Tag = DD_TAG or Tag = DL_TAG or Tag = DT_TAG;
-
-            when TD_TAG =>
-               return Tag = TD_TAG or Tag = TR_TAG or Tag = TH_TAG;
-
-            when TR_TAG =>
-               return False;
-
-            when others =>
-               return False;
-
-         end case;
-      end if;
-   end Need_Close;
 
    --  ------------------------------
    --  Flush the HTML element that have not yet been closed.
