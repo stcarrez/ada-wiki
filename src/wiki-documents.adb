@@ -15,10 +15,11 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Wide_Wide_Characters.Handling;
-with Ada.Unchecked_Deallocation;
+
 package body Wiki.Documents is
+
    use Wiki.Nodes;
+
    --  ------------------------------
    --  Append a HTML tag start node to the document.
    --  ------------------------------
