@@ -15,7 +15,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Finalization;
 
 with Wiki.Attributes;
@@ -43,8 +42,6 @@ with Wiki.Strings;
 package Wiki.Filters is
 
    pragma Preelaborate;
-
-   use Ada.Strings.Wide_Wide_Unbounded;
 
    --  ------------------------------
    --  Filter type
@@ -115,7 +112,7 @@ package Wiki.Filters is
    procedure Add_Preformatted (Filter   : in out Filter_Type;
                                Document : in out Wiki.Documents.Document;
                                Text     : in Wiki.Strings.WString;
-                               Format   : in Unbounded_Wide_Wide_String);
+                               Format   : in Wiki.Strings.WString);
 
    --  Finish the document after complete wiki text has been parsed.
    procedure Finish (Filter   : in out Filter_Type;
