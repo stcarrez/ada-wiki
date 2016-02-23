@@ -22,7 +22,7 @@ package body Wiki.Helpers is
    --  ------------------------------
    --  Returns True if the character is a space or tab.
    --  ------------------------------
-   function Is_Space (C : in Wide_Wide_Character) return Boolean is
+   function Is_Space (C : in Wiki.Strings.WChar) return Boolean is
    begin
       return Ada.Wide_Wide_Characters.Handling.Is_Space (C) or C = HT;
    end Is_Space;
@@ -30,7 +30,7 @@ package body Wiki.Helpers is
    --  ------------------------------
    --  Returns True if the character is a space, tab or a newline.
    --  ------------------------------
-   function Is_Space_Or_Newline (C : in Wide_Wide_Character) return Boolean is
+   function Is_Space_Or_Newline (C : in Wiki.Strings.WChar) return Boolean is
    begin
       return Is_Space (C) or Ada.Wide_Wide_Characters.Handling.Is_Line_Terminator (C);
    end Is_Space_Or_Newline;
@@ -38,7 +38,7 @@ package body Wiki.Helpers is
    --  ------------------------------
    --  Returns True if the text is a valid URL
    --  ------------------------------
-   function Is_Url (Text : in Wide_Wide_String) return Boolean is
+   function Is_Url (Text : in Wiki.Strings.WString) return Boolean is
    begin
       if Text'Length <= 9 then
          return False;
@@ -53,8 +53,8 @@ package body Wiki.Helpers is
    --  Recognized extension are: .png, .gif, .jpg, .jpeg.
    --  The extension case is ignored.
    --  ------------------------------
-   function Is_Image_Extension (Ext : in Wide_Wide_String) return Boolean is
-      S : constant Wide_Wide_String := Ada.Wide_Wide_Characters.Handling.To_Lower (Ext);
+   function Is_Image_Extension (Ext : in Wiki.Strings.WString) return Boolean is
+      S : constant Wiki.Strings.WString := Ada.Wide_Wide_Characters.Handling.To_Lower (Ext);
    begin
       return S = ".png" or S = ".jpg" or S = ".gif" or S = ".jpeg";
    end Is_Image_Extension;
