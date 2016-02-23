@@ -15,28 +15,28 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-
+with Wiki.Strings;
 package Wiki.Helpers is
 
    pragma Preelaborate;
 
-   LF : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#0A#);
-   CR : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#0D#);
-   HT : constant Wide_Wide_Character := Wide_Wide_Character'Val (16#09#);
+   LF : constant Wiki.Strings.WChar := Wiki.Strings.WChar'Val (16#0A#);
+   CR : constant Wiki.Strings.WChar := Wiki.Strings.WChar'Val (16#0D#);
+   HT : constant Wiki.Strings.WChar := Wiki.Strings.WChar'Val (16#09#);
 
    --  Returns True if the character is a space or tab.
-   function Is_Space (C : in Wide_Wide_Character) return Boolean;
+   function Is_Space (C : in Wiki.Strings.WChar) return Boolean;
 
    --  Returns True if the character is a space, tab or a newline.
-   function Is_Space_Or_Newline (C : in Wide_Wide_Character) return Boolean;
+   function Is_Space_Or_Newline (C : in Wiki.Strings.WChar) return Boolean;
 
    --  Returns True if the text is a valid URL
-   function Is_Url (Text : in Wide_Wide_String) return Boolean;
+   function Is_Url (Text : in Wiki.Strings.WString) return Boolean;
 
    --  Returns True if the extension part correspond to an image.
    --  Recognized extension are: .png, .gif, .jpg, .jpeg.
    --  The extension case is ignored.
-   function Is_Image_Extension (Ext : in Wide_Wide_String) return Boolean;
+   function Is_Image_Extension (Ext : in Wiki.Strings.WString) return Boolean;
 
    --  Given the current tag on the top of the stack and the new tag that will be pushed,
    --  decide whether the current tag must be closed or not.
