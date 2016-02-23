@@ -15,14 +15,23 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
+with Wiki.Strings;
 
---  == Writer interfaces ==
---  The <tt>Wiki.Writers</tt> package defines the interfaces used by the renderer to write
---  their outputs.
+--  == Input and Output streams ==
+--  The <tt>Wiki.Streams</tt> package defines the interfaces used by
+--  the parser or renderer to read and write their outputs.
 --
 --  The <tt>Input_Stream</tt> interface defines the interface that must be implemented to
 --  read the source Wiki content.  The <tt>Read</tt> procedure is called by the parser
 --  repeatedly while scanning the Wiki content.
+--
+--  The <tt>Output_Stream</tt> interface is the interface used by the renderer
+--  to write their outpus.  It defines the <tt>Write</tt> procedure to write
+--  a single character or a string.
+--
+--  @include wiki-streams-html.ads
+--  @include wiki-streams-builders.ads
+--  @include wiki-streams-html-builders.ads
 package Wiki.Streams is
 
    pragma Preelaborate;
@@ -33,17 +42,18 @@ package Wiki.Streams is
    --  Read one character from the input stream and return False to the <tt>Eof</tt> indicator.
    --  When there is no character to read, return True in the <tt>Eof</tt> indicator.
    procedure Read (Input : in out Input_Stream;
-                   Char  : out Wide_Wide_Character;
+                   Char  : out Wiki.Strings.WChar;
                    Eof   : out Boolean) is abstract;
 
    type Output_Stream is limited interface;
    type Output_Stream_Access is access all Output_Stream'Class;
 
+   --  Write the string to the output stream.
    procedure Write (Stream  : in out Output_Stream;
-                    Content : in Wide_Wide_String) is abstract;
+                    Content : in Wiki.Strings.WString) is abstract;
 
-   --  Write a single character to the string builder.
+   --  Write a single character to the output stream.
    procedure Write (Stream : in out Output_Stream;
-                    Char   : in Wide_Wide_Character) is abstract;
+                    Char   : in Wiki.Strings.WChar) is abstract;
 
 end Wiki.Streams;
