@@ -18,7 +18,7 @@
 with Ada.Strings.Wide_Wide_Unbounded;
 with Wiki.Strings;
 
---  == Writer interfaces ==
+--  === HTML Output Stream ===
 --  The <tt>Wiki.Writers</tt> package defines the interfaces used by the renderer to write
 --  their outputs.
 --
