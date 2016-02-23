@@ -1205,6 +1205,7 @@ package body Wiki.Parsers is
          Character'Pos ('{') => Parse_Image'Access,
          Character'Pos ('%') => Parse_Line_Break'Access,
          Character'Pos ('<') => Parse_Maybe_Html'Access,
+         Character'Pos ('`') => Parse_Preformatted'Access,
          others => Parse_Text'Access
         );
 
