@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-documents -- Wiki document
---  Copyright (C) 2011, 2015 Stephane Carrez
+--  Copyright (C) 2011, 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -87,6 +87,13 @@ package Wiki.Documents is
    procedure Iterate (Doc     : in Document;
                       Process : not null access procedure (Node : in Wiki.Nodes.Node_Type));
 
+   --  Get the table of content node associated with the document.
+   procedure Get_TOC (Doc : in out Document;
+                      TOC : out Wiki.Nodes.Node_List_Ref);
+
+   --  Get the table of content node associated with the document.
+   function Get_TOC (Doc : in Document) return Wiki.Nodes.Node_List_Ref;
+
 private
 
    --  Append a node to the document.
@@ -95,6 +102,7 @@ private
 
    type Document is tagged record
       Nodes   : Wiki.Nodes.Node_List_Ref;
+      TOC     : Wiki.Nodes.Node_List_Ref;
       Current : Wiki.Nodes.Node_Type_Access;
    end record;
 
