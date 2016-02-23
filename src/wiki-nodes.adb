@@ -48,7 +48,9 @@ package body Wiki.Nodes is
       Into.Length := Into.Length + 1;
    end Append;
 
+   --  ------------------------------
    --  Finalize the node list to release the allocated memory.
+   --  ------------------------------
    overriding
    procedure Finalize (List : in out Node_List) is
       procedure Free is
@@ -60,7 +62,7 @@ package body Wiki.Nodes is
       procedure Free is
         new Ada.Unchecked_Deallocation (Node_List, Node_List_Access);
 
-      procedure Release (List : in out Node_List_Block_Access);
+      procedure Release (List : in Node_List_Block_Access);
 
       procedure Free_Block (Block : in out Node_List_Block) is
       begin
@@ -72,7 +74,7 @@ package body Wiki.Nodes is
          end loop;
       end Free_Block;
 
-      procedure Release (List : in out Node_List_Block_Access) is
+      procedure Release (List : in Node_List_Block_Access) is
          Next  : Node_List_Block_Access := List;
          Block : Node_List_Block_Access;
       begin
@@ -106,7 +108,9 @@ package body Wiki.Nodes is
       end loop;
    end Iterate;
 
+   --  ------------------------------
    --  Append a node to the node list.
+   --  ------------------------------
    procedure Append (Into : in out Node_List_Ref;
                      Node : in Node_Type_Access) is
    begin
@@ -117,8 +121,10 @@ package body Wiki.Nodes is
       Append (Into.Value.all, Node);
    end Append;
 
+   --  ------------------------------
    --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
    --  each node instance.
+   --  ------------------------------
    procedure Iterate (List    : in Node_List_Ref;
                       Process : not null access procedure (Node : in Node_Type)) is
    begin
@@ -126,5 +132,13 @@ package body Wiki.Nodes is
          Iterate (List.Value, Process);
       end if;
    end Iterate;
+
+   --  ------------------------------
+   --  Returns True if the list reference is empty.
+   --  ------------------------------
+   function Is_Empty (List : in Node_List_Ref) return Boolean is
+   begin
+      return List.Is_Null;
+   end Is_Empty;
 
 end Wiki.Nodes;
