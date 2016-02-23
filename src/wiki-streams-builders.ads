@@ -17,10 +17,11 @@
 -----------------------------------------------------------------------
 with Wiki.Strings;
 
---  == Writer interfaces ==
---  The <tt>Wiki.Writers</tt> package defines the interfaces used by the renderer to write
---  their outputs.
---
+--  === Output Builder Stream ==
+--  The <tt>Output_Builder_Stream</tt> is a concrete in-memory output stream.
+--  It collects the output in a <tt>Wiki.Strings.Bstring</tt> object and the
+--  content can be retrieved at the end by using the <tt>To_String</tt>
+--  or <tt>Iterate</tt> operation.
 package Wiki.Streams.Builders is
 
    type Output_Builder_Stream is limited new Output_Stream with private;
@@ -29,21 +30,21 @@ package Wiki.Streams.Builders is
    --  Write the content to the string builder.
    overriding
    procedure Write (Stream  : in out Output_Builder_Stream;
-                    Content : in Wide_Wide_String);
+                    Content : in Wiki.Strings.WString);
 
    --  Write a single character to the string builder.
    overriding
    procedure Write (Stream  : in out Output_Builder_Stream;
-                    Content : in Wide_Wide_Character);
+                    Content : in Wiki.Strings.WChar);
 
    --  Write the string to the string builder.
    procedure Write_String (Stream  : in out Output_Builder_Stream;
-                           Content : in STring);
+                           Content : in String);
 
    --  Iterate over the buffer content calling the <tt>Process</tt> procedure with each
    --  chunk.
    procedure Iterate (Source  : in Output_Builder_Stream;
-                      Process : not null access procedure (Chunk : in Wide_Wide_String));
+                      Process : not null access procedure (Chunk : in Wiki.Strings.WString));
 
    --  Convert what was collected in the writer builder to a string and return it.
    function To_String (Source : in Output_Builder_Stream) return String;
