@@ -196,6 +196,8 @@ package body Wiki.Parsers is
    --  ------------------------------
    procedure Flush_Text (P : in out Parser) is
 
+      procedure Add_Text (Content : in Wiki.Strings.WString);
+
       procedure Add_Text (Content : in Wiki.Strings.WString) is
       begin
          P.Filters.Add_Text (P.Document, Content, P.Format);
@@ -292,6 +294,8 @@ package body Wiki.Parsers is
    --  ------------------------------
    procedure Parse_Preformatted (P     : in out Parser;
                                  Token : in Wide_Wide_Character) is
+      procedure Add_Preformatted (Content : in Wiki.Strings.WString);
+
       C          : Wide_Wide_Character;
       Stop_Token : Wide_Wide_Character;
       Format     : Unbounded_Wide_Wide_String;
@@ -421,6 +425,8 @@ package body Wiki.Parsers is
    --  ------------------------------
    procedure Parse_Header (P     : in out Parser;
                            Token : in Wide_Wide_Character) is
+
+      procedure Add_Header (Content : in Wiki.Strings.WString);
 
       C      : Wide_Wide_Character;
       Level  : Integer := 1;
