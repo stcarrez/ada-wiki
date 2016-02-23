@@ -16,6 +16,11 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 
+--  == Wiki ==
+--
+--  @include wiki-documents.ads
+--  @include wiki-attributes.ads
+--  @include wiki-parsers.ads
 package Wiki is
 
    pragma Preelaborate;
@@ -47,6 +52,7 @@ package Wiki is
          --  The input is plain possibly incorrect HTML.
          SYNTAX_HTML);
 
+   --  Defines the possible text formats.
    type Format_Type is (BOLD, ITALIC, CODE, SUPERSCRIPT, SUBSCRIPT, STRIKEOUT, PREFORMAT);
 
    type Format_Map is array (Format_Type) of Boolean;
