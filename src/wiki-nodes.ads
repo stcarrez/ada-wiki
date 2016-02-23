@@ -26,6 +26,8 @@ package Wiki.Nodes is
                       N_HORIZONTAL_RULE,
                       N_PARAGRAPH,
                       N_HEADER,
+                      N_TOC,
+                      N_TOC_ENTRY,
                       N_BLOCKQUOTE,
                       N_QUOTE,
                       N_TAG_START,
@@ -50,7 +52,7 @@ package Wiki.Nodes is
 
    type Node_Type (Kind : Node_Kind; Len : Natural) is limited record
       case Kind is
-         when N_HEADER | N_BLOCKQUOTE | N_INDENT | N_LIST | N_NUM_LIST =>
+         when N_HEADER | N_BLOCKQUOTE | N_INDENT | N_LIST | N_NUM_LIST | N_TOC_ENTRY =>
             Level  : Natural := 0;
             Header : Wiki.Strings.WString (1 .. Len);
 
@@ -70,6 +72,9 @@ package Wiki.Nodes is
 
          when N_PREFORMAT =>
             Preformatted : Wiki.Strings.WString (1 .. Len);
+
+         when N_TOC =>
+            Entries    : Node_List_Access;
 
          when others =>
             null;
@@ -98,6 +103,9 @@ package Wiki.Nodes is
    --  each node instance.
    procedure Iterate (List    : in Node_List_Ref;
                       Process : not null access procedure (Node : in Node_Type));
+
+   --  Returns True if the list reference is empty.
+   function Is_Empty (List : in Node_List_Ref) return Boolean;
 
 private
 
