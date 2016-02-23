@@ -20,7 +20,7 @@ private with Ada.Containers.Vectors;
 private with Ada.Finalization;
 private with Util.Refs;
 
---  == Attributes ==
+--  === Attributes ===
 --  The  <tt>Attributes</tt> package defines a simple management of attributes for
 --  the wiki document parser.  Attribute lists are described by the <tt>Attribute_List</tt>
 --  with some operations to append or query for an attribute.
