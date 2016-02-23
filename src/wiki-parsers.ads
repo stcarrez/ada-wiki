@@ -23,10 +23,29 @@ with Wiki.Strings;
 with Wiki.Documents;
 with Wiki.Streams;
 
---  == Wiki Parsers ==
---  The <b>Wikis.Parsers</b> package implements a parser for several well known wiki formats.
---  The parser works with the <b>Document_Reader</b> interface type which defines several
---  procedures that are called by the parser when the wiki text is scanned.
+--  === Wiki Parsers ===
+--  The <b>Wikis.Parsers</b> package implements a parser for several well known wiki formats
+--  but also for HTML.  While reading the input, the parser populates a wiki <tt>Document</tt>
+--  instance with headers, paragraphs, links, and other elements.
+--
+--     Doc    : Wiki.Documents.Document;
+--     Engine : Wiki.Parsers.Parser;
+--
+--  Before using the parser, it must be configured to choose the syntax by using the
+--  <tt>Set_Syntax</tt> procedure:
+--
+--    Engine.Set_Syntax (Wiki.SYNTAX_HTML);
+--
+--  The parser can be configured to use filters.  A filter is added by using the
+--  <tt>Add_Filter</tt> procedure.  A filter is added at begining of the chain so that
+--  the filter added last is called first.
+--
+--  The <tt>Parse</tt> procedure is then used to parse either a string content or some stream
+--  represented by the <tt>Input_Stream</tt> interface.  After the <tt>Parse</tt> procedure
+--  completes, the <tt>Document</tt> instance holds the wiki document.
+--
+--    Engine.Parse (Some_Text, Doc);
+--
 package Wiki.Parsers is
 
    pragma Preelaborate;
@@ -49,7 +68,7 @@ package Wiki.Parsers is
    --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
    --  defined on the parser.
    procedure Parse (Engine : in out Parser;
-                    Text   : in Wide_Wide_String;
+                    Text   : in Wiki.Strings.WString;
                     Doc    : in out Wiki.Documents.Document);
 
    --  Parse the wiki stream managed by <tt>Stream</tt> according to the wiki syntax configured
@@ -61,7 +80,7 @@ package Wiki.Parsers is
 private
 
    type Parser is tagged limited record
-      Pending             : Wide_Wide_Character;
+      Pending             : Wiki.Strings.WChar;
       Has_Pending         : Boolean;
       Syntax              : Wiki_Syntax;
       Document            : Wiki.Documents.Document;
@@ -80,25 +99,25 @@ private
       Check_Image_Link    : Boolean := False;
       Header_Offset       : Integer := 0;
       Quote_Level         : Natural := 0;
-      Escape_Char         : Wide_Wide_Character;
+      Escape_Char         : Wiki.Strings.WChar;
       List_Level          : Natural := 0;
       Reader              : Wiki.Streams.Input_Stream_Access := null;
       Attributes          : Wiki.Attributes.Attribute_List;
    end record;
 
    type Parser_Handler is access procedure (P     : in out Parser;
-                                            Token : in Wide_Wide_Character);
+                                            Token : in Wiki.Strings.WChar);
 
    type Parser_Table is array (0 .. 127) of Parser_Handler;
    type Parser_Table_Access is access Parser_Table;
 
    --  Peek the next character from the wiki text buffer.
    procedure Peek (P     : in out Parser;
-                   Token : out Wide_Wide_Character);
+                   Token : out Wiki.Strings.WChar);
 
    --  Put back the character so that it will be returned by the next call to Peek.
    procedure Put_Back (P     : in out Parser;
-                       Token : in Wide_Wide_Character);
+                       Token : in Wiki.Strings.WChar);
 
    --  Skip all the spaces and tabs as well as end of the current line (CR+LF).
    procedure Skip_End_Of_Line (P : in out Parser);
@@ -114,11 +133,11 @@ private
 
    --  Append a character to the wiki text buffer.
    procedure Parse_Text (P     : in out Parser;
-                         Token : in Wide_Wide_Character);
+                         Token : in Wiki.Strings.WChar);
 
    --  Check if the link refers to an image and must be rendered as an image.
    function Is_Image (P    : in Parser;
-                      Link : in Wide_Wide_String) return Boolean;
+                      Link : in Wiki.Strings.WString) return Boolean;
 
    procedure Start_Element (P          : in out Parser;
                             Tag        : in Wiki.Html_Tag;
