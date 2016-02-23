@@ -16,7 +16,6 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Characters.Conversions;
-with Ada.Unchecked_Deallocation;
 
 package body Wiki.Attributes is
 
@@ -187,16 +186,7 @@ package body Wiki.Attributes is
    --  Clear the list and remove all existing attributes.
    --  ------------------------------
    procedure Clear (List : in out Attribute_List) is
---        procedure Free is
---          new Ada.Unchecked_Deallocation (Object => Attribute,
---                                          Name   => Attribute_Access);
---        Item : Attribute_Access;
    begin
---        while not List.List.Is_Empty loop
---           Item := List.List.Last_Element;
---           List.List.Delete_Last;
---           Free (Item);
---        end loop;
       List.List.Clear;
    end Clear;
 
