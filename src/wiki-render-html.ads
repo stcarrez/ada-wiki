@@ -99,6 +99,11 @@ private
                             Header : in Wiki.Strings.WString;
                             Level  : in Positive);
 
+   --  Render the table of content.
+   procedure Render_Toc (Engine : in out Html_Renderer;
+                         Doc    : in Wiki.Documents.Document;
+                         Level  : in Natural);
+
    --  Render a link.
    procedure Render_Link (Engine : in out Html_Renderer;
                           Doc    : in Wiki.Documents.Document;
