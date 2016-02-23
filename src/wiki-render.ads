@@ -18,6 +18,10 @@
 with Ada.Strings.Wide_Wide_Unbounded;
 with Wiki.Nodes;
 with Wiki.Documents;
+
+--  == Wiki Renderer ==
+--  The <tt>Wiki.Render</tt> package represents the renderer that takes a wiki document
+--  and render the result either in text, HTML or another format.
 package Wiki.Render is
 
    pragma Preelaborate;
@@ -68,8 +72,8 @@ package Wiki.Render is
                      Doc    : in Wiki.Documents.Document;
                      Node   : in Wiki.Nodes.Node_Type) is abstract;
 
-   --  Finish the rendering after complete wiki document nodes are rendered.
-   procedure Finish (Document : in out Renderer) is abstract;
+   --  Finish the rendering pass after all the wiki document nodes are rendered.
+   procedure Finish (Engine : in out Renderer) is abstract;
 
    --  Render the list of nodes from the document.
    procedure Render (Engine : in out Renderer'Class;
