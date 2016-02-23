@@ -185,4 +185,24 @@ package body Wiki.Documents is
       Iterate (Doc.Nodes, Process);
    end Iterate;
 
+   --  ------------------------------
+   --  Get the table of content node associated with the document.
+   --  ------------------------------
+   procedure Get_TOC (Doc : in out Document;
+                      TOC : out Wiki.Nodes.Node_List_Ref) is
+   begin
+      if Wiki.Nodes.Is_Empty (Doc.TOC) then
+         Append (Doc.TOC, new Node_Type '(Kind => N_TOC, Len => 0, others => <>));
+      end if;
+      TOC := Doc.TOC;
+   end Get_TOC;
+
+   --  ------------------------------
+   --  Get the table of content node associated with the document.
+   --  ------------------------------
+   function Get_TOC (Doc : in Document) return Wiki.Nodes.Node_List_Ref is
+   begin
+      return Doc.TOC;
+   end Get_TOC;
+
 end Wiki.Documents;
