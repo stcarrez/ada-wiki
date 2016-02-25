@@ -235,9 +235,10 @@ package body Wiki.Render.Text is
    --  Finish the document after complete wiki text has been parsed.
    --  ------------------------------
    overriding
-   procedure Finish (Document : in out Text_Renderer) is
+   procedure Finish (Engine : in out Text_Renderer;
+                     Doc    : in Wiki.Documents.Document) is
    begin
-      Document.Close_Paragraph;
+      Engine.Close_Paragraph;
    end Finish;
 
 end Wiki.Render.Text;
