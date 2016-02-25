@@ -107,6 +107,9 @@ package Wiki.Nodes is
    --  Returns True if the list reference is empty.
    function Is_Empty (List : in Node_List_Ref) return Boolean;
 
+   --  Get the number of nodes in the list.
+   function Length (List : in Node_List_Ref) return Natural;
+
 private
 
    NODE_LIST_BLOCK_SIZE : constant Positive := 20;
