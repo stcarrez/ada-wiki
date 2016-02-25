@@ -51,10 +51,10 @@ package body Wiki.Attributes is
    --  ------------------------------
    --  Get the attribute wide value.
    --  ------------------------------
-   function Get_Unbounded_Wide_Value (Position : in Cursor) return Unbounded_Wide_Wide_String is
+   function Get_Unbounded_Wide_Value (Position : in Cursor) return Wiki.Strings.UString is
       Attr : constant Attribute_Ref := Attribute_Vectors.Element (Position.Pos);
    begin
-      return To_Unbounded_Wide_Wide_String (Attr.Value.Value);
+      return Wiki.Strings.To_UString (Attr.Value.Value);
    end Get_Unbounded_Wide_Value;
 
    --  ------------------------------
@@ -97,13 +97,13 @@ package body Wiki.Attributes is
    --  Find the attribute with the given name and return its value.
    --  ------------------------------
    function Get_Attribute (List : in Attribute_List;
-                           Name : in String) return Unbounded_Wide_Wide_String is
+                           Name : in String) return Wiki.Strings.UString is
       Attr : constant Cursor := Find (List, Name);
    begin
       if Has_Element (Attr) then
          return Get_Unbounded_Wide_Value (Attr);
       else
-         return Null_Unbounded_Wide_Wide_String;
+         return Wiki.Strings.Null_UString;
       end if;
    end Get_Attribute;
 
@@ -141,11 +141,10 @@ package body Wiki.Attributes is
    --  Append the attribute to the attribute list.
    --  ------------------------------
    procedure Append (List  : in out Attribute_List;
-                     Name  : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
-                     Value : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String) is
+                     Name  : in Wiki.Strings.UString;
+                     Value : in Wiki.Strings.UString) is
    begin
-      Append (List, Ada.Strings.Wide_Wide_Unbounded.To_Wide_Wide_String (Name),
-              Ada.Strings.Wide_Wide_Unbounded.To_Wide_Wide_String (Value));
+      Append (List, Wiki.Strings.To_WString (Name), Wiki.Strings.To_WString (Value));
    end Append;
 
    --  ------------------------------
@@ -153,8 +152,8 @@ package body Wiki.Attributes is
    --  ------------------------------
    procedure Append (List  : in out Attribute_List;
                      Name  : in String;
-                     Value : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String) is
-      Val  : constant Wiki.Strings.WString := To_Wide_Wide_String (Value);
+                     Value : in Wiki.Strings.UString) is
+      Val  : constant Wiki.Strings.WString := Wiki.Strings.To_WString (Value);
       Attr : constant Attribute_Access
         := new Attribute '(Util.Refs.Ref_Entity with
                            Name_Length  => Name'Length,
