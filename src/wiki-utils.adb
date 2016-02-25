@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-utils -- Wiki utility operations
---  Copyright (C) 2015 Stephane Carrez
+--  Copyright (C) 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ package body Wiki.Utils is
    --  ------------------------------
    --  Render the wiki text according to the wiki syntax in HTML into a string.
    --  ------------------------------
-   function To_Html (Text   : in Wide_Wide_String;
+   function To_Html (Text   : in Wiki.Strings.WString;
                      Syntax : in Wiki.Wiki_Syntax) return String is
       Stream   : aliased Wiki.Streams.Html.Builders.Html_Output_Builder_Stream;
       Renderer : aliased Wiki.Render.Html.Html_Renderer;
@@ -50,7 +50,7 @@ package body Wiki.Utils is
    --  Render the wiki text according to the wiki syntax in text into a string.
    --  Wiki formatting and decoration are removed.
    --  ------------------------------
-   function To_Text (Text   : in Wide_Wide_String;
+   function To_Text (Text   : in Wiki.Strings.WString;
                      Syntax : in Wiki.Wiki_Syntax) return String is
       Stream   : aliased Wiki.Streams.Builders.Output_Builder_Stream;
       Doc      : Wiki.Documents.Document;
