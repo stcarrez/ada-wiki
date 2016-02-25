@@ -15,6 +15,7 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
+with Ada.Strings.Wide_Wide_Unbounded;
 with Util.Texts.Builders;
 
 package Wiki.Strings is
@@ -23,6 +24,16 @@ package Wiki.Strings is
 
    subtype WChar is Wide_Wide_Character;
    subtype WString is Wide_Wide_String;
+   subtype UString is Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
+
+   function To_UString (S : in WString) return UString
+     renames Ada.Strings.Wide_Wide_Unbounded.To_Unbounded_Wide_Wide_String;
+
+   function To_WString (S : in UString) return WString
+     renames Ada.Strings.Wide_Wide_Unbounded.To_Wide_Wide_String;
+
+   Null_UString : UString
+     renames Ada.Strings.Wide_Wide_Unbounded.Null_Unbounded_Wide_Wide_String;
 
    package Wide_Wide_Builders is new Util.Texts.Builders (Element_Type => WChar,
                                                           Input        => WString,
