@@ -42,7 +42,7 @@ package body Wiki.Attributes is
    --  ------------------------------
    --  Get the attribute wide value.
    --  ------------------------------
-   function Get_Wide_Value (Position : in Cursor) return Wide_Wide_String is
+   function Get_Wide_Value (Position : in Cursor) return Wiki.Strings.WString is
       Attr : constant Attribute_Ref := Attribute_Vectors.Element (Position.Pos);
    begin
       return Attr.Value.Value;
@@ -111,7 +111,7 @@ package body Wiki.Attributes is
    --  Find the attribute with the given name and return its value.
    --  ------------------------------
    function Get_Attribute (List : in Attribute_List;
-                           Name : in String) return Wide_Wide_String is
+                           Name : in String) return Wiki.Strings.WString is
       Attr : constant Cursor := Find (List, Name);
    begin
       if Has_Element (Attr) then
@@ -125,8 +125,8 @@ package body Wiki.Attributes is
    --  Append the attribute to the attribute list.
    --  ------------------------------
    procedure Append (List  : in out Attribute_List;
-                     Name  : in Wide_Wide_String;
-                     Value : in Wide_Wide_String) is
+                     Name  : in Wiki.Strings.WString;
+                     Value : in Wiki.Strings.WString) is
       Attr : constant Attribute_Access
         := new Attribute '(Util.Refs.Ref_Entity with
                            Name_Length  => Name'Length,
@@ -154,8 +154,7 @@ package body Wiki.Attributes is
    procedure Append (List  : in out Attribute_List;
                      Name  : in String;
                      Value : in Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String) is
-      Val : constant Wide_Wide_String
-        := To_Wide_Wide_String (Value);
+      Val  : constant Wiki.Strings.WString := To_Wide_Wide_String (Value);
       Attr : constant Attribute_Access
         := new Attribute '(Util.Refs.Ref_Entity with
                            Name_Length  => Name'Length,
@@ -194,8 +193,8 @@ package body Wiki.Attributes is
    --  Iterate over the list attributes and call the <tt>Process</tt> procedure.
    --  ------------------------------
    procedure Iterate (List    : in Attribute_List;
-                      Process : not null access procedure (Name : in String;
-                                                           Value : in Wide_Wide_String)) is
+                      Process : not null access procedure (Name  : in String;
+                                                           Value : in Wiki.Strings.WString)) is
       Iter : Attribute_Vectors.Cursor := List.List.First;
       Item : Attribute_Ref;
    begin
