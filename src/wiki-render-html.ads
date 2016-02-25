@@ -66,7 +66,8 @@ package Wiki.Render.Html is
 
    --  Finish the document after complete wiki text has been parsed.
    overriding
-   procedure Finish (Engine : in out Html_Renderer);
+   procedure Finish (Engine : in out Html_Renderer;
+                     Doc    : in Wiki.Documents.Document);
 
 private
 
