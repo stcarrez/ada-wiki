@@ -141,4 +141,16 @@ package body Wiki.Nodes is
       return List.Is_Null;
    end Is_Empty;
 
+   --  ------------------------------
+   --  Get the number of nodes in the list.
+   --  ------------------------------
+   function Length (List : in Node_List_Ref) return Natural is
+   begin
+      if List.Is_Null then
+         return 0;
+      else
+         return List.Value.Length;
+      end if;
+   end Length;
+
 end Wiki.Nodes;
