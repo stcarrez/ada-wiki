@@ -72,7 +72,8 @@ package Wiki.Render.Text is
 
    --  Finish the document after complete wiki text has been parsed.
    overriding
-   procedure Finish (Document : in out Text_Renderer);
+   procedure Finish (Engine : in out Text_Renderer;
+                     Doc    : in Wiki.Documents.Document);
 
 private
 
