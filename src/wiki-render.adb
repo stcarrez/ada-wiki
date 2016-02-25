@@ -81,7 +81,7 @@ package body Wiki.Render is
       end Process;
    begin
       Doc.Iterate (Process'Access);
-      Engine.Finish;
+      Engine.Finish (Doc);
    end Render;
 
 end Wiki.Render;
