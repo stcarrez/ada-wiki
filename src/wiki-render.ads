@@ -73,7 +73,8 @@ package Wiki.Render is
                      Node   : in Wiki.Nodes.Node_Type) is abstract;
 
    --  Finish the rendering pass after all the wiki document nodes are rendered.
-   procedure Finish (Engine : in out Renderer) is abstract;
+   procedure Finish (Engine : in out Renderer;
+                     Doc    : in Wiki.Documents.Document) is null;
 
    --  Render the list of nodes from the document.
    procedure Render (Engine : in out Renderer'Class;
