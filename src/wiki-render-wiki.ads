@@ -95,7 +95,8 @@ package Wiki.Render.Wiki is
                          Node   : in Nodes.Node_Type);
 
    --  Finish the document after complete wiki text has been parsed.
-   procedure Finish (Engine : in out Wiki_Renderer);
+   procedure Finish (Engine : in out Wiki_Renderer;
+                     Doc    : in Documents.Document);
 
    --  Set the text style format.
    procedure Set_Format (Engine : in out Wiki_Renderer;

@@ -570,7 +570,8 @@ package body Wiki.Render.Wiki is
 
    --  Finish the document after complete wiki text has been parsed.
    overriding
-   procedure Finish (Engine : in out Wiki_Renderer) is
+   procedure Finish (Engine : in out Wiki_Renderer;
+                     Doc    : in Documents.Document) is
    begin
       Engine.Set_Format (Empty_Formats);
    end Finish;
