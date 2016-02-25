@@ -19,6 +19,7 @@ with Wiki.Parsers;
 with Wiki.Render.Text;
 with Wiki.Render.Html;
 with Wiki.Filters.Html;
+with Wiki.Filters.TOC;
 with Wiki.Streams.Builders;
 with Wiki.Streams.Html.Builders;
 with Wiki.Documents;
@@ -33,9 +34,11 @@ package body Wiki.Utils is
       Renderer : aliased Wiki.Render.Html.Html_Renderer;
       Doc      : Wiki.Documents.Document;
       Filter   : aliased Wiki.Filters.Html.Html_Filter_Type;
+      TOC      : aliased Wiki.Filters.TOC.TOC_Filter;
       Engine   : Wiki.Parsers.Parser;
    begin
       Renderer.Set_Output_Stream (Stream'Unchecked_Access);
+      Engine.Add_Filter (TOC'Unchecked_Access);
       Engine.Add_Filter (Filter'Unchecked_Access);
       Engine.Set_Syntax (Syntax);
       Engine.Parse (Text, Doc);
