@@ -35,4 +35,11 @@ package Wiki.Plugins is
                      Document : in out Wiki.Documents.Document;
                      Params   : in out Wiki.Attributes.Attribute_List) is abstract;
 
+   type Plugin_Factory is limited Interface;
+   type Plugin_Factory_Access is access all Plugin_Factory'Class;
+
+   --  Find a plugin knowing its name.
+   function Find (Factory : in Plugin_Factory;
+                  Name    : in String) return Wiki_Plugin_Access is abstract;
+
 end Wiki.Plugins;
