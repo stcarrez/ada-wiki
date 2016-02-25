@@ -16,6 +16,7 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Strings.Wide_Wide_Unbounded;
+with Wiki.Strings;
 private with Ada.Containers.Vectors;
 private with Ada.Finalization;
 private with Util.Refs;
@@ -39,7 +40,7 @@ package Wiki.Attributes is
    function Get_Value (Position : in Cursor) return String;
 
    --  Get the attribute wide value.
-   function Get_Wide_Value (Position : in Cursor) return Wide_Wide_String;
+   function Get_Wide_Value (Position : in Cursor) return Wiki.Strings.WString;
 
    --  Get the attribute wide value.
    function Get_Unbounded_Wide_Value (Position : in Cursor) return Unbounded_Wide_Wide_String;
@@ -63,12 +64,12 @@ package Wiki.Attributes is
 
    --  Find the attribute with the given name and return its value.
    function Get_Attribute (List : in Attribute_List;
-                           Name : in String) return Wide_Wide_String;
+                           Name : in String) return Wiki.Strings.WString;
 
    --  Append the attribute to the attribute list.
    procedure Append (List  : in out Attribute_List;
-                     Name  : in Wide_Wide_String;
-                     Value : in Wide_Wide_String);
+                     Name  : in Wiki.Strings.WString;
+                     Value : in Wiki.Strings.WString);
 
    --  Append the attribute to the attribute list.
    procedure Append (List  : in out Attribute_List;
@@ -91,15 +92,15 @@ package Wiki.Attributes is
 
    --  Iterate over the list attributes and call the <tt>Process</tt> procedure.
    procedure Iterate (List    : in Attribute_List;
-                      Process : not null access procedure (Name : in String;
-                                                           Value : in Wide_Wide_String));
+                      Process : not null access procedure (Name  : in String;
+                                                           Value : in Wiki.Strings.WString));
 
 private
 
    type Attribute (Name_Length, Value_Length : Natural) is limited
    new Util.Refs.Ref_Entity with record
       Name   : String (1 .. Name_Length);
-      Value  : Wide_Wide_String (1 .. Value_Length);
+      Value  : Wiki.Strings.WString (1 .. Value_Length);
    end record;
    type Attribute_Access is access all Attribute;
 
