@@ -15,7 +15,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Wide_Wide_Characters.Handling;
 
 with Wiki.Helpers;
 package body Wiki.Render.Wiki is
@@ -341,7 +340,7 @@ package body Wiki.Render.Wiki is
          Append (Engine.Content, Text (Start .. Last));
       else
          for I in Start .. Last loop
-            if Ada.Wide_Wide_Characters.Handling.Is_Line_Terminator (Text (I)) then
+            if Helpers.Is_Newline (Text (I)) then
                if Engine.Empty_Line = False then
                   if Apply_Format and then Engine.Format /= Empty_Formats then
                      Engine.Set_Format (Empty_Formats);
@@ -391,7 +390,7 @@ package body Wiki.Render.Wiki is
       Engine.New_Line;
       Engine.Output.Write (Engine.Tags (Preformat_Start).all);
       for I in Content'Range loop
-         if Ada.Wide_Wide_Characters.Handling.Is_Line_Terminator (Content (I)) then
+         if Helpers.Is_Newline (Content (I)) then
             Col := 0;
          else
             Col := Col + 1;
@@ -568,10 +567,13 @@ package body Wiki.Render.Wiki is
       end case;
    end Render_Tag;
 
+   --  ------------------------------
    --  Finish the document after complete wiki text has been parsed.
+   --  ------------------------------
    overriding
    procedure Finish (Engine : in out Wiki_Renderer;
                      Doc    : in Documents.Document) is
+      pragma Unreferenced (Doc);
    begin
       Engine.Set_Format (Empty_Formats);
    end Finish;
