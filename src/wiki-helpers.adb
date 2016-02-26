@@ -36,6 +36,14 @@ package body Wiki.Helpers is
    end Is_Space_Or_Newline;
 
    --  ------------------------------
+   --  Returns True if the character is a line terminator.
+   --  ------------------------------
+   function Is_Newline (C : in Wiki.Strings.WChar) return Boolean is
+   begin
+      return Ada.Wide_Wide_Characters.Handling.Is_Line_Terminator (C);
+   end Is_Newline;
+
+   --  ------------------------------
    --  Returns True if the text is a valid URL
    --  ------------------------------
    function Is_Url (Text : in Wiki.Strings.WString) return Boolean is
