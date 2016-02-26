@@ -30,6 +30,9 @@ package Wiki.Strings is
    function To_WChar (C : in Character) return WChar
                       renames Ada.Characters.Conversions.To_Wide_Wide_Character;
 
+   function To_Char (C : in WChar; Substitute : in Character := ' ') return Character
+                     renames Ada.Characters.Conversions.To_Character;
+
    function To_UString (S : in WString) return UString
                         renames Ada.Strings.Wide_Wide_Unbounded.To_Unbounded_Wide_Wide_String;
 
