@@ -15,7 +15,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Strings.Wide_Wide_Unbounded;
 with Wiki.Strings;
 
 --  === HTML Output Stream ===
@@ -26,8 +25,6 @@ with Wiki.Strings;
 --  read the source Wiki content.  The <tt>Read</tt> procedure is called by the parser
 --  repeatedly while scanning the Wiki content.
 package Wiki.Streams.Html is
-
-   use Ada.Strings.Wide_Wide_Unbounded;
 
    type Html_Output_Stream is limited interface and Output_Stream;
    type Html_Output_Stream_Access is access all Html_Output_Stream'Class;
@@ -43,7 +40,7 @@ package Wiki.Streams.Html is
    --  The attribute value is escaped according to the XML escape rules.
    procedure Write_Wide_Attribute (Writer  : in out Html_Output_Stream;
                                    Name    : in String;
-                                   Content : in Unbounded_Wide_Wide_String) is abstract;
+                                   Content : in Wiki.Strings.UString) is abstract;
 
    --  Write an XML attribute within an XML element.
    --  The attribute value is escaped according to the XML escape rules.
