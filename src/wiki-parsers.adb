@@ -36,7 +36,7 @@ package body Wiki.Parsers is
    generic
       Format : Format_Type;
    procedure Parse_Double_Format (P     : in out Parser;
-                                  Token : in Wide_Wide_Character);
+                                  Token : in Wiki.Strings.WChar);
 
    --  Parse the beginning or the end of a single character sequence.  This procedure
    --  is instantiated for several format types (bold, italic, superscript, subscript, code).
@@ -45,7 +45,7 @@ package body Wiki.Parsers is
    generic
       Format : Format_Type;
    procedure Parse_Single_Format (P     : in out Parser;
-                                  Token : in Wide_Wide_Character);
+                                  Token : in Wiki.Strings.WChar);
 
    --  Parse an italic, bold or bold + italic sequence.
    --  Example:
@@ -53,14 +53,14 @@ package body Wiki.Parsers is
    --    '''name'''       (bold)
    --    '''''name'''''   (bold+italic)
    procedure Parse_Bold_Italic (P     : in out Parser;
-                                Token : in Wide_Wide_Character);
+                                Token : in Wiki.Strings.WChar);
 
    --  Parse a line break.
    --  Example:
    --     \\    (Creole)
    --     %%%   (Dotclear)
    procedure Parse_Line_Break (P     : in out Parser;
-                               Token : in Wide_Wide_Character);
+                               Token : in Wiki.Strings.WChar);
 
    --  Parse a link.
    --  Example:
@@ -72,7 +72,7 @@ package body Wiki.Parsers is
    --    [[link|name]]
    --  ------------------------------
    procedure Parse_Link (P     : in out Parser;
-                         Token : in Wide_Wide_Character);
+                         Token : in Wiki.Strings.WChar);
 
    --  Parse a space and take necessary formatting actions.
    --  Example:
@@ -81,7 +81,7 @@ package body Wiki.Parsers is
    --    ' # item'     => start an ordered list (Google)
    --    ' item'       => preformatted text (Google, Creole)
    procedure Parse_Space (P     : in out Parser;
-                          Token : in Wide_Wide_Character);
+                          Token : in Wiki.Strings.WChar);
 
    --  Parse a wiki heading.  The heading could start with '=' or '!'.
    --  The trailing equals are ignored.
@@ -89,7 +89,7 @@ package body Wiki.Parsers is
    --    == Level 2 ==
    --    !!! Level 3
    procedure Parse_Header (P     : in out Parser;
-                           Token : in Wide_Wide_Character);
+                           Token : in Wiki.Strings.WChar);
 
    --  Parse an image.
    --  Example:
@@ -97,7 +97,7 @@ package body Wiki.Parsers is
    --    ((url|alt text|position))
    --    ((url|alt text|position||description))
    procedure Parse_Image (P     : in out Parser;
-                          Token : in Wide_Wide_Character);
+                          Token : in Wiki.Strings.WChar);
 
    --  Parse a quote.
    --  Example:
@@ -105,22 +105,22 @@ package body Wiki.Parsers is
    --    {{name|language}}
    --    {{name|language|url}}
    procedure Parse_Quote (P     : in out Parser;
-                          Token : in Wide_Wide_Character);
+                          Token : in Wiki.Strings.WChar);
 
    --  Parse a horizontal rule.
    --  Example:
    --    ----
    procedure Parse_Horizontal_Rule (P     : in out Parser;
-                                    Token : in Wide_Wide_Character);
+                                    Token : in Wiki.Strings.WChar);
 
    procedure Parse_Token (P     : in out Parser;
                           Table : in Parser_Table);
 
    procedure Parse_End_Line (P     : in out Parser;
-                             Token : in Wide_Wide_Character);
+                             Token : in Wiki.Strings.WChar);
 
    procedure Parse_Preformatted (P     : in out Parser;
-                                 Token : in Wide_Wide_Character);
+                                 Token : in Wiki.Strings.WChar);
 
    --  Parse a blockquote.
    --  Example:
@@ -128,31 +128,31 @@ package body Wiki.Parsers is
    --    >>quote level 2
    --    >quote level 1
    procedure Parse_Blockquote (P     : in out Parser;
-                               Token : in Wide_Wide_Character);
+                               Token : in Wiki.Strings.WChar);
 
    procedure Parse_List (P     : in out Parser;
-                         Token : in Wide_Wide_Character);
+                         Token : in Wiki.Strings.WChar);
 
    procedure Parse_List_Or_Bold (P     : in out Parser;
-                                 Token : in Wide_Wide_Character);
+                                 Token : in Wiki.Strings.WChar);
 
    --  Parse a HTML component.
    --  Example:
    --     <b> or </b>
    procedure Parse_Maybe_Html (P     : in out Parser;
-                               Token : in Wide_Wide_Character);
+                               Token : in Wiki.Strings.WChar);
 
    --  Parse a list definition:
    --    ;item 1
    --    : definition 1
    procedure Parse_Item (P     : in out Parser;
-                         Token : in Wide_Wide_Character);
+                         Token : in Wiki.Strings.WChar);
 
    --  Parse a list definition:
    --    ;item 1
    --    : definition 1
    procedure Parse_Definition (P     : in out Parser;
-                               Token : in Wide_Wide_Character);
+                               Token : in Wiki.Strings.WChar);
 
    procedure Toggle_Format (P      : in out Parser;
                             Format : in Format_Type);
@@ -161,7 +161,7 @@ package body Wiki.Parsers is
    --  Peek the next character from the wiki text buffer.
    --  ------------------------------
    procedure Peek (P     : in out Parser;
-                   Token : out Wide_Wide_Character) is
+                   Token : out Wiki.Strings.WChar) is
    begin
       if P.Has_Pending then
          --  Return the pending character.
@@ -185,7 +185,7 @@ package body Wiki.Parsers is
    --  Put back the character so that it will be returned by the next call to Peek.
    --  ------------------------------
    procedure Put_Back (P     : in out Parser;
-                       Token : in Wide_Wide_Character) is
+                       Token : in Wiki.Strings.WChar) is
    begin
       P.Pending     := Token;
       P.Has_Pending := True;
@@ -225,7 +225,7 @@ package body Wiki.Parsers is
    --  Skip white spaces and tabs.
    --  ------------------------------
    procedure Skip_Spaces (P : in out Parser) is
-      C : Wide_Wide_Character;
+      C : Wiki.Strings.WChar;
    begin
       while not P.Is_Eof loop
          Peek (P, C);
@@ -255,7 +255,7 @@ package body Wiki.Parsers is
    --  Append a character to the wiki text buffer.
    --  ------------------------------
    procedure Parse_Text (P     : in out Parser;
-                         Token : in Wide_Wide_Character) is
+                         Token : in Wiki.Strings.WChar) is
    begin
       Append (P.Text, Token);
       P.Empty_Line := False;
@@ -265,7 +265,7 @@ package body Wiki.Parsers is
    --  Skip all the spaces and tabs as well as end of the current line (CR+LF).
    --  ------------------------------
    procedure Skip_End_Of_Line (P : in out Parser) is
-      C : Wide_Wide_Character;
+      C : Wiki.Strings.WChar;
    begin
       loop
          Peek (P, C);
@@ -293,11 +293,11 @@ package body Wiki.Parsers is
    --    ' pre-formattted'
    --  ------------------------------
    procedure Parse_Preformatted (P     : in out Parser;
-                                 Token : in Wide_Wide_Character) is
+                                 Token : in Wiki.Strings.WChar) is
       procedure Add_Preformatted (Content : in Wiki.Strings.WString);
 
-      C          : Wide_Wide_Character;
-      Stop_Token : Wide_Wide_Character;
+      C          : Wiki.Strings.WChar;
+      Stop_Token : Wiki.Strings.WChar;
       Format     : Unbounded_Wide_Wide_String;
       Col        : Natural;
       Is_Html    : Boolean := False;
@@ -424,11 +424,11 @@ package body Wiki.Parsers is
    --    !!! Level 3
    --  ------------------------------
    procedure Parse_Header (P     : in out Parser;
-                           Token : in Wide_Wide_Character) is
+                           Token : in Wiki.Strings.WChar) is
 
       procedure Add_Header (Content : in Wiki.Strings.WString);
 
-      C      : Wide_Wide_Character;
+      C      : Wiki.Strings.WChar;
       Level  : Integer := 1;
 
       procedure Add_Header (Content : in Wiki.Strings.WString) is
@@ -535,7 +535,7 @@ package body Wiki.Parsers is
    --    [[link|name]]
    --  ------------------------------
    procedure Parse_Link (P     : in out Parser;
-                         Token : in Wide_Wide_Character) is
+                         Token : in Wiki.Strings.WChar) is
 
       --  Parse a link component
       procedure Parse_Link_Token (Into : in out Unbounded_Wide_Wide_String);
@@ -545,7 +545,7 @@ package body Wiki.Parsers is
       Language   : Unbounded_Wide_Wide_String;
       Link_Title : Unbounded_Wide_Wide_String;
       Tmp        : Unbounded_Wide_Wide_String;
-      C          : Wide_Wide_Character;
+      C          : Wiki.Strings.WChar;
 
       procedure Parse_Link_Token (Into : in out Unbounded_Wide_Wide_String) is
       begin
@@ -628,7 +628,7 @@ package body Wiki.Parsers is
    --    {{name|language|url}}
    --  ------------------------------
    procedure Parse_Quote (P     : in out Parser;
-                          Token : in Wide_Wide_Character) is
+                          Token : in Wiki.Strings.WChar) is
 
       --  Parse a quote component
       procedure Parse_Quote_Token (Into : in out Unbounded_Wide_Wide_String);
@@ -636,7 +636,7 @@ package body Wiki.Parsers is
       Link       : Unbounded_Wide_Wide_String;
       Quote      : Unbounded_Wide_Wide_String;
       Language   : Unbounded_Wide_Wide_String;
-      C          : Wide_Wide_Character;
+      C          : Wiki.Strings.WChar;
 
       procedure Parse_Quote_Token (Into : in out Unbounded_Wide_Wide_String) is
       begin
@@ -686,8 +686,8 @@ package body Wiki.Parsers is
    --    ---- (dotclear)
    --  ------------------------------
    procedure Parse_Horizontal_Rule (P     : in out Parser;
-                                    Token : in Wide_Wide_Character) is
-      C     : Wide_Wide_Character;
+                                    Token : in Wiki.Strings.WChar) is
+      C     : Wiki.Strings.WChar;
       Count : Natural := 1;
    begin
       loop
@@ -721,7 +721,7 @@ package body Wiki.Parsers is
    --    ((url|alt text|position||description))
    --  ------------------------------
    procedure Parse_Image (P     : in out Parser;
-                          Token : in Wide_Wide_Character) is
+                          Token : in Wiki.Strings.WChar) is
 
       --  Parse a image component
       procedure Parse_Image_Token (Into : in out Unbounded_Wide_Wide_String);
@@ -730,7 +730,7 @@ package body Wiki.Parsers is
       Alt        : Unbounded_Wide_Wide_String;
       Position   : Unbounded_Wide_Wide_String;
       Desc       : Unbounded_Wide_Wide_String;
-      C          : Wide_Wide_Character;
+      C          : Wiki.Strings.WChar;
 
       procedure Parse_Image_Token (Into : in out Unbounded_Wide_Wide_String) is
       begin
@@ -792,7 +792,7 @@ package body Wiki.Parsers is
    --    _name_    *bold*   `code`
    --  ------------------------------
    procedure Parse_Single_Format (P     : in out Parser;
-                                  Token : in Wide_Wide_Character) is
+                                  Token : in Wiki.Strings.WChar) is
       pragma Unreferenced (Token);
    begin
       Toggle_Format (P, Format);
@@ -812,8 +812,8 @@ package body Wiki.Parsers is
    --    --name--  **bold** ~~strike~~
    --  ------------------------------
    procedure Parse_Double_Format (P     : in out Parser;
-                                  Token : in Wide_Wide_Character) is
-      C : Wide_Wide_Character;
+                                  Token : in Wiki.Strings.WChar) is
+      C : Wiki.Strings.WChar;
    begin
       Peek (P, C);
       if C = Token then
@@ -839,8 +839,8 @@ package body Wiki.Parsers is
    --    '''''name'''''   (bold+italic)
    --  ------------------------------
    procedure Parse_Bold_Italic (P     : in out Parser;
-                                Token : in Wide_Wide_Character) is
-      C     : Wide_Wide_Character;
+                                Token : in Wiki.Strings.WChar) is
+      C     : Wiki.Strings.WChar;
       Count : Natural := 1;
    begin
       loop
@@ -881,8 +881,8 @@ package body Wiki.Parsers is
    end Parse_Bold_Italic;
 
    procedure Parse_List (P     : in out Parser;
-                         Token : in Wide_Wide_Character) is
-      C     : Wide_Wide_Character;
+                         Token : in Wiki.Strings.WChar) is
+      C     : Wiki.Strings.WChar;
       Level : Natural := 1;
    begin
       if not P.Empty_Line then
@@ -904,8 +904,8 @@ package body Wiki.Parsers is
    end Parse_List;
 
    procedure Parse_List_Or_Bold (P     : in out Parser;
-                                 Token : in Wide_Wide_Character) is
-      C     : Wide_Wide_Character;
+                                 Token : in Wiki.Strings.WChar) is
+      C     : Wiki.Strings.WChar;
       Level : Natural := 1;
    begin
       if not P.Empty_Line then
@@ -932,7 +932,7 @@ package body Wiki.Parsers is
    --    : definition 1
    --  ------------------------------
    procedure Parse_Item (P     : in out Parser;
-                         Token : in Wide_Wide_Character) is
+                         Token : in Wiki.Strings.WChar) is
    begin
       if not P.Empty_Line then
          Parse_Text (P, Token);
@@ -953,7 +953,7 @@ package body Wiki.Parsers is
    --    : definition 1
    --  ------------------------------
    procedure Parse_Definition (P     : in out Parser;
-                               Token : in Wide_Wide_Character) is
+                               Token : in Wiki.Strings.WChar) is
    begin
       if not P.Empty_Line then
          Parse_Text (P, Token);
@@ -972,8 +972,8 @@ package body Wiki.Parsers is
    --    >quote level 1
    --  ------------------------------
    procedure Parse_Blockquote (P     : in out Parser;
-                               Token : in Wide_Wide_Character) is
-      C     : Wide_Wide_Character;
+                               Token : in Wiki.Strings.WChar) is
+      C     : Wiki.Strings.WChar;
       Level : Natural := 1;
    begin
       if not P.Empty_Line then
@@ -1006,8 +1006,8 @@ package body Wiki.Parsers is
    --    ' item'       => preformatted text (Google, Creole)
    --  ------------------------------
    procedure Parse_Space (P     : in out Parser;
-                          Token : in Wide_Wide_Character) is
-      C     : Wide_Wide_Character;
+                          Token : in Wiki.Strings.WChar) is
+      C     : Wiki.Strings.WChar;
    begin
       if P.Empty_Line then
          loop
@@ -1028,8 +1028,8 @@ package body Wiki.Parsers is
    end Parse_Space;
 
    procedure Parse_End_Line (P     : in out Parser;
-                             Token : in Wide_Wide_Character) is
-      C     : Wide_Wide_Character := Token;
+                             Token : in Wiki.Strings.WChar) is
+      C     : Wiki.Strings.WChar := Token;
       Count : Positive := 1;
    begin
       if P.Is_Eof then
@@ -1075,8 +1075,8 @@ package body Wiki.Parsers is
    --     %%%   (Dotclear)
    --  ------------------------------
    procedure Parse_Line_Break (P     : in out Parser;
-                               Token : in Wide_Wide_Character) is
-      C : Wide_Wide_Character;
+                               Token : in Wiki.Strings.WChar) is
+      C : Wiki.Strings.WChar;
    begin
       Peek (P, C);
 
@@ -1112,7 +1112,7 @@ package body Wiki.Parsers is
    --     <b> or </b>
    --  ------------------------------
    procedure Parse_Maybe_Html (P     : in out Parser;
-                               Token : in Wide_Wide_Character) is
+                               Token : in Wiki.Strings.WChar) is
       pragma Unreferenced (Token);
    begin
       Wiki.Parsers.Html.Parse_Element (P);
@@ -1293,11 +1293,11 @@ package body Wiki.Parsers is
 
       overriding
       procedure Read (Buf    : in out Wide_Input;
-                      Token  : out Wide_Wide_Character;
+                      Token  : out Wiki.Strings.WChar;
                       Is_Eof : out Boolean);
 
       procedure Read (Buf    : in out Wide_Input;
-                      Token  : out Wide_Wide_Character;
+                      Token  : out Wiki.Strings.WChar;
                       Is_Eof : out Boolean) is
       begin
          if Buf.Pos > Text'Last then
@@ -1369,7 +1369,7 @@ package body Wiki.Parsers is
 
    procedure Parse_Token (P     : in out Parser;
                           Table : in Parser_Table) is
-      C : Wide_Wide_Character;
+      C : Wiki.Strings.WChar;
    begin
       P.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
       P.In_Paragraph := True;
@@ -1378,7 +1378,7 @@ package body Wiki.Parsers is
          if C > '~' then
             Parse_Text (P, C);
          else
-            Table (Wide_Wide_Character'Pos (C)).all (P, C);
+            Table (Wiki.Strings.WChar'Pos (C)).all (P, C);
          end if;
       end loop;
 
