@@ -70,6 +70,11 @@ package Wiki.Attributes is
 
    --  Append the attribute to the attribute list.
    procedure Append (List  : in out Attribute_List;
+                     Name  : in String;
+                     Value : in Wiki.Strings.WString);
+
+   --  Append the attribute to the attribute list.
+   procedure Append (List  : in out Attribute_List;
                      Name  : in Wiki.Strings.UString;
                      Value : in Wiki.Strings.UString);
 
