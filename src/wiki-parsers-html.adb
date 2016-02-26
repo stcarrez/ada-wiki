@@ -15,7 +15,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Characters.Conversions;
 with Ada.Strings.Wide_Wide_Unbounded;
 
 with Wiki.Helpers;
@@ -238,7 +237,7 @@ package body Wiki.Parsers.Html is
          Peek (P, C);
          exit when C = ';' or else P.Is_Eof;
          Len := Len + 1;
-         Name (Len) := Ada.Characters.Conversions.To_Character (C);
+         Name (Len) := Wiki.Strings.To_Char (C);
       end loop;
       while Low <= High loop
          Pos := (Low + High) / 2;
@@ -255,7 +254,7 @@ package body Wiki.Parsers.Html is
       --  The HTML entity is not recognized: we must treat it as plain wiki text.
       Parse_Text (P, '&');
       for I in 1 .. Len loop
-         Parse_Text (P, Ada.Characters.Conversions.To_Wide_Wide_Character (Name (I)));
+         Parse_Text (P, Wiki.Strings.To_WChar (Name (I)));
       end loop;
    end Parse_Entity;
 
