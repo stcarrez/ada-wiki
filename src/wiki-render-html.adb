@@ -15,12 +15,9 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Characters.Conversions;
 with Util.Strings;
 
 package body Wiki.Render.Html is
-
-   package ACC renames Ada.Characters.Conversions;
 
    --  ------------------------------
    --  Set the output stream.
@@ -73,7 +70,6 @@ package body Wiki.Render.Html is
             Engine.Render_Preformatted (Node.Preformatted, "");
 
          when Wiki.Nodes.N_INDENT =>
-            -- Engine.Indent_Level := Node.Level;
             null;
 
          when Wiki.Nodes.N_LIST =>
@@ -101,6 +97,12 @@ package body Wiki.Render.Html is
          when Wiki.Nodes.N_TAG_START =>
             Engine.Render_Tag (Doc, Node);
 
+         when Wiki.Nodes.N_TOC =>
+            Engine.Render_TOC (Doc, Node.Level);
+
+         when Wiki.Nodes.N_TOC_ENTRY =>
+            null;
+
       end case;
    end Render;
 
@@ -117,14 +119,22 @@ package body Wiki.Render.Html is
          Engine.Need_Paragraph := False;
       elsif Node.Tag_Start = Wiki.UL_TAG
         or Node.Tag_Start = Wiki.OL_TAG
-        or Node.Tag_Start = Wiki.DL_Tag
+        or Node.Tag_Start = Wiki.DL_TAG
         or Node.Tag_Start = Wiki.DT_TAG
         or Node.Tag_Start = Wiki.DD_TAG
         or Node.Tag_Start = Wiki.LI_TAG
-        or Node.Tag_Start = Wiki.TABLE_TAG then
+        or Node.Tag_Start = Wiki.H1_TAG
+        or Node.Tag_Start = Wiki.H2_TAG
+        or Node.Tag_Start = Wiki.H3_TAG
+        or Node.Tag_Start = Wiki.H4_TAG
+        or Node.Tag_Start = Wiki.H5_TAG
+        or Node.Tag_Start = Wiki.H6_TAG
+        or Node.Tag_Start = Wiki.TABLE_TAG
+      then
          Engine.Close_Paragraph;
          Engine.Need_Paragraph := False;
       end if;
+      Engine.Open_Paragraph;
       Engine.Output.Start_Element (Name.all);
       while Wiki.Attributes.Has_Element (Iter) loop
          Engine.Output.Write_Wide_Attribute (Name    => Wiki.Attributes.Get_Name (Iter),
@@ -171,6 +181,88 @@ package body Wiki.Render.Html is
             Engine.Output.Write_Wide_Element ("h3", Header);
       end case;
    end Render_Header;
+
+   --  ------------------------------
+   --  Render the table of content.
+   --  ------------------------------
+   procedure Render_TOC (Engine : in out Html_Renderer;
+                         Doc    : in Wiki.Documents.Document;
+                         Level  : in Natural) is
+
+      procedure Render_Entry (Node : in Wiki.Nodes.Node_Type);
+      procedure Set_Current_Level (New_Level : in Natural);
+      function Get_Number return Wiki.Strings.WString;
+
+      use Wiki.Nodes;
+
+      type Toc_Number_Array is array (1 .. 6) of Positive;
+
+      Current_Level : Natural := 0;
+      Toc_Number    : Toc_Number_Array := (others => 1);
+
+      procedure Set_Current_Level (New_Level : in Natural) is
+      begin
+         if New_Level = Current_Level and then New_Level /= 0 then
+            Engine.Output.End_Element ("li");
+            Engine.Output.Start_Element ("li");
+         end if;
+
+         --  Close the ul/li lists up to the expected level.
+         while New_Level < Current_Level loop
+            Engine.Output.End_Element ("li");
+            Engine.Output.End_Element ("ul");
+            Current_Level := Current_Level - 1;
+         end loop;
+         while New_Level > Current_Level loop
+            Engine.Output.Start_Element ("ul");
+            Engine.Output.Start_Element ("li");
+            Current_Level := Current_Level + 1;
+            Toc_Number (Current_Level) := 1;
+         end loop;
+      end Set_Current_Level;
+
+      function Get_Number return Wiki.Strings.WString is
+         Result : Unbounded_Wide_Wide_String;
+      begin
+         for I in 1 .. Current_Level loop
+            declare
+               N : constant Wiki.Strings.WString := Positive'Wide_Wide_Image (Toc_Number (I));
+            begin
+               if I > 1 then
+                  Append (Result, ".");
+               end if;
+               Append (Result, N (N'First + 1 .. N'Last));
+            end;
+         end loop;
+         return To_Wide_Wide_String (Result);
+      end Get_Number;
+
+      procedure Render_Entry (Node : in Wiki.Nodes.Node_Type) is
+      begin
+         if Node.Kind /= Wiki.Nodes.N_TOC_ENTRY or else Node.Level > Level then
+            return;
+         end if;
+         Set_Current_Level (Node.Level);
+         Engine.Output.Start_Element ("a");
+         Engine.Output.Start_Element ("span");
+         Engine.Output.Write_Wide_Text (Get_Number);
+         Engine.Output.End_Element ("span");
+         Engine.Output.Start_Element ("span");
+         Engine.Output.Write_Wide_Text (Node.Header);
+         Engine.Output.End_Element ("span");
+         Engine.Output.End_Element ("a");
+         Toc_Number (Current_Level) := Toc_Number (Current_Level) + 1;
+      end Render_Entry;
+
+      Toc : constant Wiki.Nodes.Node_List_Ref := Doc.Get_TOC;
+   begin
+      if Wiki.Nodes.Length (Toc) > 2 then
+         Engine.Output.Start_Element ("div");
+         Wiki.Nodes.Iterate (Toc, Render_Entry'Access);
+         Set_Current_Level (0);
+         Engine.Output.End_Element ("div");
+      end if;
+   end Render_TOC;
 
    --  ------------------------------
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
@@ -268,13 +360,17 @@ package body Wiki.Render.Html is
                           Doc    : in Wiki.Documents.Document;
                           Title  : in Wiki.Strings.WString;
                           Attr   : in Wiki.Attributes.Attribute_List) is
+      pragma Unreferenced (Doc);
 
       procedure Render_Attribute (Name  : in String;
-                                  Value : in Wide_Wide_String) is
+                                  Value : in Wiki.Strings.WString);
+
+      procedure Render_Attribute (Name  : in String;
+                                  Value : in Wiki.Strings.WString) is
       begin
          if Name = "href" then
             declare
-               URI    : Unbounded_Wide_Wide_String;
+               URI    : Wiki.Strings.UString;
                Exists : Boolean;
             begin
                Engine.Links.Make_Page_Link (Value, URI, Exists);
@@ -285,7 +381,8 @@ package body Wiki.Render.Html is
             return;
 
          elsif Name = "lang" or Name = "title" or Name = "rel" or Name = "target"
-         or Name = "style" or Name = "class" then
+           or Name = "style" or Name = "class"
+         then
             Engine.Output.Write_Wide_Attribute (Name, Value);
          end if;
       end Render_Attribute;
@@ -305,13 +402,17 @@ package body Wiki.Render.Html is
                            Doc    : in Wiki.Documents.Document;
                            Title  : in Wiki.Strings.WString;
                            Attr   : in Wiki.Attributes.Attribute_List) is
+      pragma Unreferenced (Doc);
 
       procedure Render_Attribute (Name  : in String;
-                                  Value : in Wide_Wide_String) is
+                                  Value : in Wiki.Strings.WString);
+
+      procedure Render_Attribute (Name  : in String;
+                                  Value : in Wiki.Strings.WString) is
       begin
          if Name = "src" then
             declare
-               URI    : Unbounded_Wide_Wide_String;
+               URI    : Wiki.Strings.UString;
                Width  : Natural;
                Height : Natural;
             begin
@@ -329,7 +430,8 @@ package body Wiki.Render.Html is
             return;
 
          elsif Name = "alt" or Name = "longdesc"
-           or Name = "style" or Name = "class" then
+           or Name = "style" or Name = "class"
+         then
             Engine.Output.Write_Wide_Attribute (Name, Value);
          end if;
       end Render_Attribute;
@@ -351,14 +453,20 @@ package body Wiki.Render.Html is
                            Doc    : in Wiki.Documents.Document;
                            Title  : in Wiki.Strings.WString;
                            Attr   : in Wiki.Attributes.Attribute_List) is
+      pragma Unreferenced (Doc);
 
       procedure Render_Attribute (Name  : in String;
-                                  Value : in Wide_Wide_String) is
+                                  Value : in Wiki.Strings.WString);
+
+      procedure Render_Attribute (Name  : in String;
+                                  Value : in Wiki.Strings.WString) is
       begin
          if Value'Length = 0 then
             return;
 
-         elsif Name = "cite" or Name = "title" or Name = "lang" or Name = "style" or Name = "class" then
+         elsif Name = "cite" or Name = "title" or Name = "lang"
+           or Name = "style" or Name = "class"
+         then
             Engine.Output.Write_Wide_Attribute (Name, Value);
          end if;
       end Render_Attribute;
@@ -433,8 +541,10 @@ package body Wiki.Render.Html is
    --  Finish the document after complete wiki text has been parsed.
    --  ------------------------------
    overriding
-   procedure Finish (Engine : in out Html_Renderer) is
+   procedure Finish (Engine : in out Html_Renderer;
+                     Doc    : in Wiki.Documents.Document) is
    begin
+      Engine.Render_TOC (Doc, 4);
       Engine.Close_Paragraph;
       Engine.Add_Blockquote (0);
    end Finish;

@@ -101,7 +101,7 @@ private
                             Level  : in Positive);
 
    --  Render the table of content.
-   procedure Render_Toc (Engine : in out Html_Renderer;
+   procedure Render_TOC (Engine : in out Html_Renderer;
                          Doc    : in Wiki.Documents.Document;
                          Level  : in Natural);
 
