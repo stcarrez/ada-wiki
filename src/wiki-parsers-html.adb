@@ -15,17 +15,14 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Strings.Wide_Wide_Unbounded;
 
 with Wiki.Helpers;
 with Wiki.Parsers.Html.Entities;
 package body Wiki.Parsers.Html is
 
-   use Ada.Strings.Wide_Wide_Unbounded;
-
    --  Parse an HTML attribute
    procedure Parse_Attribute_Name (P    : in out Parser;
-                                   Name : in out Unbounded_Wide_Wide_String);
+                                   Name : in out Wiki.Strings.UString);
 
    --  Parse a HTML/XML comment to strip it.
    procedure Parse_Comment (P : in out Parser);
@@ -36,7 +33,7 @@ package body Wiki.Parsers.Html is
    procedure Collect_Attributes (P     : in out Parser);
    function Is_Letter (C : in Wiki.Strings.WChar) return Boolean;
    procedure Collect_Attribute_Value (P     : in out Parser;
-                                      Value : in out Unbounded_Wide_Wide_String);
+                                      Value : in out Wiki.Strings.UString);
 
    function Is_Letter (C : in Wiki.Strings.WChar) return Boolean is
    begin
@@ -48,10 +45,10 @@ package body Wiki.Parsers.Html is
    --  Parse an HTML attribute
    --  ------------------------------
    procedure Parse_Attribute_Name (P    : in out Parser;
-                                   Name : in out Unbounded_Wide_Wide_String) is
+                                   Name : in out Wiki.Strings.UString) is
       C : Wiki.Strings.WChar;
    begin
-      Name := To_Unbounded_Wide_Wide_String ("");
+      Name := Wiki.Strings.To_UString ("");
       Skip_Spaces (P);
       while not P.Is_Eof loop
          Peek (P, C);
@@ -59,16 +56,16 @@ package body Wiki.Parsers.Html is
             Put_Back (P, C);
             return;
          end if;
-         Ada.Strings.Wide_Wide_Unbounded.Append (Name, C);
+         Wiki.Strings.Append (Name, C);
       end loop;
    end Parse_Attribute_Name;
 
    procedure Collect_Attribute_Value (P     : in out Parser;
-                                      Value : in out Unbounded_Wide_Wide_String) is
+                                      Value : in out Wiki.Strings.UString) is
       C     : Wiki.Strings.WChar;
       Token : Wiki.Strings.WChar;
    begin
-      Value := To_Unbounded_Wide_Wide_String ("");
+      Value := Wiki.Strings.To_UString ("");
       Peek (P, Token);
       if Wiki.Helpers.Is_Space (Token) then
          return;
@@ -76,14 +73,14 @@ package body Wiki.Parsers.Html is
          Put_Back (P, Token);
          return;
       elsif Token /= ''' and Token /= '"' then
-         Append (Value, Token);
+         Wiki.Strings.Append (Value, Token);
          while not P.Is_Eof loop
             Peek (P, C);
             if C = ''' or C = '"' or C = ' ' or C = '=' or C = '>' or C = '<' or C = '`' then
                Put_Back (P, C);
                return;
             end if;
-            Append (Value, C);
+            Wiki.Strings.Append (Value, C);
          end loop;
       else
          while not P.Is_Eof loop
@@ -91,7 +88,7 @@ package body Wiki.Parsers.Html is
             if C = Token then
                return;
             end if;
-            Append (Value, C);
+            Wiki.Strings.Append (Value, C);
          end loop;
       end if;
    end Collect_Attribute_Value;
@@ -107,8 +104,8 @@ package body Wiki.Parsers.Html is
    --  ------------------------------
    procedure Collect_Attributes (P     : in out Parser) is
       C     : Wiki.Strings.WChar;
-      Name  : Unbounded_Wide_Wide_String;
-      Value : Unbounded_Wide_Wide_String;
+      Name  : Wiki.Strings.UString;
+      Value : Wiki.Strings.UString;
    begin
       Wiki.Attributes.Clear (P.Attributes);
       while not P.Is_Eof loop
@@ -122,15 +119,15 @@ package body Wiki.Parsers.Html is
          if C = '=' then
             Collect_Attribute_Value (P, Value);
             Attributes.Append (P.Attributes, Name, Value);
-         elsif Wiki.Helpers.Is_Space (C) and Length (Name) > 0 then
-            Attributes.Append (P.Attributes, Name, Null_Unbounded_Wide_Wide_String);
+         elsif Wiki.Helpers.Is_Space (C) and Wiki.Strings.Length (Name) > 0 then
+            Attributes.Append (P.Attributes, Name, Wiki.Strings.Null_UString);
          end if;
       end loop;
       --  Peek (P, C);
 
       --  Add any pending attribute.
-      if Length (Name) > 0 then
-         Attributes.Append (P.Attributes, Name, Null_Unbounded_Wide_Wide_String);
+      if Wiki.Strings.Length (Name) > 0 then
+         Attributes.Append (P.Attributes, Name, Wiki.Strings.Null_UString);
       end if;
    end Collect_Attributes;
 
@@ -175,7 +172,7 @@ package body Wiki.Parsers.Html is
    --  or parse an end of HTML element </XXX>
    --  ------------------------------
    procedure Parse_Element (P : in out Parser) is
-      Name : Unbounded_Wide_Wide_String;
+      Name : Wiki.Strings.UString;
       C    : Wiki.Strings.WChar;
       Tag  : Wiki.Html_Tag;
    begin
@@ -193,7 +190,7 @@ package body Wiki.Parsers.Html is
          Put_Back (P, C);
       end if;
       Parse_Attribute_Name (P, Name);
-      Tag := Wiki.Find_Tag (To_Wide_Wide_String (Name));
+      Tag := Wiki.Find_Tag (Wiki.Strings.To_WString (Name));
       if C = '/' then
          Skip_Spaces (P);
          Peek (P, C);
