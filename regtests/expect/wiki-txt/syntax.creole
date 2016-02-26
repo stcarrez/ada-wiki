@@ -37,12 +37,12 @@ subscript
 __underline__
 A link
 
-titleA link
+title (A link)
 
 
 Alt text}}linkAlt textlink
 
-{A pre-formatted section 
+A pre-formatted section 
 
 [[Nowiki]]
 }}}

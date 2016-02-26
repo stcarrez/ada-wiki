@@ -40,7 +40,7 @@ Strike
 Delete
 A link
 
-A linktitle
+title (A link)
 
 
 item 1

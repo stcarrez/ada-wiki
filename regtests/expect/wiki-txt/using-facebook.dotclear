@@ -1,9 +1,9 @@
 
-Through this article you will learn how to use the http://oauth.net/OAuth 2.0 framework to let an application access service provider APIs such as Facebook API, Google+ API and others.
+Through this article you will learn how to use the OAuth 2.0 (http://oauth.net/) framework to let an application access service provider APIs such as Facebook API, Google+ API and others.
 Althought this article uses Ada as programming language and Facebook as service provider, most part also applies to other programming languages and other service providers.
 
 Overview
-http://oauth.net/OAuth 2.0 is an open standard for authorization.  It is used by service providers as authorization mechanism for most of their APIs.
+OAuth 2.0 (http://oauth.net/) is an open standard for authorization.  It is used by service providers as authorization mechanism for most of their APIs.
 The authorization workflow is depicted below:
 
 [1], first a user goes in the application which displays a link to the OAuth API provider asking the user to grant access to his data for the application,
@@ -15,7 +15,7 @@ The authorization workflow is depicted below:
 [3.3], The application ask the API provider to transform the grant code to an access token,
 
 [4] The application invokes the API provider with the access token
-OAuth WorkflowOAuth Workflow, juin 2012/images/samples/.OAuth_m.jpg
+OAuth Workflow OAuth Workflow, juin 2012
 
 Registering the application
 The first step is to register the application in the service provider (Facebook, Google+, Twitter, ...). 
@@ -26,9 +26,9 @@ An application secret is defined. It must be kept private to the application. Th
 
 A callback URL or domain name is registered in the service provider. As far as I'm concerned, I had to register the domain demo.vacs.fr.
 Facebook OAuth
-For the OAuth authorization process, we will use the http://code.google.com/p/ada-securityAda Security library and its Application type.
+For the OAuth authorization process, we will use the Ada Security (http://code.google.com/p/ada-security) library and its Application type.
 We will extend that type to expose some EL variables and an EL method that will be used in the authorization process. The
-http://blog.vacs.fr/index.php?post/2011/05/02/Ada-Server-Faces-Application-Example-part-3%3A-the-action-beanAda Server Faces Application Example part 3: the action bean
+Ada Server Faces Application Example part 3: the action bean (http://blog.vacs.fr/index.php?post/2011/05/02/Ada-Server-Faces-Application-Example-part-3%3A-the-action-bean)
 
 explains how to do that and many details will no be covered by this article.
 
@@ -79,7 +79,7 @@ the EL method authenticate will be called on the facebook bean (ie, our FB_Auth 
 The Authenticate procedure extracts from the request the OAuth state and code parameters.
 It verifies that the state parameter is a valid key that we submitted and it makes a HTTP POST request
 on the OAuth service provider to transform the code into an access token.  This step is handled
-by the http://code.google.com/p/ada-securityAda Security  library through the Request_Access_Token operation.
+by the Ada Security (http://code.google.com/p/ada-security)  library through the Request_Access_Token operation.
 
 procedure Authenticate (From    : in out Facebook_Auth;
                         Outcome : in out Ada.Strings.Unbounded.Unbounded_String) is
@@ -111,7 +111,7 @@ The access token must be saved in the user session or another per-user safe stor
 The access token can expire and if this happens a fresh new access token must be obtained.
 Getting the Facebook friends
 Until now we have dealt with the authorization process.  Let's look at using the service provider API and see how
-the http://code.google.com/p/ada-utilAda Utility Library will help in this task.
+the Ada Utility Library (http://code.google.com/p/ada-util) will help in this task.
 
 Defining the Ada beans
 To represent the API result, we will use an Ada bean object that can easily be used from a presentation page.
@@ -194,8 +194,8 @@ The HTTP GET operation must be made using SSL/TLS since this is part of OAuth 2.
 
 Now you are ready to use and access the user's data as easily as other information...
 References
- http://code.google.com/p/ada-asf/source/browse/trunk/samples/beans/facebook.adsfacebook.ads 
- http://code.google.com/p/ada-asf/source/browse/trunk/samples/beans/facebook.adbfacebook.adb 
-http://developers.facebook.com/docs/reference/api/Facebook API
+facebook.ads  ( http://code.google.com/p/ada-asf/source/browse/trunk/samples/beans/facebook.ads)
+facebook.adb  ( http://code.google.com/p/ada-asf/source/browse/trunk/samples/beans/facebook.adb)
+Facebook API (http://developers.facebook.com/docs/reference/api/)
 
 
