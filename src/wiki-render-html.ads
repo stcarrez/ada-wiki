@@ -37,6 +37,10 @@ package Wiki.Render.Html is
    procedure Set_Link_Renderer (Engine : in out Html_Renderer;
                                 Links    : in Link_Renderer_Access);
 
+   --  Set the render TOC flag that controls the TOC rendering.
+   procedure Set_Render_TOC (Engine : in out Html_Renderer;
+                             State  : in Boolean);
+
    --  Render the node instance from the document.
    overriding
    procedure Render (Engine : in out Html_Renderer;
@@ -79,16 +83,17 @@ private
    Default_Links : aliased Default_Link_Renderer;
 
    type Html_Renderer is new Renderer with record
-      Output         : Wiki.Streams.Html.Html_Output_Stream_Access := null;
-      Format         : Wiki.Format_Map := (others => False);
-      Links          : Link_Renderer_Access := Default_Links'Access;
-      Has_Paragraph  : Boolean := False;
-      Need_Paragraph : Boolean := False;
-      Has_Item       : Boolean := False;
-      Current_Level  : Natural := 0;
-      List_Styles    : List_Style_Array := (others => False);
-      Quote_Level    : Natural := 0;
-      Html_Level     : Natural := 0;
+      Output            : Wiki.Streams.Html.Html_Output_Stream_Access := null;
+      Format            : Wiki.Format_Map := (others => False);
+      Links             : Link_Renderer_Access := Default_Links'Access;
+      Has_Paragraph     : Boolean := False;
+      Need_Paragraph    : Boolean := False;
+      Has_Item          : Boolean := False;
+      Enable_Render_TOC : Boolean := False;
+      Current_Level     : Natural := 0;
+      List_Styles       : List_Style_Array := (others => False);
+      Quote_Level       : Natural := 0;
+      Html_Level        : Natural := 0;
    end record;
 
    procedure Render_Tag (Engine : in out Html_Renderer;
