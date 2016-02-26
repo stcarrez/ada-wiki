@@ -138,6 +138,22 @@ package body Wiki.Attributes is
    --  Append the attribute to the attribute list.
    --  ------------------------------
    procedure Append (List  : in out Attribute_List;
+                     Name  : in String;
+                     Value : in Wiki.Strings.WString) is
+      Attr : constant Attribute_Access
+        := new Attribute '(Util.Refs.Ref_Entity with
+                           Name_Length  => Name'Length,
+                           Value_Length => Value'Length,
+                           Name         => Name,
+                           Value        => Value);
+   begin
+      List.List.Append (Attribute_Refs.Create (Attr));
+   end Append;
+
+   --  ------------------------------
+   --  Append the attribute to the attribute list.
+   --  ------------------------------
+   procedure Append (List  : in out Attribute_List;
                      Name  : in Wiki.Strings.UString;
                      Value : in Wiki.Strings.UString) is
    begin
