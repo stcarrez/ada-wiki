@@ -33,6 +33,6 @@ private package Wiki.Parsers.Html is
 
    --  Parse an HTML entity such as &nbsp; and replace it with the corresponding code.
    procedure Parse_Entity (P     : in out Parser;
-                           Token : in Wide_Wide_Character);
+                           Token : in Wiki.Strings.WChar);
 
 end Wiki.Parsers.Html;
