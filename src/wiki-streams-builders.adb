@@ -19,7 +19,7 @@
 with GNAT.Encode_UTF8_String;
 package body Wiki.Streams.Builders is
 
-   use Wiki.Strings;
+--   use Wiki.Strings;
 
    package WBS renames Wiki.Strings.Wide_Wide_Builders;
 
@@ -28,7 +28,7 @@ package body Wiki.Streams.Builders is
    --  ------------------------------
    overriding
    procedure Write (Stream  : in out Output_Builder_Stream;
-                    Content : in Wide_Wide_String) is
+                    Content : in Wiki.Strings.WString) is
    begin
       WBS.Append (Stream.Content, Content);
    end Write;
@@ -38,7 +38,7 @@ package body Wiki.Streams.Builders is
    --  ------------------------------
    overriding
    procedure Write (Stream  : in out Output_Builder_Stream;
-                    Content : in Wide_Wide_Character) is
+                    Content : in Wiki.Strings.WChar) is
    begin
       WBS.Append (Stream.Content, Content);
    end Write;
@@ -57,21 +57,21 @@ package body Wiki.Streams.Builders is
    --  chunk.
    --  ------------------------------
    procedure Iterate (Source  : in Output_Builder_Stream;
-                      Process : not null access procedure (Chunk : in Wide_Wide_String)) is
+                      Process : not null access procedure (Chunk : in Wiki.Strings.WString)) is
    begin
-      Wide_Wide_Builders.Iterate (Source.Content, Process);
+      Strings.Wide_Wide_Builders.Iterate (Source.Content, Process);
    end Iterate;
 
    --  ------------------------------
    --  Convert what was collected in the writer builder to a string and return it.
    --  ------------------------------
    function To_String (Source : in Output_Builder_Stream) return String is
-      procedure Convert (Chunk : in Wide_Wide_String);
+      procedure Convert (Chunk : in Wiki.Strings.WString);
 
       Pos    : Natural := 1;
-      Result : String (1 .. 5 * Wide_Wide_Builders.Length (Source.Content));
+      Result : String (1 .. 5 * Strings.Wide_Wide_Builders.Length (Source.Content));
 
-      procedure Convert (Chunk : in Wide_Wide_String) is
+      procedure Convert (Chunk : in Wiki.Strings.WString) is
       begin
          for I in Chunk'Range loop
             GNAT.Encode_UTF8_String.Encode_Wide_Wide_Character (Char   => Chunk (I),
@@ -81,7 +81,7 @@ package body Wiki.Streams.Builders is
       end Convert;
 
    begin
-      Wide_Wide_Builders.Iterate (Source.Content, Convert'Access);
+      Strings.Wide_Wide_Builders.Iterate (Source.Content, Convert'Access);
       return Result (1 .. Pos - 1);
    end To_String;
 
