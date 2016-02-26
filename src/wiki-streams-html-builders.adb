@@ -104,8 +104,8 @@ package body Wiki.Streams.Html.Builders is
 
    procedure Write_Wide_Attribute (Stream  : in out Html_Output_Builder_Stream;
                                    Name    : in String;
-                                   Content : in Unbounded_Wide_Wide_String) is
-      Count : constant Natural := Length (Content);
+                                   Content : in Wiki.Strings.UString) is
+      Count : constant Natural := Wiki.Strings.Length (Content);
    begin
       if Stream.Close_Start then
          Stream.Write (' ');
@@ -114,7 +114,7 @@ package body Wiki.Streams.Html.Builders is
          Stream.Write ('"');
          for I in 1 .. Count loop
             declare
-               C : constant Wiki.Strings.WChar := Element (Content, I);
+               C : constant Wiki.Strings.WChar := Wiki.Strings.Element (Content, I);
             begin
                if C = '"' then
                   Stream.Write ("&quot;");
