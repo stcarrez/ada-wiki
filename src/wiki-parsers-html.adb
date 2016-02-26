@@ -34,11 +34,11 @@ package body Wiki.Parsers.Html is
    procedure Parse_Doctype (P : in out Parser);
 
    procedure Collect_Attributes (P     : in out Parser);
-   function Is_Letter (C : in Wide_Wide_Character) return Boolean;
+   function Is_Letter (C : in Wiki.Strings.WChar) return Boolean;
    procedure Collect_Attribute_Value (P     : in out Parser;
                                       Value : in out Unbounded_Wide_Wide_String);
 
-   function Is_Letter (C : in Wide_Wide_Character) return Boolean is
+   function Is_Letter (C : in Wiki.Strings.WChar) return Boolean is
    begin
       return C > ' ' and C /= ':' and C /= '>' and C /= ''' and C /= '"'
         and C /= '/' and C /= '=' and C /= '<';
@@ -49,7 +49,7 @@ package body Wiki.Parsers.Html is
    --  ------------------------------
    procedure Parse_Attribute_Name (P    : in out Parser;
                                    Name : in out Unbounded_Wide_Wide_String) is
-      C : Wide_Wide_Character;
+      C : Wiki.Strings.WChar;
    begin
       Name := To_Unbounded_Wide_Wide_String ("");
       Skip_Spaces (P);
@@ -65,8 +65,8 @@ package body Wiki.Parsers.Html is
 
    procedure Collect_Attribute_Value (P     : in out Parser;
                                       Value : in out Unbounded_Wide_Wide_String) is
-      C     : Wide_Wide_Character;
-      Token : Wide_Wide_Character;
+      C     : Wiki.Strings.WChar;
+      Token : Wiki.Strings.WChar;
    begin
       Value := To_Unbounded_Wide_Wide_String ("");
       Peek (P, Token);
@@ -106,7 +106,7 @@ package body Wiki.Parsers.Html is
    --  <name name='value' ...>
    --  ------------------------------
    procedure Collect_Attributes (P     : in out Parser) is
-      C     : Wide_Wide_Character;
+      C     : Wiki.Strings.WChar;
       Name  : Unbounded_Wide_Wide_String;
       Value : Unbounded_Wide_Wide_String;
    begin
@@ -138,7 +138,7 @@ package body Wiki.Parsers.Html is
    --  Parse a HTML/XML comment to strip it.
    --  ------------------------------
    procedure Parse_Comment (P : in out Parser) is
-      C     : Wide_Wide_Character;
+      C     : Wiki.Strings.WChar;
    begin
       Peek (P, C);
       while not P.Is_Eof loop
@@ -162,7 +162,7 @@ package body Wiki.Parsers.Html is
    --  Parse a simple DOCTYPE declaration and ignore it.
    --  ------------------------------
    procedure Parse_Doctype (P : in out Parser) is
-      C : Wide_Wide_Character;
+      C : Wiki.Strings.WChar;
    begin
       while not P.Is_Eof loop
          Peek (P, C);
@@ -176,7 +176,7 @@ package body Wiki.Parsers.Html is
    --  ------------------------------
    procedure Parse_Element (P : in out Parser) is
       Name : Unbounded_Wide_Wide_String;
-      C    : Wide_Wide_Character;
+      C    : Wiki.Strings.WChar;
       Tag  : Wiki.Html_Tag;
    begin
       Peek (P, C);
@@ -223,7 +223,7 @@ package body Wiki.Parsers.Html is
    --  Parse an HTML entity such as &nbsp; and replace it with the corresponding code.
    --  ------------------------------
    procedure Parse_Entity (P     : in out Parser;
-                           Token : in Wide_Wide_Character) is
+                           Token : in Wiki.Strings.WChar) is
       pragma Unreferenced (Token);
 
       Name : String (1 .. 10);
@@ -231,7 +231,7 @@ package body Wiki.Parsers.Html is
       High : Natural := Wiki.Parsers.Html.Entities.Keywords'Last;
       Low  : Natural := Wiki.Parsers.Html.Entities.Keywords'First;
       Pos  : Natural;
-      C    : Wide_Wide_Character;
+      C    : Wiki.Strings.WChar;
    begin
       while Len < Name'Last loop
          Peek (P, C);
