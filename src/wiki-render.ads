@@ -22,6 +22,10 @@ with Wiki.Documents;
 --  == Wiki Renderer ==
 --  The <tt>Wiki.Render</tt> package represents the renderer that takes a wiki document
 --  and render the result either in text, HTML or another format.
+--
+--  @include wiki-render-html.ads
+--  @include wiki-render-text.ads
+--  @include wiki-render-wiki.ads
 package Wiki.Render is
 
    pragma Preelaborate;
