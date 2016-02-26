@@ -222,19 +222,19 @@ package body Wiki.Render.Html is
       end Set_Current_Level;
 
       function Get_Number return Wiki.Strings.WString is
-         Result : Unbounded_Wide_Wide_String;
+         Result : Wiki.Strings.UString;
       begin
          for I in 1 .. Current_Level loop
             declare
                N : constant Wiki.Strings.WString := Positive'Wide_Wide_Image (Toc_Number (I));
             begin
                if I > 1 then
-                  Append (Result, ".");
+                  Wiki.Strings.Append (Result, ".");
                end if;
-               Append (Result, N (N'First + 1 .. N'Last));
+               Wiki.Strings.Append (Result, N (N'First + 1 .. N'Last));
             end;
          end loop;
-         return To_Wide_Wide_String (Result);
+         return Wiki.Strings.To_WString (Result);
       end Get_Number;
 
       procedure Render_Entry (Node : in Wiki.Nodes.Node_Type) is
