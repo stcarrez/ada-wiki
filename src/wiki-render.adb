@@ -22,13 +22,13 @@ package body Wiki.Render is
    --  ------------------------------
    overriding
    procedure Make_Image_Link (Renderer : in Default_Link_Renderer;
-                              Link     : in Wide_Wide_String;
-                              URI      : out Unbounded_Wide_Wide_String;
+                              Link     : in Wiki.Strings.WString;
+                              URI      : out Wiki.Strings.UString;
                               Width    : out Natural;
                               Height   : out Natural) is
       pragma Unreferenced (Renderer);
    begin
-      URI    := To_Unbounded_Wide_Wide_String (Link);
+      URI    := Wiki.Strings.To_UString (Link);
       Width  := 0;
       Height := 0;
    end Make_Image_Link;
@@ -38,12 +38,12 @@ package body Wiki.Render is
    --  ------------------------------
    overriding
    procedure Make_Page_Link (Renderer : in Default_Link_Renderer;
-                             Link     : in Wide_Wide_String;
-                             URI      : out Unbounded_Wide_Wide_String;
+                             Link     : in Wiki.Strings.WString;
+                             URI      : out Wiki.Strings.UString;
                              Exists   : out Boolean) is
       pragma Unreferenced (Renderer);
    begin
-      URI    := To_Unbounded_Wide_Wide_String (Link);
+      URI    := Wiki.Strings.To_UString (Link);
       Exists := True;
    end Make_Page_Link;
 
