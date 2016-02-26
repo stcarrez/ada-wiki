@@ -15,7 +15,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Characters.Conversions;
 package body Wiki.Streams.Html is
 
    --  ------------------------------
@@ -26,7 +25,7 @@ package body Wiki.Streams.Html is
                               Name    : in String;
                               Content : in String) is
    begin
-      Writer.Write_Wide_Attribute (Name, Ada.Characters.Conversions.To_Wide_Wide_String (Content));
+      Writer.Write_Wide_Attribute (Name, Wiki.Strings.To_WString (Content));
    end Write_Attribute;
 
 end Wiki.Streams.Html;
