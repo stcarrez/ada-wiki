@@ -25,7 +25,7 @@ package body Wiki.Streams.Html.Builders is
    --  and escape that character as necessary.  Unlike 'Write_Char',
    --  this operation does not closes the current XML entity.
    procedure Write_Escape (Stream : in out Html_Output_Builder_Stream'Class;
-                           Char   : in Wide_Wide_Character);
+                           Char   : in Wiki.Strings.WChar);
 
    type Unicode_Char is mod 2**31;
 
@@ -35,8 +35,8 @@ package body Wiki.Streams.Html.Builders is
    --  this operation does not closes the current XML entity.
    --  ------------------------------
    procedure Write_Escape (Stream : in out Html_Output_Builder_Stream'Class;
-                           Char   : in Wide_Wide_Character) is
-      Code : constant Unicode_Char := Wide_Wide_Character'Pos (Char);
+                           Char   : in Wiki.Strings.WChar) is
+      Code : constant Unicode_Char := Wiki.Strings.WChar'Pos (Char);
    begin
       --  If "?" or over, no escaping is needed (this covers
       --  most of the Latin alphabet)
@@ -89,7 +89,7 @@ package body Wiki.Streams.Html.Builders is
          Stream.Write ('"');
          for I in Content'Range loop
             declare
-               C : constant Wide_Wide_Character := Content (I);
+               C : constant Wiki.Strings.WChar := Content (I);
             begin
                if C = '"' then
                   Stream.Write ("&quot;");
@@ -114,7 +114,7 @@ package body Wiki.Streams.Html.Builders is
          Stream.Write ('"');
          for I in 1 .. Count loop
             declare
-               C : constant Wide_Wide_Character := Element (Content, I);
+               C : constant Wiki.Strings.WChar := Element (Content, I);
             begin
                if C = '"' then
                   Stream.Write ("&quot;");
