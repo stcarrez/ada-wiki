@@ -45,6 +45,9 @@ package Wiki.Strings is
    function To_WString (S : in String) return WString
                         renames Ada.Characters.Conversions.To_Wide_Wide_String;
 
+   procedure Append (Into : in out UString; S : in WString)
+                     renames Ada.Strings.Wide_Wide_Unbounded.Append;
+
    Null_UString : UString
    renames Ada.Strings.Wide_Wide_Unbounded.Null_Unbounded_Wide_Wide_String;
 
