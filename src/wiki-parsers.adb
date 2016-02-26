@@ -521,6 +521,62 @@ package body Wiki.Parsers is
    end Is_Image;
 
    --  ------------------------------
+   --  Extract a list of parameters separated by the given separator (ex: '|').
+   --  ------------------------------
+   procedure Parse_Parameters (P          : in out Parser;
+                               Separator  : in Wiki.Strings.WChar;
+                               Terminator : in Wiki.Strings.WChar;
+                               Names      : in String_Array) is
+      procedure Add_Parameter (Content : in Wiki.Strings.WString);
+
+      Index : Positive := 1;
+
+      procedure Add_Parameter (Content : in Wiki.Strings.WString) is
+      begin
+         if Index <= Names'Last then
+            Wiki.Attributes.Append (P.Attributes, Names (Index).all, Content);
+         else
+            Wiki.Attributes.Append (P.Attributes, Positive'Image (Index), Content);
+         end if;
+         Index := Index + 1;
+      end Add_Parameter;
+
+      procedure Add_Attribute is
+         new Wiki.Strings.Wide_Wide_Builders.Get (Add_Parameter);
+
+      C : Wiki.Strings.WChar;
+   begin
+      Wiki.Attributes.Clear (P.Attributes);
+      loop
+         Peek (P, C);
+         if C = P.Escape_Char then
+            Peek (P, C);
+            Append (P.Text, C);
+         elsif C = Separator then
+            Add_Attribute (P.Text);
+            Clear (P.Text);
+         elsif C = Terminator or P.Is_Eof then
+            Add_Attribute (P.Text);
+            Clear (P.Text);
+            return;
+         else
+            Append (P.Text, C);
+         end if;
+      end loop;
+   end Parse_Parameters;
+
+   NAME_ATTR  : aliased constant String := "name";
+   HREF_ATTR  : aliased constant String := "href";
+   LANG_ATTR  : aliased constant String := "lang";
+   TITLE_ATTR : aliased constant String := "title";
+
+   Attr_Names_Title_First : constant String_Array (1 .. 4)
+     := (NAME_ATTR'Access, HREF_ATTR'Access, LANG_ATTR'Access, TITLE_ATTR'Access);
+
+   Attr_Names_Link_First  : constant String_Array (1 .. 4)
+     := (HREF_ATTR'Access, NAME_ATTR'Access, LANG_ATTR'Access, TITLE_ATTR'Access);
+
+   --  ------------------------------
    --  Parse a link.
    --  Example:
    --    [name]
@@ -528,35 +584,14 @@ package body Wiki.Parsers is
    --    [name|url]
    --    [name|url|language]
    --    [name|url|language|title]
+   --  MediaWiki
    --    [[link]]
    --    [[link|name]]
+   --    [[link|mode|size|center|alt]]
    --  ------------------------------
    procedure Parse_Link (P     : in out Parser;
                          Token : in Wiki.Strings.WChar) is
-
-      --  Parse a link component
-      procedure Parse_Link_Token (Into : in out Wiki.Strings.UString);
-
-      Link       : Wiki.Strings.UString;
-      Title      : Wiki.Strings.UString;
-      Language   : Wiki.Strings.UString;
-      Link_Title : Wiki.Strings.UString;
-      Tmp        : Wiki.Strings.UString;
       C          : Wiki.Strings.WChar;
-
-      procedure Parse_Link_Token (Into : in out Wiki.Strings.UString) is
-      begin
-         loop
-            Peek (P, C);
-            if C = P.Escape_Char then
-               Peek (P, C);
-            else
-               exit when C = LF or C = CR or C = ']' or C = '|';
-            end if;
-            Wiki.Strings.Append (Into, C);
-         end loop;
-      end Parse_Link_Token;
-
    begin
       --  If links have the form '[[link]]', check the second bracket.
       if P.Link_Double_Bracket then
@@ -567,47 +602,40 @@ package body Wiki.Parsers is
             return;
          end if;
       end if;
+      Flush_Text (P);
 
-      Parse_Link_Token (Title);
-      if C = '|' then
-         Parse_Link_Token (Link);
-         if C = '|' then
-            Parse_Link_Token (Language);
-            if C = '|' then
-               Parse_Link_Token (Link_Title);
-            end if;
-         end if;
+      Wiki.Attributes.Clear (P.Attributes);
+      if P.Link_Title_First then
+         Parse_Parameters (P, '|', ']', Attr_Names_Title_First);
+      else
+         Parse_Parameters (P, '|', ']', Attr_Names_Link_First);
       end if;
+
       if P.Link_Double_Bracket then
          Peek (P, C);
          if C /= ']' then
             Put_Back (P, C);
          end if;
-      elsif C /= ']' then
-         Put_Back (P, C);
       end if;
       P.Empty_Line := False;
-      Flush_Text (P);
-      if not P.Link_Title_First then
-         Tmp := Title;
-         Title := Link;
-         Link := Tmp;
-         if Wiki.Strings.Length (Title) = 0 then
-            Title := Link;
+      declare
+         Link : constant Strings.WString := Attributes.Get_Attribute (P.Attributes, HREF_ATTR);
+         Name : constant Strings.WString := Attributes.Get_Attribute (P.Attributes, NAME_ATTR);
+      begin
+         if P.Is_Image (Link) then
+            Wiki.Attributes.Append (P.Attributes, String '("src"), Link);
+            P.Filters.Add_Image (P.Document, Name, P.Attributes);
+         else
+            if P.Link_Title_First and Link'Length = 0 then
+               Wiki.Attributes.Append (P.Attributes, HREF_ATTR, Name);
+            end if;
+            if not P.Link_Title_First and Name'Length = 0 then
+               P.Filters.Add_Link (P.Document, Link, P.Attributes);
+            else
+               P.Filters.Add_Link (P.Document, Name, P.Attributes);
+            end if;
          end if;
-      end if;
-      if Wiki.Strings.Length (Link) = 0 then
-         Link := Title;
-      end if;
-      Wiki.Attributes.Clear (P.Attributes);
-      Wiki.Attributes.Append (P.Attributes, "href", Link);
-      Wiki.Attributes.Append (P.Attributes, "lang", Language);
-      Wiki.Attributes.Append (P.Attributes, "title", Link_Title);
-      if Is_Image (P, Wiki.Strings.To_WString (Link)) then
-         P.Filters.Add_Image (P.Document, Wiki.Strings.To_WString (Title), P.Attributes);
-      else
-         P.Filters.Add_Link (P.Document, Wiki.Strings.To_WString (Title), P.Attributes);
-      end if;
+      end;
       Peek (P, C);
       if not P.Is_Eof then
          if C = CR or C = LF then
