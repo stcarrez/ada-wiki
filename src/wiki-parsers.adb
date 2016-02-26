@@ -16,14 +16,11 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Strings.Wide_Wide_Fixed;
-with Ada.Strings.Wide_Wide_Unbounded;
 
 with Wiki.Parsers.Html;
 with Wiki.Helpers;
 with Wiki.Nodes;
 package body Wiki.Parsers is
-
-   use Ada.Strings.Wide_Wide_Unbounded;
 
    use Wiki.Helpers;
    use Wiki.Nodes;
@@ -298,13 +295,13 @@ package body Wiki.Parsers is
 
       C          : Wiki.Strings.WChar;
       Stop_Token : Wiki.Strings.WChar;
-      Format     : Unbounded_Wide_Wide_String;
+      Format     : Wiki.Strings.UString;
       Col        : Natural;
       Is_Html    : Boolean := False;
 
       procedure Add_Preformatted (Content : in Wiki.Strings.WString) is
       begin
-         P.Filters.Add_Preformatted (P.Document, Content, To_Wide_Wide_String (Format));
+         P.Filters.Add_Preformatted (P.Document, Content, Wiki.Strings.To_WString (Format));
       end Add_Preformatted;
 
    begin
@@ -371,7 +368,7 @@ package body Wiki.Parsers is
             return;
          elsif Token /= ' ' then
             while not P.Is_Eof and C /= LF and C /= CR loop
-               Append (Format, C);
+               Wiki.Strings.Append (Format, C);
                Peek (P, C);
             end loop;
          end if;
@@ -381,7 +378,7 @@ package body Wiki.Parsers is
             Stop_Token := Token;
          end if;
          Flush_List (P);
-         Is_Html := Format = "html";
+         Is_Html := Wiki.Strings.To_WString (Format) = "html";
          Col := 0;
          while not P.Is_Eof loop
             Peek (P, C);
@@ -538,16 +535,16 @@ package body Wiki.Parsers is
                          Token : in Wiki.Strings.WChar) is
 
       --  Parse a link component
-      procedure Parse_Link_Token (Into : in out Unbounded_Wide_Wide_String);
+      procedure Parse_Link_Token (Into : in out Wiki.Strings.UString);
 
-      Link       : Unbounded_Wide_Wide_String;
-      Title      : Unbounded_Wide_Wide_String;
-      Language   : Unbounded_Wide_Wide_String;
-      Link_Title : Unbounded_Wide_Wide_String;
-      Tmp        : Unbounded_Wide_Wide_String;
+      Link       : Wiki.Strings.UString;
+      Title      : Wiki.Strings.UString;
+      Language   : Wiki.Strings.UString;
+      Link_Title : Wiki.Strings.UString;
+      Tmp        : Wiki.Strings.UString;
       C          : Wiki.Strings.WChar;
 
-      procedure Parse_Link_Token (Into : in out Unbounded_Wide_Wide_String) is
+      procedure Parse_Link_Token (Into : in out Wiki.Strings.UString) is
       begin
          loop
             Peek (P, C);
@@ -556,7 +553,7 @@ package body Wiki.Parsers is
             else
                exit when C = LF or C = CR or C = ']' or C = '|';
             end if;
-            Append (Into, C);
+            Wiki.Strings.Append (Into, C);
          end loop;
       end Parse_Link_Token;
 
@@ -595,21 +592,21 @@ package body Wiki.Parsers is
          Tmp := Title;
          Title := Link;
          Link := Tmp;
-         if Length (Title) = 0 then
+         if Wiki.Strings.Length (Title) = 0 then
             Title := Link;
          end if;
       end if;
-      if Length (Link) = 0 then
+      if Wiki.Strings.Length (Link) = 0 then
          Link := Title;
       end if;
       Wiki.Attributes.Clear (P.Attributes);
       Wiki.Attributes.Append (P.Attributes, "href", Link);
       Wiki.Attributes.Append (P.Attributes, "lang", Language);
       Wiki.Attributes.Append (P.Attributes, "title", Link_Title);
-      if Is_Image (P, To_Wide_Wide_String (Link)) then
-         P.Filters.Add_Image (P.Document, To_Wide_Wide_String (Title), P.Attributes);
+      if Is_Image (P, Wiki.Strings.To_WString (Link)) then
+         P.Filters.Add_Image (P.Document, Wiki.Strings.To_WString (Title), P.Attributes);
       else
-         P.Filters.Add_Link (P.Document, To_Wide_Wide_String (Title), P.Attributes);
+         P.Filters.Add_Link (P.Document, Wiki.Strings.To_WString (Title), P.Attributes);
       end if;
       Peek (P, C);
       if not P.Is_Eof then
@@ -631,14 +628,14 @@ package body Wiki.Parsers is
                           Token : in Wiki.Strings.WChar) is
 
       --  Parse a quote component
-      procedure Parse_Quote_Token (Into : in out Unbounded_Wide_Wide_String);
+      procedure Parse_Quote_Token (Into : in out Wiki.Strings.UString);
 
-      Link       : Unbounded_Wide_Wide_String;
-      Quote      : Unbounded_Wide_Wide_String;
-      Language   : Unbounded_Wide_Wide_String;
+      Link       : Wiki.Strings.UString;
+      Quote      : Wiki.Strings.UString;
+      Language   : Wiki.Strings.UString;
       C          : Wiki.Strings.WChar;
 
-      procedure Parse_Quote_Token (Into : in out Unbounded_Wide_Wide_String) is
+      procedure Parse_Quote_Token (Into : in out Wiki.Strings.UString) is
       begin
          loop
             Peek (P, C);
@@ -647,7 +644,7 @@ package body Wiki.Parsers is
             else
                exit when C = LF or C = CR or C = '}' or C = '|';
             end if;
-            Append (Into, C);
+            Wiki.Strings.Append (Into, C);
          end loop;
       end Parse_Quote_Token;
 
@@ -673,7 +670,7 @@ package body Wiki.Parsers is
       Wiki.Attributes.Clear (P.Attributes);
       Wiki.Attributes.Append (P.Attributes, "cite", Link);
       Wiki.Attributes.Append (P.Attributes, "lang", Language);
-      P.Filters.Add_Quote (P.Document, To_Wide_Wide_String (Quote), P.Attributes);
+      P.Filters.Add_Quote (P.Document, Wiki.Strings.To_WString (Quote), P.Attributes);
       Peek (P, C);
       if C /= '}' then
          Put_Back (P, C);
@@ -724,15 +721,15 @@ package body Wiki.Parsers is
                           Token : in Wiki.Strings.WChar) is
 
       --  Parse a image component
-      procedure Parse_Image_Token (Into : in out Unbounded_Wide_Wide_String);
+      procedure Parse_Image_Token (Into : in out Wiki.Strings.UString);
 
-      Link       : Unbounded_Wide_Wide_String;
-      Alt        : Unbounded_Wide_Wide_String;
-      Position   : Unbounded_Wide_Wide_String;
-      Desc       : Unbounded_Wide_Wide_String;
+      Link       : Wiki.Strings.UString;
+      Alt        : Wiki.Strings.UString;
+      Position   : Wiki.Strings.UString;
+      Desc       : Wiki.Strings.UString;
       C          : Wiki.Strings.WChar;
 
-      procedure Parse_Image_Token (Into : in out Unbounded_Wide_Wide_String) is
+      procedure Parse_Image_Token (Into : in out Wiki.Strings.UString) is
       begin
          loop
             Peek (P, C);
@@ -741,7 +738,7 @@ package body Wiki.Parsers is
             else
                exit when C = LF or C = CR or C = ')' or C = '|';
             end if;
-            Append (Into, C);
+            Wiki.Strings.Append (Into, C);
          end loop;
       end Parse_Image_Token;
 
@@ -771,7 +768,7 @@ package body Wiki.Parsers is
       Wiki.Attributes.Append (P.Attributes, "src", Link);
       Wiki.Attributes.Append (P.Attributes, "position", Position);
       Wiki.Attributes.Append (P.Attributes, "longdesc", Desc);
-      P.Filters.Add_Image (P.Document, To_Wide_Wide_String (Alt), P.Attributes);
+      P.Filters.Add_Image (P.Document, Wiki.Strings.To_WString (Alt), P.Attributes);
       Peek (P, C);
       if C /= ')' then
          Put_Back (P, C);
