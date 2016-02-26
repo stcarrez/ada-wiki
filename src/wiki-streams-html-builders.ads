@@ -35,7 +35,7 @@ package Wiki.Streams.Html.Builders is
    overriding
    procedure Write_Wide_Attribute (Stream  : in out Html_Output_Builder_Stream;
                                    Name    : in String;
-                                   Content : in Unbounded_Wide_Wide_String);
+                                   Content : in Wiki.Strings.UString);
 
    --  Write an XML attribute within an XML element.
    --  The attribute value is escaped according to the XML escape rules.
