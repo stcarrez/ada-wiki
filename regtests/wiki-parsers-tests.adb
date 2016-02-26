@@ -184,8 +184,8 @@ package body Wiki.Parsers.Tests is
       Util.Tests.Assert_Equals (T, "<p><a href=""name"">name</a></p>",
                                 Wiki.Utils.To_Html ("[name]", SYNTAX_GOOGLE),
                                 "Link rendering invalid");
-      Util.Tests.Assert_Equals (T, "<p><a title=""some"" lang=""en"" " &
-                                "href=""http://www.joe.com/item"">name </a></p>",
+      Util.Tests.Assert_Equals (T, "<p><a href=""http://www.joe.com/item"" lang=""en"" title=""some""" &
+                                ">name </a></p>",
                                 Wiki.Utils.To_Html ("[name |http://www.joe.com/item|en|some]",
                                 SYNTAX_DOTCLEAR),
                                 "Link rendering invalid");
@@ -216,7 +216,7 @@ package body Wiki.Parsers.Tests is
       Util.Tests.Assert_Equals (T, "<p><q lang=""en"">quote</q></p>",
                                 Wiki.Utils.To_Html ("{{quote|en}}", SYNTAX_DOTCLEAR),
                                 "Quote rendering invalid");
-      Util.Tests.Assert_Equals (T, "<p><q lang=""en"" cite=""http://www.sun.com"">quote</q></p>",
+      Util.Tests.Assert_Equals (T, "<p><q cite=""http://www.sun.com"" lang=""en"">quote</q></p>",
                                 Wiki.Utils.To_Html ("{{quote|en|http://www.sun.com}}",
                                                  SYNTAX_DOTCLEAR),
                                 "Quote rendering invalid");
@@ -255,8 +255,8 @@ package body Wiki.Parsers.Tests is
       Util.Tests.Assert_Equals (T, "<p><img alt=""title"" src=""/image/t.png"" /></p>",
                                 Wiki.Utils.To_Html ("((/image/t.png|title))", SYNTAX_DOTCLEAR),
                                 "Image rendering invalid");
-      Util.Tests.Assert_Equals (T, "<p><img alt=""title"" longdesc=""describe"" " &
-                                "src=""/image/t.png"" /></p>",
+      Util.Tests.Assert_Equals (T, "<p><img alt=""title"" " &
+                                "src=""/image/t.png"" longdesc=""describe"" /></p>",
                                 Wiki.Utils.To_Html ("((/image/t.png|title|D|describe))",
                                                  SYNTAX_DOTCLEAR),
                                 "Image rendering invalid");
