@@ -19,6 +19,10 @@
 with Wiki.Strings;
 with Wiki.Attributes;
 with Wiki.Nodes;
+
+--  === Documents ===
+--  The <tt>Document</tt> type is used to hold a Wiki document that was parsed by the parser
+--  with one of the supported syntax.
 package Wiki.Documents is
 
    pragma Preelaborate;

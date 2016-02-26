@@ -39,6 +39,8 @@ with Wiki.Strings;
 --  just propagate the call to the attached wiki document instance (ie, a kind of pass
 --  through filter).
 --
+--  @include wiki-filters-toc.ads
+--  @include wiki-filters-html.ads
 package Wiki.Filters is
 
    pragma Preelaborate;

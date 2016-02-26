@@ -17,6 +17,12 @@
 -----------------------------------------------------------------------
 
 --  == Wiki ==
+--  The Wiki engine parses a Wiki text in several Wiki syntax such as <tt>MediaWiki</tt>,
+--  <tt>Creole</tt>, <tt>Markdown</tt> and renders the result either in HTML, text or into
+--  another Wiki format.  The Wiki engine is used in two steps:
+--
+--  * The Wiki text is parsed according to its syntax to produce a Wiki Document instance.
+--  * The Wiki document is then rendered by a renderer to produce the final HTML, text.
 --
 --  @include wiki-documents.ads
 --  @include wiki-attributes.ads

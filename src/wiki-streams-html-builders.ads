@@ -17,9 +17,10 @@
 -----------------------------------------------------------------------
 with Wiki.Streams.Builders;
 
---  == Writer interfaces ==
---  The <tt>Wiki.Writers</tt> package defines the interfaces used by the renderer to write
---  their outputs.
+--  === HTML Output Builder Stream ===
+--  The <tt>Html_Output_Builder_Stream</tt> type defines a HTML output stream that collects the
+--  HTML into expandable buffers.  Once the complete HTML document is rendered, the content is
+--  retrieved either by the <tt>To_String</tt> or the <tt>Iterate</tt> operations.
 --
 package Wiki.Streams.Html.Builders is
 
