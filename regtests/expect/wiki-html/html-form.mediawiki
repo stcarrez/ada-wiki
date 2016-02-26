@@ -1,4 +1,4 @@
-<form> <select id="" name="test">
+<p><form> <select id="" name="test">
  <option selected="">option 1
  </option><option>option 2
  </option></select>
@@ -7,4 +7,4 @@
  </option><option>option 2
  </option></select>
  <input elected="" />
-</form>
+</form></p>

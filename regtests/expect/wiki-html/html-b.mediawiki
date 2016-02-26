@@ -1,1 +1,1 @@
-<b>Html bold</b>
+<p><b>Html bold</b></p>
