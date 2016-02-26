@@ -15,7 +15,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Characters.Conversions;
 
 with GNAT.Encode_UTF8_String;
 package body Wiki.Streams.Builders is
@@ -46,10 +45,10 @@ package body Wiki.Streams.Builders is
 
    --  Write the string to the string builder.
    procedure Write_String (Stream  : in out Output_Builder_Stream;
-                           Content : in STring) is
+                           Content : in String) is
    begin
       for I in Content'Range loop
-         WBS.Append (Stream.Content, Ada.Characters.Conversions.To_Wide_Wide_Character (Content (I)));
+         WBS.Append (Stream.Content, Wiki.Strings.To_WChar (Content (I)));
       end loop;
    end Write_String;
 
