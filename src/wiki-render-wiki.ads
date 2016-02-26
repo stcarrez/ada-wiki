@@ -16,6 +16,7 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Strings.Wide_Wide_Maps;
+with Ada.Strings.Wide_Wide_Unbounded;
 
 with Wiki.Documents;
 with Wiki.Attributes;
@@ -85,10 +86,10 @@ package Wiki.Render.Wiki is
                           Text   : in Wide_Wide_String;
                           Format : in Format_Map);
 
-   --  Add a text block that is pre-formatted.
-   procedure Add_Preformatted (Engine : in out Wiki_Renderer;
-                               Text     : in Unbounded_Wide_Wide_String;
-                               Format   : in Unbounded_Wide_Wide_String);
+   --  Render a text block that is pre-formatted.
+   procedure Render_Preformatted (Engine : in out Wiki_Renderer;
+                                  Text   : in Strings.WString;
+                                  Format : in Strings.WString);
 
    procedure Render_Tag (Engine : in out Wiki_Renderer;
                          Doc    : in Documents.Document;
@@ -103,6 +104,8 @@ package Wiki.Render.Wiki is
                          Format   : in Format_Map);
 
 private
+
+   use Ada.Strings.Wide_Wide_Unbounded;
 
    type Wide_String_Access is access constant Wide_Wide_String;
 
