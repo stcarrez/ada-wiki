@@ -53,17 +53,15 @@ package Wiki.Render.Text is
                                Level    : in Positive;
                                Ordered  : in Boolean);
 
-   --  Add a link.
-   procedure Add_Link (Document : in out Text_Renderer;
-                       Title    : in Wiki.Strings.WString;
-                       Attr     : in Wiki.Attributes.Attribute_List);
+   --  Render a link.
+   procedure Render_Link (Engine   : in out Text_Renderer;
+                          Title    : in Wiki.Strings.WString;
+                          Attr     : in Wiki.Attributes.Attribute_List);
 
-   --  Add an image.
-   procedure Add_Image (Document    : in out Text_Renderer;
-                        Link        : in Unbounded_Wide_Wide_String;
-                        Alt         : in Unbounded_Wide_Wide_String;
-                        Position    : in Unbounded_Wide_Wide_String;
-                        Description : in Unbounded_Wide_Wide_String);
+   --  Render an image.
+   procedure Render_Image (Engine   : in out Text_Renderer;
+                           Title    : in Wiki.Strings.WString;
+                           Attr     : in Wiki.Attributes.Attribute_List);
 
    --  Render a text block that is pre-formatted.
    procedure Render_Preformatted (Engine   : in out Text_Renderer;
