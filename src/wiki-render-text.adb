@@ -102,12 +102,13 @@ package body Wiki.Render.Text is
       if Title'Length /= 0 then
          Engine.Output.Write (Title);
       end if;
-      if Title /= Href then
-         if Title'Length /= 0 and Href'Length /= 0 then
-            Engine.Output.Write (' ');
+      if Title /= Href and Href'Length /= 0 then
+         if Title'Length /= 0 then
+            Engine.Output.Write (" (");
          end if;
-         if Href'Length /= 0 then
-            Engine.Output.Write (Href);
+         Engine.Output.Write (Href);
+         if Title'Length /= 0 then
+            Engine.Output.Write (")");
          end if;
       end if;
       Engine.Empty_Line := False;
