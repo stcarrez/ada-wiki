@@ -48,6 +48,12 @@ package Wiki.Strings is
    procedure Append (Into : in out UString; S : in WString)
                      renames Ada.Strings.Wide_Wide_Unbounded.Append;
 
+   procedure Append (Into : in out UString; S : in WChar)
+                     renames Ada.Strings.Wide_Wide_Unbounded.Append;
+
+   function Length (S : in UString) return Natural
+                    renames Ada.Strings.Wide_Wide_Unbounded.Length;
+
    Null_UString : UString
    renames Ada.Strings.Wide_Wide_Unbounded.Null_Unbounded_Wide_Wide_String;
 
