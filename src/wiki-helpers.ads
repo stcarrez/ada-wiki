@@ -30,6 +30,9 @@ package Wiki.Helpers is
    --  Returns True if the character is a space, tab or a newline.
    function Is_Space_Or_Newline (C : in Wiki.Strings.WChar) return Boolean;
 
+   --  Returns True if the character is a line terminator.
+   function Is_Newline (C : in Wiki.Strings.WChar) return Boolean;
+
    --  Returns True if the text is a valid URL
    function Is_Url (Text : in Wiki.Strings.WString) return Boolean;
 
