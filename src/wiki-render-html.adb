@@ -38,6 +38,15 @@ package body Wiki.Render.Html is
    end Set_Link_Renderer;
 
    --  ------------------------------
+   --  Set the render TOC flag that controls the TOC rendering.
+   --  ------------------------------
+   procedure Set_Render_TOC (Engine : in out Html_Renderer;
+                             State  : in Boolean) is
+   begin
+      Engine.Enable_Render_TOC := State;
+   end Set_Render_TOC;
+
+   --  ------------------------------
    --  Render the node instance from the document.
    --  ------------------------------
    overriding
@@ -544,7 +553,9 @@ package body Wiki.Render.Html is
    procedure Finish (Engine : in out Html_Renderer;
                      Doc    : in Wiki.Documents.Document) is
    begin
-      Engine.Render_TOC (Doc, 4);
+      if Engine.Enable_Render_TOC then
+         Engine.Render_TOC (Doc, 4);
+      end if;
       Engine.Close_Paragraph;
       Engine.Add_Blockquote (0);
    end Finish;
