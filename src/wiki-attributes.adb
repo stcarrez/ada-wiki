@@ -15,11 +15,8 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Characters.Conversions;
 
 package body Wiki.Attributes is
-
-   use Ada.Characters;
 
    --  ------------------------------
    --  Get the attribute name.
@@ -36,7 +33,7 @@ package body Wiki.Attributes is
    function Get_Value (Position : in Cursor) return String is
       Attr : constant Attribute_Ref := Attribute_Vectors.Element (Position.Pos);
    begin
-      return Ada.Characters.Conversions.To_String (Attr.Value.Value);
+      return Wiki.Strings.To_String (Attr.Value.Value);
    end Get_Value;
 
    --  ------------------------------
@@ -131,7 +128,7 @@ package body Wiki.Attributes is
         := new Attribute '(Util.Refs.Ref_Entity with
                            Name_Length  => Name'Length,
                            Value_Length => Value'Length,
-                           Name         => Conversions.To_String (Name),
+                           Name         => Wiki.Strings.To_String (Name),
                            Value        => Value);
    begin
       List.List.Append (Attribute_Refs.Create (Attr));
