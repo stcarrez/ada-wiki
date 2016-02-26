@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-text -- Wiki Text renderer
---  Copyright (C) 2011, 2012, 2013, 2015 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Characters.Conversions;
 with Wiki.Helpers;
 package body Wiki.Render.Text is
 
@@ -92,39 +91,48 @@ package body Wiki.Render.Text is
    end Open_Paragraph;
 
    --  ------------------------------
-   --  Add a link.
+   --  Render a link.
    --  ------------------------------
-   procedure Add_Link (Document : in out Text_Renderer;
-                       Title    : in Wiki.Strings.WString;
-                       Attr     : in Wiki.Attributes.Attribute_List) is
+   procedure Render_Link (Engine : in out Text_Renderer;
+                          Title  : in Wiki.Strings.WString;
+                          Attr   : in Wiki.Attributes.Attribute_List) is
+      Href : constant Wiki.Strings.WString := Wiki.Attributes.Get_Attribute (Attr, "href");
    begin
-      Document.Open_Paragraph;
+      Engine.Open_Paragraph;
       if Title'Length /= 0 then
-         Document.Output.Write (Title);
+         Engine.Output.Write (Title);
       end if;
-      Document.Empty_Line := False;
-   end Add_Link;
+      if Title /= Href then
+         if Title'Length /= 0 and Href'Length /= 0 then
+            Engine.Output.Write (' ');
+         end if;
+         if Href'Length /= 0 then
+            Engine.Output.Write (Href);
+         end if;
+      end if;
+      Engine.Empty_Line := False;
+   end Render_Link;
 
    --  ------------------------------
-   --  Add an image.
+   --  Render an image.
    --  ------------------------------
-   procedure Add_Image (Document    : in out Text_Renderer;
-                        Link        : in Unbounded_Wide_Wide_String;
-                        Alt         : in Unbounded_Wide_Wide_String;
-                        Position    : in Unbounded_Wide_Wide_String;
-                        Description : in Unbounded_Wide_Wide_String) is
-      pragma Unreferenced (Position);
+   procedure Render_Image (Engine   : in out Text_Renderer;
+                           Title    : in Wiki.Strings.WString;
+                           Attr     : in Wiki.Attributes.Attribute_List) is
+      Desc : constant Wiki.Strings.WString := Wiki.Attributes.Get_Attribute (Attr, "longdesc");
    begin
-      Document.Open_Paragraph;
---        if Length (Alt) > 0 then
---           Document.Output.Write (Alt);
---        end if;
---        if Length (Description) > 0 then
---           Document.Output.Write (Description);
---        end if;
---        Document.Output.Write (Link);
-      Document.Empty_Line := False;
-   end Add_Image;
+      Engine.Open_Paragraph;
+      if Title'Length > 0 then
+         Engine.Output.Write (Title);
+      end if;
+      if Title'Length > 0 and Desc'Length > 0 then
+         Engine.Output.Write (' ');
+      end if;
+      if Desc'Length > 0 then
+         Engine.Output.Write (Desc);
+      end if;
+      Engine.Empty_Line := False;
+   end Render_Image;
 
    --  ------------------------------
    --  Render a text block that is pre-formatted.
@@ -196,7 +204,10 @@ package body Wiki.Render.Text is
             Engine.Empty_Line := False;
 
          when Wiki.Nodes.N_LINK =>
-            Engine.Add_Link (Node.Title, Node.Link_Attr);
+            Engine.Render_Link (Node.Title, Node.Link_Attr);
+
+         when Wiki.Nodes.N_IMAGE =>
+            Engine.Render_Image (Node.Title, Node.Link_Attr);
 
          when Wiki.Nodes.N_PREFORMAT =>
             Engine.Render_Preformatted (Node.Preformatted, "");
@@ -237,6 +248,7 @@ package body Wiki.Render.Text is
    overriding
    procedure Finish (Engine : in out Text_Renderer;
                      Doc    : in Wiki.Documents.Document) is
+      pragma Unreferenced (Doc);
    begin
       Engine.Close_Paragraph;
    end Finish;
