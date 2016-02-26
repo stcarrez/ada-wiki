@@ -54,6 +54,9 @@ package Wiki.Strings is
    function Length (S : in UString) return Natural
                     renames Ada.Strings.Wide_Wide_Unbounded.Length;
 
+   function Element (S : in UString; Pos : in Positive) return WChar
+                     renames Ada.Strings.Wide_Wide_Unbounded.Element;
+
    Null_UString : UString
    renames Ada.Strings.Wide_Wide_Unbounded.Null_Unbounded_Wide_Wide_String;
 
