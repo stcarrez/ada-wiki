@@ -139,6 +139,14 @@ private
    function Is_Image (P    : in Parser;
                       Link : in Wiki.Strings.WString) return Boolean;
 
+   type String_Array is array (Positive range <>) of Wiki.String_Access;
+
+   --  Extract a list of parameters separated by the given separator (ex: '|').
+   procedure Parse_Parameters (P          : in out Parser;
+                               Separator  : in Wiki.Strings.WChar;
+                               Terminator : in Wiki.Strings.WChar;
+                               Names      : in String_Array);
+
    procedure Start_Element (P          : in out Parser;
                             Tag        : in Wiki.Html_Tag;
                             Attributes : in out Wiki.Attributes.Attribute_List);
