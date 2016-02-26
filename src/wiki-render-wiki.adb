@@ -21,36 +21,36 @@ package body Wiki.Render.Wiki is
 
    use Helpers;
 
-   HEADER_CREOLE             : aliased constant Wide_Wide_String := "=";
-   BOLD_CREOLE               : aliased constant Wide_Wide_String := "**";
-   LINE_BREAK_CREOLE         : aliased constant Wide_Wide_String := "%%%";
-   IMG_START_CREOLE          : aliased constant Wide_Wide_String := "{{";
-   IMG_END_CREOLE            : aliased constant Wide_Wide_String := "}}";
-   LINK_START_CREOLE         : aliased constant Wide_Wide_String := "[[";
-   LINK_END_CREOLE           : aliased constant Wide_Wide_String := "]]";
-   PREFORMAT_START_CREOLE    : aliased constant Wide_Wide_String := "{{{";
-   PREFORMAT_END_CREOLE      : aliased constant Wide_Wide_String := "}}}" & LF;
-   HORIZONTAL_RULE_CREOLE    : aliased constant Wide_Wide_String := "----" & LF;
-   LINK_SEPARATOR_CREOLE     : aliased constant Wide_Wide_String := "|";
-   LIST_ITEM_CREOLE          : aliased constant Wide_Wide_String := "*";
-   LIST_ORDERED_ITEM_CREOLE  : aliased constant Wide_Wide_String := "#";
-   ESCAPE_CREOLE             : aliased constant Wide_Wide_String := "~";
+   HEADER_CREOLE             : aliased constant Strings.WString := "=";
+   BOLD_CREOLE               : aliased constant Strings.WString := "**";
+   LINE_BREAK_CREOLE         : aliased constant Strings.WString := "%%%";
+   IMG_START_CREOLE          : aliased constant Strings.WString := "{{";
+   IMG_END_CREOLE            : aliased constant Strings.WString := "}}";
+   LINK_START_CREOLE         : aliased constant Strings.WString := "[[";
+   LINK_END_CREOLE           : aliased constant Strings.WString := "]]";
+   PREFORMAT_START_CREOLE    : aliased constant Strings.WString := "{{{";
+   PREFORMAT_END_CREOLE      : aliased constant Strings.WString := "}}}" & LF;
+   HORIZONTAL_RULE_CREOLE    : aliased constant Strings.WString := "----" & LF;
+   LINK_SEPARATOR_CREOLE     : aliased constant Strings.WString := "|";
+   LIST_ITEM_CREOLE          : aliased constant Strings.WString := "*";
+   LIST_ORDERED_ITEM_CREOLE  : aliased constant Strings.WString := "#";
+   ESCAPE_CREOLE             : aliased constant Strings.WString := "~";
 
-   HEADER_DOTCLEAR           : aliased constant Wide_Wide_String := "!";
-   IMG_START_DOTCLEAR        : aliased constant Wide_Wide_String := "((";
-   IMG_END_DOTCLEAR          : aliased constant Wide_Wide_String := "))";
-   LINK_START_DOTCLEAR       : aliased constant Wide_Wide_String := "[";
-   LINK_END_DOTCLEAR         : aliased constant Wide_Wide_String := "]";
-   PREFORMAT_START_DOTCLEAR  : aliased constant Wide_Wide_String := "///";
-   PREFORMAT_END_DOTCLEAR    : aliased constant Wide_Wide_String := "///" & LF;
-   ESCAPE_DOTCLEAR           : aliased constant Wide_Wide_String := "\";
+   HEADER_DOTCLEAR           : aliased constant Strings.WString := "!";
+   IMG_START_DOTCLEAR        : aliased constant Strings.WString := "((";
+   IMG_END_DOTCLEAR          : aliased constant Strings.WString := "))";
+   LINK_START_DOTCLEAR       : aliased constant Strings.WString := "[";
+   LINK_END_DOTCLEAR         : aliased constant Strings.WString := "]";
+   PREFORMAT_START_DOTCLEAR  : aliased constant Strings.WString := "///";
+   PREFORMAT_END_DOTCLEAR    : aliased constant Strings.WString := "///" & LF;
+   ESCAPE_DOTCLEAR           : aliased constant Strings.WString := "\";
 
-   LINE_BREAK_MEDIAWIKI      : aliased constant Wide_Wide_String := "<br />";
-   BOLD_MEDIAWIKI            : aliased constant Wide_Wide_String := "'''";
-   PREFORMAT_START_MEDIAWIKI : aliased constant Wide_Wide_String := "<pre>";
-   PREFORMAT_END_MEDIAWIKI   : aliased constant Wide_Wide_String := "</pre>";
-   IMG_START_MEDIAWIKI       : aliased constant Wide_Wide_String := "[[File:";
-   IMG_END_MEDIAWIKI         : aliased constant Wide_Wide_String := "]]";
+   LINE_BREAK_MEDIAWIKI      : aliased constant Strings.WString := "<br />";
+   BOLD_MEDIAWIKI            : aliased constant Strings.WString := "'''";
+   PREFORMAT_START_MEDIAWIKI : aliased constant Strings.WString := "<pre>";
+   PREFORMAT_END_MEDIAWIKI   : aliased constant Strings.WString := "</pre>";
+   IMG_START_MEDIAWIKI       : aliased constant Strings.WString := "[[File:";
+   IMG_END_MEDIAWIKI         : aliased constant Strings.WString := "]]";
 
    Empty_Formats : constant Format_Map := (others => False);
 
@@ -181,7 +181,7 @@ package body Wiki.Render.Wiki is
    --  Add a section header in the document.
    --  ------------------------------
    procedure Render_Header (Engine : in out Wiki_Renderer;
-                            Header : in Wide_Wide_String;
+                            Header : in Strings.WString;
                             Level  : in Positive) is
       Count : Natural := Level;
    begin
@@ -321,7 +321,7 @@ package body Wiki.Render.Wiki is
 
    --  Add a text block with the given format.
    procedure Render_Text (Engine : in out Wiki_Renderer;
-                          Text     : in Wide_Wide_String;
+                          Text     : in Strings.WString;
                           Format   : in Format_Map) is
       Start        : Natural := Text'First;
       Last         : Natural := Text'Last;
@@ -377,29 +377,28 @@ package body Wiki.Render.Wiki is
    end Render_Text;
 
    --  ------------------------------
-   --  Add a text block that is pre-formatted.
+   --  Render a text block that is pre-formatted.
    --  ------------------------------
-   procedure Add_Preformatted (Engine : in out Wiki_Renderer;
-                               Text     : in Unbounded_Wide_Wide_String;
-                               Format   : in Unbounded_Wide_Wide_String) is
+   procedure Render_Preformatted (Engine : in out Wiki_Renderer;
+                                  Text   : in Strings.WString;
+                                  Format : in Strings.WString) is
       pragma Unreferenced (Format);
 
-      Content       : constant Wide_Wide_String := To_Wide_Wide_String (Text);
       Col           : Natural := 2;
    begin
       Engine.New_Line;
       Engine.Output.Write (Engine.Tags (Preformat_Start).all);
-      for I in Content'Range loop
-         if Helpers.Is_Newline (Content (I)) then
+      for I in Text'Range loop
+         if Helpers.Is_Newline (Text (I)) then
             Col := 0;
          else
             Col := Col + 1;
          end if;
-         if I = Content'First and then Col > 0 then
+         if I = Text'First and then Col > 0 then
             Engine.Output.Write (LF);
             Col := 0;
          end if;
-         Engine.Output.Write (Content (I));
+         Engine.Output.Write (Text (I));
       end loop;
       if Col /= 0 then
          Engine.New_Line;
@@ -407,12 +406,12 @@ package body Wiki.Render.Wiki is
       Engine.Output.Write (Engine.Tags (Preformat_End).all);
       Engine.New_Line;
       Engine.Empty_Line := True;
-   end Add_Preformatted;
+   end Render_Preformatted;
 
    procedure Start_Keep_Content (Engine : in out Wiki_Renderer) is
    begin
       Engine.Keep_Content := True;
-      Engine.Content := To_Unbounded_Wide_Wide_String ("");
+      Engine.Content := Strings.To_UString ("");
    end Start_Keep_Content;
 
    procedure Render_Tag (Engine : in out Wiki_Renderer;
@@ -490,36 +489,36 @@ package body Wiki.Render.Wiki is
 
       case Node.Tag_Start is
          when H1_TAG =>
-            Engine.Render_Header (To_Wide_Wide_String (Engine.Content), 1);
+            Engine.Render_Header (Strings.To_WString (Engine.Content), 1);
             Engine.Keep_Content := False;
 
          when H2_TAG =>
-            Engine.Render_Header (To_Wide_Wide_String (Engine.Content), 2);
+            Engine.Render_Header (Strings.To_WString (Engine.Content), 2);
             Engine.Keep_Content := False;
 
          when H3_TAG =>
-            Engine.Render_Header (To_Wide_Wide_String (Engine.Content), 3);
+            Engine.Render_Header (Strings.To_WString (Engine.Content), 3);
             Engine.Keep_Content := False;
 
          when H4_TAG =>
-            Engine.Render_Header (To_Wide_Wide_String (Engine.Content), 4);
+            Engine.Render_Header (Strings.To_WString (Engine.Content), 4);
             Engine.Keep_Content := False;
 
          when H5_TAG =>
-            Engine.Render_Header (To_Wide_Wide_String (Engine.Content), 5);
+            Engine.Render_Header (Strings.To_WString (Engine.Content), 5);
             Engine.Keep_Content := False;
 
          when H6_TAG =>
-            Engine.Render_Header (To_Wide_Wide_String (Engine.Content), 6);
+            Engine.Render_Header (Strings.To_WString (Engine.Content), 6);
             Engine.Keep_Content := False;
 
          when A_TAG =>
-            Engine.Render_Link (Name     => To_Wide_Wide_String (Engine.Content),
+            Engine.Render_Link (Name     => Strings.To_WString (Engine.Content),
                                 Attrs    => Node.Attributes);
             Engine.Keep_Content := False;
 
          when Q_TAG =>
-            Engine.Render_Quote (Title    => To_Wide_Wide_String (Engine.Content),
+            Engine.Render_Quote (Title    => Strings.To_WString (Engine.Content),
                                  Attrs    => Node.Attributes);
             Engine.Keep_Content := False;
 
@@ -549,7 +548,7 @@ package body Wiki.Render.Wiki is
             end if;
 
          when PRE_TAG =>
-            Engine.Add_Preformatted (Engine.Content, Null_Unbounded_Wide_Wide_String);
+            Engine.Render_Preformatted (Strings.To_WString (Engine.Content), "");
             Engine.Keep_Content := False;
 
          when UL_TAG =>
