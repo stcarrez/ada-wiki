@@ -79,10 +79,18 @@ package Wiki.Parsers is
 
 private
 
+   type Parser_Handler is access procedure (P     : in out Parser;
+                                            Token : in Wiki.Strings.WChar);
+
+   type Parser_Table is array (0 .. 127) of Parser_Handler;
+   type Parser_Table_Access is access constant Parser_Table;
+
    type Parser is tagged limited record
       Pending             : Wiki.Strings.WChar;
       Has_Pending         : Boolean;
       Syntax              : Wiki_Syntax;
+      Previous_Syntax     : Wiki_Syntax;
+      Table               : Parser_Table_Access;
       Document            : Wiki.Documents.Document;
       Filters             : Wiki.Filters.Filter_Chain;
       Format              : Wiki.Format_Map;
@@ -104,12 +112,6 @@ private
       Reader              : Wiki.Streams.Input_Stream_Access := null;
       Attributes          : Wiki.Attributes.Attribute_List;
    end record;
-
-   type Parser_Handler is access procedure (P     : in out Parser;
-                                            Token : in Wiki.Strings.WChar);
-
-   type Parser_Table is array (0 .. 127) of Parser_Handler;
-   type Parser_Table_Access is access Parser_Table;
 
    --  Peek the next character from the wiki text buffer.
    procedure Peek (P     : in out Parser;
@@ -153,5 +155,7 @@ private
 
    procedure End_Element (P    : in out Parser;
                           Tag  : in Wiki.Html_Tag);
+
+   procedure Parse_Token (P     : in out Parser);
 
 end Wiki.Parsers;
