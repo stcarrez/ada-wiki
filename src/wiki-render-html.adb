@@ -517,7 +517,12 @@ package body Wiki.Render.Html is
                        Text     : in Wiki.Strings.WString;
                        Format   : in Wiki.Format_Map) is
    begin
-      Engine.Open_Paragraph;
+      if Engine.Html_Level = 0 then
+         Engine.Open_Paragraph;
+      elsif Engine.Need_Paragraph then
+         Engine.Output.Write (' ');
+         Engine.Need_Paragraph := False;
+      end if;
       for I in Format'Range loop
          if Format (I) then
             Engine.Output.Start_Element (HTML_ELEMENT (I).all);
