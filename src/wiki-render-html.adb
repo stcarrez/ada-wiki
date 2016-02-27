@@ -150,7 +150,9 @@ package body Wiki.Render.Html is
                                              Content => Wiki.Attributes.Get_Wide_Value (Iter));
          Wiki.Attributes.Next (Iter);
       end loop;
+      Engine.Html_Level := Engine.Html_Level + 1;
       Engine.Render (Doc, Node.Children);
+      Engine.Html_Level := Engine.Html_Level - 1;
       if Node.Tag_Start = Wiki.P_TAG then
          Engine.Has_Paragraph := False;
          Engine.Need_Paragraph := True;
