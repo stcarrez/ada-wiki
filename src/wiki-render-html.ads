@@ -47,6 +47,11 @@ package Wiki.Render.Html is
                      Doc    : in Wiki.Documents.Document;
                      Node   : in Wiki.Nodes.Node_Type);
 
+   --  Get the current section number.
+   function Get_Section_Number (Engine    : in Html_Renderer;
+                                Prefix    : in Wiki.Strings.WString;
+                                Separator : in Wiki.Strings.WChar) return Wiki.Strings.WString;
+
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
    procedure Add_Blockquote (Engine : in out Html_Renderer;
@@ -78,6 +83,8 @@ private
    procedure Close_Paragraph (Engine : in out Html_Renderer);
    procedure Open_Paragraph (Engine : in out Html_Renderer);
 
+   type Toc_Number_Array is array (1 .. 6) of Natural;
+
    type List_Style_Array is array (1 .. 32) of Boolean;
 
    Default_Links : aliased Default_Link_Renderer;
@@ -90,10 +97,13 @@ private
       Need_Paragraph    : Boolean := False;
       Has_Item          : Boolean := False;
       Enable_Render_TOC : Boolean := False;
+      TOC_Rendered      : Boolean := False;
       Current_Level     : Natural := 0;
       List_Styles       : List_Style_Array := (others => False);
       Quote_Level       : Natural := 0;
       Html_Level        : Natural := 0;
+      Current_Section   : Toc_Number_Array := (others => 0);
+      Section_Level     : Natural := 0;
    end record;
 
    procedure Render_Tag (Engine : in out Html_Renderer;
@@ -102,6 +112,7 @@ private
 
    --  Render a section header in the document.
    procedure Render_Header (Engine : in out Html_Renderer;
+                            Doc    : in Wiki.Documents.Document;
                             Header : in Wiki.Strings.WString;
                             Level  : in Positive);
 
