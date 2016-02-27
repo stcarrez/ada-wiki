@@ -42,6 +42,7 @@ procedure Render is
       Ada.Text_IO.Put_Line ("  -m      Render a Markdown wiki content");
       Ada.Text_IO.Put_Line ("  -M      Render a Mediawiki wiki content");
       Ada.Text_IO.Put_Line ("  -d      Render a Dotclear wiki content");
+      Ada.Text_IO.Put_Line ("  -g      Render a Google wiki content");
       Ada.Text_IO.Put_Line ("  -c      Render a Creole wiki content");
    end Usage;
 
@@ -50,7 +51,7 @@ procedure Render is
    Syntax    : Wiki.Wiki_Syntax := Wiki.SYNTAX_MARKDOWN;
 begin
    loop
-      case Getopt ("m M d c t") is
+      case Getopt ("m M d c g t") is
          when 'm' =>
             Syntax := Wiki.SYNTAX_MARKDOWN;
 
@@ -62,6 +63,9 @@ begin
 
          when 'd' =>
             Syntax := Wiki.SYNTAX_DOTCLEAR;
+
+         when 'g' =>
+            Syntax := Wiki.SYNTAX_GOOGLE;
 
          when 't' =>
             Html_Mode := False;
