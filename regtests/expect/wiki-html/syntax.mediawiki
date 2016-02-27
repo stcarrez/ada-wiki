@@ -18,6 +18,8 @@
 </dd><dt>item 2
 </dt><dd> definition item 2
 </dd><dt>item 3
-</dt><dd> definition item 3</dd></dl><pre><ul>item 1
-<i>item</i>
-</></ul><h2>dd</h2>
+</dt><dd> definition item 3</dd></dl><p><pre>
+* item 1
+''item''
+== dd ==
+</pre></p>

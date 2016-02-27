@@ -1,2 +1,2 @@
 <p><b class="test"> <span class="css-class-test"><i>Italic
- </p></i></span></b>
+ </i></span></b></p>

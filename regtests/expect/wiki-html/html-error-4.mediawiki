@@ -1,4 +1,4 @@
-<b class=""> <span class="css-class-test"><i>Italic
+<p><b class=""> <span class="css-class-test"><i>Italic
  <table>
  <tr>
  <td>Item <i>1</i></td>
@@ -11,4 +11,4 @@
  </td><td>Item 5
  </td><tr>
  <td>Item 6<img />
- </td><td>Item 7<hr />4<h1>Title</h2></td></tr></tr></table></i></span></b>
+ </td><td>Item 7<hr />4<h1>Title</h1></td></tr></tr></table></i></span></b></p>

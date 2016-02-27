@@ -1,9 +1,6 @@
-<h2>NAME</h2><p>dynamo - Ada Web Application Generator</p><h2>SYNOPSIS</h2><p><b>dynamo</b> <a href=" -o"> -o</a>
-
-<i>directory </i> ] <a href=" -t"> -t</a>
-
-<i>templates </i> ] <a href=" -c"> -c</a>
-
+<h2>NAME</h2><p>dynamo - Ada Web Application Generator</p><h2>SYNOPSIS</h2><p><b>dynamo</b> [ -o
+<i>directory </i> ] [ -t
+<i>templates </i> ] [ -c
 <i>config-dir </i> ]
 <i>command </i> </p><h2>DESCRIPTION</h2><p><i>dynamo</i> is a command to help developers write an Ada Web Application using the
 <b>ASF</b> framework.  <i>dynamo</i> provides several commands to perform one specific task in
