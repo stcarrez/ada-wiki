@@ -28,6 +28,7 @@ with Util.Streams.Buffered;
 with Util.Strings.Transforms;
 
 with Wiki.Filters.Html;
+with Wiki.Filters.TOC;
 with Wiki.Streams.Builders;
 with Wiki.Streams.Html.Builders;
 with Wiki.Render.Html;
@@ -48,6 +49,7 @@ procedure Import is
    procedure Parse (Content : in String);
 
    Html_Filter : aliased Wiki.Filters.Html.Html_Filter_Type;
+   TOC         : aliased Wiki.Filters.TOC.TOC_Filter;
    Count       : Natural := 0;
    Html_Mode   : Boolean := True;
    Wiki_Mode   : Boolean := False;
@@ -68,6 +70,7 @@ procedure Import is
       Doc    : Wiki.Documents.Document;
       Engine : Wiki.Parsers.Parser;
    begin
+      Engine.Add_Filter (TOC'Unchecked_Access);
       Engine.Add_Filter (Html_Filter'Unchecked_Access);
       if Wiki_Mode then
          declare
