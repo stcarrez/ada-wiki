@@ -47,6 +47,31 @@ package body Wiki.Render.Html is
    end Set_Render_TOC;
 
    --  ------------------------------
+   --  Get the current section number.
+   --  ------------------------------
+   function Get_Section_Number (Engine    : in Html_Renderer;
+                                Prefix    : in Wiki.Strings.WString;
+                                Separator : in Wiki.Strings.WChar) return Wiki.Strings.WString is
+      Result : Wiki.Strings.UString;
+   begin
+      if Engine.Section_Level = 0 then
+         return "";
+      end if;
+      Wiki.Strings.Append (Result, Prefix);
+      for I in 1 .. Engine.Section_Level loop
+         declare
+            N : constant Strings.WString := Positive'Wide_Wide_Image (Engine.Current_Section (I));
+         begin
+            if I > 1 then
+               Wiki.Strings.Append (Result, Separator);
+            end if;
+            Wiki.Strings.Append (Result, N (N'First + 1 .. N'Last));
+         end;
+      end loop;
+      return Wiki.Strings.To_WString (Result);
+   end Get_Section_Number;
+
+   --  ------------------------------
    --  Render the node instance from the document.
    --  ------------------------------
    overriding
@@ -58,7 +83,8 @@ package body Wiki.Render.Html is
    begin
       case Node.Kind is
          when Wiki.Nodes.N_HEADER =>
-            Engine.Render_Header (Header => Node.Header,
+            Engine.Render_Header (Doc    => Doc,
+                                  Header => Node.Header,
                                   Level  => Node.Level);
 
          when Wiki.Nodes.N_LINE_BREAK =>
@@ -164,33 +190,50 @@ package body Wiki.Render.Html is
    --  Render a section header in the document.
    --  ------------------------------
    procedure Render_Header (Engine : in out Html_Renderer;
+                            Doc    : in Wiki.Documents.Document;
                             Header : in Wiki.Strings.WString;
                             Level  : in Positive) is
+      Tag     : String_Access;
    begin
+      if Engine.Enable_Render_TOC and not Engine.TOC_Rendered then
+         Engine.Render_TOC (Doc, 3);
+      end if;
       Engine.Close_Paragraph;
       Engine.Add_Blockquote (0);
+      Engine.Current_Section (Level) := Engine.Current_Section (Level) + 1;
+      for I in Level + 1 .. Engine.Current_Section'Last loop
+         Engine.Current_Section (I) := 0;
+      end loop;
+      Engine.Section_Level := Level;
       case Level is
          when 1 =>
-            Engine.Output.Write_Wide_Element ("h1", Header);
+            Tag := Get_Tag_Name (H1_TAG);
 
          when 2 =>
-            Engine.Output.Write_Wide_Element ("h2", Header);
+            Tag := Get_Tag_Name (H2_TAG);
 
          when 3 =>
-            Engine.Output.Write_Wide_Element ("h3", Header);
+            Tag := Get_Tag_Name (H3_TAG);
 
          when 4 =>
-            Engine.Output.Write_Wide_Element ("h4", Header);
+            Tag := Get_Tag_Name (H4_TAG);
 
          when 5 =>
-            Engine.Output.Write_Wide_Element ("h5", Header);
+            Tag := Get_Tag_Name (H5_TAG);
 
          when 6 =>
-            Engine.Output.Write_Wide_Element ("h6", Header);
+            Tag := Get_Tag_Name (H6_TAG);
 
          when others =>
-            Engine.Output.Write_Wide_Element ("h3", Header);
+            Tag := Get_Tag_Name (H3_TAG);
+
       end case;
+      Engine.Output.Start_Element (Tag.all);
+      if Engine.Enable_Render_TOC then
+         Engine.Output.Write_Wide_Attribute ("id", Engine.Get_Section_Number ("section_", '_'));
+      end if;
+      Engine.Output.Write_Wide_Text (Header);
+      Engine.Output.End_Element (Tag.all);
    end Render_Header;
 
    --  ------------------------------
@@ -202,51 +245,29 @@ package body Wiki.Render.Html is
 
       procedure Render_Entry (Node : in Wiki.Nodes.Node_Type);
       procedure Set_Current_Level (New_Level : in Natural);
-      function Get_Number return Wiki.Strings.WString;
 
       use Wiki.Nodes;
 
-      type Toc_Number_Array is array (1 .. 6) of Positive;
-
-      Current_Level : Natural := 0;
-      Toc_Number    : Toc_Number_Array := (others => 1);
-
       procedure Set_Current_Level (New_Level : in Natural) is
       begin
-         if New_Level = Current_Level and then New_Level /= 0 then
+         if New_Level = Engine.Section_Level and then New_Level /= 0 then
             Engine.Output.End_Element ("li");
             Engine.Output.Start_Element ("li");
          end if;
 
          --  Close the ul/li lists up to the expected level.
-         while New_Level < Current_Level loop
+         while New_Level < Engine.Section_Level loop
             Engine.Output.End_Element ("li");
             Engine.Output.End_Element ("ul");
-            Current_Level := Current_Level - 1;
+            Engine.Section_Level := Engine.Section_Level - 1;
          end loop;
-         while New_Level > Current_Level loop
+         while New_Level > Engine.Section_Level loop
             Engine.Output.Start_Element ("ul");
             Engine.Output.Start_Element ("li");
-            Current_Level := Current_Level + 1;
-            Toc_Number (Current_Level) := 1;
+            Engine.Section_Level := Engine.Section_Level + 1;
+            Engine.Current_Section (Engine.Section_Level) := 0;
          end loop;
       end Set_Current_Level;
-
-      function Get_Number return Wiki.Strings.WString is
-         Result : Wiki.Strings.UString;
-      begin
-         for I in 1 .. Current_Level loop
-            declare
-               N : constant Wiki.Strings.WString := Positive'Wide_Wide_Image (Toc_Number (I));
-            begin
-               if I > 1 then
-                  Wiki.Strings.Append (Result, ".");
-               end if;
-               Wiki.Strings.Append (Result, N (N'First + 1 .. N'Last));
-            end;
-         end loop;
-         return Wiki.Strings.To_WString (Result);
-      end Get_Number;
 
       procedure Render_Entry (Node : in Wiki.Nodes.Node_Type) is
       begin
@@ -254,24 +275,28 @@ package body Wiki.Render.Html is
             return;
          end if;
          Set_Current_Level (Node.Level);
+         Engine.Current_Section (Engine.Section_Level)
+           := Engine.Current_Section (Engine.Section_Level) + 1;
          Engine.Output.Start_Element ("a");
          Engine.Output.Start_Element ("span");
-         Engine.Output.Write_Wide_Text (Get_Number);
+         Engine.Output.Write_Wide_Text (Engine.Get_Section_Number ("", '.'));
          Engine.Output.End_Element ("span");
          Engine.Output.Start_Element ("span");
          Engine.Output.Write_Wide_Text (Node.Header);
          Engine.Output.End_Element ("span");
          Engine.Output.End_Element ("a");
-         Toc_Number (Current_Level) := Toc_Number (Current_Level) + 1;
       end Render_Entry;
 
       Toc : constant Wiki.Nodes.Node_List_Ref := Doc.Get_TOC;
    begin
-      if Wiki.Nodes.Length (Toc) > 2 then
+      if Wiki.Nodes.Length (Toc) > 2 and not Engine.TOC_Rendered then
+         Engine.Section_Level := 0;
+         Engine.Current_Section := (others => 0);
          Engine.Output.Start_Element ("div");
          Wiki.Nodes.Iterate (Toc, Render_Entry'Access);
          Set_Current_Level (0);
          Engine.Output.End_Element ("div");
+         Engine.TOC_Rendered := True;
       end if;
    end Render_TOC;
 
