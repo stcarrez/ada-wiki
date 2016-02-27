@@ -102,6 +102,7 @@ private
       In_List             : Boolean := False;
       Need_Paragraph      : Boolean := True;
       Link_Double_Bracket : Boolean := False;
+      Link_No_Space       : Boolean := False;
       Is_Dotclear         : Boolean := False;
       Link_Title_First    : Boolean := False;
       Check_Image_Link    : Boolean := False;
