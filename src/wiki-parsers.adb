@@ -591,6 +591,7 @@ package body Wiki.Parsers is
             Put_Back (P, C);
             return;
          end if;
+         Put_Back (P, C);
       end if;
       Flush_Text (P);
 
