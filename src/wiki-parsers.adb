@@ -110,9 +110,6 @@ package body Wiki.Parsers is
    procedure Parse_Horizontal_Rule (P     : in out Parser;
                                     Token : in Wiki.Strings.WChar);
 
-   procedure Parse_Token (P     : in out Parser;
-                          Table : in Parser_Table);
-
    procedure Parse_End_Line (P     : in out Parser;
                              Token : in Wiki.Strings.WChar);
 
@@ -232,21 +229,6 @@ package body Wiki.Parsers is
          end if;
       end loop;
    end Skip_Spaces;
-
-   procedure Start_Element (P          : in out Parser;
-                            Tag        : in Wiki.Html_Tag;
-                            Attributes : in out Wiki.Attributes.Attribute_List) is
-   begin
-      Flush_Text (P);
-      P.Filters.Push_Node (P.Document, Tag, Attributes);
-   end Start_Element;
-
-   procedure End_Element (P    : in out Parser;
-                          Tag  : in Wiki.Html_Tag) is
-   begin
-      Flush_Text (P);
-      P.Filters.Pop_Node (P.Document, Tag);
-   end End_Element;
 
    --  ------------------------------
    --  Append a character to the wiki text buffer.
@@ -1143,7 +1125,7 @@ package body Wiki.Parsers is
       Wiki.Parsers.Html.Parse_Element (P);
    end Parse_Maybe_Html;
 
-   Google_Wiki_Table : constant Parser_Table
+   Google_Wiki_Table : aliased constant Parser_Table
      := (
          16#0A# => Parse_End_Line'Access,
          16#0D# => Parse_End_Line'Access,
@@ -1164,7 +1146,7 @@ package body Wiki.Parsers is
          others => Parse_Text'Access
         );
 
-   Dotclear_Wiki_Table : constant Parser_Table
+   Dotclear_Wiki_Table : aliased constant Parser_Table
      := (
          16#0A# => Parse_End_Line'Access,
          16#0D# => Parse_End_Line'Access,
@@ -1189,7 +1171,7 @@ package body Wiki.Parsers is
          others => Parse_Text'Access
         );
 
-   Creole_Wiki_Table : constant Parser_Table
+   Creole_Wiki_Table : aliased constant Parser_Table
      := (
          16#0A# => Parse_End_Line'Access,
          16#0D# => Parse_End_Line'Access,
@@ -1212,7 +1194,7 @@ package body Wiki.Parsers is
          others => Parse_Text'Access
         );
 
-   Markdown_Wiki_Table : constant Parser_Table
+   Markdown_Wiki_Table : aliased constant Parser_Table
      := (
          16#0A# => Parse_End_Line'Access,
          16#0D# => Parse_End_Line'Access,
@@ -1234,7 +1216,7 @@ package body Wiki.Parsers is
          others => Parse_Text'Access
         );
 
-   Mediawiki_Wiki_Table : constant Parser_Table
+   Mediawiki_Wiki_Table : aliased constant Parser_Table
      := (
          16#0A# => Parse_End_Line'Access,
          16#0D# => Parse_End_Line'Access,
@@ -1253,7 +1235,7 @@ package body Wiki.Parsers is
          others => Parse_Text'Access
         );
 
-   Misc_Wiki_Table : constant Parser_Table
+   Misc_Wiki_Table : aliased constant Parser_Table
      := (
          16#0A# => Parse_End_Line'Access,
          16#0D# => Parse_End_Line'Access,
@@ -1273,12 +1255,53 @@ package body Wiki.Parsers is
          others => Parse_Text'Access
         );
 
-   Html_Table : constant Parser_Table
+   Html_Table : aliased constant Parser_Table
      := (
          Character'Pos ('<') => Parse_Maybe_Html'Access,
          Character'Pos ('&') => Html.Parse_Entity'Access,
          others => Parse_Text'Access
         );
+
+   type Syntax_Parser_Tables is array (Wiki_Syntax) of Parser_Table_Access;
+
+   Syntax_Tables : constant Syntax_Parser_Tables
+     := (
+         SYNTAX_GOOGLE     => Google_Wiki_Table'Access,
+         SYNTAX_CREOLE     => Creole_Wiki_Table'Access,
+         SYNTAX_DOTCLEAR   => Dotclear_Wiki_Table'Access,
+         SYNTAX_PHPBB      => Mediawiki_Wiki_Table'Access,
+         SYNTAX_MEDIA_WIKI => Mediawiki_Wiki_Table'Access,
+         SYNTAX_MARKDOWN   => Markdown_Wiki_Table'Access,
+         SYNTAX_MIX        => Misc_Wiki_Table'Access,
+         SYNTAX_HTML       => Html_Table'Access
+        );
+
+   procedure Start_Element (P          : in out Parser;
+                            Tag        : in Wiki.Html_Tag;
+                            Attributes : in out Wiki.Attributes.Attribute_List) is
+   begin
+      Flush_Text (P);
+      P.Filters.Push_Node (P.Document, Tag, Attributes);
+
+      --  When we are within a <pre> HTML element, switch to HTML to emit the text as is.
+      if Tag = PRE_TAG and P.Syntax /= SYNTAX_HTML then
+         P.Previous_Syntax := P.Syntax;
+         P.Set_Syntax (SYNTAX_HTML);
+      end if;
+   end Start_Element;
+
+   procedure End_Element (P    : in out Parser;
+                          Tag  : in Wiki.Html_Tag) is
+   begin
+      Flush_Text (P);
+      P.Filters.Pop_Node (P.Document, Tag);
+
+      --  Switch back to the previous syntax when we reached the </pre> HTML element.
+      if P.Previous_Syntax /= P.Syntax and Tag = PRE_TAG then
+         P.Set_Syntax (P.Previous_Syntax);
+      end if;
+   end End_Element;
+
 
    --  Add the plugin to the wiki engine.
    procedure Add_Plugin (Engine : in out Parser;
@@ -1288,11 +1311,14 @@ package body Wiki.Parsers is
       null;
    end Add_Plugin;
 
+   --  ------------------------------
    --  Set the wiki syntax that the wiki engine must use.
+   --  ------------------------------
    procedure Set_Syntax (Engine : in out Parser;
                          Syntax : in Wiki_Syntax := SYNTAX_MIX) is
    begin
       Engine.Syntax := Syntax;
+      Engine.Table  := Syntax_Tables (Syntax);
    end Set_Syntax;
 
    --  ------------------------------
@@ -1348,67 +1374,54 @@ package body Wiki.Parsers is
                     Doc    : in out Wiki.Documents.Document) is
    begin
       Engine.Document   := Doc;
+      Engine.Previous_Syntax := Engine.Syntax;
       Engine.Empty_Line := True;
       Engine.Format     := (others => False);
       Engine.Is_Eof     := False;
+      Engine.In_Paragraph := True;
       Engine.Has_Pending := False;
       Engine.Reader      := Stream;
       Engine.Link_Double_Bracket := False;
       Engine.Escape_Char := '~';
+      Engine.Filters.Add_Node (Engine.Document, Wiki.Nodes.N_PARAGRAPH);
       case Engine.Syntax is
-         when SYNTAX_GOOGLE =>
-            Parse_Token (Engine, Google_Wiki_Table);
-
          when SYNTAX_DOTCLEAR =>
             Engine.Is_Dotclear := True;
             Engine.Escape_Char := '\';
             Engine.Header_Offset := -6;
             Engine.Link_Title_First := True;
-            Parse_Token (Engine, Dotclear_Wiki_Table);
 
          when SYNTAX_CREOLE =>
             Engine.Link_Double_Bracket := True;
-            Parse_Token (Engine, Creole_Wiki_Table);
-
-         when SYNTAX_PHPBB =>
-            Parse_Token (Engine, Mediawiki_Wiki_Table);
 
          when SYNTAX_MEDIA_WIKI =>
             Engine.Link_Double_Bracket := True;
             Engine.Check_Image_Link := True;
-            Parse_Token (Engine, Mediawiki_Wiki_Table);
-
-         when SYNTAX_MARKDOWN =>
-            Parse_Token (Engine, Markdown_Wiki_Table);
 
          when SYNTAX_MIX =>
             Engine.Is_Dotclear := True;
-            Parse_Token (Engine, Misc_Wiki_Table);
 
-         when SYNTAX_HTML =>
-            Parse_Token (Engine, Html_Table);
+         when others =>
+            null;
 
       end case;
+      Parse_Token (Engine);
+      Flush_Text (Engine);
+      Engine.Filters.Finish (Engine.Document);
       Doc := Engine.Document;
    end Parse;
 
-   procedure Parse_Token (P     : in out Parser;
-                          Table : in Parser_Table) is
+   procedure Parse_Token (P : in out Parser) is
       C : Wiki.Strings.WChar;
    begin
-      P.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
-      P.In_Paragraph := True;
       while not P.Is_Eof loop
          Peek (P, C);
          if C > '~' then
             Parse_Text (P, C);
          else
-            Table (Wiki.Strings.WChar'Pos (C)).all (P, C);
+            P.Table (Wiki.Strings.WChar'Pos (C)).all (P, C);
          end if;
       end loop;
-
-      Flush_Text (P);
-      P.Filters.Finish (P.Document);
    end Parse_Token;
 
 end Wiki.Parsers;
