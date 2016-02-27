@@ -282,6 +282,7 @@ package body Wiki.Render.Html is
            := Engine.Current_Section (Engine.Section_Level) + 1;
          Engine.Output.Start_Element ("a");
          Engine.Output.Write_Attribute ("class", "wiki-toc-ref");
+         Engine.Output.Write_Wide_Attribute ("href", Engine.Get_Section_Number ("#section_", '_'));
          Engine.Output.Start_Element ("span");
          Engine.Output.Write_Attribute ("class", "wiki-toc-level");
          Engine.Output.Write_Wide_Text (Engine.Get_Section_Number ("", '.'));
