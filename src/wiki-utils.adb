@@ -38,6 +38,7 @@ package body Wiki.Utils is
       Engine   : Wiki.Parsers.Parser;
    begin
       Renderer.Set_Output_Stream (Stream'Unchecked_Access);
+      Renderer.Set_Render_TOC (True);
       Engine.Add_Filter (TOC'Unchecked_Access);
       Engine.Add_Filter (Filter'Unchecked_Access);
       Engine.Set_Syntax (Syntax);
