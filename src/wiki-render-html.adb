@@ -253,6 +253,7 @@ package body Wiki.Render.Html is
          if New_Level = Engine.Section_Level and then New_Level /= 0 then
             Engine.Output.End_Element ("li");
             Engine.Output.Start_Element ("li");
+            Engine.Output.Write_Attribute ("class", "wiki-toc-entry");
          end if;
 
          --  Close the ul/li lists up to the expected level.
@@ -263,7 +264,9 @@ package body Wiki.Render.Html is
          end loop;
          while New_Level > Engine.Section_Level loop
             Engine.Output.Start_Element ("ul");
+            Engine.Output.Write_Attribute ("class", "wiki-toc-entry");
             Engine.Output.Start_Element ("li");
+            Engine.Output.Write_Attribute ("class", "wiki-toc-entry");
             Engine.Section_Level := Engine.Section_Level + 1;
             Engine.Current_Section (Engine.Section_Level) := 0;
          end loop;
@@ -278,10 +281,13 @@ package body Wiki.Render.Html is
          Engine.Current_Section (Engine.Section_Level)
            := Engine.Current_Section (Engine.Section_Level) + 1;
          Engine.Output.Start_Element ("a");
+         Engine.Output.Write_Attribute ("class", "wiki-toc-ref");
          Engine.Output.Start_Element ("span");
+         Engine.Output.Write_Attribute ("class", "wiki-toc-level");
          Engine.Output.Write_Wide_Text (Engine.Get_Section_Number ("", '.'));
          Engine.Output.End_Element ("span");
          Engine.Output.Start_Element ("span");
+         Engine.Output.Write_Attribute ("class", "wiki-toc-title");
          Engine.Output.Write_Wide_Text (Node.Header);
          Engine.Output.End_Element ("span");
          Engine.Output.End_Element ("a");
@@ -293,6 +299,7 @@ package body Wiki.Render.Html is
          Engine.Section_Level := 0;
          Engine.Current_Section := (others => 0);
          Engine.Output.Start_Element ("div");
+         Engine.Output.Write_Attribute ("class", "wiki-toc");
          Wiki.Nodes.Iterate (Toc, Render_Entry'Access);
          Set_Current_Level (0);
          Engine.Output.End_Element ("div");
