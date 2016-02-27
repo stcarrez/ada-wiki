@@ -584,6 +584,14 @@ package body Wiki.Parsers is
             return;
          end if;
       end if;
+      if P.Link_No_Space then
+         Peek (P, C);
+         if C = ' ' then
+            Append (P.Text, Token);
+            Put_Back (P, C);
+            return;
+         end if;
+      end if;
       Flush_Text (P);
 
       Wiki.Attributes.Clear (P.Attributes);
@@ -1400,6 +1408,9 @@ package body Wiki.Parsers is
 
          when SYNTAX_MIX =>
             Engine.Is_Dotclear := True;
+
+         when SYNTAX_GOOGLE =>
+            Engine.Link_No_Space := True;
 
          when others =>
             null;
