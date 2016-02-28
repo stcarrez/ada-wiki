@@ -16,6 +16,29 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 package body Wiki.Streams.Html is
+   type Unicode_Char is mod 2**31;
+
+   --  ------------------------------
+   --  Write a character on the response stream and escape that character as necessary.
+   --  ------------------------------
+   procedure Write_Escape (Stream : in out Html_Output_Stream'Class;
+                           Char   : in Wiki.Strings.WChar) is
+      Code : constant Unicode_Char := Wiki.Strings.WChar'Pos (Char);
+   begin
+      --  If "?" or over, no escaping is needed (this covers
+      --  most of the Latin alphabet)
+      if Code > 16#3F# or Code <= 16#20# then
+         Stream.Write (Char);
+      elsif Char = '<' then
+         Stream.Write ("&lt;");
+      elsif Char = '>' then
+         Stream.Write ("&gt;");
+      elsif Char = '&' then
+         Stream.Write ("&amp;");
+      else
+         Stream.Write (Char);
+      end if;
+   end Write_Escape;
 
    --  ------------------------------
    --  Write an XML attribute within an XML element.

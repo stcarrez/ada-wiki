@@ -21,37 +21,7 @@ package body Wiki.Streams.Html.Builders is
    --  Close the current XML entity if an entity was started
    procedure Close_Current (Stream : in out Html_Output_Builder_Stream'Class);
 
-   --  Internal method to write a character on the response stream
-   --  and escape that character as necessary.  Unlike 'Write_Char',
-   --  this operation does not closes the current XML entity.
-   procedure Write_Escape (Stream : in out Html_Output_Builder_Stream'Class;
-                           Char   : in Wiki.Strings.WChar);
-
    type Unicode_Char is mod 2**31;
-
-   --  ------------------------------
-   --  Internal method to write a character on the response stream
-   --  and escape that character as necessary.  Unlike 'Write_Char',
-   --  this operation does not closes the current XML entity.
-   --  ------------------------------
-   procedure Write_Escape (Stream : in out Html_Output_Builder_Stream'Class;
-                           Char   : in Wiki.Strings.WChar) is
-      Code : constant Unicode_Char := Wiki.Strings.WChar'Pos (Char);
-   begin
-      --  If "?" or over, no escaping is needed (this covers
-      --  most of the Latin alphabet)
-      if Code > 16#3F# or Code <= 16#20# then
-         Stream.Write (Char);
-      elsif Char = '<' then
-         Stream.Write ("&lt;");
-      elsif Char = '>' then
-         Stream.Write ("&gt;");
-      elsif Char = '&' then
-         Stream.Write ("&amp;");
-      else
-         Stream.Write (Char);
-      end if;
-   end Write_Escape;
 
    --  ------------------------------
    --  Close the current XML entity if an entity was started
