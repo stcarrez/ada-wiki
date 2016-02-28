@@ -16,7 +16,12 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 package body Wiki.Streams.Html is
+
    type Unicode_Char is mod 2**31;
+
+   --  Write the string to the stream.
+   procedure Write_String (Stream  : in out Html_Output_Stream'Class;
+                           Content : in String);
 
    --  ------------------------------
    --  Write a character on the response stream and escape that character as necessary.
@@ -39,6 +44,54 @@ package body Wiki.Streams.Html is
          Stream.Write (Char);
       end if;
    end Write_Escape;
+
+   --  ------------------------------
+   --  Write a string on the response stream and escape the characters as necessary.
+   --  ------------------------------
+   procedure Write_Escape (Stream  : in out Html_Output_Stream'Class;
+                           Content : in Wiki.Strings.WString) is
+   begin
+      for I in Content'Range loop
+         Stream.Write_Escape (Content (I));
+      end loop;
+   end Write_Escape;
+
+   --  ------------------------------
+   --  Write the string to the stream.
+   --  ------------------------------
+   procedure Write_String (Stream  : in out Html_Output_Stream'Class;
+                           Content : in String) is
+   begin
+      for I in Content'Range loop
+         Stream.Write (Wiki.Strings.To_WChar (Content (I)));
+      end loop;
+   end Write_String;
+
+   --  ------------------------------
+   --  Write an XML attribute within an XML element.
+   --  The attribute value is escaped according to the XML escape rules.
+   --  ------------------------------
+   procedure Write_Escape_Attribute (Stream  : in out Html_Output_Stream'Class;
+                                     Name    : in String;
+                                     Content : in Wiki.Strings.WString) is
+   begin
+      Stream.Write (' ');
+      Stream.Write_String (Name);
+      Stream.Write ('=');
+      Stream.Write ('"');
+      for I in Content'Range loop
+         declare
+            C : constant Wiki.Strings.WChar := Content (I);
+         begin
+            if C = '"' then
+               Stream.Write ("&quot;");
+            else
+               Stream.Write_Escape (C);
+            end if;
+         end;
+      end loop;
+      Stream.Write ('"');
+   end Write_Escape_Attribute;
 
    --  ------------------------------
    --  Write an XML attribute within an XML element.
