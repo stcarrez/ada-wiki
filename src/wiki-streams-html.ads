@@ -29,13 +29,6 @@ package Wiki.Streams.Html is
    type Html_Output_Stream is limited interface and Output_Stream;
    type Html_Output_Stream_Access is access all Html_Output_Stream'Class;
 
-   --  Write an XML element using the given name and with the content.
-   --  This is similar to calling <b>Start_Element</b>, <b>Write_Text</b>
-   --  and <b>End_Element</b>.
-   procedure Write_Wide_Element (Writer  : in out Html_Output_Stream;
-                                 Name    : in String;
-                                 Content : in Wiki.Strings.WString) is abstract;
-
    --  Write an XML attribute within an XML element.
    --  The attribute value is escaped according to the XML escape rules.
    procedure Write_Wide_Attribute (Writer  : in out Html_Output_Stream;
