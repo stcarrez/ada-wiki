@@ -21,8 +21,6 @@ package body Wiki.Streams.Html.Builders is
    --  Close the current XML entity if an entity was started
    procedure Close_Current (Stream : in out Html_Output_Builder_Stream'Class);
 
-   type Unicode_Char is mod 2**31;
-
    --  ------------------------------
    --  Close the current XML entity if an entity was started
    --  ------------------------------
@@ -43,22 +41,7 @@ package body Wiki.Streams.Html.Builders is
                                    Content : in Wiki.Strings.WString) is
    begin
       if Stream.Close_Start then
-         Stream.Write (' ');
-         Stream.Write_String (Name);
-         Stream.Write ('=');
-         Stream.Write ('"');
-         for I in Content'Range loop
-            declare
-               C : constant Wiki.Strings.WChar := Content (I);
-            begin
-               if C = '"' then
-                  Stream.Write ("&quot;");
-               else
-                  Stream.Write_Escape (C);
-               end if;
-            end;
-         end loop;
-         Stream.Write ('"');
+         Stream.Write_Escape_Attribute (Name, Content);
       end if;
    end Write_Wide_Attribute;
 
@@ -114,9 +97,7 @@ package body Wiki.Streams.Html.Builders is
                               Content : in Wiki.Strings.WString) is
    begin
       Close_Current (Stream);
-      for I in Content'Range loop
-         Html_Output_Builder_Stream'Class (Stream).Write_Escape (Content (I));
-      end loop;
+      Stream.Write_Escape (Content);
    end Write_Wide_Text;
 
 end Wiki.Streams.Html.Builders;
