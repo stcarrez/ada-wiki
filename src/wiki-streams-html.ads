@@ -57,6 +57,16 @@ package Wiki.Streams.Html is
    procedure Write_Escape (Stream : in out Html_Output_Stream'Class;
                            Char   : in Wiki.Strings.WChar);
 
+   --  Write a string on the response stream and escape the characters as necessary.
+   procedure Write_Escape (Stream  : in out Html_Output_Stream'Class;
+                           Content : in Wiki.Strings.WString);
+
+   --  Write an XML attribute within an XML element.
+   --  The attribute value is escaped according to the XML escape rules.
+   procedure Write_Escape_Attribute (Stream  : in out Html_Output_Stream'Class;
+                                     Name    : in String;
+                                     Content : in Wiki.Strings.WString);
+
    --  Write an XML attribute within an XML element.
    --  The attribute value is escaped according to the XML escape rules.
    procedure Write_Attribute (Writer  : in out Html_Output_Stream'Class;
