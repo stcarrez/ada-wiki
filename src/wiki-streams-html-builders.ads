@@ -29,11 +29,6 @@ package Wiki.Streams.Html.Builders is
    type Html_Output_Builder_Stream_Access is access all Html_Output_Builder_Stream'Class;
 
    overriding
-   procedure Write_Wide_Element (Stream  : in out Html_Output_Builder_Stream;
-                                 Name    : in String;
-                                 Content : in Wiki.Strings.WString);
-
-   overriding
    procedure Write_Wide_Attribute (Stream  : in out Html_Output_Builder_Stream;
                                    Name    : in String;
                                    Content : in Wiki.Strings.UString);

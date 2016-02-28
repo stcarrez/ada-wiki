@@ -64,16 +64,6 @@ package body Wiki.Streams.Html.Builders is
       end if;
    end Close_Current;
 
-   procedure Write_Wide_Element (Stream  : in out Html_Output_Builder_Stream;
-                                 Name    : in String;
-                                 Content : in Wiki.Strings.WString) is
-
-   begin
-      Stream.Start_Element (Name);
-      Stream.Write_Wide_Text (Content);
-      Stream.End_Element (Name);
-   end Write_Wide_Element;
-
    --  ------------------------------
    --  Write an XML attribute within an XML element.
    --  The attribute value is escaped according to the XML escape rules.
