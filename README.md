@@ -48,6 +48,13 @@ And to render the Wiki text into HTML use:
    bin/render -M content.wiki
 ```
 
+The 'words' samples illustrates the use of filters to collect information stored
+in the documents.  It collects words and links and report their usage in the
+document.  The next command reports the links used in the document:
+```
+   bin/words -l -M content.wiki
+```
+
 # Documentation
 
 The Ada Wiki sources as well as a wiki documentation is provided on:
