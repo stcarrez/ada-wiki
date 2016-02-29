@@ -17,6 +17,7 @@
 -----------------------------------------------------------------------
 with Ada.IO_Exceptions;
 
+with Wiki.Helpers;
 package body Wiki.Streams.Text_IO is
 
    --  ------------------------------
@@ -39,12 +40,13 @@ package body Wiki.Streams.Text_IO is
                    Eof   : out Boolean) is
       Available : Boolean;
    begin
+      Eof := False;
       Ada.Wide_Wide_Text_IO.Get_immediate (Input.File, Char, Available);
-      Eof := not Available;
 
    exception
       when Ada.IO_Exceptions.End_Error =>
-         Eof := True;
+         Char := Wiki.Helpers.LF;
+         Eof  := True;
 
    end Read;
 

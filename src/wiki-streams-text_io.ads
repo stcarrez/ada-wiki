@@ -71,7 +71,7 @@ package Wiki.Streams.Text_IO is
 private
 
    type File_Input_Stream is limited new Wiki.Streams.Input_Stream with record
-      File : Ada.Wide_Wide_Text_IO.File_Type := Ada.Wide_Wide_Text_IO.Current_Input;
+      File : Ada.Wide_Wide_Text_IO.File_Type;
    end record;
 
    type File_Output_Stream is limited new Wiki.Streams.Output_Stream with record
