@@ -19,7 +19,13 @@
 package body Wiki.Filters.Collectors is
 
    procedure Add_String (Into : in out WString_Maps.Map;
+                         Item : in Wiki.Strings.WString);
+
+   procedure Add_String (Into : in out WString_Maps.Map;
                          Item : in Wiki.Strings.WString) is
+
+      procedure Increment (Key : in Wiki.Strings.WString;
+                           Value : in out Natural);
 
       procedure Increment (Key : in Wiki.Strings.WString;
                            Value : in out Natural) is
