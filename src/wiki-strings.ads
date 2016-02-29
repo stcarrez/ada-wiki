@@ -17,6 +17,7 @@
 -----------------------------------------------------------------------
 with Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Characters.Conversions;
+with Ada.Wide_Wide_Characters.Handling;
 with Util.Texts.Builders;
 
 package Wiki.Strings is
@@ -56,6 +57,9 @@ package Wiki.Strings is
 
    function Element (S : in UString; Pos : in Positive) return WChar
                      renames Ada.Strings.Wide_Wide_Unbounded.Element;
+
+   function Is_Alphanumeric (C : in WChar) return Boolean
+     renames Ada.Wide_Wide_Characters.Handling.Is_Alphanumeric;
 
    Null_UString : UString
    renames Ada.Strings.Wide_Wide_Unbounded.Null_Unbounded_Wide_Wide_String;
