@@ -2,15 +2,11 @@
 NAME
 dynamo - Ada Web Application Generator
 SYNOPSIS
-dynamo  -o
-
-directory  ]  -t
-
-templates  ]  -c
-
+dynamo [ -o
+directory  ] [ -t
+templates  ] [ -c
 config-dir  ]
 command  
-
 DESCRIPTION
 dynamo is a command to help developers write an Ada Web Application using the
 ASF framework.  dynamo provides several commands to perform one specific task in

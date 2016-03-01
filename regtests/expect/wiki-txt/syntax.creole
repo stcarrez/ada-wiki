@@ -40,7 +40,7 @@ A link
 title (A link)
 
 
-Alt text}}linkAlt textlink
+Alt text}}Alt text
 
 A pre-formatted section 
 
