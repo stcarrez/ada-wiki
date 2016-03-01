@@ -71,6 +71,15 @@ package body Wiki.Parsers is
    procedure Parse_Link (P     : in out Parser;
                          Token : in Wiki.Strings.WChar);
 
+   --  Parse a template with parameters.
+   --  Example:
+   --    {{Name|param|...}}           MediaWiki
+   --    {{Name|param=value|...}}     MediaWiki
+   --    <<Name param=value ...>>     Creole
+   --    [{Name param=value ...}]     JSPWiki
+   procedure Parse_Template (P     : in out Parser;
+                             Token : in Wiki.Strings.WChar);
+
    --  Parse a space and take necessary formatting actions.
    --  Example:
    --    item1 item2   => add space in text buffer
@@ -567,6 +576,9 @@ package body Wiki.Parsers is
    Attr_Names_Link_First  : constant String_Array (1 .. 4)
      := (HREF_ATTR'Access, NAME_ATTR'Access, LANG_ATTR'Access, TITLE_ATTR'Access);
 
+   Attr_Name              : constant String_Array (1 .. 1)
+     := (1 => NAME_ATTR'Access);
+
    --  ------------------------------
    --  Parse a link.
    --  Example:
@@ -644,6 +656,70 @@ package body Wiki.Parsers is
          Put_Back (P, C);
       end if;
    end Parse_Link;
+
+   --  ------------------------------
+   --  Find the plugin with the given name.
+   --  Returns null if there is no such plugin.
+   --  ------------------------------
+   function Find (P    : in Parser;
+                  Name : in Wiki.Strings.WString) return Wiki.Plugins.Wiki_Plugin_Access is
+      use type Wiki.Plugins.Plugin_Factory_Access;
+   begin
+      if P.Factory = null then
+         return null;
+      else
+         return P.Factory.Find (Wiki.Strings.To_String (Name));
+      end if;
+   end Find;
+
+   --  ------------------------------
+   --  Parse a template with parameters.
+   --  Example:
+   --    {{Name|param|...}}           MediaWiki
+   --    {{Name|param=value|...}}     MediaWiki
+   --    <<Name param=value ...>>     Creole
+   --    [{Name param=value ...}]     JSPWiki
+   --  ------------------------------
+   procedure Parse_Template (P     : in out Parser;
+                             Token : in Wiki.Strings.WChar) is
+      use type Wiki.Plugins.Wiki_Plugin_Access;
+
+      C      : Wiki.Strings.WChar;
+      Expect : Wiki.Strings.WChar;
+   begin
+      Peek (P, C);
+      if C /= Token then
+         Append (P.Text, Token);
+         Put_Back (P, C);
+         return;
+      end if;
+      Flush_Text (P);
+
+      if Token = '{' then
+         Expect := '}';
+      else
+         Expect := '>';
+      end if;
+      Wiki.Attributes.Clear (P.Attributes);
+      if P.Syntax = SYNTAX_MEDIA_WIKI then
+         Parse_Parameters (P, '|', Expect, Attr_Name);
+      else
+         Parse_Parameters (P, ' ', Expect, Attr_Name);
+      end if;
+      Peek (P, C);
+      if C /= Expect then
+         Put_Back (P, C);
+      end if;
+      P.Empty_Line := False;
+      declare
+         Name   : constant Strings.WString := Attributes.Get_Attribute (P.Attributes, NAME_ATTR);
+         Plugin : constant Wiki.Plugins.Wiki_Plugin_Access := P.Find (Name);
+      begin
+         if Plugin /= null then
+            Plugin.Expand (P.Document, P.Attributes);
+         end if;
+      end;
+   end Parse_Template;
 
    --  ------------------------------
    --  Parse a quote.
@@ -1208,6 +1284,7 @@ package body Wiki.Parsers is
          Character'Pos ('{') => Parse_Image'Access,
          Character'Pos ('%') => Parse_Line_Break'Access,
          Character'Pos (';') => Parse_Item'Access,
+         Character'Pos ('<') => Parse_Template'Access,
          Character'Pos (':') => Parse_Definition'Access,
          others => Parse_Text'Access
         );
@@ -1249,6 +1326,7 @@ package body Wiki.Parsers is
          Character'Pos ('&') => Html.Parse_Entity'Access,
          Character'Pos ('-') => Parse_Horizontal_Rule'Access,
          Character'Pos (';') => Parse_Item'Access,
+         Character'Pos ('{') => Parse_Template'Access,
          Character'Pos (':') => Parse_Definition'Access,
          others => Parse_Text'Access
         );
