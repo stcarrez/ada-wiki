@@ -93,6 +93,7 @@ private
       Table               : Parser_Table_Access;
       Document            : Wiki.Documents.Document;
       Filters             : Wiki.Filters.Filter_Chain;
+      Factory             : Wiki.Plugins.Plugin_Factory_Access;
       Format              : Wiki.Format_Map;
       Text                : Wiki.Strings.BString (512);
       Token               : Wiki.Strings.BString (512);
@@ -141,6 +142,11 @@ private
    --  Check if the link refers to an image and must be rendered as an image.
    function Is_Image (P    : in Parser;
                       Link : in Wiki.Strings.WString) return Boolean;
+
+   --  Find the plugin with the given name.
+   --  Returns null if there is no such plugin.
+   function Find (P    : in Parser;
+                  Name : in Wiki.Strings.WString) return Wiki.Plugins.Wiki_Plugin_Access;
 
    type String_Array is array (Positive range <>) of Wiki.String_Access;
 
