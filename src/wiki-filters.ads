@@ -41,6 +41,7 @@ with Wiki.Strings;
 --
 --  @include wiki-filters-toc.ads
 --  @include wiki-filters-html.ads
+--  @include wiki-filters-collectors.ads
 package Wiki.Filters is
 
    pragma Preelaborate;
