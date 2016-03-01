@@ -67,7 +67,8 @@ package body Wiki.Nodes is
       procedure Free_Block (Block : in out Node_List_Block) is
       begin
          for I in 1 .. Block.Last loop
-            if Block.List (I).Kind = N_TAG_START then
+            if Block.List (I).Kind = N_TAG_START and then Block.List (I).Children /= null then
+               Finalize (Block.List (I).Children.all);
                Free (Block.List (I).Children);
             end if;
             Free (Block.List (I));
