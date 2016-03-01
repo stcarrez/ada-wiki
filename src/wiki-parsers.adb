@@ -197,9 +197,12 @@ package body Wiki.Parsers is
          P.Filters.Add_Text (P.Document, Content, P.Format);
       end Add_Text;
 
+      procedure Add_Text is
+         new Wiki.Strings.Wide_Wide_Builders.Get (Add_Text);
+
    begin
       if Length (P.Text) > 0 then
-         Iterate (P.Text, Add_Text'Access);
+         Add_Text (P.Text);
          Clear (P.Text);
       end if;
    end Flush_Text;
@@ -285,6 +288,9 @@ package body Wiki.Parsers is
       begin
          P.Filters.Add_Preformatted (P.Document, Content, Wiki.Strings.To_WString (Format));
       end Add_Preformatted;
+
+      procedure Add_Preformatted is
+         new Wiki.Strings.Wide_Wide_Builders.Get (Add_Preformatted);
 
    begin
       if Token /= ' ' then
@@ -388,7 +394,7 @@ package body Wiki.Parsers is
       P.Empty_Line := True;
 
       if not Is_Html then
-         Iterate (P.Text, Add_Preformatted'Access);
+         Add_Preformatted (P.Text);
          Clear (P.Text);
          P.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
          P.In_Paragraph := True;
@@ -430,6 +436,9 @@ package body Wiki.Parsers is
          P.Filters.Add_Header (P.Document, Content (Content'First .. Last), Level);
       end Add_Header;
 
+      procedure Add_Header is
+         new Wiki.Strings.Wide_Wide_Builders.Get (Add_Header);
+
    begin
       if not P.Empty_Line then
          Parse_Text (P, Token);
@@ -464,7 +473,7 @@ package body Wiki.Parsers is
          Level := 1;
       end if;
 
-      Iterate (P.Text, Add_Header'Access);
+      Add_Header (P.Text);
       P.Empty_Line   := True;
       P.In_Paragraph := False;
       Clear (P.Text);
