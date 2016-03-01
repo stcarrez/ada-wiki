@@ -157,20 +157,20 @@ package body Wiki.Parsers is
    procedure Peek (P     : in out Parser;
                    Token : out Wiki.Strings.WChar) is
    begin
-      if P.Has_Pending then
-         --  Return the pending character.
-         Token         := P.Pending;
-         P.Has_Pending := False;
-
-      elsif P.Is_Eof then
-         --  Return a \n on end of file (this simplifies the implementation).
-         Token := LF;
-      else
-
+      if not P.Has_Pending then
          --  Get the next character.
          P.Reader.Read (Token, P.Is_Eof);
          if P.Is_Eof then
+            --  Return a \n on end of file (this simplifies the implementation).
             Token := LF;
+            P.Pending := LF;
+            P.Has_Pending := True;
+         end if;
+      else
+         --  Return the pending character.
+         Token := P.Pending;
+         if not P.Is_Eof then
+            P.Has_Pending := False;
          end if;
       end if;
    end Peek;
@@ -1435,8 +1435,9 @@ package body Wiki.Parsers is
    procedure Parse_Token (P : in out Parser) is
       C : Wiki.Strings.WChar;
    begin
-      while not P.Is_Eof loop
+      loop
          Peek (P, C);
+         exit when P.Is_Eof;
          if C > '~' then
             Parse_Text (P, C);
          else
