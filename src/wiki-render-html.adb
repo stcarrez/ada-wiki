@@ -305,6 +305,7 @@ package body Wiki.Render.Html is
          Set_Current_Level (0);
          Engine.Output.End_Element ("div");
          Engine.TOC_Rendered := True;
+         Engine.Current_Section := (others => 0);
       end if;
    end Render_TOC;
 
