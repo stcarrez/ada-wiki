@@ -65,6 +65,10 @@ package Wiki.Parsers is
    procedure Add_Filter (Engine : in out Parser;
                          Filter : in Wiki.Filters.Filter_Type_Access);
 
+   --  Set the plugin context.
+   procedure Set_Context (Engine  : in out Parser;
+                          Context : in Wiki.Plugins.Plugin_Context);
+
    --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
    --  defined on the parser.
    procedure Parse (Engine : in out Parser;
@@ -86,17 +90,15 @@ private
    type Parser_Table_Access is access constant Parser_Table;
 
    type Parser is tagged limited record
+      Context             : Wiki.Plugins.Plugin_Context;
       Pending             : Wiki.Strings.WChar;
       Has_Pending         : Boolean;
       Syntax              : Wiki_Syntax;
       Previous_Syntax     : Wiki_Syntax;
       Table               : Parser_Table_Access;
       Document            : Wiki.Documents.Document;
-      Filters             : Wiki.Filters.Filter_Chain;
-      Factory             : Wiki.Plugins.Plugin_Factory_Access;
       Format              : Wiki.Format_Map;
       Text                : Wiki.Strings.BString (512);
-      Token               : Wiki.Strings.BString (512);
       Empty_Line          : Boolean := True;
       Is_Eof              : Boolean := False;
       In_Paragraph        : Boolean := False;
