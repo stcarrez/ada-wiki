@@ -203,7 +203,7 @@ package body Wiki.Parsers is
 
       procedure Add_Text (Content : in Wiki.Strings.WString) is
       begin
-         P.Filters.Add_Text (P.Document, Content, P.Format);
+         P.context.Filters.Add_Text (P.Document, Content, P.Format);
       end Add_Text;
 
       procedure Add_Text is
@@ -222,7 +222,7 @@ package body Wiki.Parsers is
    procedure Flush_List (P : in out Parser) is
    begin
       if P.In_List then
-         P.Filters.Pop_Node (P.Document, Wiki.DL_TAG);
+         P.Context.Filters.Pop_Node (P.Document, Wiki.DL_TAG);
          P.In_List := False;
       end if;
    end Flush_List;
@@ -295,7 +295,7 @@ package body Wiki.Parsers is
 
       procedure Add_Preformatted (Content : in Wiki.Strings.WString) is
       begin
-         P.Filters.Add_Preformatted (P.Document, Content, Wiki.Strings.To_WString (Format));
+         P.Context.Filters.Add_Preformatted (P.Document, Content, Wiki.Strings.To_WString (Format));
       end Add_Preformatted;
 
       procedure Add_Preformatted is
@@ -405,7 +405,7 @@ package body Wiki.Parsers is
       if not Is_Html then
          Add_Preformatted (P.Text);
          Clear (P.Text);
-         P.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
+         P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
          P.In_Paragraph := True;
       end if;
    end Parse_Preformatted;
@@ -442,7 +442,7 @@ package body Wiki.Parsers is
             end if;
             Last := Last - 1;
          end loop;
-         P.Filters.Add_Header (P.Document, Content (Content'First .. Last), Level);
+         P.Context.Filters.Add_Header (P.Document, Content (Content'First .. Last), Level);
       end Add_Header;
 
       procedure Add_Header is
@@ -636,15 +636,15 @@ package body Wiki.Parsers is
       begin
          if P.Is_Image (Link) then
             Wiki.Attributes.Append (P.Attributes, String '("src"), Link);
-            P.Filters.Add_Image (P.Document, Name, P.Attributes);
+            P.Context.Filters.Add_Image (P.Document, Name, P.Attributes);
          else
             if P.Link_Title_First and Link'Length = 0 then
                Wiki.Attributes.Append (P.Attributes, HREF_ATTR, Name);
             end if;
             if not P.Link_Title_First and Name'Length = 0 then
-               P.Filters.Add_Link (P.Document, Link, P.Attributes);
+               P.Context.Filters.Add_Link (P.Document, Link, P.Attributes);
             else
-               P.Filters.Add_Link (P.Document, Name, P.Attributes);
+               P.Context.Filters.Add_Link (P.Document, Name, P.Attributes);
             end if;
          end if;
       end;
@@ -665,10 +665,10 @@ package body Wiki.Parsers is
                   Name : in Wiki.Strings.WString) return Wiki.Plugins.Wiki_Plugin_Access is
       use type Wiki.Plugins.Plugin_Factory_Access;
    begin
-      if P.Factory = null then
+      if P.Context.Factory = null then
          return null;
       else
-         return P.Factory.Find (Wiki.Strings.To_String (Name));
+         return P.Context.Factory.Find (Wiki.Strings.To_String (Name));
       end if;
    end Find;
 
@@ -714,9 +714,12 @@ package body Wiki.Parsers is
       declare
          Name   : constant Strings.WString := Attributes.Get_Attribute (P.Attributes, NAME_ATTR);
          Plugin : constant Wiki.Plugins.Wiki_Plugin_Access := P.Find (Name);
+         Context : Wiki.Plugins.Plugin_Context;
       begin
          if Plugin /= null then
-            Plugin.Expand (P.Document, P.Attributes);
+            Context.Factory := P.Context.Factory;
+            Context.Variables := P.Attributes;
+            Plugin.Expand (P.Document, P.Attributes, Context);
          end if;
       end;
    end Parse_Template;
@@ -774,7 +777,7 @@ package body Wiki.Parsers is
       Wiki.Attributes.Clear (P.Attributes);
       Wiki.Attributes.Append (P.Attributes, "cite", Link);
       Wiki.Attributes.Append (P.Attributes, "lang", Language);
-      P.Filters.Add_Quote (P.Document, Wiki.Strings.To_WString (Quote), P.Attributes);
+      P.Context.Filters.Add_Quote (P.Document, Wiki.Strings.To_WString (Quote), P.Attributes);
       Peek (P, C);
       if C /= '}' then
          Put_Back (P, C);
@@ -799,7 +802,7 @@ package body Wiki.Parsers is
       if Count >= 4 then
          Flush_Text (P);
          Flush_List (P);
-         P.Filters.Add_Node (P.Document, Wiki.Nodes.N_HORIZONTAL_RULE);
+         P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_HORIZONTAL_RULE);
          if C /= LF and C /= CR then
             Put_Back (P, C);
          end if;
@@ -872,7 +875,7 @@ package body Wiki.Parsers is
       Wiki.Attributes.Append (P.Attributes, "src", Link);
       Wiki.Attributes.Append (P.Attributes, "position", Position);
       Wiki.Attributes.Append (P.Attributes, "longdesc", Desc);
-      P.Filters.Add_Image (P.Document, Wiki.Strings.To_WString (Alt), P.Attributes);
+      P.Context.Filters.Add_Image (P.Document, Wiki.Strings.To_WString (Alt), P.Attributes);
       Peek (P, C);
       if C /= ')' then
          Put_Back (P, C);
@@ -996,7 +999,7 @@ package body Wiki.Parsers is
          Level := Level + 1;
       end loop;
       Flush_Text (P);
-      P.Filters.Add_List_Item (P.Document, Level, Token = '#');
+      P.Context.Filters.Add_List_Item (P.Document, Level, Token = '#');
 
       --  Ignore the first white space after the list item.
       if C /= ' ' and C /= HT then
@@ -1019,7 +1022,7 @@ package body Wiki.Parsers is
          Level := Level + 1;
       end loop;
       Flush_Text (P);
-      P.Filters.Add_List_Item (P.Document, Level, Token = '#');
+      P.Context.Filters.Add_List_Item (P.Document, Level, Token = '#');
 
       --  Ignore the first white space after the list item.
       if C /= ' ' and C /= HT then
@@ -1042,10 +1045,10 @@ package body Wiki.Parsers is
       Flush_Text (P);
       Wiki.Attributes.Clear (P.Attributes);
       if not P.In_List then
-         P.Filters.Push_Node (P.Document, Wiki.DL_TAG, P.Attributes);
+         P.Context.Filters.Push_Node (P.Document, Wiki.DL_TAG, P.Attributes);
          P.In_List := True;
       end if;
-      P.Filters.Push_Node (P.Document, Wiki.DT_TAG, P.Attributes);
+      P.Context.Filters.Push_Node (P.Document, Wiki.DT_TAG, P.Attributes);
    end Parse_Item;
 
    --  ------------------------------
@@ -1062,7 +1065,7 @@ package body Wiki.Parsers is
       end if;
       Flush_Text (P);
       Wiki.Attributes.Clear (P.Attributes);
-      P.Filters.Push_Node (P.Document, Wiki.DD_TAG, P.Attributes);
+      P.Context.Filters.Push_Node (P.Document, Wiki.DD_TAG, P.Attributes);
    end Parse_Definition;
 
    --  ------------------------------
@@ -1090,7 +1093,7 @@ package body Wiki.Parsers is
       Flush_List (P);
       P.Empty_Line := True;
       P.Quote_Level := Level;
-      P.Filters.Add_Blockquote (P.Document, Level);
+      P.Context.Filters.Add_Blockquote (P.Document, Level);
 
       --  Ignore the first white space after the quote character.
       if C /= ' ' and C /= HT then
@@ -1150,10 +1153,10 @@ package body Wiki.Parsers is
 
          --  Finish the active blockquotes if a new paragraph is started on an empty line.
          if P.Quote_Level > 0 then
-            P.Filters.Add_Blockquote (P.Document, 0);
+            P.Context.Filters.Add_Blockquote (P.Document, 0);
             P.Quote_Level := 0;
          end if;
-         P.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
+         P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
          P.In_Paragraph := True;
       elsif Length (P.Text) > 0 or not P.Empty_Line then
          Append (P.Text, LF);
@@ -1163,7 +1166,7 @@ package body Wiki.Parsers is
       --  the blockquote.
       if P.Quote_Level > 0 and C /= '>' then
          Flush_Text (P);
-         P.Filters.Add_Blockquote (P.Document, 0);
+         P.Context.Filters.Add_Blockquote (P.Document, 0);
          P.Quote_Level := 0;
       end if;
       P.Empty_Line := True;
@@ -1204,7 +1207,7 @@ package body Wiki.Parsers is
       end if;
       P.Empty_Line := True;
       Flush_Text (P);
-      P.Filters.Add_Node (P.Document, Wiki.Nodes.N_LINE_BREAK);
+      P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_LINE_BREAK);
    end Parse_Line_Break;
 
    --  ------------------------------
@@ -1377,7 +1380,7 @@ package body Wiki.Parsers is
                             Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       Flush_Text (P);
-      P.Filters.Push_Node (P.Document, Tag, Attributes);
+      P.Context.Filters.Push_Node (P.Document, Tag, Attributes);
 
       --  When we are within a <pre> HTML element, switch to HTML to emit the text as is.
       if Tag = PRE_TAG and P.Syntax /= SYNTAX_HTML then
@@ -1390,7 +1393,7 @@ package body Wiki.Parsers is
                           Tag  : in Wiki.Html_Tag) is
    begin
       Flush_Text (P);
-      P.Filters.Pop_Node (P.Document, Tag);
+      P.Context.Filters.Pop_Node (P.Document, Tag);
 
       --  Switch back to the previous syntax when we reached the </pre> HTML element.
       if P.Previous_Syntax /= P.Syntax and Tag = PRE_TAG then
@@ -1423,8 +1426,19 @@ package body Wiki.Parsers is
    procedure Add_Filter (Engine : in out Parser;
                          Filter : in Wiki.Filters.Filter_Type_Access) is
    begin
-      Engine.Filters.Add_Filter (Filter);
+      Engine.Context.Filters.Add_Filter (Filter);
    end Add_Filter;
+
+   --  ------------------------------
+   --  Set the plugin context.
+   --  ------------------------------
+   procedure Set_Context (Engine  : in out Parser;
+                          Context : in Wiki.Plugins.Plugin_Context) is
+   begin
+      Engine.Context.Filters.Set_Chain (Context.Filters);
+      Engine.Context.Factory   := Context.Factory;
+      Engine.Context.Variables := Context.Variables;
+   end Set_Context;
 
    --  ------------------------------
    --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
@@ -1479,7 +1493,7 @@ package body Wiki.Parsers is
       Engine.Reader      := Stream;
       Engine.Link_Double_Bracket := False;
       Engine.Escape_Char := '~';
-      Engine.Filters.Add_Node (Engine.Document, Wiki.Nodes.N_PARAGRAPH);
+      Engine.Context.Filters.Add_Node (Engine.Document, Wiki.Nodes.N_PARAGRAPH);
       case Engine.Syntax is
          when SYNTAX_DOTCLEAR =>
             Engine.Is_Dotclear := True;
@@ -1506,7 +1520,7 @@ package body Wiki.Parsers is
       end case;
       Parse_Token (Engine);
       Flush_Text (Engine);
-      Engine.Filters.Finish (Engine.Document);
+      Engine.Context.Filters.Finish (Engine.Document);
       Doc := Engine.Document;
    end Parse;
 
