@@ -49,7 +49,7 @@ package Wiki.Filters is
    --  ------------------------------
    --  Filter type
    --  ------------------------------
-   type Filter_Type is new Ada.Finalization.Limited_Controlled with private;
+   type Filter_Type is limited new Ada.Finalization.Limited_Controlled with private;
    type Filter_Type_Access is access all Filter_Type'Class;
 
    --  Add a simple node such as N_LINE_BREAK, N_HORIZONTAL_RULE or N_PARAGRAPH to the document.
@@ -127,9 +127,13 @@ package Wiki.Filters is
    procedure Add_Filter (Chain  : in out Filter_Chain;
                          Filter : in Filter_Type_Access);
 
+   --  Internal operation to copy the filter chain.
+   procedure Set_Chain (Chain : in out Filter_Chain;
+                        From  : in Filter_Chain'Class);
+
 private
 
-   type Filter_Type is new Ada.Finalization.Limited_Controlled with record
+   type Filter_Type is limited new Ada.Finalization.Limited_Controlled with record
       Next     : Filter_Type_Access;
    end record;
 
