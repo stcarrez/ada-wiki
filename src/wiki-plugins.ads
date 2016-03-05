@@ -18,6 +18,7 @@
 
 with Wiki.Attributes;
 with Wiki.Documents;
+with Wiki.Filters;
 
 --  == Plugins ==
 --  The <b>Wiki.Plugins</b> package defines the plugin interface that is used by the wiki
@@ -27,13 +28,16 @@ package Wiki.Plugins is
 
    pragma Preelaborate;
 
+   type Plugin_Context;
+
    type Wiki_Plugin is limited interface;
    type Wiki_Plugin_Access is access all Wiki_Plugin'Class;
 
    --  Expand the plugin configured with the parameters for the document.
    procedure Expand (Plugin   : in out Wiki_Plugin;
                      Document : in out Wiki.Documents.Document;
-                     Params   : in out Wiki.Attributes.Attribute_List) is abstract;
+                     Params   : in out Wiki.Attributes.Attribute_List;
+                     Context  : in Plugin_Context) is abstract;
 
    type Plugin_Factory is limited Interface;
    type Plugin_Factory_Access is access all Plugin_Factory'Class;
@@ -41,5 +45,11 @@ package Wiki.Plugins is
    --  Find a plugin knowing its name.
    function Find (Factory : in Plugin_Factory;
                   Name    : in String) return Wiki_Plugin_Access is abstract;
+
+   type Plugin_Context is record
+      Filters   : Wiki.Filters.Filter_Chain;
+      Factory   : Plugin_Factory_Access;
+      Variables : Wiki.Attributes.Attribute_List;
+   end record;
 
 end Wiki.Plugins;
