@@ -203,4 +203,13 @@ package body Wiki.Filters is
       Chain.Next := Filter;
    end Add_Filter;
 
+   --  ------------------------------
+   --  Internal operation to copy the filter chain.
+   --  ------------------------------
+   procedure Set_Chain (Chain : in out Filter_Chain;
+                        From  : in Filter_Chain'Class) is
+   begin
+      Chain.Next := From.Next;
+   end Set_Chain;
+
 end Wiki.Filters;
