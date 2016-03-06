@@ -15,6 +15,7 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
+with Wiki.Strings;
 
 --  === Link Renderer ===
 --  The <tt>Wiki.Render.Links</tt> package defines the <tt>Link_Renderer</tt> interface used
