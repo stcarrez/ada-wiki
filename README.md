@@ -68,4 +68,5 @@ document.  The next command reports the links used in the document:
 
 The Ada Wiki sources as well as a wiki documentation is provided on:
 
-   https://github.com/stcarrez/ada-wiki
+   https://github.com/stcarrez/ada-wiki/wiki
+
