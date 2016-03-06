@@ -20,6 +20,15 @@ To use Ada Wiki library, configure as follows:
    ./configure
    make
 ```
+
+By default the configure is setup to use the Ada Utility Library.  You can disable that
+by using the 'with-ada-util=no' configure option.  When disabled, the build will use some
+locally imported files (in src/util) but the unit tests will not be compiled.
+```
+   ./configure --with-ada-util=no
+   make
+```
+
 The unit tests are built and executed with:
 ```
    make test
