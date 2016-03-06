@@ -52,10 +52,9 @@ package Wiki.Parsers is
 
    type Parser is tagged limited private;
 
-   --  Add the plugin to the wiki engine.
-   procedure Add_Plugin (Engine : in out Parser;
-                         Name   : in String;
-                         Plugin : in Wiki.Plugins.Wiki_Plugin_Access);
+   --  Set the plugin factory to find and use plugins.
+   procedure Set_Plugin_Factory (Engine  : in out Parser;
+                                 Factory : in Wiki.Plugins.Plugin_Factory_Access);
 
    --  Set the wiki syntax that the wiki engine must use.
    procedure Set_Syntax (Engine : in out Parser;
