@@ -15,7 +15,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Util.Strings;
 
 package body Wiki.Render.Html is
 
@@ -533,7 +532,7 @@ package body Wiki.Render.Html is
    --  HTML_UNDERLINE   : aliased constant String := "ins";
    HTML_PREFORMAT   : aliased constant String := "pre";
 
-   type String_Array_Access is array (Format_Type) of Util.Strings.Name_Access;
+   type String_Array_Access is array (Format_Type) of Wiki.String_Access;
 
    HTML_ELEMENT     : constant String_Array_Access :=
      (BOLD        => HTML_BOLD'Access,
