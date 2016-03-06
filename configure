@@ -590,6 +590,8 @@ ADA_ALI_BASE
 ADA_LIB_BASE
 ADA_INC_BASE
 GPRINSTALL
+WIKI_USE_ADA_UTIL
+WITH_ADA_UTIL
 UTIL_DIR
 BUILDS_SHARED
 NR_CPUS
@@ -3066,9 +3068,31 @@ $as_echo "${ac_enable_shared}" >&6; }
 
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking Ada Utility Library" >&5
+$as_echo_n "checking Ada Utility Library... " >&6; }
+
+# Check whether --with-ada-util was given.
+if test "${with_ada_util+set}" = set; then :
+  withval=$with_ada_util;
+  if test T${withval} = Tno ; then
+    WIKI_USE_ADA_UTIL=no;
+  else
+    WIKI_USE_ADA_UTIL='yes';
+  fi
+
+else
+
+  WIKI_USE_ADA_UTIL=yes;
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: ${WIKI_USE_ADA_UTIL}" >&5
+$as_echo "${WIKI_USE_ADA_UTIL}" >&6; }
+
 ##########################################
 # Ada Util library
 ##########################################
+if test T${WIKI_USE_ADA_UTIL} = Tyes; then
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking Ada Utility Library" >&5
 $as_echo_n "checking Ada Utility Library... " >&6; }
@@ -3165,6 +3189,12 @@ $as_echo "no" >&6; }
 " "$LINENO" 5
     fi
   fi
+
+  WITH_ADA_UTIL="with \"${UTIL_DIR}util\";";
+else
+  WITH_ADA_UTIL=''
+  UTIL_DIR=''
+fi
 
 
 
