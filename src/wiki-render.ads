@@ -24,44 +24,12 @@ with Wiki.Documents;
 --  and render the result either in text, HTML or another format.
 --
 --  @include wiki-render-html.ads
+--  @include wiki-render-links.ads
 --  @include wiki-render-text.ads
 --  @include wiki-render-wiki.ads
 package Wiki.Render is
 
    pragma Preelaborate;
-
-   type Link_Renderer is limited interface;
-   type Link_Renderer_Access is access all Link_Renderer'Class;
-
-   --  Get the image link that must be rendered from the wiki image link.
-   procedure Make_Image_Link (Renderer : in Link_Renderer;
-                              Link     : in Wiki.Strings.WString;
-                              URI      : out Wiki.Strings.UString;
-                              Width    : out Natural;
-                              Height   : out Natural) is abstract;
-
-   --  Get the page link that must be rendered from the wiki page link.
-   procedure Make_Page_Link (Renderer : in Link_Renderer;
-                             Link     : in Wiki.Strings.WString;
-                             URI      : out Wiki.Strings.UString;
-                             Exists   : out Boolean) is abstract;
-
-   type Default_Link_Renderer is new Link_Renderer with null record;
-
-   --  Get the image link that must be rendered from the wiki image link.
-   overriding
-   procedure Make_Image_Link (Renderer : in Default_Link_Renderer;
-                              Link     : in Wiki.Strings.WString;
-                              URI      : out Wiki.Strings.UString;
-                              Width    : out Natural;
-                              Height   : out Natural);
-
-   --  Get the page link that must be rendered from the wiki page link.
-   overriding
-   procedure Make_Page_Link (Renderer : in Default_Link_Renderer;
-                             Link     : in Wiki.Strings.WString;
-                             URI      : out Wiki.Strings.UString;
-                             Exists   : out Boolean);
 
    --  ------------------------------
    --  Document renderer
