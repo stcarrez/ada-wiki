@@ -16,6 +16,8 @@ GPRPATH=wiki.gpr
 
 BUILDS_SHARED=@BUILDS_SHARED@
 
+HAVE_ADA_UTIL=@WIKI_USE_ADA_UTIL@
+
 version=@WIKI_VERSION@
 
 distdir=ada-wiki-@WIKI_VERSION@
@@ -108,7 +110,9 @@ clean:
 	-$(GNATCLEAN) -q -P "$(GPRPATH)" -XWIKI_LIBRARY_TYPE=relocatable \
 	   -XXMLADA_BUILD=relocatable -XLIBRARY_TYPE=relocatable -XUTIL_BUILD=relocatable \
 	   -XUTIL_LIBRARY_TYPE=relocatable
+ifeq ($(HAVE_ADA_UTIL),yes)
 	-$(GNATCLEAN) -q -Pwiki_tests
+endif
 	-rm -f lib/*.a lib/*.$(DLLEXT)
 
 # Clean root project and all imported projects too.
@@ -125,8 +129,12 @@ rebuild: clean build
 
 # Build and run the unit tests
 test:	build
+ifeq ($(HAVE_ADA_UTIL),yes)
 	$(GNATMAKE) -p -Pwiki_tests $(MAKE_ARGS)
 	bin/wiki_harness -xml wiki-aunit.xml
+else
+	@echo "WARNING: Tests are not compiled and not executed because Ada Utility Library is not used"
+endif
 
 doc:
 	dynamo build-doc -markdown wiki
