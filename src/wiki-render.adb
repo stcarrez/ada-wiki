@@ -18,36 +18,6 @@
 package body Wiki.Render is
 
    --  ------------------------------
-   --  Get the image link that must be rendered from the wiki image link.
-   --  ------------------------------
-   overriding
-   procedure Make_Image_Link (Renderer : in Default_Link_Renderer;
-                              Link     : in Wiki.Strings.WString;
-                              URI      : out Wiki.Strings.UString;
-                              Width    : out Natural;
-                              Height   : out Natural) is
-      pragma Unreferenced (Renderer);
-   begin
-      URI    := Wiki.Strings.To_UString (Link);
-      Width  := 0;
-      Height := 0;
-   end Make_Image_Link;
-
-   --  ------------------------------
-   --  Get the page link that must be rendered from the wiki page link.
-   --  ------------------------------
-   overriding
-   procedure Make_Page_Link (Renderer : in Default_Link_Renderer;
-                             Link     : in Wiki.Strings.WString;
-                             URI      : out Wiki.Strings.UString;
-                             Exists   : out Boolean) is
-      pragma Unreferenced (Renderer);
-   begin
-      URI    := Wiki.Strings.To_UString (Link);
-      Exists := True;
-   end Make_Page_Link;
-
-   --  ------------------------------
    --  Render the list of nodes from the document.
    --  ------------------------------
    procedure Render (Engine : in out Renderer'Class;
