@@ -32,13 +32,6 @@ package Wiki.Plugins is
 
    type Wiki_Plugin is limited interface;
    type Wiki_Plugin_Access is access all Wiki_Plugin'Class;
-
-   --  Expand the plugin configured with the parameters for the document.
-   procedure Expand (Plugin   : in out Wiki_Plugin;
-                     Document : in out Wiki.Documents.Document;
-                     Params   : in out Wiki.Attributes.Attribute_List;
-                     Context  : in Plugin_Context) is abstract;
-
    type Plugin_Factory is limited Interface;
    type Plugin_Factory_Access is access all Plugin_Factory'Class;
 
@@ -46,10 +39,17 @@ package Wiki.Plugins is
    function Find (Factory : in Plugin_Factory;
                   Name    : in String) return Wiki_Plugin_Access is abstract;
 
-   type Plugin_Context is record
+   type Plugin_Context is limited record
       Filters   : Wiki.Filters.Filter_Chain;
       Factory   : Plugin_Factory_Access;
       Variables : Wiki.Attributes.Attribute_List;
    end record;
+
+   --  Expand the plugin configured with the parameters for the document.
+   procedure Expand (Plugin   : in out Wiki_Plugin;
+                     Document : in out Wiki.Documents.Document;
+                     Params   : in out Wiki.Attributes.Attribute_List;
+                     Context  : in Plugin_Context) is abstract;
+
 
 end Wiki.Plugins;
