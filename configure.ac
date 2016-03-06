@@ -51,17 +51,39 @@ AC_SUBST(NR_CPUS)
 ##########################################
 AM_SHARED_LIBRARY_SUPPORT
 
+AC_MSG_CHECKING([Ada Utility Library])
+AC_ARG_WITH(ada-util,
+AS_HELP_STRING([--with-ada-util=x], [Path for Ada Utility Library]),
+[
+  if test T${withval} = Tno ; then
+    WIKI_USE_ADA_UTIL=no;
+  else
+    WIKI_USE_ADA_UTIL='yes';
+  fi
+],
+[
+  WIKI_USE_ADA_UTIL=yes;
+])
+AC_MSG_RESULT(${WIKI_USE_ADA_UTIL})
+
 ##########################################
 # Ada Util library
 ##########################################
+if test T${WIKI_USE_ADA_UTIL} = Tyes; then
 AM_GNAT_FIND_PROJECT([ada-util],[Ada Utility Library],[util],
   [git@github.com:stcarrez/ada-util.git],
   [Building Ada Wiki requires the Ada Utility Library.],
   [
     UTIL_DIR=${gnat_project_dir_util}
   ])
+  WITH_ADA_UTIL="with \"${UTIL_DIR}util\";";
+else
+  WITH_ADA_UTIL=''
+  UTIL_DIR=''
+fi
 AC_SUBST(UTIL_DIR)
-
+AC_SUBST(WITH_ADA_UTIL)
+AC_SUBST(WIKI_USE_ADA_UTIL)
 AM_UTIL_CHECK_INSTALL
 
 WIKI_LIBDIR="lib"
