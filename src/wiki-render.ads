@@ -16,7 +16,6 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Wiki.Nodes;
-with Wiki.Strings;
 with Wiki.Documents;
 
 --  == Wiki Renderer ==
