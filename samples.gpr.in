@@ -1,12 +1,21 @@
 with "@UTIL_DIR@config";
-with "@UTIL_DIR@util";
+@WITH_ADA_UTIL@
 with "wiki";
 
 project Samples is
 
-   Mains := ("render.adb", "import.adb", "words.adb");
+   Mains := ("render.adb", "words.adb");
 
    for Main use Mains;
+
+   case Wiki.Use_Ada_Util is
+      when "yes" =>
+         for Main use Mains & ("import.adb");
+
+      when "no" =>
+         null;
+
+   end case;
 
    for Source_Dirs use ("samples");
 
