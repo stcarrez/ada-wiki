@@ -32,6 +32,8 @@ with Wiki.Strings;
 --  @include wiki-streams-html.ads
 --  @include wiki-streams-builders.ads
 --  @include wiki-streams-html-builders.ads
+--  @include wiki-streams-text_io.ads
+--  @include wiki-streams-html-text_io.ads
 package Wiki.Streams is
 
    pragma Preelaborate;
