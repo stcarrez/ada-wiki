@@ -32,7 +32,7 @@ package body Wiki.Render.Html is
    --  Set the link renderer.
    --  ------------------------------
    procedure Set_Link_Renderer (Engine : in out Html_Renderer;
-                                Links    : in Link_Renderer_Access) is
+                                Links    : in Wiki.Render.Links.Link_Renderer_Access) is
    begin
       Engine.Links := Links;
    end Set_Link_Renderer;
