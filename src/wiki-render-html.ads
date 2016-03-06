@@ -18,6 +18,7 @@
 with Wiki.Attributes;
 with Wiki.Streams.Html;
 with Wiki.Strings;
+with Wiki.Render.Links;
 
 --  == HTML Renderer ==
 --  The <tt>Text_Renderer</tt> allows to render a wiki document into a text content.
@@ -35,7 +36,7 @@ package Wiki.Render.Html is
 
    --  Set the link renderer.
    procedure Set_Link_Renderer (Engine : in out Html_Renderer;
-                                Links    : in Link_Renderer_Access);
+                                Links    : in Wiki.Render.Links.Link_Renderer_Access);
 
    --  Set the render TOC flag that controls the TOC rendering.
    procedure Set_Render_TOC (Engine : in out Html_Renderer;
@@ -87,12 +88,12 @@ private
 
    type List_Style_Array is array (1 .. 32) of Boolean;
 
-   Default_Links : aliased Default_Link_Renderer;
+   Default_Links : aliased Wiki.Render.Links.Default_Link_Renderer;
 
    type Html_Renderer is new Renderer with record
       Output            : Wiki.Streams.Html.Html_Output_Stream_Access := null;
       Format            : Wiki.Format_Map := (others => False);
-      Links             : Link_Renderer_Access := Default_Links'Access;
+      Links             : Wiki.Render.Links.Link_Renderer_Access := Default_Links'Access;
       Has_Paragraph     : Boolean := False;
       Need_Paragraph    : Boolean := False;
       Has_Item          : Boolean := False;
