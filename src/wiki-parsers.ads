@@ -28,7 +28,6 @@ with Wiki.Streams;
 --  but also for HTML.  While reading the input, the parser populates a wiki <tt>Document</tt>
 --  instance with headers, paragraphs, links, and other elements.
 --
---     Doc    : Wiki.Documents.Document;
 --     Engine : Wiki.Parsers.Parser;
 --
 --  Before using the parser, it must be configured to choose the syntax by using the
@@ -38,7 +37,11 @@ with Wiki.Streams;
 --
 --  The parser can be configured to use filters.  A filter is added by using the
 --  <tt>Add_Filter</tt> procedure.  A filter is added at begining of the chain so that
---  the filter added last is called first.
+--  the filter added last is called first.  The wiki <tt>Document</tt> is always built through
+--  the filter chain so this allows filters to change or alter the content that was parsed.
+--
+--    Engine.Add_Filter (TOC'Unchecked_Access);
+--    Engine.Add_Filter (Filter'Unchecked_Access);
 --
 --  The <tt>Parse</tt> procedure is then used to parse either a string content or some stream
 --  represented by the <tt>Input_Stream</tt> interface.  After the <tt>Parse</tt> procedure
