@@ -21,9 +21,16 @@ private with Ada.Finalization;
 private with Util.Refs;
 
 --  === Attributes ===
---  The  <tt>Attributes</tt> package defines a simple management of attributes for
+--  The <tt>Attributes</tt> package defines a simple management of attributes for
 --  the wiki document parser.  Attribute lists are described by the <tt>Attribute_List</tt>
---  with some operations to append or query for an attribute.
+--  with some operations to append or query for an attribute.  Attributes are used for
+--  the Wiki document representation to describe the HTML attributes that were parsed and
+--  several parameters that describe Wiki content (links, ...).
+--
+--  The Wiki filters and Wiki plugins have access to the attributes before they are added
+--  to the Wiki document.  They can check them or modify them according to their needs.
+--
+--  The Wiki renderers use the attributes to render the final HTML content.
 package Wiki.Attributes is
 
    pragma Preelaborate;
