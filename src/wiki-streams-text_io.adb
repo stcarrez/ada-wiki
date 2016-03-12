@@ -31,6 +31,14 @@ package body Wiki.Streams.Text_IO is
    end Open;
 
    --  ------------------------------
+   --  Close the file.
+   --  ------------------------------
+   procedure Close (Stream : in out File_Input_Stream) is
+   begin
+      Ada.Wide_Wide_Text_IO.Close (Stream.File);
+   end Close;
+
+   --  ------------------------------
    --  Read one character from the input stream and return False to the <tt>Eof</tt> indicator.
    --  When there is no character to read, return True in the <tt>Eof</tt> indicator.
    --  ------------------------------
