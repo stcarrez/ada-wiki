@@ -77,6 +77,12 @@ package Wiki.Parsers is
                     Text   : in Wiki.Strings.WString;
                     Doc    : in out Wiki.Documents.Document);
 
+   --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
+   --  defined on the parser.
+   procedure Parse (Engine : in out Parser;
+                    Text   : in Wiki.Strings.UString;
+                    Doc    : in out Wiki.Documents.Document);
+
    --  Parse the wiki stream managed by <tt>Stream</tt> according to the wiki syntax configured
    --  on the wiki engine.
    procedure Parse (Engine : in out Parser;
