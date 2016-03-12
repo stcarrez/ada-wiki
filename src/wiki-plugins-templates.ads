@@ -43,7 +43,12 @@ package Wiki.Plugins.Templates is
                      Params   : in out Wiki.Attributes.Attribute_List;
                      Context  : in Plugin_Context);
 
-   type File_Template_Plugin is new Wiki_Plugin with private;
+   type File_Template_Plugin is new Wiki_Plugin and Plugin_Factory with private;
+
+   --  Find a plugin knowing its name.
+   overriding
+   function Find (Factory : in File_Template_Plugin;
+                  Name    : in String) return Wiki_Plugin_Access;
 
    --  Set the directory path that contains template files.
    procedure Set_Template_Path (Plugin : in out File_Template_Plugin;
@@ -62,7 +67,7 @@ package Wiki.Plugins.Templates is
 
 private
 
-   type File_Template_Plugin is new Wiki_Plugin with record
+   type File_Template_Plugin is new Wiki_Plugin and Plugin_Factory with record
       Path : Ada.Strings.Unbounded.Unbounded_String;
    end record;
 
