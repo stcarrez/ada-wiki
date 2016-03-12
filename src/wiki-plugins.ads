@@ -43,6 +43,7 @@ package Wiki.Plugins is
       Filters   : Wiki.Filters.Filter_Chain;
       Factory   : Plugin_Factory_Access;
       Variables : Wiki.Attributes.Attribute_List;
+      Syntax    : Wiki.Wiki_Syntax;
    end record;
 
    --  Expand the plugin configured with the parameters for the document.
