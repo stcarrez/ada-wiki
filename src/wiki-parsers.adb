@@ -718,6 +718,7 @@ package body Wiki.Parsers is
       begin
          if Plugin /= null then
             Context.Factory := P.Context.Factory;
+            Context.Syntax  := P.Context.Syntax;
             Context.Variables := P.Attributes;
             Plugin.Expand (P.Document, P.Attributes, Context);
          end if;
