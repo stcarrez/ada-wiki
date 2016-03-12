@@ -1477,8 +1477,49 @@ package body Wiki.Parsers is
       Engine.Parse (Buffer'Unchecked_Access, Doc);
    end Parse;
 
+   --  ------------------------------
+   --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
+   --  defined on the parser.
+   --  ------------------------------
+   procedure Parse (Engine : in out Parser;
+                    Text   : in Wiki.Strings.UString;
+                    Doc    : in out Wiki.Documents.Document) is
+
+      type Wide_Input is new Wiki.Streams.Input_Stream with record
+         Pos : Positive;
+         Len : Natural;
+      end record;
+
+      overriding
+      procedure Read (Buf    : in out Wide_Input;
+                      Token  : out Wiki.Strings.WChar;
+                      Is_Eof : out Boolean);
+
+      procedure Read (Buf    : in out Wide_Input;
+                      Token  : out Wiki.Strings.WChar;
+                      Is_Eof : out Boolean) is
+      begin
+         if Buf.Pos > Buf.Len then
+            Is_Eof := True;
+            Token := CR;
+         else
+            Token := Wiki.Strings.Element (Text, Buf.Pos);
+            Buf.Pos := Buf.Pos + 1;
+            Is_Eof := False;
+         end if;
+      end Read;
+
+      Buffer : aliased Wide_Input;
+   begin
+      Buffer.Pos   := 1;
+      Buffer.Len   := Wiki.Strings.Length (Text);
+      Engine.Parse (Buffer'Unchecked_Access, Doc);
+   end Parse;
+
+   --  ------------------------------
    --  Parse the wiki stream managed by <tt>Stream</tt> according to the wiki syntax configured
    --  on the wiki engine.
+   --  ------------------------------
    procedure Parse (Engine : in out Parser;
                     Stream : in Wiki.Streams.Input_Stream_Access;
                     Doc    : in out Wiki.Documents.Document) is
