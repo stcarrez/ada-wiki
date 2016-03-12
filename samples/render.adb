@@ -25,6 +25,7 @@ with Wiki.Documents;
 with Wiki.Parsers;
 with Wiki.Filters.TOC;
 with Wiki.Filters.Html;
+with Wiki.Plugins.Templates;
 with Wiki.Render.Html;
 with Wiki.Render.Text;
 with Wiki.Streams.Text_IO;
@@ -124,6 +125,7 @@ begin
          Name     : constant String := GNAT.Command_Line.Get_Argument;
          Input    : aliased Wiki.Streams.Text_IO.File_Input_Stream;
          Filter   : aliased Wiki.Filters.Html.Html_Filter_Type;
+         Template : aliased Wiki.Plugins.Templates.File_Template_Plugin;
          TOC      : aliased Wiki.Filters.TOC.TOC_Filter;
          Doc      : Wiki.Documents.Document;
          Engine   : Wiki.Parsers.Parser;
@@ -136,8 +138,11 @@ begin
          end if;
          Count := Count + 1;
 
+         Template.Set_Template_Path (".");
+
          --  Open the file and parse it (assume UTF-8).
          Input.Open (Name, "WCEM=8");
+         Engine.Set_Plugin_Factory (Template'Unchecked_Access);
          Engine.Add_Filter (TOC'Unchecked_Access);
          Engine.Add_Filter (Filter'Unchecked_Access);
          Engine.Set_Syntax (Syntax);
