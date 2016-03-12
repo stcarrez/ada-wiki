@@ -15,6 +15,7 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
+with Ada.Strings.Unbounded;
 with Wiki.Strings;
 
 --  === Template Plugins ===
@@ -23,8 +24,6 @@ with Wiki.Strings;
 --  It is responsible for getting the template content according to the plugin parameters.
 --
 package Wiki.Plugins.Templates is
-
-   pragma Preelaborate;
 
    type Template_Plugin is abstract new Wiki_Plugin with null record;
 
@@ -43,5 +42,28 @@ package Wiki.Plugins.Templates is
                      Document : in out Wiki.Documents.Document;
                      Params   : in out Wiki.Attributes.Attribute_List;
                      Context  : in Plugin_Context);
+
+   type File_Template_Plugin is new Wiki_Plugin with private;
+
+   --  Set the directory path that contains template files.
+   procedure Set_Template_Path (Plugin : in out File_Template_Plugin;
+                                Path   : in String);
+
+   --  Expand the template configured with the parameters for the document.
+   --  Read the file whose basename correspond to the first parameter and parse that file
+   --  in the current document.  Template parameters are passed
+   --  in the <tt>Context</tt> instance and they can be evaluated within the template
+   --  while parsing the template content.
+   overriding
+   procedure Expand (Plugin   : in out File_Template_Plugin;
+                     Document : in out Wiki.Documents.Document;
+                     Params   : in out Wiki.Attributes.Attribute_List;
+                     Context  : in Plugin_Context);
+
+private
+
+   type File_Template_Plugin is new Wiki_Plugin with record
+      Path : Ada.Strings.Unbounded.Unbounded_String;
+   end record;
 
 end Wiki.Plugins.Templates;
