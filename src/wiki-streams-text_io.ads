@@ -53,6 +53,9 @@ package Wiki.Streams.Text_IO is
                    Path   : in String;
                    Form   : in String := "");
 
+   --  Close the file.
+   procedure Close (Stream : in out File_Input_Stream);
+
    --  Create the file and prepare to write the output stream.
    procedure Create (Stream : in out File_Output_Stream;
                      Path   : in String;
