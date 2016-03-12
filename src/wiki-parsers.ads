@@ -101,7 +101,6 @@ private
       Context             : Wiki.Plugins.Plugin_Context;
       Pending             : Wiki.Strings.WChar;
       Has_Pending         : Boolean;
-      Syntax              : Wiki_Syntax;
       Previous_Syntax     : Wiki_Syntax;
       Table               : Parser_Table_Access;
       Document            : Wiki.Documents.Document;
