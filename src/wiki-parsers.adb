@@ -71,6 +71,12 @@ package body Wiki.Parsers is
    procedure Parse_Link (P     : in out Parser;
                          Token : in Wiki.Strings.WChar);
 
+   --  Parse a template parameter and expand it.
+   --  Example:
+   --    {{{1}}}                      MediaWiki
+   procedure Parse_Parameter (P     : in out Parser;
+                              Token : in Wiki.Strings.WChar);
+
    --  Parse a template with parameters.
    --  Example:
    --    {{Name|param|...}}           MediaWiki
@@ -536,7 +542,11 @@ package body Wiki.Parsers is
          if Index <= Names'Last then
             Wiki.Attributes.Append (P.Attributes, Names (Index).all, Content);
          else
-            Wiki.Attributes.Append (P.Attributes, Positive'Image (Index), Content);
+            declare
+               Name : constant String := Positive'Image (Index - Names'Length);
+            begin
+               Wiki.Attributes.Append (P.Attributes, Name (Name'First + 1 .. Name'Last), Content);
+            end;
          end if;
          Index := Index + 1;
       end Add_Parameter;
@@ -673,6 +683,42 @@ package body Wiki.Parsers is
    end Find;
 
    --  ------------------------------
+   --  Parse a template parameter and expand it.
+   --  Example:
+   --    {{{1}}}                      MediaWiki
+   --  ------------------------------
+   procedure Parse_Parameter (P     : in out Parser;
+                              Token : in Wiki.Strings.WChar) is
+      C      : Wiki.Strings.WChar;
+      Expect : Wiki.Strings.WChar;
+      Pos    : Wiki.Attributes.Cursor;
+   begin
+      if Token = '{' then
+         Expect := '}';
+      else
+         Expect := '>';
+      end if;
+      Parse_Parameters (P, '|', Expect, Attr_Name);
+      Peek (P, C);
+      if C = Expect then
+         Peek (P, C);
+         if C /= Expect then
+            Put_Back (P, C);
+         end if;
+      else
+         Put_Back (P, C);
+      end if;
+      declare
+         Name : constant String := Wiki.Attributes.Get_Value (Wiki.Attributes.First (P.Attributes));
+      begin
+         Pos := Wiki.Attributes.Find (P.Context.Variables, Name);
+         if Wiki.Attributes.Has_Element (Pos) then
+            Append (P.Text, Wiki.Attributes.Get_Wide_Value (Pos));
+         end if;
+      end;
+   end Parse_Parameter;
+
+   --  ------------------------------
    --  Parse a template with parameters.
    --  Example:
    --    {{Name|param|...}}           MediaWiki
@@ -693,8 +739,13 @@ package body Wiki.Parsers is
          Put_Back (P, C);
          return;
       end if;
+      Peek (P, C);
+      if C = Token then
+         Parse_Parameter (P, Token);
+         return;
+      end if;
       Flush_Text (P);
-
+      Put_Back (P, C);
       if Token = '{' then
          Expect := '}';
       else
