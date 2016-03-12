@@ -21,8 +21,8 @@ with Wiki.Strings;
 with Wiki.Render.Links;
 
 --  == HTML Renderer ==
---  The <tt>Text_Renderer</tt> allows to render a wiki document into a text content.
---  The formatting rules are ignored except for the paragraphs and sections.
+--  The <tt>Html_Renderer</tt> allows to render a wiki document into an HTML content.
+--
 package Wiki.Render.Html is
 
    --  ------------------------------
@@ -36,7 +36,7 @@ package Wiki.Render.Html is
 
    --  Set the link renderer.
    procedure Set_Link_Renderer (Engine : in out Html_Renderer;
-                                Links    : in Wiki.Render.Links.Link_Renderer_Access);
+                                Links  : in Wiki.Render.Links.Link_Renderer_Access);
 
    --  Set the render TOC flag that controls the TOC rendering.
    procedure Set_Render_TOC (Engine : in out Html_Renderer;
