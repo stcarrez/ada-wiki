@@ -701,7 +701,7 @@ package body Wiki.Parsers is
          Expect := '>';
       end if;
       Wiki.Attributes.Clear (P.Attributes);
-      if P.Syntax = SYNTAX_MEDIA_WIKI then
+      if P.Context.Syntax = SYNTAX_MEDIA_WIKI then
          Parse_Parameters (P, '|', Expect, Attr_Name);
       else
          Parse_Parameters (P, ' ', Expect, Attr_Name);
@@ -1383,8 +1383,8 @@ package body Wiki.Parsers is
       P.Context.Filters.Push_Node (P.Document, Tag, Attributes);
 
       --  When we are within a <pre> HTML element, switch to HTML to emit the text as is.
-      if Tag = PRE_TAG and P.Syntax /= SYNTAX_HTML then
-         P.Previous_Syntax := P.Syntax;
+      if Tag = PRE_TAG and P.Context.Syntax /= SYNTAX_HTML then
+         P.Previous_Syntax := P.Context.Syntax;
          P.Set_Syntax (SYNTAX_HTML);
       end if;
    end Start_Element;
@@ -1396,7 +1396,7 @@ package body Wiki.Parsers is
       P.Context.Filters.Pop_Node (P.Document, Tag);
 
       --  Switch back to the previous syntax when we reached the </pre> HTML element.
-      if P.Previous_Syntax /= P.Syntax and Tag = PRE_TAG then
+      if P.Previous_Syntax /= P.Context.Syntax and Tag = PRE_TAG then
          P.Set_Syntax (P.Previous_Syntax);
       end if;
    end End_Element;
@@ -1416,7 +1416,7 @@ package body Wiki.Parsers is
    procedure Set_Syntax (Engine : in out Parser;
                          Syntax : in Wiki_Syntax := SYNTAX_MIX) is
    begin
-      Engine.Syntax := Syntax;
+      Engine.Context.Syntax := Syntax;
       Engine.Table  := Syntax_Tables (Syntax);
    end Set_Syntax;
 
@@ -1438,6 +1438,7 @@ package body Wiki.Parsers is
       Engine.Context.Filters.Set_Chain (Context.Filters);
       Engine.Context.Factory   := Context.Factory;
       Engine.Context.Variables := Context.Variables;
+      Engine.Set_Syntax (Context.Syntax);
    end Set_Context;
 
    --  ------------------------------
@@ -1525,7 +1526,7 @@ package body Wiki.Parsers is
                     Doc    : in out Wiki.Documents.Document) is
    begin
       Engine.Document   := Doc;
-      Engine.Previous_Syntax := Engine.Syntax;
+      Engine.Previous_Syntax := Engine.Context.Syntax;
       Engine.Empty_Line := True;
       Engine.Format     := (others => False);
       Engine.Is_Eof     := False;
@@ -1535,7 +1536,7 @@ package body Wiki.Parsers is
       Engine.Link_Double_Bracket := False;
       Engine.Escape_Char := '~';
       Engine.Context.Filters.Add_Node (Engine.Document, Wiki.Nodes.N_PARAGRAPH);
-      case Engine.Syntax is
+      case Engine.Context.Syntax is
          when SYNTAX_DOTCLEAR =>
             Engine.Is_Dotclear := True;
             Engine.Escape_Char := '\';
