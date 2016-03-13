@@ -116,6 +116,7 @@ private
       Is_Dotclear         : Boolean := False;
       Link_Title_First    : Boolean := False;
       Check_Image_Link    : Boolean := False;
+      Is_Hidden           : Boolean := False;
       Header_Offset       : Integer := 0;
       Quote_Level         : Natural := 0;
       Escape_Char         : Wiki.Strings.WChar;
