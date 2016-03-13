@@ -80,6 +80,7 @@ package body Wiki.Streams.Text_IO is
          Ada.Wide_Wide_Text_IO.Close (Stream.File);
       end if;
       Ada.Wide_Wide_Text_IO.Open (Stream.File, Ada.Wide_Wide_Text_IO.Out_File, Path, Form);
+      Ada.Wide_Wide_Text_IO.Set_Line_Length (Ada.Wide_Wide_Text_IO.Count'Last);
       Stream.Stdout := False;
    end Open;
 
@@ -91,6 +92,7 @@ package body Wiki.Streams.Text_IO is
                      Form   : in String := "") is
    begin
       Ada.Wide_Wide_Text_IO.Create (Stream.File, Ada.Wide_Wide_Text_IO.Out_File, Path, Form);
+      Ada.Wide_Wide_Text_IO.Set_Line_Length (Ada.Wide_Wide_Text_IO.Count'Last);
       Stream.Stdout := False;
    end Create;
 
