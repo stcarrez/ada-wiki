@@ -1329,7 +1329,7 @@ package body Wiki.Parsers is
             P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
          end if;
          P.In_Paragraph := True;
-      elsif Length (P.Text) > 0 or not P.Empty_Line then
+      elsif (Length (P.Text) > 0 or not P.Empty_Line) and then not P.Is_Eof then
          Append (P.Text, LF);
       end if;
 
