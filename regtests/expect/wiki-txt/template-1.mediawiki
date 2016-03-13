@@ -1,0 +1,12 @@
+
+Include 1 (img):
+thumb
+
+
+Include 2 (pre):
+
+* item 1
+''item''
+== dd ==
+
+item 2

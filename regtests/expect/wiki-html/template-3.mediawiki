@@ -1,0 +1,3 @@
+<p>Call Template with parameter:</p><ul><li>No param: 1@@ 2@@ 3@@
+</li><li>One param: 1@This is first parameter@ 2@@ 3@@
+</li><li>Two params: 1@First@ 2@This is second parameter@ 3@@</li></ul><p>End</p>
