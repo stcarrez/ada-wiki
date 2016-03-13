@@ -190,30 +190,46 @@ package body Wiki.Parsers.Html is
          Put_Back (P, C);
       end if;
       Parse_Attribute_Name (P, Name);
-      Tag := Wiki.Find_Tag (Wiki.Strings.To_WString (Name));
-      if C = '/' then
-         Skip_Spaces (P);
-         Peek (P, C);
-         if C /= '>' then
-            Put_Back (P, C);
-         end if;
-         Flush_Text (P);
-         End_Element (P, Tag);
-      else
-         Collect_Attributes (P);
-         Peek (P, C);
+      declare
+         Token : constant Wiki.Strings.WString := Wiki.Strings.To_WString (Name);
+      begin
+         Tag := Wiki.Find_Tag (Token);
          if C = '/' then
+            Skip_Spaces (P);
             Peek (P, C);
-            if C = '>' then
-               Start_Element (P, Tag, P.Attributes);
-               End_Element (P, Tag);
-               return;
+            if C /= '>' then
+               Put_Back (P, C);
             end if;
-         elsif C /= '>' then
-            Put_Back (P, C);
+            Flush_Text (P);
+            if Tag = Wiki.UNKNOWN_TAG then
+               if Token = "noinclude" then
+                  P.Is_Hidden := False;
+               end if;
+            else
+               End_Element (P, Tag);
+            end if;
+         else
+            Collect_Attributes (P);
+            Peek (P, C);
+            if C = '/' then
+               Peek (P, C);
+               if C = '>' then
+                  Start_Element (P, Tag, P.Attributes);
+                  End_Element (P, Tag);
+                  return;
+               end if;
+            elsif C /= '>' then
+               Put_Back (P, C);
+            end if;
+            if Tag = UNKNOWN_TAG then
+               if Token = "noinclude" then
+                  P.Is_Hidden := True;
+               end if;
+            else
+               Start_Element (P, Tag, P.Attributes);
+            end if;
          end if;
-         Start_Element (P, Tag, P.Attributes);
-      end if;
+      end;
    end Parse_Element;
 
    --  ------------------------------
