@@ -71,6 +71,13 @@ package body Wiki.Parsers is
    procedure Parse_Link (P     : in out Parser;
                          Token : in Wiki.Strings.WChar);
 
+   --  Parse a template parameter and expand it to the target buffer.
+   --  Example:
+   --    {{{1}}}                      MediaWiki
+   --    <<<1>>>                      Creole extension
+   procedure Expand_Parameter (P     : in out Parser;
+                               Into  : in out Wiki.Strings.BString);
+
    --  Parse a template parameter and expand it.
    --  Example:
    --    {{{1}}}                      MediaWiki
@@ -209,7 +216,7 @@ package body Wiki.Parsers is
 
       procedure Add_Text (Content : in Wiki.Strings.WString) is
       begin
-         P.context.Filters.Add_Text (P.Document, Content, P.Format);
+         P.Context.Filters.Add_Text (P.Document, Content, P.Format);
       end Add_Text;
 
       procedure Add_Text is
@@ -301,7 +308,8 @@ package body Wiki.Parsers is
 
       procedure Add_Preformatted (Content : in Wiki.Strings.WString) is
       begin
-         P.Context.Filters.Add_Preformatted (P.Document, Content, Wiki.Strings.To_WString (Format));
+         P.Context.Filters.Add_Preformatted (P.Document, Content,
+                                             Wiki.Strings.To_WString (Format));
       end Add_Preformatted;
 
       procedure Add_Preformatted is
@@ -527,6 +535,81 @@ package body Wiki.Parsers is
    end Is_Image;
 
    --  ------------------------------
+   --  Parse a template parameter and expand it to the target buffer.
+   --  Example:
+   --    {{{1}}}                      MediaWiki
+   --    <<<1>>>                      Creole extension
+   --  ------------------------------
+   procedure Expand_Parameter (P     : in out Parser;
+                               Into  : in out Wiki.Strings.BString) is
+      procedure Expand (Content : in Wiki.Strings.WString);
+
+      C      : Wiki.Strings.WChar;
+      Expect : Wiki.Strings.WChar;
+      Param  : Wiki.Strings.BString (256);
+
+      procedure Expand (Content : in Wiki.Strings.WString) is
+         Name : constant String := Wiki.Strings.To_String (Content);
+         Pos  : constant Attributes.Cursor := Wiki.Attributes.Find (P.Context.Variables, Name);
+      begin
+         if Wiki.Attributes.Has_Element (Pos) then
+            Append (Into, Wiki.Attributes.Get_Wide_Value (Pos));
+         else
+            Append (Into, P.Param_Char);
+            Append (Into, P.Param_Char);
+            Append (Into, P.Param_Char);
+            Append (Into, Content);
+            Append (Into, Expect);
+            Append (Into, Expect);
+            Append (Into, Expect);
+         end if;
+      end Expand;
+
+      procedure Expand is
+         new Wiki.Strings.Wide_Wide_Builders.Get (Expand);
+
+   begin
+      Peek (P, C);
+      if C /= P.Param_Char then
+         Append (Into, P.Param_Char);
+         Put_Back (P, C);
+         return;
+      end if;
+      Peek (P, C);
+      if C /= P.Param_Char then
+         Append (Into, P.Param_Char);
+         Append (Into, P.Param_Char);
+         Put_Back (P, C);
+         return;
+      end if;
+      if P.Param_Char = '{' then
+         Expect := '}';
+      else
+         Expect := '>';
+      end if;
+
+      --  Collect the parameter name or index until we find the end marker.
+      loop
+         Peek (P, C);
+         exit when P.Is_Eof;
+         if C = Expect then
+            Peek (P, C);
+            if C = Expect then
+               Peek (P, C);
+               exit when C = Expect;
+               Append (Param, Expect);
+            end if;
+            Append (Param, C);
+         else
+            Append (Param, C);
+         end if;
+      end loop;
+
+      --  Expand the result.
+      Expand (Param);
+   end Expand_Parameter;
+
+   --  ------------------------------
    --  Extract a list of parameters separated by the given separator (ex: '|').
    --  ------------------------------
    procedure Parse_Parameters (P          : in out Parser;
@@ -566,6 +649,8 @@ package body Wiki.Parsers is
          elsif C = Separator then
             Add_Attribute (Text);
             Clear (Text);
+         elsif C = P.Param_Char then
+            Expand_Parameter (P, Text);
          elsif C = Terminator or P.Is_Eof then
             Add_Attribute (Text);
             return;
@@ -709,7 +794,7 @@ package body Wiki.Parsers is
          Put_Back (P, C);
       end if;
       declare
-         Name : constant String := Wiki.Attributes.Get_Value (Wiki.Attributes.First (P.Attributes));
+         Name : constant String := Attributes.Get_Value (Wiki.Attributes.First (P.Attributes));
       begin
          Pos := Wiki.Attributes.Find (P.Context.Variables, Name);
          if Wiki.Attributes.Has_Element (Pos) then
@@ -1587,6 +1672,7 @@ package body Wiki.Parsers is
       Engine.Reader      := Stream;
       Engine.Link_Double_Bracket := False;
       Engine.Escape_Char := '~';
+      Engine.Param_Char := Wiki.Strings.WChar'Last;
       if Doc.Is_Empty then
          Engine.Context.Filters.Add_Node (Engine.Document, Wiki.Nodes.N_PARAGRAPH);
       end if;
@@ -1599,10 +1685,12 @@ package body Wiki.Parsers is
 
          when SYNTAX_CREOLE =>
             Engine.Link_Double_Bracket := True;
+            Engine.Param_Char := '<';
 
          when SYNTAX_MEDIA_WIKI =>
             Engine.Link_Double_Bracket := True;
             Engine.Check_Image_Link := True;
+            Engine.Param_Char := '{';
 
          when SYNTAX_MIX =>
             Engine.Is_Dotclear := True;
