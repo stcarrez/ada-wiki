@@ -554,23 +554,23 @@ package body Wiki.Parsers is
       procedure Add_Attribute is
          new Wiki.Strings.Wide_Wide_Builders.Get (Add_Parameter);
 
-      C : Wiki.Strings.WChar;
+      C    : Wiki.Strings.WChar;
+      Text : Wiki.Strings.BString (256);
    begin
       Wiki.Attributes.Clear (P.Attributes);
       loop
          Peek (P, C);
          if C = P.Escape_Char then
             Peek (P, C);
-            Append (P.Text, C);
+            Append (Text, C);
          elsif C = Separator then
-            Add_Attribute (P.Text);
-            Clear (P.Text);
+            Add_Attribute (Text);
+            Clear (Text);
          elsif C = Terminator or P.Is_Eof then
-            Add_Attribute (P.Text);
-            Clear (P.Text);
+            Add_Attribute (Text);
             return;
          else
-            Append (P.Text, C);
+            Append (Text, C);
          end if;
       end loop;
    end Parse_Parameters;
@@ -1587,7 +1587,9 @@ package body Wiki.Parsers is
       Engine.Reader      := Stream;
       Engine.Link_Double_Bracket := False;
       Engine.Escape_Char := '~';
-      Engine.Context.Filters.Add_Node (Engine.Document, Wiki.Nodes.N_PARAGRAPH);
+      if Doc.Is_Empty then
+         Engine.Context.Filters.Add_Node (Engine.Document, Wiki.Nodes.N_PARAGRAPH);
+      end if;
       case Engine.Context.Syntax is
          when SYNTAX_DOTCLEAR =>
             Engine.Is_Dotclear := True;
