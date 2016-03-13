@@ -16,6 +16,7 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Wide_Wide_Text_IO;
+with Ada.Finalization;
 
 --  === Text_IO Input and Output streams ===
 --  The <tt>Wiki.Streams.Text_IO</tt> package defines the <tt>File_Input_Stream</tt> and
@@ -30,7 +31,8 @@ with Ada.Wide_Wide_Text_IO;
 --
 package Wiki.Streams.Text_IO is
 
-   type File_Input_Stream is limited new Wiki.Streams.Input_Stream with private;
+   type File_Input_Stream is limited new Ada.Finalization.Limited_Controlled
+     and Wiki.Streams.Input_Stream with private;
    type File_Input_Stream_Access is access all File_Input_Stream'Class;
 
    --  Open the file and prepare to read the input stream.
@@ -45,7 +47,15 @@ package Wiki.Streams.Text_IO is
                    Char  : out Wiki.Strings.WChar;
                    Eof   : out Boolean);
 
-   type File_Output_Stream is limited new Wiki.Streams.Output_Stream with private;
+   --  Close the file.
+   procedure Close (Stream : in out File_Input_Stream);
+
+   --  Close the stream.
+   overriding
+   procedure Finalize (Stream : in out File_Input_Stream);
+
+   type File_Output_Stream is limited new Ada.Finalization.Limited_Controlled
+     and Wiki.Streams.Output_Stream with private;
    type File_Output_Stream_Access is access all File_Output_Stream'Class;
 
    --  Open the file and prepare to write the output stream.
@@ -53,13 +63,13 @@ package Wiki.Streams.Text_IO is
                    Path   : in String;
                    Form   : in String := "");
 
-   --  Close the file.
-   procedure Close (Stream : in out File_Input_Stream);
-
    --  Create the file and prepare to write the output stream.
    procedure Create (Stream : in out File_Output_Stream;
                      Path   : in String;
                      Form   : in String := "");
+
+   --  Close the file.
+   procedure Close (Stream : in out File_Output_Stream);
 
    --  Write the string to the output stream.
    overriding
@@ -71,14 +81,21 @@ package Wiki.Streams.Text_IO is
    procedure Write (Stream : in out File_Output_Stream;
                     Char   : in Wiki.Strings.WChar);
 
+   --  Close the stream.
+   overriding
+   procedure Finalize (Stream : in out File_Output_Stream);
+
 private
 
-   type File_Input_Stream is limited new Wiki.Streams.Input_Stream with record
+   type File_Input_Stream is limited new Ada.Finalization.Limited_Controlled
+     and Wiki.Streams.Input_Stream with record
       File : Ada.Wide_Wide_Text_IO.File_Type;
    end record;
 
-   type File_Output_Stream is limited new Wiki.Streams.Output_Stream with record
-      File : Ada.Wide_Wide_Text_IO.File_Type := Ada.Wide_Wide_Text_IO.Current_Output;
+   type File_Output_Stream is limited new Ada.Finalization.Limited_Controlled
+     and Wiki.Streams.Output_Stream with record
+      File   : Ada.Wide_Wide_Text_IO.File_Type;
+      Stdout : Boolean := True;
    end record;
 
 end Wiki.Streams.Text_IO;
