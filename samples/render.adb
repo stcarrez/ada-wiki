@@ -18,6 +18,7 @@
 with Ada.Text_IO;
 with Ada.IO_Exceptions;
 with Ada.Strings.Unbounded;
+with Ada.Directories;
 
 with GNAT.Command_Line;
 
@@ -138,7 +139,7 @@ begin
          end if;
          Count := Count + 1;
 
-         Template.Set_Template_Path (".");
+         Template.Set_Template_Path (Ada.Directories.Containing_Directory (Name));
 
          --  Open the file and parse it (assume UTF-8).
          Input.Open (Name, "WCEM=8");
