@@ -1,0 +1,5 @@
+Include non-existing template:
+
+St{{this-template-does-not-exist.mediawiki}}art
+
+En{{this template does not exist.mediawiki|Parm1|Param2|Param3}}d

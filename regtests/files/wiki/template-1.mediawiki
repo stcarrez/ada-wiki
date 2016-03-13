@@ -1,0 +1,7 @@
+Include 1 (img):
+
+{{img.mediawiki}}
+
+Include 2 (pre):
+
+{{pre.mediawiki}}
