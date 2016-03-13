@@ -20,14 +20,16 @@ with Ada.Text_IO;
 with Ada.Directories;
 with Ada.Characters.Conversions;
 
-with Util.Files;
 with Util.Measures;
 
 with Wiki.Render.Wiki;
+with Wiki.Render.Html;
+with Wiki.Render.Text;
 with Wiki.Filters.Html;
-with Wiki.Streams.Html.Builders;
-with Wiki.Streams.Builders;
-with Wiki.Utils;
+with Wiki.Filters.TOC;
+with Wiki.Plugins.Templates;
+with Wiki.Streams.Text_IO;
+with Wiki.Streams.Html.Text_IO;
 with Wiki.Documents;
 with Wiki.Parsers;
 package body Wiki.Tests is
@@ -38,45 +40,65 @@ package body Wiki.Tests is
    --  Test rendering a wiki text in HTML or text.
    --  ------------------------------
    procedure Test_Render (T : in out Test) is
-      function To_Wide (Item : in String) return Wide_Wide_String
-        renames Ada.Characters.Conversions.To_Wide_Wide_String;
+
+      use Ada.Directories;
 
       Result_File : constant String := To_String (T.Result);
-      Content     : Unbounded_String;
+      Dir         : constant String := Containing_Directory (Result_File);
+      Doc         : Wiki.Documents.Document;
+      Engine      : Wiki.Parsers.Parser;
+      Toc_Filter  : aliased Wiki.Filters.TOC.TOC_Filter;
+      Html_Filter : aliased Wiki.Filters.Html.Html_Filter_Type;
+      Template    : aliased Wiki.Plugins.Templates.File_Template_Plugin;
+      Input       : aliased Wiki.Streams.Text_IO.File_Input_Stream;
+      Output      : aliased Wiki.Streams.Html.Text_IO.Html_File_Output_Stream;
    begin
-      Util.Files.Read_File (Path     => To_String (T.File),
-                            Into     => Content,
-                            Max_Size => 10000);
+      if not Exists (Dir) then
+         Create_Path (Dir);
+      end if;
+      Input.Open (Path => To_String (T.File),
+                  Form => "WCEM=8");
+      Output.Create (Result_File, "WCEM=8");
+      Template.Set_Template_Path (Containing_Directory (To_String (T.File)));
       declare
          Time : Util.Measures.Stamp;
       begin
+         Engine.Set_Syntax (T.Source);
+         Engine.Set_Plugin_Factory (Template'Unchecked_Access);
+         Engine.Add_Filter (Toc_Filter'Unchecked_Access);
+         Engine.Add_Filter (Html_Filter'Unchecked_Access);
+         Engine.Parse (Input'Unchecked_Access, Doc);
+         Util.Measures.Report (Time, "Parse " & To_String (T.Name));
          if T.Source = Wiki.SYNTAX_HTML then
             declare
-               Html_Filter : aliased Wiki.Filters.Html.Html_Filter_Type;
-               Writer      : aliased Wiki.Streams.Builders.Output_Builder_Stream;
                Renderer    : aliased Wiki.Render.Wiki.Wiki_Renderer;
-               Doc         : Wiki.Documents.Document;
-               Engine      : Wiki.Parsers.Parser;
             begin
-               Renderer.Set_Output_Stream (Writer'Unchecked_Access, T.Format);
-               Engine.Add_Filter (Html_Filter'Unchecked_Access);
-               Engine.Set_Syntax (Wiki.SYNTAX_HTML);
-               Engine.Parse (To_Wide (To_String (Content)), Doc);
+               Renderer.Set_Output_Stream (Output'Unchecked_Access, T.Format);
                Renderer.Render (Doc);
-               Content := To_Unbounded_String (Writer.To_String);
+               Output.Close;
+               Util.Measures.Report (Time, "Render Wiki " & To_String (T.Name));
             end;
          elsif T.Is_Html then
-            Content := To_Unbounded_String
-              (Utils.To_Html (To_Wide (To_String (Content)), T.Format));
+            declare
+               Renderer : aliased Wiki.Render.Html.Html_Renderer;
+            begin
+               Renderer.Set_Output_Stream (Output'Unchecked_Access);
+               Renderer.Render (Doc);
+               Output.Close;
+               Util.Measures.Report (Time, "Render HTML " & To_String (T.Name));
+            end;
          else
-            Content := To_Unbounded_String
-              (Utils.To_Text (To_Wide (To_String (Content)), T.Format));
+            declare
+               Renderer : aliased Wiki.Render.Text.Text_Renderer;
+            begin
+               Renderer.Set_Output_Stream (Output'Unchecked_Access);
+               Renderer.Render (Doc);
+               Output.Close;
+               Util.Measures.Report (Time, "Render Text " & To_String (T.Name));
+            end;
          end if;
-
-         Util.Measures.Report (Time, "Render " & To_String (T.Name));
       end;
-
-      Util.Files.Write_File (Result_File, Content);
+      Input.Close;
       Util.Tests.Assert_Equal_Files (T       => T,
                                      Expect  => To_String (T.Expect),
                                      Test    => Result_File,
