@@ -1304,14 +1304,16 @@ package body Wiki.Parsers is
       if P.Is_Eof then
          return;
       end if;
-      while not P.Is_Eof loop
+      loop
          Peek (P, C);
-         exit when C /= CR and C /= LF;
+         exit when P.Is_Eof;
          if C = Token then
             Count := Count + 1;
+         elsif C /= CR and C /= LF then
+            Put_Back (P, C);
+            exit;
          end if;
       end loop;
-      Put_Back (P, C);
       if Count >= 2 then
          Flush_Text (P);
          Flush_List (P);
@@ -1701,6 +1703,7 @@ package body Wiki.Parsers is
    procedure Parse (Engine : in out Parser;
                     Stream : in Wiki.Streams.Input_Stream_Access;
                     Doc    : in out Wiki.Documents.Document) is
+      Main : constant Boolean := Doc.Is_Empty;
    begin
       Engine.Document   := Doc;
       Engine.Previous_Syntax := Engine.Context.Syntax;
@@ -1713,7 +1716,7 @@ package body Wiki.Parsers is
       Engine.Link_Double_Bracket := False;
       Engine.Escape_Char := '~';
       Engine.Param_Char := Wiki.Strings.WChar'Last;
-      if Doc.Is_Empty then
+      if Main then
          Engine.Context.Filters.Add_Node (Engine.Document, Wiki.Nodes.N_PARAGRAPH);
       end if;
       case Engine.Context.Syntax is
@@ -1744,7 +1747,9 @@ package body Wiki.Parsers is
       end case;
       Parse_Token (Engine);
       Flush_Text (Engine);
-      Engine.Context.Filters.Finish (Engine.Document);
+      if Main then
+         Engine.Context.Filters.Finish (Engine.Document);
+      end if;
       Doc := Engine.Document;
    end Parse;
 
