@@ -35,8 +35,19 @@ package body Wiki.Streams.Text_IO is
    --  ------------------------------
    procedure Close (Stream : in out File_Input_Stream) is
    begin
-      Ada.Wide_Wide_Text_IO.Close (Stream.File);
+      if Ada.Wide_Wide_Text_IO.Is_Open (Stream.File) then
+         Ada.Wide_Wide_Text_IO.Close (Stream.File);
+      end if;
    end Close;
+
+   --  ------------------------------
+   --  Close the stream.
+   --  ------------------------------
+   overriding
+   procedure Finalize (Stream : in out File_Input_Stream) is
+   begin
+      Stream.Close;
+   end Finalize;
 
    --  ------------------------------
    --  Read one character from the input stream and return False to the <tt>Eof</tt> indicator.
@@ -65,7 +76,11 @@ package body Wiki.Streams.Text_IO is
                    Path   : in String;
                    Form   : in String := "") is
    begin
+      if Ada.Wide_Wide_Text_IO.Is_Open (Stream.File) then
+         Ada.Wide_Wide_Text_IO.Close (Stream.File);
+      end if;
       Ada.Wide_Wide_Text_IO.Open (Stream.File, Ada.Wide_Wide_Text_IO.Out_File, Path, Form);
+      Stream.Stdout := False;
    end Open;
 
    --  ------------------------------
@@ -76,7 +91,18 @@ package body Wiki.Streams.Text_IO is
                      Form   : in String := "") is
    begin
       Ada.Wide_Wide_Text_IO.Create (Stream.File, Ada.Wide_Wide_Text_IO.Out_File, Path, Form);
+      Stream.Stdout := False;
    end Create;
+
+   --  ------------------------------
+   --  Close the file.
+   --  ------------------------------
+   procedure Close (Stream : in out File_Output_Stream) is
+   begin
+      if Ada.Wide_Wide_Text_IO.Is_Open (Stream.File) then
+         Ada.Wide_Wide_Text_IO.Close (Stream.File);
+      end if;
+   end Close;
 
    --  ------------------------------
    --  Write the string to the output stream.
@@ -85,7 +111,11 @@ package body Wiki.Streams.Text_IO is
    procedure Write (Stream  : in out File_Output_Stream;
                     Content : in Wiki.Strings.WString) is
    begin
-      Ada.Wide_Wide_Text_IO.Put (Stream.File, Content);
+      if not Stream.Stdout then
+         Ada.Wide_Wide_Text_IO.Put (Stream.File, Content);
+      else
+         Ada.Wide_Wide_Text_IO.Put (Content);
+      end if;
    end Write;
 
    --  ------------------------------
@@ -95,7 +125,20 @@ package body Wiki.Streams.Text_IO is
    procedure Write (Stream : in out File_Output_Stream;
                     Char   : in Wiki.Strings.WChar) is
    begin
-      Ada.Wide_Wide_Text_IO.Put (Stream.File, Char);
+      if not Stream.Stdout then
+         Ada.Wide_Wide_Text_IO.Put (Stream.File, Char);
+      else
+         Ada.Wide_Wide_Text_IO.Put (Char);
+      end if;
    end Write;
+
+   --  ------------------------------
+   --  Close the stream.
+   --  ------------------------------
+   overriding
+   procedure Finalize (Stream : in out File_Output_Stream) is
+   begin
+      Stream.Close;
+   end Finalize;
 
 end Wiki.Streams.Text_IO;
