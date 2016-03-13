@@ -186,6 +186,14 @@ package body Wiki.Documents is
    end Iterate;
 
    --  ------------------------------
+   --  Returns True if the document is empty.
+   --  ------------------------------
+   function Is_Empty (Doc : in Document) return Boolean is
+   begin
+      return Wiki.Nodes.Is_Empty (Doc.Nodes);
+   end Is_Empty;
+
+   --  ------------------------------
    --  Get the table of content node associated with the document.
    --  ------------------------------
    procedure Get_TOC (Doc : in out Document;
