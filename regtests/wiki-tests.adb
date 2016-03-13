@@ -83,6 +83,7 @@ package body Wiki.Tests is
                Renderer : aliased Wiki.Render.Html.Html_Renderer;
             begin
                Renderer.Set_Output_Stream (Output'Unchecked_Access);
+               Renderer.Set_Render_TOC (True);
                Renderer.Render (Doc);
                Output.Close;
                Util.Measures.Report (Time, "Render HTML " & To_String (T.Name));
