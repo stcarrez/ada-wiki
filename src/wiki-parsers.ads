@@ -119,6 +119,7 @@ private
       Header_Offset       : Integer := 0;
       Quote_Level         : Natural := 0;
       Escape_Char         : Wiki.Strings.WChar;
+      Param_Char          : Wiki.Strings.WChar;
       List_Level          : Natural := 0;
       Reader              : Wiki.Streams.Input_Stream_Access := null;
       Attributes          : Wiki.Attributes.Attribute_List;
