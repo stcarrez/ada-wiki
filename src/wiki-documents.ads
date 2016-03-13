@@ -102,6 +102,9 @@ package Wiki.Documents is
    procedure Iterate (Doc     : in Document;
                       Process : not null access procedure (Node : in Wiki.Nodes.Node_Type));
 
+   --  Returns True if the document is empty.
+   function Is_Empty (Doc : in Document) return Boolean;
+
    --  Get the table of content node associated with the document.
    procedure Get_TOC (Doc : in out Document;
                       TOC : out Wiki.Nodes.Node_List_Ref);
