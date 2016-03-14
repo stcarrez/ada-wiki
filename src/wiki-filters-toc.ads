@@ -30,6 +30,13 @@ package Wiki.Filters.TOC is
    --  ------------------------------
    type TOC_Filter is new Filter_Type with null record;
 
+   --  Add a text content with the given format to the document.
+   overriding
+   procedure Add_Text (Filter    : in out TOC_Filter;
+                       Document  : in out Wiki.Documents.Document;
+                       Text      : in Wiki.Strings.WString;
+                       Format    : in Wiki.Format_Map);
+
    --  Add a section header with the given level in the document.
    overriding
    procedure Add_Header (Filter    : in out TOC_Filter;
