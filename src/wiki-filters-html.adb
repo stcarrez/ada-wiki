@@ -37,6 +37,9 @@ package body Wiki.Filters.Html is
          when N_HORIZONTAL_RULE =>
             Tag := HR_TAG;
 
+         when N_TOC_DISPLAY =>
+            return;
+
       end case;
       if Filter.Allowed (Tag) then
          Filter_Type (Filter).Add_Node (Document, Kind);
