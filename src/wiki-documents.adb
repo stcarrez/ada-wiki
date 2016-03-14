@@ -91,6 +91,10 @@ package body Wiki.Documents is
          when N_PARAGRAPH =>
             Append (Into, new Node_Type '(Kind => N_PARAGRAPH, Len => 0));
 
+         when N_TOC_DISPLAY =>
+            Append (Into, new Node_Type '(Kind => N_TOC_DISPLAY, Len => 0));
+            Into.Using_TOC := True;
+
       end  case;
    end Append;
 
@@ -192,6 +196,14 @@ package body Wiki.Documents is
    begin
       return Wiki.Nodes.Is_Empty (Doc.Nodes);
    end Is_Empty;
+
+   --  ------------------------------
+   --  Returns True if the document displays the table of contents by itself.
+   --  ------------------------------
+   function Is_Using_TOC (Doc : in Document) return Boolean is
+   begin
+      return Doc.Using_TOC;
+   end Is_Using_TOC;
 
    --  ------------------------------
    --  Get the table of content node associated with the document.
