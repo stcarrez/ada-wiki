@@ -105,6 +105,9 @@ package Wiki.Documents is
    --  Returns True if the document is empty.
    function Is_Empty (Doc : in Document) return Boolean;
 
+   --  Returns True if the document displays the table of contents by itself.
+   function Is_Using_TOC (Doc : in Document) return Boolean;
+
    --  Get the table of content node associated with the document.
    procedure Get_TOC (Doc : in out Document;
                       TOC : out Wiki.Nodes.Node_List_Ref);
@@ -119,9 +122,10 @@ private
                      Node : in Wiki.Nodes.Node_Type_Access);
 
    type Document is tagged record
-      Nodes   : Wiki.Nodes.Node_List_Ref;
-      TOC     : Wiki.Nodes.Node_List_Ref;
-      Current : Wiki.Nodes.Node_Type_Access;
+      Nodes       : Wiki.Nodes.Node_List_Ref;
+      TOC         : Wiki.Nodes.Node_List_Ref;
+      Current     : Wiki.Nodes.Node_Type_Access;
+      Using_TOC   : Boolean := False;
    end record;
 
 end Wiki.Documents;
