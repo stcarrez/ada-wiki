@@ -24,6 +24,7 @@ package Wiki.Nodes is
 
    type Node_Kind is (N_LINE_BREAK,
                       N_HORIZONTAL_RULE,
+                      N_TOC_DISPLAY,
                       N_PARAGRAPH,
                       N_HEADER,
                       N_TOC,
