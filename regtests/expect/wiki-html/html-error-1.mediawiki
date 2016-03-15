@@ -1,1 +1,1 @@
-<p><span class="css-class-test">Html span</span></p><h2 id="section_0_1">Span close before section</h2>
+<p><span class="css-class-test">Html span</span></p><h2>Span close before section</h2>
