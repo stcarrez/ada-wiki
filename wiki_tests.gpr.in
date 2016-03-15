@@ -16,7 +16,17 @@ project Wiki_Tests is
    for Object_Dir use "./" & Config'Object_Dir & "/obj";
    for Exec_Dir use "./" & Config'Exec_Dir & "/bin";
 
-   package Binder renames Config.Binder;
+   package binder is
+      case Config.Mode is
+         when "debug" =>
+            for Default_Switches ("Ada") use ("-E", "-W8");
+
+         when others =>
+            for Default_Switches ("Ada") use ("-E", "-W8");
+
+      end case;
+   end binder;
+
    package Builder renames Config.Builder;
    package Compiler renames Config.Compiler;
    package Linker renames Config.Linker;
