@@ -298,7 +298,10 @@ package body Wiki.Render.Html is
 
       Toc : constant Wiki.Nodes.Node_List_Ref := Doc.Get_TOC;
    begin
-      if Wiki.Nodes.Length (Toc) > 2 and not Engine.TOC_Rendered then
+      if Wiki.Nodes.Length (Toc) <= 3 then
+         Engine.Enable_Render_TOC := False;
+
+      elsif not Engine.TOC_Rendered then
          Engine.Section_Level := 0;
          Engine.Current_Section := (others => 0);
          Engine.Output.Start_Element ("div");
