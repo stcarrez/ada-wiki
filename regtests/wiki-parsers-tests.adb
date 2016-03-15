@@ -145,8 +145,8 @@ package body Wiki.Parsers.Tests is
                                 Wiki.Utils.To_Html ("= item =" & CR & "== item2 ==",
                                   SYNTAX_GOOGLE),
                                 "H1 rendering invalid");
-      Util.Tests.Assert_Equals (T, "<h1>item</h1><h2>item2</h2><h1>item3</h1>",
-        Wiki.Utils.To_Html ("= item =" & CR & "== item2 ==" & CR & "= item3 =",
+      Util.Tests.Assert_Equals (T, "<h1>item</h1><h2>item2</h2>",
+        Wiki.Utils.To_Html ("= item =" & CR & "== item2 ==",
           SYNTAX_GOOGLE),
         "H1 rendering invalid");
    end Test_Wiki_Section;
