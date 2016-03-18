@@ -1,0 +1,6 @@
+This site http://www.sun.com is a great site.
+
+* http://www.oracle.com/
+* https://www.oracle.com/servers/sparc/silicon-expression-of-oracle-strategy.html
+
+''Style content https://en.wikibooks.org/wiki/Ada_Programming with link''
