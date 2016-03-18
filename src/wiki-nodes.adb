@@ -63,6 +63,7 @@ package body Wiki.Nodes is
         new Ada.Unchecked_Deallocation (Node_List, Node_List_Access);
 
       procedure Release (List : in Node_List_Block_Access);
+      procedure Free_Block (Block : in out Node_List_Block);
 
       procedure Free_Block (Block : in out Node_List_Block) is
       begin
