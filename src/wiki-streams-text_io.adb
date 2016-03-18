@@ -60,7 +60,7 @@ package body Wiki.Streams.Text_IO is
       Available : Boolean;
    begin
       Eof := False;
-      Ada.Wide_Wide_Text_IO.Get_immediate (Input.File, Char, Available);
+      Ada.Wide_Wide_Text_IO.Get_Immediate (Input.File, Char, Available);
 
    exception
       when Ada.IO_Exceptions.End_Error =>
