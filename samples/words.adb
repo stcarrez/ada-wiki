@@ -25,6 +25,7 @@ with Wiki.Documents;
 with Wiki.Parsers;
 with Wiki.Streams.Text_IO;
 with Wiki.Filters.Html;
+with Wiki.Filters.Autolink;
 with Wiki.Filters.Collectors;
 
 procedure Words is
@@ -38,6 +39,7 @@ procedure Words is
    begin
       Ada.Text_IO.Put_Line ("Report list of words or links used in a wiki text file or HTML file");
       Ada.Text_IO.Put_Line ("Usage: words [-l] [-m] [-H] [-M] [-d] [-c] {wiki-file}");
+      Ada.Text_IO.Put_Line ("  -l        Report links instead of words");
       Ada.Text_IO.Put_Line ("  -m        Parse a Markdown wiki content");
       Ada.Text_IO.Put_Line ("  -M        Parse a Mediawiki wiki content");
       Ada.Text_IO.Put_Line ("  -d        Parse a Dotclear wiki content");
@@ -93,6 +95,7 @@ begin
          Name     : constant String := GNAT.Command_Line.Get_Argument;
          Input    : aliased Wiki.Streams.Text_IO.File_Input_Stream;
          Filter   : aliased Wiki.Filters.Html.Html_Filter_Type;
+         Autolink : aliased Wiki.Filters.Autolink.Autolink_Filter;
          Doc      : Wiki.Documents.Document;
          Engine   : Wiki.Parsers.Parser;
       begin
@@ -106,9 +109,10 @@ begin
 
          --  Open the file and parse it (assume UTF-8).
          Input.Open (Name, "WCEM=8");
-         Engine.Add_Filter (Filter'Unchecked_Access);
          Engine.Add_Filter (Words'Unchecked_Access);
          Engine.Add_Filter (Links'Unchecked_Access);
+         Engine.Add_Filter (Filter'Unchecked_Access);
+         Engine.Add_Filter (Autolink'Unchecked_Access);
          Engine.Set_Syntax (Syntax);
          Engine.Parse (Input'Unchecked_Access, Doc);
 

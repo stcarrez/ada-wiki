@@ -127,7 +127,7 @@ begin
          Name     : constant String := GNAT.Command_Line.Get_Argument;
          Input    : aliased Wiki.Streams.Text_IO.File_Input_Stream;
          Filter   : aliased Wiki.Filters.Html.Html_Filter_Type;
-         autolink : aliased Wiki.Filters.Autolink.Autolink_Filter;
+         Autolink : aliased Wiki.Filters.Autolink.Autolink_Filter;
          Template : aliased Wiki.Plugins.Templates.File_Template_Plugin;
          TOC      : aliased Wiki.Filters.TOC.TOC_Filter;
          Doc      : Wiki.Documents.Document;
