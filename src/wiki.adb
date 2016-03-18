@@ -256,6 +256,11 @@ package body Wiki is
    --  Find the tag from the tag name.
    --  ------------------------------
    function Find_Tag (Name : in Wide_Wide_String) return Html_Tag is
+
+      function Tag (Name   : in Wide_Wide_String;
+                    Expect : in Wide_Wide_String;
+                    Tag    : in Html_Tag) return Html_Tag;
+
       function Tag (Name   : in Wide_Wide_String;
                     Expect : in Wide_Wide_String;
                     Tag    : in Html_Tag) return Html_Tag is
