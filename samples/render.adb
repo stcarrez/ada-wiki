@@ -26,6 +26,7 @@ with Wiki.Documents;
 with Wiki.Parsers;
 with Wiki.Filters.TOC;
 with Wiki.Filters.Html;
+with Wiki.Filters.Autolink;
 with Wiki.Plugins.Templates;
 with Wiki.Render.Html;
 with Wiki.Render.Text;
@@ -126,6 +127,7 @@ begin
          Name     : constant String := GNAT.Command_Line.Get_Argument;
          Input    : aliased Wiki.Streams.Text_IO.File_Input_Stream;
          Filter   : aliased Wiki.Filters.Html.Html_Filter_Type;
+         autolink : aliased Wiki.Filters.Autolink.Autolink_Filter;
          Template : aliased Wiki.Plugins.Templates.File_Template_Plugin;
          TOC      : aliased Wiki.Filters.TOC.TOC_Filter;
          Doc      : Wiki.Documents.Document;
@@ -145,6 +147,7 @@ begin
          Input.Open (Name, "WCEM=8");
          Engine.Set_Plugin_Factory (Template'Unchecked_Access);
          Engine.Add_Filter (TOC'Unchecked_Access);
+         Engine.Add_Filter (Autolink'Unchecked_Access);
          Engine.Add_Filter (Filter'Unchecked_Access);
          Engine.Set_Syntax (Syntax);
          Engine.Parse (Input'Unchecked_Access, Doc);
