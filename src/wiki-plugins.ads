@@ -32,7 +32,7 @@ package Wiki.Plugins is
 
    type Wiki_Plugin is limited interface;
    type Wiki_Plugin_Access is access all Wiki_Plugin'Class;
-   type Plugin_Factory is limited Interface;
+   type Plugin_Factory is limited interface;
    type Plugin_Factory_Access is access all Plugin_Factory'Class;
 
    --  Find a plugin knowing its name.
@@ -51,6 +51,5 @@ package Wiki.Plugins is
                      Document : in out Wiki.Documents.Document;
                      Params   : in out Wiki.Attributes.Attribute_List;
                      Context  : in Plugin_Context) is abstract;
-
 
 end Wiki.Plugins;
