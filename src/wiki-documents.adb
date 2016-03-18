@@ -43,6 +43,7 @@ package body Wiki.Documents is
    --  ------------------------------
    procedure Pop_Node (From : in out Document;
                        Tag  : in Html_Tag) is
+      pragma Unreferenced (Tag);
    begin
       if From.Current /= null then
          From.Current := From.Current.Parent;
