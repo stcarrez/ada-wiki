@@ -16,8 +16,10 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Strings.Wide_Wide_Unbounded;
+with Ada.Strings.Wide_Wide_Maps;
 with Ada.Characters.Conversions;
 with Ada.Wide_Wide_Characters.Handling;
+with Ada.Strings.Wide_Wide_Fixed;
 with Util.Texts.Builders;
 
 package Wiki.Strings is
@@ -27,6 +29,7 @@ package Wiki.Strings is
    subtype WChar is Wide_Wide_Character;
    subtype WString is Wide_Wide_String;
    subtype UString is Ada.Strings.Wide_Wide_Unbounded.Unbounded_Wide_Wide_String;
+   subtype WChar_Mapping is Ada.Strings.Wide_Wide_Maps.Wide_Wide_Character_Mapping;
 
    function To_WChar (C : in Character) return WChar
                       renames Ada.Characters.Conversions.To_Wide_Wide_Character;
@@ -60,6 +63,12 @@ package Wiki.Strings is
 
    function Is_Alphanumeric (C : in WChar) return Boolean
      renames Ada.Wide_Wide_Characters.Handling.Is_Alphanumeric;
+
+   function Index (S       : in WString;
+                   P       : in WString;
+                   Going   : in Ada.Strings.Direction := Ada.Strings.Forward;
+                   Mapping : in WChar_Mapping := Ada.Strings.Wide_Wide_Maps.Identity)
+     return Natural renames Ada.Strings.Wide_Wide_Fixed.Index;
 
    Null_UString : UString
    renames Ada.Strings.Wide_Wide_Unbounded.Null_Unbounded_Wide_Wide_String;
