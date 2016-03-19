@@ -10,8 +10,8 @@ It selects the best supply voltage for every power supply outputs,
 It limits and measures the current.
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
 Rectifier
-The [http://en.wikipedia.org/wiki/Rectifier rectifier] board contains the diodes to convert the alternating current into direct current.
-thumb Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a [http://en.wikipedia.org/wiki/Bridge_rectifier bridge rectifier] connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
+The rectifier (http://en.wikipedia.org/wiki/Rectifier) board contains the diodes to convert the alternating current into direct current.
+thumb Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
 
 Two 22000uF capacitors are present on each output to produce
 a steady DC.  The DC outputs may vary between 24V and 26V due to the
@@ -31,7 +31,7 @@ The voltage switch is followed by a low pass LC filter.  The intent of that filt
 Measuring the current
 To measure the output current a resistor is used in the path of the
 power transistor controlling the output voltage.
-thumb In fact the resistor is composed of two parallel networks composed of a resistor followed by a high [http://en.wikipedia.org/wiki/Power_MOSFET power MOSFET] transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
+thumb In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
 
 The MOSFET transistors are controlled by an open drain output provided by the Power Supply Controller (VACS:Projects:Hardware:LPS:ControllerBoard). The open drain outputs are implemented by using the Q1 and Q2 NPN transistors (2N1893 because I had many). The MOSFET has a maximum VGS that is arround 20V which is too low since the power supply input voltage can reach 26V. To protect the resistors R1 and R2 are added in the path to limit and make sure the VGS of the switching transistors will remain in acceptable range.
 
@@ -78,7 +78,7 @@ A second issue more important occurs when the output power supply has a low volt
  15K
  4.8A
  5.4V
-thumb The second method is not really inovative. We use an operational amplifier in [http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier differential mode]. If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
+thumb The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The gain created by R3/R2 is chosen to be near 4 to maximize the output voltage swing for the analog converter.

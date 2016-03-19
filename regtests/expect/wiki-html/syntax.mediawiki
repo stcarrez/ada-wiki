@@ -13,6 +13,10 @@
 <del>Delete</del></p><p><a href="A link">A link</a>
 
 <a href="A link">title</a>
+
+<a href="http://en.wikipedia.org/wiki/Rectifier">rectifier</a>
+
+<a href="http://www.sun.com">Sun Microsystems</a>
 </p><dl><dt>item 1
 </dt><dd> definition item 1
 </dd><dt>item 2
