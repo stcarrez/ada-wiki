@@ -868,6 +868,7 @@ package body Wiki.Parsers is
             Context.Factory := P.Context.Factory;
             Context.Syntax  := P.Context.Syntax;
             Context.Variables := P.Attributes;
+            Context.Filters.Set_Chain (P.Context.Filters);
             Plugin.Expand (P.Document, P.Attributes, Context);
          end if;
       end;
