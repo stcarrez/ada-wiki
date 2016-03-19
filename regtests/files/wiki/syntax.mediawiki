@@ -52,6 +52,8 @@ Line<br />break
 
 [[A link]]
 [[A link|title]]
+[http://en.wikipedia.org/wiki/Rectifier rectifier]
+[http://www.sun.com Sun Microsystems]
 
 ;item 1
 : definition item 1
