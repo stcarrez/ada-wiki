@@ -623,7 +623,8 @@ package body Wiki.Parsers is
    procedure Parse_Parameters (P          : in out Parser;
                                Separator  : in Wiki.Strings.WChar;
                                Terminator : in Wiki.Strings.WChar;
-                               Names      : in String_Array) is
+                               Names      : in String_Array;
+                               Max        : in Positive := 200) is
       procedure Add_Parameter (Content : in Wiki.Strings.WString);
 
       Index : Positive := 1;
@@ -654,7 +655,7 @@ package body Wiki.Parsers is
          if C = P.Escape_Char then
             Peek (P, C);
             Append (Text, C);
-         elsif C = Separator then
+         elsif C = Separator and Index <= Max then
             Add_Attribute (Text);
             Clear (Text);
          elsif C = P.Param_Char then
@@ -694,18 +695,29 @@ package body Wiki.Parsers is
    --    [[link]]
    --    [[link|name]]
    --    [[link|mode|size|center|alt]]
+   --    [http://...]
+   --    [http://... title]
    --  ------------------------------
    procedure Parse_Link (P     : in out Parser;
                          Token : in Wiki.Strings.WChar) is
-      C          : Wiki.Strings.WChar;
+      C              : Wiki.Strings.WChar;
+      Separator      : Wiki.Strings.WChar := '|';
+      Double_Bracket : Boolean := P.Link_Double_Bracket;
+      Max_Count      : Positive := 200;
    begin
       --  If links have the form '[[link]]', check the second bracket.
-      if P.Link_Double_Bracket then
+      if Double_Bracket then
          Peek (P, C);
          if C /= Token then
-            Append (P.Text, Token);
+            if P.Context.Syntax /= SYNTAX_MEDIA_WIKI and C /= 'h' then
+               Append (P.Text, Token);
+               Put_Back (P, C);
+               return;
+            end if;
             Put_Back (P, C);
-            return;
+            Separator := ' ';
+            Double_Bracket := False;
+            Max_Count := 1;
          end if;
       end if;
       if P.Link_No_Space then
@@ -721,12 +733,12 @@ package body Wiki.Parsers is
 
       Wiki.Attributes.Clear (P.Attributes);
       if P.Link_Title_First then
-         Parse_Parameters (P, '|', ']', Attr_Names_Title_First);
+         Parse_Parameters (P, Separator, ']', Attr_Names_Title_First, Max_Count);
       else
-         Parse_Parameters (P, '|', ']', Attr_Names_Link_First);
+         Parse_Parameters (P, Separator, ']', Attr_Names_Link_First, Max_Count);
       end if;
 
-      if P.Link_Double_Bracket then
+      if Double_Bracket then
          Peek (P, C);
          if C /= ']' then
             Put_Back (P, C);
