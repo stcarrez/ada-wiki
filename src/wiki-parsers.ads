@@ -165,7 +165,8 @@ private
    procedure Parse_Parameters (P          : in out Parser;
                                Separator  : in Wiki.Strings.WChar;
                                Terminator : in Wiki.Strings.WChar;
-                               Names      : in String_Array);
+                               Names      : in String_Array;
+                               Max        : in Positive := 200);
 
    procedure Start_Element (P          : in out Parser;
                             Tag        : in Wiki.Html_Tag;
