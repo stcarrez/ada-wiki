@@ -30,14 +30,14 @@ package Wiki.Render.Links is
    type Link_Renderer_Access is access all Link_Renderer'Class;
 
    --  Get the image link that must be rendered from the wiki image link.
-   procedure Make_Image_Link (Renderer : in Link_Renderer;
+   procedure Make_Image_Link (Renderer : in out Link_Renderer;
                               Link     : in Wiki.Strings.WString;
                               URI      : out Wiki.Strings.UString;
                               Width    : out Natural;
                               Height   : out Natural) is abstract;
 
    --  Get the page link that must be rendered from the wiki page link.
-   procedure Make_Page_Link (Renderer : in Link_Renderer;
+   procedure Make_Page_Link (Renderer : in out Link_Renderer;
                              Link     : in Wiki.Strings.WString;
                              URI      : out Wiki.Strings.UString;
                              Exists   : out Boolean) is abstract;
@@ -46,7 +46,7 @@ package Wiki.Render.Links is
 
    --  Get the image link that must be rendered from the wiki image link.
    overriding
-   procedure Make_Image_Link (Renderer : in Default_Link_Renderer;
+   procedure Make_Image_Link (Renderer : in out Default_Link_Renderer;
                               Link     : in Wiki.Strings.WString;
                               URI      : out Wiki.Strings.UString;
                               Width    : out Natural;
@@ -54,7 +54,7 @@ package Wiki.Render.Links is
 
    --  Get the page link that must be rendered from the wiki page link.
    overriding
-   procedure Make_Page_Link (Renderer : in Default_Link_Renderer;
+   procedure Make_Page_Link (Renderer : in out Default_Link_Renderer;
                              Link     : in Wiki.Strings.WString;
                              URI      : out Wiki.Strings.UString;
                              Exists   : out Boolean);
