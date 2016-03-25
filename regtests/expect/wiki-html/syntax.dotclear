@@ -17,4 +17,4 @@ citation line 3</p></blockquote><p><a href="A link">A link</a>
 <a href="link" lang="en">Title</a>
 
 <a href="link" lang="en" title="The link title">Title</a>
-</p><p><img alt="Alt text" src="link" /><img alt="Alt text" src="link" /><img alt="Alt text" src="link" longdesc="Long alt description" /></p><p><q>citation</q></p><p><q lang="en">citation</q></p><p><q cite="http://www.sun.com" lang="en">citation</q></p><p>A <tt>code</tt> statement.</p>
+</p><p><img src="link" alt="Alt text" /><img src="link" alt="Alt text" /><img src="link" longdesc="Long alt description" alt="Alt text" /></p><p><q>citation</q></p><p><q lang="en">citation</q></p><p><q cite="http://www.sun.com" lang="en">citation</q></p><p>A <tt>code</tt> statement.</p>
