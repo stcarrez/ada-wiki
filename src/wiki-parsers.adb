@@ -512,32 +512,39 @@ package body Wiki.Parsers is
 
    --  ------------------------------
    --  Check if the link refers to an image and must be rendered as an image.
+   --  Returns a positive index of the start the the image link.
    --  ------------------------------
    function Is_Image (P    : in Parser;
-                      Link : in Wide_Wide_String) return Boolean is
+                      Link : in Wide_Wide_String) return Natural is
       Pos : Natural;
    begin
       if not P.Check_Image_Link then
-         return False;
+         return 0;
       elsif Wiki.Helpers.Is_Url (Link) then
          Pos := Ada.Strings.Wide_Wide_Fixed.Index (Link, ".", Ada.Strings.Backward);
          if Pos = 0 then
-            return False;
+            return 0;
+         elsif Wiki.Helpers.Is_Image_Extension (Link (Pos .. Link'Last)) then
+            return Link'First;
          else
-            return Wiki.Helpers.Is_Image_Extension (Link (Pos .. Link'Last));
+            return 0;
          end if;
       elsif Link'Length <= 5 then
-         return False;
+         return 0;
+      elsif Link (Link'First .. Link'First + 5) = "Image:" then
+         return Link'First + 6;
       elsif Link (Link'First .. Link'First + 4) /= "File:" and
         Link (Link'First .. Link'First + 5) /= "Image:"
       then
-         return False;
+         return 0;
       else
          Pos := Ada.Strings.Wide_Wide_Fixed.Index (Link, ".", Ada.Strings.Backward);
          if Pos = 0 then
-            return False;
+            return 0;
+         elsif Wiki.Helpers.Is_Image_Extension (Link (Pos .. Link'Last)) then
+            return Link'First;
          else
-            return Wiki.Helpers.Is_Image_Extension (Link (Pos .. Link'Last));
+            return 0;
          end if;
       end if;
    end Is_Image;
@@ -700,6 +707,61 @@ package body Wiki.Parsers is
    --  ------------------------------
    procedure Parse_Link (P     : in out Parser;
                          Token : in Wiki.Strings.WChar) is
+
+      procedure Add_Mediawiki_Image (Link : in Wiki.Strings.WString);
+
+      --  ------------------------------
+      --  Extract MediaWiki image attribute and normalize them for the renderer.
+      --  Attributes:   alt,  src,   align,   frame
+      --  border,frameless,thumb,thumbnail
+      --  left,right,center,none
+      --  baseline,sup,super,top,text-top,middle,bottom,text-bottom
+      --  <width>px, x<height>px, <width>x<height>px
+      --  ------------------------------
+      procedure Add_Mediawiki_Image (Link : in Wiki.Strings.WString) is
+         Len  : constant Natural := Wiki.Attributes.Length (P.Attributes);
+         Pos  : Natural := 0;
+         Attr : Wiki.Attributes.Attribute_List;
+
+         procedure Collect_Attribute (Name  : in String;
+                                      Value : in Wiki.Strings.WString) is
+         begin
+            Pos := Pos + 1;
+            if Pos = 1 then
+               return;
+            end if;
+            if Value = "border" or Value = "frameless" or Value = "thumb"
+              or Value = "thumbnail" then
+               Wiki.Attributes.Append (Attr, String '("frame"), Value);
+
+            elsif Value = "left" or Value = "right" or Value = "center" or Value = "none" then
+               Wiki.Attributes.Append (Attr, String '("align"), Value);
+
+            elsif Value = "baseline" or Value = "sup" or Value = "super" or Value = "top"
+              or Value  = "text-top" or Value = "middle" or Value = "bottom"
+              or Value = "text-bottom" then
+               Wiki.Attributes.Append (Attr, String '("valign"), Value);
+
+            elsif Value'Length > 3 and then Value (Value'Last - 1 .. Value'Last) = "px" then
+               Wiki.Attributes.Append (Attr, String '("size"), Value);
+
+            else
+               Wiki.Attributes.Append (Attr, String '("alt"), Value);
+               if Pos = Len then
+                  P.Context.Filters.Add_Image (P.Document, Value, Attr);
+               end if;
+               return;
+            end if;
+            if Pos = Len then
+               P.Context.Filters.Add_Image (P.Document, Link, Attr);
+            end if;
+         end Collect_Attribute;
+
+      begin
+         Wiki.Attributes.Append (Attr, String '("src"), Link);
+         Wiki.Attributes.Iterate (P.Attributes, Collect_Attribute'Access);
+      end Add_Mediawiki_Image;
+
       C              : Wiki.Strings.WChar;
       Separator      : Wiki.Strings.WChar := '|';
       Double_Bracket : Boolean := P.Link_Double_Bracket;
@@ -749,10 +811,10 @@ package body Wiki.Parsers is
          declare
             Link : constant Strings.WString := Attributes.Get_Attribute (P.Attributes, HREF_ATTR);
             Name : constant Strings.WString := Attributes.Get_Attribute (P.Attributes, NAME_ATTR);
+            Pos  : constant Natural := P.Is_Image (Link);
          begin
-            if P.Is_Image (Link) then
-               Wiki.Attributes.Append (P.Attributes, String '("src"), Link);
-               P.Context.Filters.Add_Image (P.Document, Name, P.Attributes);
+            if Pos > 0 then
+               Add_Mediawiki_Image (Link (Pos .. Link'Last));
             else
                if P.Link_Title_First and Link'Length = 0 then
                   Wiki.Attributes.Append (P.Attributes, HREF_ATTR, Name);
