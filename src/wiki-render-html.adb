@@ -52,20 +52,26 @@ package body Wiki.Render.Html is
                                 Prefix    : in Wiki.Strings.WString;
                                 Separator : in Wiki.Strings.WChar) return Wiki.Strings.WString is
       Result : Wiki.Strings.UString;
+      Value  : Natural;
+      Empty  : Boolean := True;
    begin
       if Engine.Section_Level = 0 then
          return "";
       end if;
       Wiki.Strings.Append (Result, Prefix);
       for I in 1 .. Engine.Section_Level loop
-         declare
-            N : constant Strings.WString := Positive'Wide_Wide_Image (Engine.Current_Section (I));
-         begin
-            if I > 1 then
-               Wiki.Strings.Append (Result, Separator);
-            end if;
-            Wiki.Strings.Append (Result, N (N'First + 1 .. N'Last));
-         end;
+         Value := Engine.Current_Section (I);
+         if Value > 0 or not Empty then
+            declare
+               N : constant Strings.WString := Positive'Wide_Wide_Image (Value);
+            begin
+               if not Empty then
+                  Wiki.Strings.Append (Result, Separator);
+               end if;
+               Empty := False;
+               Wiki.Strings.Append (Result, N (N'First + 1 .. N'Last));
+            end;
+         end if;
       end loop;
       return Wiki.Strings.To_WString (Result);
    end Get_Section_Number;
@@ -454,46 +460,81 @@ package body Wiki.Render.Html is
                            Attr   : in Wiki.Attributes.Attribute_List) is
       pragma Unreferenced (Doc);
 
-      procedure Render_Attribute (Name  : in String;
-                                  Value : in Wiki.Strings.WString);
-
-      procedure Render_Attribute (Name  : in String;
-                                  Value : in Wiki.Strings.WString) is
-      begin
-         if Name = "src" then
-            declare
-               URI    : Wiki.Strings.UString;
-               Width  : Natural;
-               Height : Natural;
-            begin
-               Engine.Links.Make_Image_Link (Value, URI, Width, Height);
-               Engine.Output.Write_Wide_Attribute ("src", URI);
-               if Width > 0 then
-                  Engine.Output.Write_Attribute ("width", Natural'Image (Width));
-               end if;
-               if Height > 0 then
-                  Engine.Output.Write_Attribute ("height", Natural'Image (Height));
-               end if;
-            end;
-
-         elsif Value'Length = 0 then
-            return;
-
-         elsif Name = "alt" or Name = "longdesc"
-           or Name = "style" or Name = "class"
-         then
-            Engine.Output.Write_Wide_Attribute (Name, Value);
-         end if;
-      end Render_Attribute;
-
+      Src        : constant Strings.WString := Attributes.Get_Attribute (Attr, "src");
+      Alt        : constant Strings.WString := Attributes.Get_Attribute (Attr, "alt");
+      Desc       : constant Strings.WString := Attributes.Get_Attribute (Attr, "longdesc");
+      Class      : constant Strings.WString := Attributes.Get_Attribute (Attr, "class");
+      Style      : constant Strings.WString := Attributes.Get_Attribute (Attr, "style");
+      Size       : constant Strings.WString := Attributes.Get_Attribute (Attr, "size");
+      Frame      : constant Strings.WString := Attributes.Get_Attribute (Attr, "frame");
+      Align      : constant Strings.WString := Attributes.Get_Attribute (Attr, "align");
+      Valign     : constant Strings.WString := Attributes.Get_Attribute (Attr, "valign");
+      URI        : Wiki.Strings.UString;
+      Frame_Attr : Wiki.Strings.UString;
+      Width      : Natural;
+      Height     : Natural;
    begin
-      Engine.Open_Paragraph;
-      Engine.Output.Start_Element ("img");
-      if Title'Length > 0 then
-         Engine.Output.Write_Wide_Attribute ("alt", Title);
+      if Frame'Length > 0 then
+         Strings.Append (Frame_Attr, "wiki-img-");
+         Strings.Append (Frame_Attr, Frame);
       end if;
-      Wiki.Attributes.Iterate (Attr, Render_Attribute'Access);
+      if Align'Length > 0 then
+         if Strings.Length (Frame_Attr) > 0 then
+            Strings.Append (Frame_Attr, " ");
+         end if;
+         Strings.Append (Frame_Attr, "wiki-img-");
+         Strings.Append (Frame_Attr, Align);
+      end if;
+      if Valign'Length > 0 then
+         if Strings.Length (Frame_Attr) > 0 then
+            Strings.Append (Frame_Attr, " ");
+         end if;
+         Strings.Append (Frame_Attr, "wiki-img-");
+         Strings.Append (Frame_Attr, Valign);
+      end if;
+      Engine.Open_Paragraph;
+      if Strings.Length (Frame_Attr) > 0 then
+         Engine.Output.Start_Element ("div");
+         Engine.Output.Write_Wide_Attribute ("class", Frame_Attr);
+         Engine.Output.Start_Element ("div");
+         Engine.Output.Write_Wide_Attribute ("class", "wiki-img-inner");
+      end if;
+
+      Engine.Output.Start_Element ("img");
+      Engine.Links.Make_Image_Link (Src, URI, Width, Height);
+      Engine.Output.Write_Wide_Attribute ("src", URI);
+      if Width > 0 then
+         Engine.Output.Write_Attribute ("width", Natural'Image (Width));
+      end if;
+      if Height > 0 then
+         Engine.Output.Write_Attribute ("height", Natural'Image (Height));
+      end if;
+      if Desc'Length > 0 then
+         Engine.Output.Write_Wide_Attribute ("longdesc", Desc);
+      end if;
+      if Class'Length > 0 then
+         Engine.Output.Write_Wide_Attribute ("class", Class);
+      end if;
+      if Style'Length > 0 then
+         Engine.Output.Write_Wide_Attribute ("style", Style);
+      end if;
+      if Title'Length > 0 and Alt'Length = 0 then
+         Engine.Output.Write_Wide_Attribute ("alt", Title);
+      elsif Alt'Length > 0 then
+         Engine.Output.Write_Wide_Attribute ("alt", Alt);
+      end if;
+
       Engine.Output.End_Element ("img");
+      if Strings.Length (Frame_Attr) > 0 then
+         Engine.Output.End_Element ("div");
+         if Title'Length > 0 and Frame /= "border" and Frame /= "frameless" and Frame /= "" then
+            Engine.Output.Start_Element ("div");
+            Engine.Output.Write_Wide_Attribute ("class", "wiki-img-caption");
+            Engine.Output.Write_Wide_Text (Title);
+            Engine.Output.End_Element ("div");
+         end if;
+         Engine.Output.End_Element ("div");
+      end if;
    end Render_Image;
 
    --  ------------------------------
