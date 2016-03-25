@@ -1,2 +1,2 @@
-<p><img alt="thumb" src="Image:study_current_measure2.png" />
+<p><div class="wiki-img-thumb wiki-img-left"><div class="wiki-img-inner"><img src="study_current_measure2.png" alt="Current Measurement" /></div><div class="wiki-img-caption">Current Measurement</div></div>
 </p>

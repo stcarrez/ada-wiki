@@ -1,6 +1,6 @@
 
 Include 1 (img):
-thumb
+Current Measurement
 
 
 Include 2 (pre):

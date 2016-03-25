@@ -11,7 +11,7 @@ It limits and measures the current.
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
 Rectifier
 The rectifier (http://en.wikipedia.org/wiki/Rectifier) board contains the diodes to convert the alternating current into direct current.
-thumb Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
+Rectifiers Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
 
 Two 22000uF capacitors are present on each output to produce
 a steady DC.  The DC outputs may vary between 24V and 26V due to the
@@ -24,14 +24,14 @@ output voltage swing will be arround 2.6V for the 24V output and
 dV = \frac{i \times 0.007}{C}
 Voltage Switch and Filter
 At the begining of LPS design, two fixed power supplies of +5V and -5V were defined.  In that design, the +5V and -5V were driven by one of the middle voltage produced by the rectifiers (a 9V transformer producing 13V as DV voltage).  But it turns out that it was easier to only have several variable power supplies and set them to these low voltages.  The 2x9V transformer was kept and a voltage switch was introduced to optimize the power supplies.
-thumb A 1RT relay is used to switch the voltage and select either the +13V or the +26V DV voltage produced by the rectifier (respectively -13V and -26V for the negative supply).  When the output supply is below 10V, the relay is activated to select the +13V unregulated DV voltage.  This limits the dissipation heat on the power supply transistor.  By default the relay selects the +26V.  The relay must be capable of supporting currents arround 5A with maximum current of 10A.  The OMRON relay G6R and SIEMENS V23061 are specified as 1RT/8A with maximum current on 10A.
+Voltage Switch and Filter A 1RT relay is used to switch the voltage and select either the +13V or the +26V DV voltage produced by the rectifier (respectively -13V and -26V for the negative supply).  When the output supply is below 10V, the relay is activated to select the +13V unregulated DV voltage.  This limits the dissipation heat on the power supply transistor.  By default the relay selects the +26V.  The relay must be capable of supporting currents arround 5A with maximum current of 10A.  The OMRON relay G6R and SIEMENS V23061 are specified as 1RT/8A with maximum current on 10A.
 
 The voltage switch is followed by a low pass LC filter.  The intent of that filter is to limit and reduce the interactions of different power supplies.  During the voltage switch, the LC filter also limits the current and reduces the voltage spikes.
 
 Measuring the current
 To measure the output current a resistor is used in the path of the
 power transistor controlling the output voltage.
-thumb In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
+Current Selection In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
 
 The MOSFET transistors are controlled by an open drain output provided by the Power Supply Controller (VACS:Projects:Hardware:LPS:ControllerBoard). The open drain outputs are implemented by using the Q1 and Q2 NPN transistors (2N1893 because I had many). The MOSFET has a maximum VGS that is arround 20V which is too low since the power supply input voltage can reach 26V. To protect the resistors R1 and R2 are added in the path to limit and make sure the VGS of the switching transistors will remain in acceptable range.
 
@@ -58,7 +58,7 @@ The MOSFET transistors are controlled by an open drain output provided by the Po
  1.24V
 
 Two ways can be used to measure the current or voltage arround R1.
-thumb The current is measured with an operational amplifier. The output current i creates a voltage drop in the resistor R1 that is used to measure the output current. The operational amplifier drives the transistor Q1 to maintain the same voltage drop on resistor R2. The current ic which flows in R2 is therefore proportional to the output current i. The current ic goes in R3 and creates a voltage which depends on i. The voltage on R3 is defined by the formula:
+Current Measurement The current is measured with an operational amplifier. The output current i creates a voltage drop in the resistor R1 that is used to measure the output current. The operational amplifier drives the transistor Q1 to maintain the same voltage drop on resistor R2. The current ic which flows in R2 is therefore proportional to the output current i. The current ic goes in R3 and creates a voltage which depends on i. The voltage on R3 is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The operational amplifier has its inputs which can range from 0 to the maximum output voltage supported by the power supply. Therefore we must provide it a power supply that is 1 or 2 volts greater than the maximum output voltage.
@@ -78,7 +78,7 @@ A second issue more important occurs when the output power supply has a low volt
  15K
  4.8A
  5.4V
-thumb The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
+Current Measurement The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The gain created by R3/R2 is chosen to be near 4 to maximize the output voltage swing for the analog converter.
@@ -152,14 +152,14 @@ The rectifier board is connected to the power supply microcontroller board for t
  MOSFET driver current selector 0.22 ohm (active low)
 
 Schematics
-thumb
+Positive Rectifier Board
 
 
 
 PCB
-thumb The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
+Positive Rectifier Board Placement The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
 
-thumb The board layout is made with the following constraints (DRC checks):
+Positive Rectifier Board PCB The board layout is made with the following constraints (DRC checks):
 
  Signal class
  Width
@@ -183,7 +183,7 @@ thumb The board layout is made with the following constraints (DRC checks):
  0.8mm
 
 The auto layout was made with a smaller clearance (0.3mm) and the routing grid of 0.635mm.  After a 100% complete auto route, the clearance was increased to 0.4mm and the PCB was fixed by hand.  The wire-to-wire clearance was put to 0.5mm and the number of clearance errors reduced to 6 (there are two wires which are at 0.45mm each).  The GND, VS1 and VS2 polygon were drawn at the end (otherwise the auto-router skips the routing of these signals!).
-thumb
+Positive Rectifier Board PCB Picture
 
 
 
@@ -253,7 +253,7 @@ It limits and measures the current.
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
 Rectifier
 The rectifier (http://en.wikipedia.org/wiki/Rectifier) board contains the diodes to convert the alternating current into direct current.
-thumb Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
+Rectifiers Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
 
 Two 22000uF capacitors are present on each output to produce
 a steady DC.  The DC outputs may vary between 24V and 26V due to the
@@ -266,14 +266,14 @@ output voltage swing will be arround 2.6V for the 24V output and
 dV = \frac{i \times 0.007}{C}
 Voltage Switch and Filter
 At the begining of LPS design, two fixed power supplies of +5V and -5V were defined.  In that design, the +5V and -5V were driven by one of the middle voltage produced by the rectifiers (a 9V transformer producing 13V as DV voltage).  But it turns out that it was easier to only have several variable power supplies and set them to these low voltages.  The 2x9V transformer was kept and a voltage switch was introduced to optimize the power supplies.
-thumb A 1RT relay is used to switch the voltage and select either the +13V or the +26V DV voltage produced by the rectifier (respectively -13V and -26V for the negative supply).  When the output supply is below 10V, the relay is activated to select the +13V unregulated DV voltage.  This limits the dissipation heat on the power supply transistor.  By default the relay selects the +26V.  The relay must be capable of supporting currents arround 5A with maximum current of 10A.  The OMRON relay G6R and SIEMENS V23061 are specified as 1RT/8A with maximum current on 10A.
+Voltage Switch and Filter A 1RT relay is used to switch the voltage and select either the +13V or the +26V DV voltage produced by the rectifier (respectively -13V and -26V for the negative supply).  When the output supply is below 10V, the relay is activated to select the +13V unregulated DV voltage.  This limits the dissipation heat on the power supply transistor.  By default the relay selects the +26V.  The relay must be capable of supporting currents arround 5A with maximum current of 10A.  The OMRON relay G6R and SIEMENS V23061 are specified as 1RT/8A with maximum current on 10A.
 
 The voltage switch is followed by a low pass LC filter.  The intent of that filter is to limit and reduce the interactions of different power supplies.  During the voltage switch, the LC filter also limits the current and reduces the voltage spikes.
 
 Measuring the current
 To measure the output current a resistor is used in the path of the
 power transistor controlling the output voltage.
-thumb In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
+Current Selection In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
 
 The MOSFET transistors are controlled by an open drain output provided by the Power Supply Controller (VACS:Projects:Hardware:LPS:ControllerBoard). The open drain outputs are implemented by using the Q1 and Q2 NPN transistors (2N1893 because I had many). The MOSFET has a maximum VGS that is arround 20V which is too low since the power supply input voltage can reach 26V. To protect the resistors R1 and R2 are added in the path to limit and make sure the VGS of the switching transistors will remain in acceptable range.
 
@@ -300,7 +300,7 @@ The MOSFET transistors are controlled by an open drain output provided by the Po
  1.24V
 
 Two ways can be used to measure the current or voltage arround R1.
-thumb The current is measured with an operational amplifier. The output current i creates a voltage drop in the resistor R1 that is used to measure the output current. The operational amplifier drives the transistor Q1 to maintain the same voltage drop on resistor R2. The current ic which flows in R2 is therefore proportional to the output current i. The current ic goes in R3 and creates a voltage which depends on i. The voltage on R3 is defined by the formula:
+Current Measurement The current is measured with an operational amplifier. The output current i creates a voltage drop in the resistor R1 that is used to measure the output current. The operational amplifier drives the transistor Q1 to maintain the same voltage drop on resistor R2. The current ic which flows in R2 is therefore proportional to the output current i. The current ic goes in R3 and creates a voltage which depends on i. The voltage on R3 is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The operational amplifier has its inputs which can range from 0 to the maximum output voltage supported by the power supply. Therefore we must provide it a power supply that is 1 or 2 volts greater than the maximum output voltage.
@@ -320,7 +320,7 @@ A second issue more important occurs when the output power supply has a low volt
  15K
  4.8A
  5.4V
-thumb The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
+Current Measurement The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The gain created by R3/R2 is chosen to be near 4 to maximize the output voltage swing for the analog converter.
@@ -394,14 +394,14 @@ The rectifier board is connected to the power supply microcontroller board for t
  MOSFET driver current selector 0.22 ohm (active low)
 
 Schematics
-thumb
+Positive Rectifier Board
 
 
 
 PCB
-thumb The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
+Positive Rectifier Board Placement The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
 
-thumb The board layout is made with the following constraints (DRC checks):
+Positive Rectifier Board PCB The board layout is made with the following constraints (DRC checks):
 
  Signal class
  Width
@@ -425,7 +425,7 @@ thumb The board layout is made with the following constraints (DRC checks):
  0.8mm
 
 The auto layout was made with a smaller clearance (0.3mm) and the routing grid of 0.635mm.  After a 100% complete auto route, the clearance was increased to 0.4mm and the PCB was fixed by hand.  The wire-to-wire clearance was put to 0.5mm and the number of clearance errors reduced to 6 (there are two wires which are at 0.45mm each).  The GND, VS1 and VS2 polygon were drawn at the end (otherwise the auto-router skips the routing of these signals!).
-thumb
+Positive Rectifier Board PCB Picture
 
 
 
@@ -495,7 +495,7 @@ It limits and measures the current.
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
 Rectifier
 The rectifier (http://en.wikipedia.org/wiki/Rectifier) board contains the diodes to convert the alternating current into direct current.
-thumb Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
+Rectifiers Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
 
 Two 22000uF capacitors are present on each output to produce
 a steady DC.  The DC outputs may vary between 24V and 26V due to the
@@ -508,14 +508,14 @@ output voltage swing will be arround 2.6V for the 24V output and
 dV = \frac{i \times 0.007}{C}
 Voltage Switch and Filter
 At the begining of LPS design, two fixed power supplies of +5V and -5V were defined.  In that design, the +5V and -5V were driven by one of the middle voltage produced by the rectifiers (a 9V transformer producing 13V as DV voltage).  But it turns out that it was easier to only have several variable power supplies and set them to these low voltages.  The 2x9V transformer was kept and a voltage switch was introduced to optimize the power supplies.
-thumb A 1RT relay is used to switch the voltage and select either the +13V or the +26V DV voltage produced by the rectifier (respectively -13V and -26V for the negative supply).  When the output supply is below 10V, the relay is activated to select the +13V unregulated DV voltage.  This limits the dissipation heat on the power supply transistor.  By default the relay selects the +26V.  The relay must be capable of supporting currents arround 5A with maximum current of 10A.  The OMRON relay G6R and SIEMENS V23061 are specified as 1RT/8A with maximum current on 10A.
+Voltage Switch and Filter A 1RT relay is used to switch the voltage and select either the +13V or the +26V DV voltage produced by the rectifier (respectively -13V and -26V for the negative supply).  When the output supply is below 10V, the relay is activated to select the +13V unregulated DV voltage.  This limits the dissipation heat on the power supply transistor.  By default the relay selects the +26V.  The relay must be capable of supporting currents arround 5A with maximum current of 10A.  The OMRON relay G6R and SIEMENS V23061 are specified as 1RT/8A with maximum current on 10A.
 
 The voltage switch is followed by a low pass LC filter.  The intent of that filter is to limit and reduce the interactions of different power supplies.  During the voltage switch, the LC filter also limits the current and reduces the voltage spikes.
 
 Measuring the current
 To measure the output current a resistor is used in the path of the
 power transistor controlling the output voltage.
-thumb In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
+Current Selection In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
 
 The MOSFET transistors are controlled by an open drain output provided by the Power Supply Controller (VACS:Projects:Hardware:LPS:ControllerBoard). The open drain outputs are implemented by using the Q1 and Q2 NPN transistors (2N1893 because I had many). The MOSFET has a maximum VGS that is arround 20V which is too low since the power supply input voltage can reach 26V. To protect the resistors R1 and R2 are added in the path to limit and make sure the VGS of the switching transistors will remain in acceptable range.
 
@@ -542,7 +542,7 @@ The MOSFET transistors are controlled by an open drain output provided by the Po
  1.24V
 
 Two ways can be used to measure the current or voltage arround R1.
-thumb The current is measured with an operational amplifier. The output current i creates a voltage drop in the resistor R1 that is used to measure the output current. The operational amplifier drives the transistor Q1 to maintain the same voltage drop on resistor R2. The current ic which flows in R2 is therefore proportional to the output current i. The current ic goes in R3 and creates a voltage which depends on i. The voltage on R3 is defined by the formula:
+Current Measurement The current is measured with an operational amplifier. The output current i creates a voltage drop in the resistor R1 that is used to measure the output current. The operational amplifier drives the transistor Q1 to maintain the same voltage drop on resistor R2. The current ic which flows in R2 is therefore proportional to the output current i. The current ic goes in R3 and creates a voltage which depends on i. The voltage on R3 is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The operational amplifier has its inputs which can range from 0 to the maximum output voltage supported by the power supply. Therefore we must provide it a power supply that is 1 or 2 volts greater than the maximum output voltage.
@@ -562,7 +562,7 @@ A second issue more important occurs when the output power supply has a low volt
  15K
  4.8A
  5.4V
-thumb The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
+Current Measurement The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The gain created by R3/R2 is chosen to be near 4 to maximize the output voltage swing for the analog converter.
@@ -636,14 +636,14 @@ The rectifier board is connected to the power supply microcontroller board for t
  MOSFET driver current selector 0.22 ohm (active low)
 
 Schematics
-thumb
+Positive Rectifier Board
 
 
 
 PCB
-thumb The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
+Positive Rectifier Board Placement The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
 
-thumb The board layout is made with the following constraints (DRC checks):
+Positive Rectifier Board PCB The board layout is made with the following constraints (DRC checks):
 
  Signal class
  Width
@@ -667,7 +667,7 @@ thumb The board layout is made with the following constraints (DRC checks):
  0.8mm
 
 The auto layout was made with a smaller clearance (0.3mm) and the routing grid of 0.635mm.  After a 100% complete auto route, the clearance was increased to 0.4mm and the PCB was fixed by hand.  The wire-to-wire clearance was put to 0.5mm and the number of clearance errors reduced to 6 (there are two wires which are at 0.45mm each).  The GND, VS1 and VS2 polygon were drawn at the end (otherwise the auto-router skips the routing of these signals!).
-thumb
+Positive Rectifier Board PCB Picture
 
 
 
@@ -737,7 +737,7 @@ It limits and measures the current.
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
 Rectifier
 The rectifier (http://en.wikipedia.org/wiki/Rectifier) board contains the diodes to convert the alternating current into direct current.
-thumb Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
+Rectifiers Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
 
 Two 22000uF capacitors are present on each output to produce
 a steady DC.  The DC outputs may vary between 24V and 26V due to the
@@ -750,14 +750,14 @@ output voltage swing will be arround 2.6V for the 24V output and
 dV = \frac{i \times 0.007}{C}
 Voltage Switch and Filter
 At the begining of LPS design, two fixed power supplies of +5V and -5V were defined.  In that design, the +5V and -5V were driven by one of the middle voltage produced by the rectifiers (a 9V transformer producing 13V as DV voltage).  But it turns out that it was easier to only have several variable power supplies and set them to these low voltages.  The 2x9V transformer was kept and a voltage switch was introduced to optimize the power supplies.
-thumb A 1RT relay is used to switch the voltage and select either the +13V or the +26V DV voltage produced by the rectifier (respectively -13V and -26V for the negative supply).  When the output supply is below 10V, the relay is activated to select the +13V unregulated DV voltage.  This limits the dissipation heat on the power supply transistor.  By default the relay selects the +26V.  The relay must be capable of supporting currents arround 5A with maximum current of 10A.  The OMRON relay G6R and SIEMENS V23061 are specified as 1RT/8A with maximum current on 10A.
+Voltage Switch and Filter A 1RT relay is used to switch the voltage and select either the +13V or the +26V DV voltage produced by the rectifier (respectively -13V and -26V for the negative supply).  When the output supply is below 10V, the relay is activated to select the +13V unregulated DV voltage.  This limits the dissipation heat on the power supply transistor.  By default the relay selects the +26V.  The relay must be capable of supporting currents arround 5A with maximum current of 10A.  The OMRON relay G6R and SIEMENS V23061 are specified as 1RT/8A with maximum current on 10A.
 
 The voltage switch is followed by a low pass LC filter.  The intent of that filter is to limit and reduce the interactions of different power supplies.  During the voltage switch, the LC filter also limits the current and reduces the voltage spikes.
 
 Measuring the current
 To measure the output current a resistor is used in the path of the
 power transistor controlling the output voltage.
-thumb In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
+Current Selection In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
 
 The MOSFET transistors are controlled by an open drain output provided by the Power Supply Controller (VACS:Projects:Hardware:LPS:ControllerBoard). The open drain outputs are implemented by using the Q1 and Q2 NPN transistors (2N1893 because I had many). The MOSFET has a maximum VGS that is arround 20V which is too low since the power supply input voltage can reach 26V. To protect the resistors R1 and R2 are added in the path to limit and make sure the VGS of the switching transistors will remain in acceptable range.
 
@@ -784,7 +784,7 @@ The MOSFET transistors are controlled by an open drain output provided by the Po
  1.24V
 
 Two ways can be used to measure the current or voltage arround R1.
-thumb The current is measured with an operational amplifier. The output current i creates a voltage drop in the resistor R1 that is used to measure the output current. The operational amplifier drives the transistor Q1 to maintain the same voltage drop on resistor R2. The current ic which flows in R2 is therefore proportional to the output current i. The current ic goes in R3 and creates a voltage which depends on i. The voltage on R3 is defined by the formula:
+Current Measurement The current is measured with an operational amplifier. The output current i creates a voltage drop in the resistor R1 that is used to measure the output current. The operational amplifier drives the transistor Q1 to maintain the same voltage drop on resistor R2. The current ic which flows in R2 is therefore proportional to the output current i. The current ic goes in R3 and creates a voltage which depends on i. The voltage on R3 is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The operational amplifier has its inputs which can range from 0 to the maximum output voltage supported by the power supply. Therefore we must provide it a power supply that is 1 or 2 volts greater than the maximum output voltage.
@@ -804,7 +804,7 @@ A second issue more important occurs when the output power supply has a low volt
  15K
  4.8A
  5.4V
-thumb The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
+Current Measurement The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The gain created by R3/R2 is chosen to be near 4 to maximize the output voltage swing for the analog converter.
@@ -878,14 +878,14 @@ The rectifier board is connected to the power supply microcontroller board for t
  MOSFET driver current selector 0.22 ohm (active low)
 
 Schematics
-thumb
+Positive Rectifier Board
 
 
 
 PCB
-thumb The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
+Positive Rectifier Board Placement The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
 
-thumb The board layout is made with the following constraints (DRC checks):
+Positive Rectifier Board PCB The board layout is made with the following constraints (DRC checks):
 
  Signal class
  Width
@@ -909,7 +909,7 @@ thumb The board layout is made with the following constraints (DRC checks):
  0.8mm
 
 The auto layout was made with a smaller clearance (0.3mm) and the routing grid of 0.635mm.  After a 100% complete auto route, the clearance was increased to 0.4mm and the PCB was fixed by hand.  The wire-to-wire clearance was put to 0.5mm and the number of clearance errors reduced to 6 (there are two wires which are at 0.45mm each).  The GND, VS1 and VS2 polygon were drawn at the end (otherwise the auto-router skips the routing of these signals!).
-thumb
+Positive Rectifier Board PCB Picture
 
 
 
@@ -979,7 +979,7 @@ It limits and measures the current.
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
 Rectifier
 The rectifier (http://en.wikipedia.org/wiki/Rectifier) board contains the diodes to convert the alternating current into direct current.
-thumb Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
+Rectifiers Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
 
 Two 22000uF capacitors are present on each output to produce
 a steady DC.  The DC outputs may vary between 24V and 26V due to the
@@ -992,14 +992,14 @@ output voltage swing will be arround 2.6V for the 24V output and
 dV = \frac{i \times 0.007}{C}
 Voltage Switch and Filter
 At the begining of LPS design, two fixed power supplies of +5V and -5V were defined.  In that design, the +5V and -5V were driven by one of the middle voltage produced by the rectifiers (a 9V transformer producing 13V as DV voltage).  But it turns out that it was easier to only have several variable power supplies and set them to these low voltages.  The 2x9V transformer was kept and a voltage switch was introduced to optimize the power supplies.
-thumb A 1RT relay is used to switch the voltage and select either the +13V or the +26V DV voltage produced by the rectifier (respectively -13V and -26V for the negative supply).  When the output supply is below 10V, the relay is activated to select the +13V unregulated DV voltage.  This limits the dissipation heat on the power supply transistor.  By default the relay selects the +26V.  The relay must be capable of supporting currents arround 5A with maximum current of 10A.  The OMRON relay G6R and SIEMENS V23061 are specified as 1RT/8A with maximum current on 10A.
+Voltage Switch and Filter A 1RT relay is used to switch the voltage and select either the +13V or the +26V DV voltage produced by the rectifier (respectively -13V and -26V for the negative supply).  When the output supply is below 10V, the relay is activated to select the +13V unregulated DV voltage.  This limits the dissipation heat on the power supply transistor.  By default the relay selects the +26V.  The relay must be capable of supporting currents arround 5A with maximum current of 10A.  The OMRON relay G6R and SIEMENS V23061 are specified as 1RT/8A with maximum current on 10A.
 
 The voltage switch is followed by a low pass LC filter.  The intent of that filter is to limit and reduce the interactions of different power supplies.  During the voltage switch, the LC filter also limits the current and reduces the voltage spikes.
 
 Measuring the current
 To measure the output current a resistor is used in the path of the
 power transistor controlling the output voltage.
-thumb In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
+Current Selection In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
 
 The MOSFET transistors are controlled by an open drain output provided by the Power Supply Controller (VACS:Projects:Hardware:LPS:ControllerBoard). The open drain outputs are implemented by using the Q1 and Q2 NPN transistors (2N1893 because I had many). The MOSFET has a maximum VGS that is arround 20V which is too low since the power supply input voltage can reach 26V. To protect the resistors R1 and R2 are added in the path to limit and make sure the VGS of the switching transistors will remain in acceptable range.
 
@@ -1026,7 +1026,7 @@ The MOSFET transistors are controlled by an open drain output provided by the Po
  1.24V
 
 Two ways can be used to measure the current or voltage arround R1.
-thumb The current is measured with an operational amplifier. The output current i creates a voltage drop in the resistor R1 that is used to measure the output current. The operational amplifier drives the transistor Q1 to maintain the same voltage drop on resistor R2. The current ic which flows in R2 is therefore proportional to the output current i. The current ic goes in R3 and creates a voltage which depends on i. The voltage on R3 is defined by the formula:
+Current Measurement The current is measured with an operational amplifier. The output current i creates a voltage drop in the resistor R1 that is used to measure the output current. The operational amplifier drives the transistor Q1 to maintain the same voltage drop on resistor R2. The current ic which flows in R2 is therefore proportional to the output current i. The current ic goes in R3 and creates a voltage which depends on i. The voltage on R3 is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The operational amplifier has its inputs which can range from 0 to the maximum output voltage supported by the power supply. Therefore we must provide it a power supply that is 1 or 2 volts greater than the maximum output voltage.
@@ -1046,7 +1046,7 @@ A second issue more important occurs when the output power supply has a low volt
  15K
  4.8A
  5.4V
-thumb The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
+Current Measurement The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The gain created by R3/R2 is chosen to be near 4 to maximize the output voltage swing for the analog converter.
@@ -1120,14 +1120,14 @@ The rectifier board is connected to the power supply microcontroller board for t
  MOSFET driver current selector 0.22 ohm (active low)
 
 Schematics
-thumb
+Positive Rectifier Board
 
 
 
 PCB
-thumb The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
+Positive Rectifier Board Placement The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
 
-thumb The board layout is made with the following constraints (DRC checks):
+Positive Rectifier Board PCB The board layout is made with the following constraints (DRC checks):
 
  Signal class
  Width
@@ -1151,7 +1151,7 @@ thumb The board layout is made with the following constraints (DRC checks):
  0.8mm
 
 The auto layout was made with a smaller clearance (0.3mm) and the routing grid of 0.635mm.  After a 100% complete auto route, the clearance was increased to 0.4mm and the PCB was fixed by hand.  The wire-to-wire clearance was put to 0.5mm and the number of clearance errors reduced to 6 (there are two wires which are at 0.45mm each).  The GND, VS1 and VS2 polygon were drawn at the end (otherwise the auto-router skips the routing of these signals!).
-thumb
+Positive Rectifier Board PCB Picture
 
 
 
@@ -1221,7 +1221,7 @@ It limits and measures the current.
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
 Rectifier
 The rectifier (http://en.wikipedia.org/wiki/Rectifier) board contains the diodes to convert the alternating current into direct current.
-thumb Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
+Rectifiers Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
 
 Two 22000uF capacitors are present on each output to produce
 a steady DC.  The DC outputs may vary between 24V and 26V due to the
@@ -1234,14 +1234,14 @@ output voltage swing will be arround 2.6V for the 24V output and
 dV = \frac{i \times 0.007}{C}
 Voltage Switch and Filter
 At the begining of LPS design, two fixed power supplies of +5V and -5V were defined.  In that design, the +5V and -5V were driven by one of the middle voltage produced by the rectifiers (a 9V transformer producing 13V as DV voltage).  But it turns out that it was easier to only have several variable power supplies and set them to these low voltages.  The 2x9V transformer was kept and a voltage switch was introduced to optimize the power supplies.
-thumb A 1RT relay is used to switch the voltage and select either the +13V or the +26V DV voltage produced by the rectifier (respectively -13V and -26V for the negative supply).  When the output supply is below 10V, the relay is activated to select the +13V unregulated DV voltage.  This limits the dissipation heat on the power supply transistor.  By default the relay selects the +26V.  The relay must be capable of supporting currents arround 5A with maximum current of 10A.  The OMRON relay G6R and SIEMENS V23061 are specified as 1RT/8A with maximum current on 10A.
+Voltage Switch and Filter A 1RT relay is used to switch the voltage and select either the +13V or the +26V DV voltage produced by the rectifier (respectively -13V and -26V for the negative supply).  When the output supply is below 10V, the relay is activated to select the +13V unregulated DV voltage.  This limits the dissipation heat on the power supply transistor.  By default the relay selects the +26V.  The relay must be capable of supporting currents arround 5A with maximum current of 10A.  The OMRON relay G6R and SIEMENS V23061 are specified as 1RT/8A with maximum current on 10A.
 
 The voltage switch is followed by a low pass LC filter.  The intent of that filter is to limit and reduce the interactions of different power supplies.  During the voltage switch, the LC filter also limits the current and reduces the voltage spikes.
 
 Measuring the current
 To measure the output current a resistor is used in the path of the
 power transistor controlling the output voltage.
-thumb In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
+Current Selection In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
 
 The MOSFET transistors are controlled by an open drain output provided by the Power Supply Controller (VACS:Projects:Hardware:LPS:ControllerBoard). The open drain outputs are implemented by using the Q1 and Q2 NPN transistors (2N1893 because I had many). The MOSFET has a maximum VGS that is arround 20V which is too low since the power supply input voltage can reach 26V. To protect the resistors R1 and R2 are added in the path to limit and make sure the VGS of the switching transistors will remain in acceptable range.
 
@@ -1268,7 +1268,7 @@ The MOSFET transistors are controlled by an open drain output provided by the Po
  1.24V
 
 Two ways can be used to measure the current or voltage arround R1.
-thumb The current is measured with an operational amplifier. The output current i creates a voltage drop in the resistor R1 that is used to measure the output current. The operational amplifier drives the transistor Q1 to maintain the same voltage drop on resistor R2. The current ic which flows in R2 is therefore proportional to the output current i. The current ic goes in R3 and creates a voltage which depends on i. The voltage on R3 is defined by the formula:
+Current Measurement The current is measured with an operational amplifier. The output current i creates a voltage drop in the resistor R1 that is used to measure the output current. The operational amplifier drives the transistor Q1 to maintain the same voltage drop on resistor R2. The current ic which flows in R2 is therefore proportional to the output current i. The current ic goes in R3 and creates a voltage which depends on i. The voltage on R3 is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The operational amplifier has its inputs which can range from 0 to the maximum output voltage supported by the power supply. Therefore we must provide it a power supply that is 1 or 2 volts greater than the maximum output voltage.
@@ -1288,7 +1288,7 @@ A second issue more important occurs when the output power supply has a low volt
  15K
  4.8A
  5.4V
-thumb The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
+Current Measurement The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The gain created by R3/R2 is chosen to be near 4 to maximize the output voltage swing for the analog converter.
@@ -1362,14 +1362,14 @@ The rectifier board is connected to the power supply microcontroller board for t
  MOSFET driver current selector 0.22 ohm (active low)
 
 Schematics
-thumb
+Positive Rectifier Board
 
 
 
 PCB
-thumb The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
+Positive Rectifier Board Placement The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
 
-thumb The board layout is made with the following constraints (DRC checks):
+Positive Rectifier Board PCB The board layout is made with the following constraints (DRC checks):
 
  Signal class
  Width
@@ -1393,7 +1393,7 @@ thumb The board layout is made with the following constraints (DRC checks):
  0.8mm
 
 The auto layout was made with a smaller clearance (0.3mm) and the routing grid of 0.635mm.  After a 100% complete auto route, the clearance was increased to 0.4mm and the PCB was fixed by hand.  The wire-to-wire clearance was put to 0.5mm and the number of clearance errors reduced to 6 (there are two wires which are at 0.45mm each).  The GND, VS1 and VS2 polygon were drawn at the end (otherwise the auto-router skips the routing of these signals!).
-thumb
+Positive Rectifier Board PCB Picture
 
 
 
@@ -1463,7 +1463,7 @@ It limits and measures the current.
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
 Rectifier
 The rectifier (http://en.wikipedia.org/wiki/Rectifier) board contains the diodes to convert the alternating current into direct current.
-thumb Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
+Rectifiers Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
 
 Two 22000uF capacitors are present on each output to produce
 a steady DC.  The DC outputs may vary between 24V and 26V due to the
@@ -1476,14 +1476,14 @@ output voltage swing will be arround 2.6V for the 24V output and
 dV = \frac{i \times 0.007}{C}
 Voltage Switch and Filter
 At the begining of LPS design, two fixed power supplies of +5V and -5V were defined.  In that design, the +5V and -5V were driven by one of the middle voltage produced by the rectifiers (a 9V transformer producing 13V as DV voltage).  But it turns out that it was easier to only have several variable power supplies and set them to these low voltages.  The 2x9V transformer was kept and a voltage switch was introduced to optimize the power supplies.
-thumb A 1RT relay is used to switch the voltage and select either the +13V or the +26V DV voltage produced by the rectifier (respectively -13V and -26V for the negative supply).  When the output supply is below 10V, the relay is activated to select the +13V unregulated DV voltage.  This limits the dissipation heat on the power supply transistor.  By default the relay selects the +26V.  The relay must be capable of supporting currents arround 5A with maximum current of 10A.  The OMRON relay G6R and SIEMENS V23061 are specified as 1RT/8A with maximum current on 10A.
+Voltage Switch and Filter A 1RT relay is used to switch the voltage and select either the +13V or the +26V DV voltage produced by the rectifier (respectively -13V and -26V for the negative supply).  When the output supply is below 10V, the relay is activated to select the +13V unregulated DV voltage.  This limits the dissipation heat on the power supply transistor.  By default the relay selects the +26V.  The relay must be capable of supporting currents arround 5A with maximum current of 10A.  The OMRON relay G6R and SIEMENS V23061 are specified as 1RT/8A with maximum current on 10A.
 
 The voltage switch is followed by a low pass LC filter.  The intent of that filter is to limit and reduce the interactions of different power supplies.  During the voltage switch, the LC filter also limits the current and reduces the voltage spikes.
 
 Measuring the current
 To measure the output current a resistor is used in the path of the
 power transistor controlling the output voltage.
-thumb In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
+Current Selection In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
 
 The MOSFET transistors are controlled by an open drain output provided by the Power Supply Controller (VACS:Projects:Hardware:LPS:ControllerBoard). The open drain outputs are implemented by using the Q1 and Q2 NPN transistors (2N1893 because I had many). The MOSFET has a maximum VGS that is arround 20V which is too low since the power supply input voltage can reach 26V. To protect the resistors R1 and R2 are added in the path to limit and make sure the VGS of the switching transistors will remain in acceptable range.
 
@@ -1510,7 +1510,7 @@ The MOSFET transistors are controlled by an open drain output provided by the Po
  1.24V
 
 Two ways can be used to measure the current or voltage arround R1.
-thumb The current is measured with an operational amplifier. The output current i creates a voltage drop in the resistor R1 that is used to measure the output current. The operational amplifier drives the transistor Q1 to maintain the same voltage drop on resistor R2. The current ic which flows in R2 is therefore proportional to the output current i. The current ic goes in R3 and creates a voltage which depends on i. The voltage on R3 is defined by the formula:
+Current Measurement The current is measured with an operational amplifier. The output current i creates a voltage drop in the resistor R1 that is used to measure the output current. The operational amplifier drives the transistor Q1 to maintain the same voltage drop on resistor R2. The current ic which flows in R2 is therefore proportional to the output current i. The current ic goes in R3 and creates a voltage which depends on i. The voltage on R3 is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The operational amplifier has its inputs which can range from 0 to the maximum output voltage supported by the power supply. Therefore we must provide it a power supply that is 1 or 2 volts greater than the maximum output voltage.
@@ -1530,7 +1530,7 @@ A second issue more important occurs when the output power supply has a low volt
  15K
  4.8A
  5.4V
-thumb The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
+Current Measurement The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The gain created by R3/R2 is chosen to be near 4 to maximize the output voltage swing for the analog converter.
@@ -1604,14 +1604,14 @@ The rectifier board is connected to the power supply microcontroller board for t
  MOSFET driver current selector 0.22 ohm (active low)
 
 Schematics
-thumb
+Positive Rectifier Board
 
 
 
 PCB
-thumb The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
+Positive Rectifier Board Placement The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
 
-thumb The board layout is made with the following constraints (DRC checks):
+Positive Rectifier Board PCB The board layout is made with the following constraints (DRC checks):
 
  Signal class
  Width
@@ -1635,7 +1635,7 @@ thumb The board layout is made with the following constraints (DRC checks):
  0.8mm
 
 The auto layout was made with a smaller clearance (0.3mm) and the routing grid of 0.635mm.  After a 100% complete auto route, the clearance was increased to 0.4mm and the PCB was fixed by hand.  The wire-to-wire clearance was put to 0.5mm and the number of clearance errors reduced to 6 (there are two wires which are at 0.45mm each).  The GND, VS1 and VS2 polygon were drawn at the end (otherwise the auto-router skips the routing of these signals!).
-thumb
+Positive Rectifier Board PCB Picture
 
 
 
@@ -1705,7 +1705,7 @@ It limits and measures the current.
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
 Rectifier
 The rectifier (http://en.wikipedia.org/wiki/Rectifier) board contains the diodes to convert the alternating current into direct current.
-thumb Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
+Rectifiers Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
 
 Two 22000uF capacitors are present on each output to produce
 a steady DC.  The DC outputs may vary between 24V and 26V due to the
@@ -1718,14 +1718,14 @@ output voltage swing will be arround 2.6V for the 24V output and
 dV = \frac{i \times 0.007}{C}
 Voltage Switch and Filter
 At the begining of LPS design, two fixed power supplies of +5V and -5V were defined.  In that design, the +5V and -5V were driven by one of the middle voltage produced by the rectifiers (a 9V transformer producing 13V as DV voltage).  But it turns out that it was easier to only have several variable power supplies and set them to these low voltages.  The 2x9V transformer was kept and a voltage switch was introduced to optimize the power supplies.
-thumb A 1RT relay is used to switch the voltage and select either the +13V or the +26V DV voltage produced by the rectifier (respectively -13V and -26V for the negative supply).  When the output supply is below 10V, the relay is activated to select the +13V unregulated DV voltage.  This limits the dissipation heat on the power supply transistor.  By default the relay selects the +26V.  The relay must be capable of supporting currents arround 5A with maximum current of 10A.  The OMRON relay G6R and SIEMENS V23061 are specified as 1RT/8A with maximum current on 10A.
+Voltage Switch and Filter A 1RT relay is used to switch the voltage and select either the +13V or the +26V DV voltage produced by the rectifier (respectively -13V and -26V for the negative supply).  When the output supply is below 10V, the relay is activated to select the +13V unregulated DV voltage.  This limits the dissipation heat on the power supply transistor.  By default the relay selects the +26V.  The relay must be capable of supporting currents arround 5A with maximum current of 10A.  The OMRON relay G6R and SIEMENS V23061 are specified as 1RT/8A with maximum current on 10A.
 
 The voltage switch is followed by a low pass LC filter.  The intent of that filter is to limit and reduce the interactions of different power supplies.  During the voltage switch, the LC filter also limits the current and reduces the voltage spikes.
 
 Measuring the current
 To measure the output current a resistor is used in the path of the
 power transistor controlling the output voltage.
-thumb In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
+Current Selection In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
 
 The MOSFET transistors are controlled by an open drain output provided by the Power Supply Controller (VACS:Projects:Hardware:LPS:ControllerBoard). The open drain outputs are implemented by using the Q1 and Q2 NPN transistors (2N1893 because I had many). The MOSFET has a maximum VGS that is arround 20V which is too low since the power supply input voltage can reach 26V. To protect the resistors R1 and R2 are added in the path to limit and make sure the VGS of the switching transistors will remain in acceptable range.
 
@@ -1752,7 +1752,7 @@ The MOSFET transistors are controlled by an open drain output provided by the Po
  1.24V
 
 Two ways can be used to measure the current or voltage arround R1.
-thumb The current is measured with an operational amplifier. The output current i creates a voltage drop in the resistor R1 that is used to measure the output current. The operational amplifier drives the transistor Q1 to maintain the same voltage drop on resistor R2. The current ic which flows in R2 is therefore proportional to the output current i. The current ic goes in R3 and creates a voltage which depends on i. The voltage on R3 is defined by the formula:
+Current Measurement The current is measured with an operational amplifier. The output current i creates a voltage drop in the resistor R1 that is used to measure the output current. The operational amplifier drives the transistor Q1 to maintain the same voltage drop on resistor R2. The current ic which flows in R2 is therefore proportional to the output current i. The current ic goes in R3 and creates a voltage which depends on i. The voltage on R3 is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The operational amplifier has its inputs which can range from 0 to the maximum output voltage supported by the power supply. Therefore we must provide it a power supply that is 1 or 2 volts greater than the maximum output voltage.
@@ -1772,7 +1772,7 @@ A second issue more important occurs when the output power supply has a low volt
  15K
  4.8A
  5.4V
-thumb The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
+Current Measurement The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The gain created by R3/R2 is chosen to be near 4 to maximize the output voltage swing for the analog converter.
@@ -1846,14 +1846,14 @@ The rectifier board is connected to the power supply microcontroller board for t
  MOSFET driver current selector 0.22 ohm (active low)
 
 Schematics
-thumb
+Positive Rectifier Board
 
 
 
 PCB
-thumb The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
+Positive Rectifier Board Placement The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
 
-thumb The board layout is made with the following constraints (DRC checks):
+Positive Rectifier Board PCB The board layout is made with the following constraints (DRC checks):
 
  Signal class
  Width
@@ -1877,7 +1877,7 @@ thumb The board layout is made with the following constraints (DRC checks):
  0.8mm
 
 The auto layout was made with a smaller clearance (0.3mm) and the routing grid of 0.635mm.  After a 100% complete auto route, the clearance was increased to 0.4mm and the PCB was fixed by hand.  The wire-to-wire clearance was put to 0.5mm and the number of clearance errors reduced to 6 (there are two wires which are at 0.45mm each).  The GND, VS1 and VS2 polygon were drawn at the end (otherwise the auto-router skips the routing of these signals!).
-thumb
+Positive Rectifier Board PCB Picture
 
 
 
@@ -1947,7 +1947,7 @@ It limits and measures the current.
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
 Rectifier
 The rectifier (http://en.wikipedia.org/wiki/Rectifier) board contains the diodes to convert the alternating current into direct current.
-thumb Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
+Rectifiers Four diodes are used to convert the 2x9V into two positive unregulated outputs. The diodes form a bridge rectifier (http://en.wikipedia.org/wiki/Bridge_rectifier) connected to the 2x9V transformer outputs which are in serial.  The drop voltage arround the diode can reach 0.8V at 5A.
 
 Two 22000uF capacitors are present on each output to produce
 a steady DC.  The DC outputs may vary between 24V and 26V due to the
@@ -1960,14 +1960,14 @@ output voltage swing will be arround 2.6V for the 24V output and
 dV = \frac{i \times 0.007}{C}
 Voltage Switch and Filter
 At the begining of LPS design, two fixed power supplies of +5V and -5V were defined.  In that design, the +5V and -5V were driven by one of the middle voltage produced by the rectifiers (a 9V transformer producing 13V as DV voltage).  But it turns out that it was easier to only have several variable power supplies and set them to these low voltages.  The 2x9V transformer was kept and a voltage switch was introduced to optimize the power supplies.
-thumb A 1RT relay is used to switch the voltage and select either the +13V or the +26V DV voltage produced by the rectifier (respectively -13V and -26V for the negative supply).  When the output supply is below 10V, the relay is activated to select the +13V unregulated DV voltage.  This limits the dissipation heat on the power supply transistor.  By default the relay selects the +26V.  The relay must be capable of supporting currents arround 5A with maximum current of 10A.  The OMRON relay G6R and SIEMENS V23061 are specified as 1RT/8A with maximum current on 10A.
+Voltage Switch and Filter A 1RT relay is used to switch the voltage and select either the +13V or the +26V DV voltage produced by the rectifier (respectively -13V and -26V for the negative supply).  When the output supply is below 10V, the relay is activated to select the +13V unregulated DV voltage.  This limits the dissipation heat on the power supply transistor.  By default the relay selects the +26V.  The relay must be capable of supporting currents arround 5A with maximum current of 10A.  The OMRON relay G6R and SIEMENS V23061 are specified as 1RT/8A with maximum current on 10A.
 
 The voltage switch is followed by a low pass LC filter.  The intent of that filter is to limit and reduce the interactions of different power supplies.  During the voltage switch, the LC filter also limits the current and reduces the voltage spikes.
 
 Measuring the current
 To measure the output current a resistor is used in the path of the
 power transistor controlling the output voltage.
-thumb In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
+Current Selection In fact the resistor is composed of two parallel networks composed of a resistor followed by a high power MOSFET (http://en.wikipedia.org/wiki/Power_MOSFET) transistor.  Each MOSFET transistor can be switched on or off. When both are off, the corresponding output voltage is switched off. This feature is used by the protection system controlled by the power supply controller.  To compute the current we just need to measure the voltage of the resistor. We must take into account the Rdson of each MOSFET because they are in the current path. The IRF9540 has an Rdson arround 0.117 ohm and some others have an Rdson that can reach 0.48 ohm.  In that later case it is possible to remove the resistor to only have two parallel MOSFETs.  The table gives the different values of R1 when at least one MOSFET is on.
 
 The MOSFET transistors are controlled by an open drain output provided by the Power Supply Controller (VACS:Projects:Hardware:LPS:ControllerBoard). The open drain outputs are implemented by using the Q1 and Q2 NPN transistors (2N1893 because I had many). The MOSFET has a maximum VGS that is arround 20V which is too low since the power supply input voltage can reach 26V. To protect the resistors R1 and R2 are added in the path to limit and make sure the VGS of the switching transistors will remain in acceptable range.
 
@@ -1994,7 +1994,7 @@ The MOSFET transistors are controlled by an open drain output provided by the Po
  1.24V
 
 Two ways can be used to measure the current or voltage arround R1.
-thumb The current is measured with an operational amplifier. The output current i creates a voltage drop in the resistor R1 that is used to measure the output current. The operational amplifier drives the transistor Q1 to maintain the same voltage drop on resistor R2. The current ic which flows in R2 is therefore proportional to the output current i. The current ic goes in R3 and creates a voltage which depends on i. The voltage on R3 is defined by the formula:
+Current Measurement The current is measured with an operational amplifier. The output current i creates a voltage drop in the resistor R1 that is used to measure the output current. The operational amplifier drives the transistor Q1 to maintain the same voltage drop on resistor R2. The current ic which flows in R2 is therefore proportional to the output current i. The current ic goes in R3 and creates a voltage which depends on i. The voltage on R3 is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The operational amplifier has its inputs which can range from 0 to the maximum output voltage supported by the power supply. Therefore we must provide it a power supply that is 1 or 2 volts greater than the maximum output voltage.
@@ -2014,7 +2014,7 @@ A second issue more important occurs when the output power supply has a low volt
  15K
  4.8A
  5.4V
-thumb The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
+Current Measurement The second method is not really inovative. We use an operational amplifier in differential mode (http://en.wikipedia.org/wiki/Operational_amplifier_applications#Differential_amplifier). If we assume that R2 = R4 and R3 = R5, the output voltage Vs is defined by the formula:
 
 Vs = \frac{R3 \times R1}{R2} \times i
 The gain created by R3/R2 is chosen to be near 4 to maximize the output voltage swing for the analog converter.
@@ -2088,14 +2088,14 @@ The rectifier board is connected to the power supply microcontroller board for t
  MOSFET driver current selector 0.22 ohm (active low)
 
 Schematics
-thumb
+Positive Rectifier Board
 
 
 
 PCB
-thumb The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
+Positive Rectifier Board Placement The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
 
-thumb The board layout is made with the following constraints (DRC checks):
+Positive Rectifier Board PCB The board layout is made with the following constraints (DRC checks):
 
  Signal class
  Width
@@ -2119,7 +2119,7 @@ thumb The board layout is made with the following constraints (DRC checks):
  0.8mm
 
 The auto layout was made with a smaller clearance (0.3mm) and the routing grid of 0.635mm.  After a 100% complete auto route, the clearance was increased to 0.4mm and the PCB was fixed by hand.  The wire-to-wire clearance was put to 0.5mm and the number of clearance errors reduced to 6 (there are two wires which are at 0.45mm each).  The GND, VS1 and VS2 polygon were drawn at the end (otherwise the auto-router skips the routing of these signals!).
-thumb
+Positive Rectifier Board PCB Picture
 
 
 
