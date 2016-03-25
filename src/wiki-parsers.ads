@@ -151,8 +151,9 @@ private
                          Token : in Wiki.Strings.WChar);
 
    --  Check if the link refers to an image and must be rendered as an image.
+   --  Returns a positive index of the start the the image link.
    function Is_Image (P    : in Parser;
-                      Link : in Wiki.Strings.WString) return Boolean;
+                      Link : in Wiki.Strings.WString) return Natural;
 
    --  Find the plugin with the given name.
    --  Returns null if there is no such plugin.
