@@ -113,6 +113,19 @@ package Wiki.Filters.Collectors is
                         Tag        : in Wiki.Html_Tag;
                         Attributes : in out Wiki.Attributes.Attribute_List);
 
+   --  ------------------------------
+   --  Image Collector type
+   --  ------------------------------
+   type Image_Collector_Type is new Collector_Type with private;
+   type Image_Collector_Type_Access is access all Image_Collector_Type'Class;
+
+   --  Add an image.
+   overriding
+   procedure Add_Image (Filter     : in out Image_Collector_Type;
+                        Document   : in out Wiki.Documents.Document;
+                        Name       : in Wiki.Strings.WString;
+                        Attributes : in out Wiki.Attributes.Attribute_List);
+
 private
 
    type Collector_Type is new Filter_Type with record
@@ -129,5 +142,7 @@ private
    procedure Collect_Link (Filter     : in out Link_Collector_Type;
                            Attributes : in Wiki.Attributes.Attribute_List;
                            Name       : in String);
+
+   type Image_Collector_Type is new Collector_Type with null record;
 
 end Wiki.Filters.Collectors;
