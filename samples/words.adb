@@ -38,8 +38,9 @@ procedure Words is
    procedure Usage is
    begin
       Ada.Text_IO.Put_Line ("Report list of words or links used in a wiki text file or HTML file");
-      Ada.Text_IO.Put_Line ("Usage: words [-l] [-m] [-H] [-M] [-d] [-c] {wiki-file}");
+      Ada.Text_IO.Put_Line ("Usage: words [-l] [-i] [-m] [-H] [-M] [-d] [-c] {wiki-file}");
       Ada.Text_IO.Put_Line ("  -l        Report links instead of words");
+      Ada.Text_IO.Put_Line ("  -i        Report images instead of words");
       Ada.Text_IO.Put_Line ("  -m        Parse a Markdown wiki content");
       Ada.Text_IO.Put_Line ("  -M        Parse a Mediawiki wiki content");
       Ada.Text_IO.Put_Line ("  -d        Parse a Dotclear wiki content");
@@ -56,14 +57,16 @@ procedure Words is
       Ada.Wide_Wide_Text_IO.Put_Line (Natural'Wide_Wide_Image (Count));
    end Print;
 
-   Count     : Natural := 0;
-   Syntax    : Wiki.Wiki_Syntax := Wiki.SYNTAX_MARKDOWN;
-   Link_Mode : Boolean := False;
-   Words     : aliased Wiki.Filters.Collectors.Word_Collector_Type;
-   Links     : aliased Wiki.Filters.Collectors.Link_Collector_Type;
+   Count      : Natural := 0;
+   Syntax     : Wiki.Wiki_Syntax := Wiki.SYNTAX_MARKDOWN;
+   Link_Mode  : Boolean := False;
+   Image_Mode : Boolean := False;
+   Words      : aliased Wiki.Filters.Collectors.Word_Collector_Type;
+   Links      : aliased Wiki.Filters.Collectors.Link_Collector_Type;
+   Images     : aliased Wiki.Filters.Collectors.Image_Collector_Type;
 begin
    loop
-      case Getopt ("m M H d c g l") is
+      case Getopt ("m M H d c g l i") is
          when 'm' =>
             Syntax := Wiki.SYNTAX_MARKDOWN;
 
@@ -84,6 +87,9 @@ begin
 
          when 'l' =>
             Link_Mode := True;
+
+         when 'i' =>
+            Image_Mode := True;
 
          when others =>
             exit;
@@ -111,6 +117,7 @@ begin
          Input.Open (Name, "WCEM=8");
          Engine.Add_Filter (Words'Unchecked_Access);
          Engine.Add_Filter (Links'Unchecked_Access);
+         Engine.Add_Filter (Images'Unchecked_Access);
          Engine.Add_Filter (Filter'Unchecked_Access);
          Engine.Add_Filter (Autolink'Unchecked_Access);
          Engine.Set_Syntax (Syntax);
@@ -123,7 +130,9 @@ begin
       end;
    end loop;
 
-   if Link_Mode then
+   if Image_Mode then
+      Images.Iterate (Print'Access);
+   elsif Link_Mode then
       Links.Iterate (Print'Access);
    else
       Words.Iterate (Print'Access);
