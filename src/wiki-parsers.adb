@@ -670,7 +670,7 @@ package body Wiki.Parsers is
          elsif C = Terminator or P.Is_Eof then
             Add_Attribute (Text);
             return;
-         else
+         elsif Length (Text) > 0 or not Wiki.Helpers.Is_Space (C) then
             Append (Text, C);
          end if;
       end loop;
@@ -719,19 +719,24 @@ package body Wiki.Parsers is
       --  <width>px, x<height>px, <width>x<height>px
       --  ------------------------------
       procedure Add_Mediawiki_Image (Link : in Wiki.Strings.WString) is
+         procedure Collect_Attribute (Name  : in String;
+                                      Value : in Wiki.Strings.WString);
+
          Len  : constant Natural := Wiki.Attributes.Length (P.Attributes);
          Pos  : Natural := 0;
          Attr : Wiki.Attributes.Attribute_List;
 
          procedure Collect_Attribute (Name  : in String;
                                       Value : in Wiki.Strings.WString) is
+            pragma Unreferenced (Name);
          begin
             Pos := Pos + 1;
             if Pos = 1 then
                return;
             end if;
             if Value = "border" or Value = "frameless" or Value = "thumb"
-              or Value = "thumbnail" then
+              or Value = "thumbnail"
+            then
                Wiki.Attributes.Append (Attr, String '("frame"), Value);
 
             elsif Value = "left" or Value = "right" or Value = "center" or Value = "none" then
@@ -739,7 +744,8 @@ package body Wiki.Parsers is
 
             elsif Value = "baseline" or Value = "sup" or Value = "super" or Value = "top"
               or Value  = "text-top" or Value = "middle" or Value = "bottom"
-              or Value = "text-bottom" then
+              or Value = "text-bottom"
+            then
                Wiki.Attributes.Append (Attr, String '("valign"), Value);
 
             elsif Value'Length > 3 and then Value (Value'Last - 1 .. Value'Last) = "px" then
