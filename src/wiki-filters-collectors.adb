@@ -194,4 +194,18 @@ package body Wiki.Filters.Collectors is
       Filter_Type (Filter).Push_Node (Document, Tag, Attributes);
    end Push_Node;
 
+   --  ------------------------------
+   --  Add an image.
+   --  ------------------------------
+   overriding
+   procedure Add_Image (Filter     : in out Image_Collector_Type;
+                        Document   : in out Wiki.Documents.Document;
+                        Name       : in Wiki.Strings.WString;
+                        Attributes : in out Wiki.Attributes.Attribute_List) is
+      Src : constant Wiki.Strings.WString := Wiki.Attributes.Get_Attribute (Attributes, "src");
+   begin
+      Add_String (Filter.Items, Src);
+      Filter_Type (Filter).Add_Image (Document, Name, Attributes);
+   end Add_Image;
+
 end Wiki.Filters.Collectors;
