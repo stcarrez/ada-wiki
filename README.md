@@ -15,6 +15,9 @@ The library allows to:
 * Filter out the wiki, HTML or text through customizable filters,
 * Render the wiki text in HTML, text or another wiki format
 
+The Ada Wiki library is used by Ada Web Application for the
+implementation of the blog and wiki online plugins.
+
 To use Ada Wiki library, configure as follows:
 ```
    ./configure
@@ -63,6 +66,8 @@ document.  The next command reports the links used in the document:
 ```
    bin/words -l -M content.wiki
 ```
+
+A complete online Wiki application is part of AWA (https://github.com/stcarrez/ada-awa).
 
 # Documentation
 
