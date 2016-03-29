@@ -19,7 +19,9 @@ private with Ada.Containers.Vectors;
 
 --  === HTML Filters ===
 --  The <b>Wiki.Filters.Html</b> package implements a customizable HTML filter that verifies
---  the HTML content embedded in the Wiki text.
+--  the HTML content embedded in the Wiki text.  The HTML filter can be customized to indicate
+--  the HTML tags that must be accepted or ignored.  By default, the filter accepts all HTML
+--  tags except 'script', 'style'.
 --
 --  The HTML filter may be declared and configured as follows:
 --
@@ -28,15 +30,11 @@ private with Ada.Containers.Vectors;
 --    F.Forbidden (Wiki.Filters.Html.SCRIPT_TAG);
 --    F.Forbidden (Wiki.Filters.Html.A_TAG);
 --
---  The <tt>Set_Document</tt> operation is used to link the HTML filter to a next filter
---  or to the HTML or text renderer:
+--  The filter is added to the Wiki parser filter chain by using the <tt>Add_Filter</tt>
+--  operation:
 --
---    F.Set_Document (Renderer'Access);
+--    Engine.Add_Filter (F'Unchecked_Access);
 --
---  The HTML filter is then either inserted as a document for a previous filter or for
---  the wiki parser:
---
---    Wiki.Parsers.Parse (F'Access, Wiki_Text, Syntax);
 --
 package Wiki.Filters.Html is
 
