@@ -127,8 +127,9 @@ private
    end record;
 
    --  Peek the next character from the wiki text buffer.
-   procedure Peek (P     : in out Parser;
+   procedure Peek (P     : in out Parser'Class;
                    Token : out Wiki.Strings.WChar);
+   pragma Inline (Peek);
 
    --  Put back the character so that it will be returned by the next call to Peek.
    procedure Put_Back (P     : in out Parser;
