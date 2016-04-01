@@ -19,6 +19,7 @@ with Ada.Strings.Wide_Wide_Fixed;
 
 with Wiki.Parsers.Html;
 with Wiki.Helpers;
+with Wiki.Helpers.Parser;
 with Wiki.Nodes;
 package body Wiki.Parsers is
 
@@ -176,7 +177,7 @@ package body Wiki.Parsers is
    --  ------------------------------
    --  Peek the next character from the wiki text buffer.
    --  ------------------------------
-   procedure Peek (P     : in out Parser;
+   procedure Peek (P     : in out Parser'Class;
                    Token : out Wiki.Strings.WChar) is
    begin
       if not P.Has_Pending then
@@ -218,9 +219,11 @@ package body Wiki.Parsers is
       begin
          P.Context.Filters.Add_Text (P.Document, Content, P.Format);
       end Add_Text;
+      pragma Inline_Always (Add_Text);
 
       procedure Add_Text is
          new Wiki.Strings.Wide_Wide_Builders.Get (Add_Text);
+      pragma Inline_Always (Add_Text);
 
    begin
       if Length (P.Text) > 0 then
@@ -318,6 +321,7 @@ package body Wiki.Parsers is
 
       procedure Add_Preformatted is
          new Wiki.Strings.Wide_Wide_Builders.Get (Add_Preformatted);
+      pragma Inline (Add_Preformatted);
 
    begin
       if Token /= ' ' then
@@ -1746,35 +1750,12 @@ package body Wiki.Parsers is
                     Text   : in Wiki.Strings.UString;
                     Doc    : in out Wiki.Documents.Document) is
 
-      type Wide_Input is new Wiki.Streams.Input_Stream with record
-         Pos : Positive;
-         Len : Natural;
-      end record;
-
-      overriding
-      procedure Read (Buf    : in out Wide_Input;
-                      Token  : out Wiki.Strings.WChar;
-                      Is_Eof : out Boolean);
-
-      procedure Read (Buf    : in out Wide_Input;
-                      Token  : out Wiki.Strings.WChar;
-                      Is_Eof : out Boolean) is
-      begin
-         if Buf.Pos > Buf.Len then
-            Is_Eof := True;
-            Token := CR;
-         else
-            Token := Wiki.Strings.Element (Text, Buf.Pos);
-            Buf.Pos := Buf.Pos + 1;
-            Is_Eof := False;
-         end if;
-      end Read;
-
-      Buffer : aliased Wide_Input;
+      use Wiki.Strings;
+      procedure Parse_Text
+        is new Wiki.Helpers.Parser (Engine_Type => Parser, Element_Type => Wiki.Strings.Ustring);
+      pragma Inline_Always (Parse_Text);
    begin
-      Buffer.Pos   := 1;
-      Buffer.Len   := Wiki.Strings.Length (Text);
-      Engine.Parse (Buffer'Unchecked_Access, Doc);
+      Parse_Text (Engine, Text, Doc);
    end Parse;
 
    --  ------------------------------
