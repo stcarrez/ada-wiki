@@ -465,7 +465,7 @@ package body Wiki.Render.Html is
       Desc       : constant Strings.WString := Attributes.Get_Attribute (Attr, "longdesc");
       Class      : constant Strings.WString := Attributes.Get_Attribute (Attr, "class");
       Style      : constant Strings.WString := Attributes.Get_Attribute (Attr, "style");
-      Size       : constant Strings.WString := Attributes.Get_Attribute (Attr, "size");
+--      Size       : constant Strings.WString := Attributes.Get_Attribute (Attr, "size");
       Frame      : constant Strings.WString := Attributes.Get_Attribute (Attr, "frame");
       Align      : constant Strings.WString := Attributes.Get_Attribute (Attr, "align");
       Valign     : constant Strings.WString := Attributes.Get_Attribute (Attr, "valign");
