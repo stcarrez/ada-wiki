@@ -37,13 +37,12 @@ procedure Wiki.Helpers.Parser (Engine  : in out Engine_Type;
                    Token  : out Wiki.Strings.WChar;
                    Is_Eof : out Boolean) is
    begin
-      if Buf.Pos > Buf.Len then
+      if Buf.Pos <= Buf.Len then
+         Element (Content, Buf.Pos, Token);
+         Is_Eof := False;
+      else
          Is_Eof := True;
          Token := Wiki.Helpers.CR;
-      else
-         Token := Element (Content, Buf.Pos);
-         Buf.Pos := Buf.Pos + 1;
-         Is_Eof := False;
       end if;
    end Read;
 
