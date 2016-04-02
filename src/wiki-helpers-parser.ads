@@ -21,9 +21,10 @@ with Wiki.Documents;
 with Wiki.Streams;
 generic
    type Engine_Type is limited private;
-   type Element_Type is limited private;
-   with function Element (Item : in Element_Type;
-                          Pos  : in Natural) return Wiki.Strings.WChar is <>;
+   type Element_Type (<>) is limited private;
+   with procedure Element (Item : in Element_Type;
+                           Pos  : in out Natural;
+                           Char : out Wiki.Strings.WChar) is <>;
    with function Length (Item  : in Element_Type) return Natural is <>;
    with procedure Parse (Engine : in out Engine_Type;
                          Stream : in Wiki.Streams.Input_Stream_Access;
