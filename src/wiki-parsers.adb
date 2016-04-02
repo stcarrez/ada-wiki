@@ -1713,33 +1713,57 @@ package body Wiki.Parsers is
                     Text   : in Wide_Wide_String;
                     Doc    : in out Wiki.Documents.Document) is
 
-      type Wide_Input is new Wiki.Streams.Input_Stream with record
-         Pos : Positive;
-      end record;
-
-      overriding
-      procedure Read (Buf    : in out Wide_Input;
-                      Token  : out Wiki.Strings.WChar;
-                      Is_Eof : out Boolean);
-
-      procedure Read (Buf    : in out Wide_Input;
-                      Token  : out Wiki.Strings.WChar;
-                      Is_Eof : out Boolean) is
+      procedure Element (Content : in Wide_Wide_String;
+                         Pos     : in out Natural;
+                         Char    : out Wiki.Strings.WChar) is
       begin
-         if Buf.Pos > Text'Last then
-            Is_Eof := True;
-            Token := CR;
-         else
-            Token := Text (Buf.Pos);
-            Buf.Pos := Buf.Pos + 1;
-            Is_Eof := False;
-         end if;
-      end Read;
+         Char := Content (Pos);
+         Pos := Pos + 1;
+      end Element;
+      pragma Inline (Element);
 
-      Buffer : aliased Wide_Input;
+      function Length (Content : in Wide_Wide_String) return Natural is
+      begin
+         return Content'Length;
+      end Length;
+      pragma Inline_Always (Length);
+
+--        type Wide_Input is new Wiki.Streams.Input_Stream with record
+--           Pos : Positive;
+--        end record;
+--
+--        overriding
+--        procedure Read (Buf    : in out Wide_Input;
+--                        Token  : out Wiki.Strings.WChar;
+--                        Is_Eof : out Boolean);
+--
+--        procedure Read (Buf    : in out Wide_Input;
+--                        Token  : out Wiki.Strings.WChar;
+--                        Is_Eof : out Boolean) is
+--        begin
+--           if Buf.Pos > Text'Last then
+--              Is_Eof := True;
+--              Token := CR;
+--           else
+--              Token := Text (Buf.Pos);
+--              Buf.Pos := Buf.Pos + 1;
+--              Is_Eof := False;
+--           end if;
+--        end Read;
+--
+--        Buffer : aliased Wide_Input;
+--     begin
+--        Buffer.Pos   := Text'First;
+--        Engine.Parse (Buffer'Unchecked_Access, Doc);
+
+      use Wiki.Strings;
+      procedure Parse_Text
+      is new Wiki.Helpers.Parser (Engine_Type  => Parser,
+                                  Element_Type => Wiki.Strings.WString);
+      pragma Inline_Always (Parse_Text);
+
    begin
-      Buffer.Pos   := Text'First;
-      Engine.Parse (Buffer'Unchecked_Access, Doc);
+      Parse_Text (Engine, Text, Doc);
    end Parse;
 
    --  ------------------------------
@@ -1750,9 +1774,19 @@ package body Wiki.Parsers is
                     Text   : in Wiki.Strings.UString;
                     Doc    : in out Wiki.Documents.Document) is
 
+      procedure Element (Content : in Wiki.Strings.UString;
+                         Pos     : in out Natural;
+                         Char    : out Wiki.Strings.WChar) is
+      begin
+         Char := Wiki.Strings.Element (Content, Pos);
+         Pos := Pos + 1;
+      end Element;
+      pragma Inline_Always (Element);
+
       use Wiki.Strings;
       procedure Parse_Text
-        is new Wiki.Helpers.Parser (Engine_Type => Parser, Element_Type => Wiki.Strings.Ustring);
+      is new Wiki.Helpers.Parser (Engine_Type  => Parser,
+                                  Element_Type => Wiki.Strings.UString);
       pragma Inline_Always (Parse_Text);
    begin
       Parse_Text (Engine, Text, Doc);
