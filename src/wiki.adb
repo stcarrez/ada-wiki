@@ -459,8 +459,6 @@ package body Wiki is
                case Name (Name'Last) is
                   when 'b' | 'B' =>
                      return Tag (Name, "sub", SUB_TAG);
-                  when 'n' | 'N' =>
-                     return SPAN_TAG;
                   when 'p' | 'P' =>
                      return Tag (Name, "sup", SUP_TAG);
                   when others =>
