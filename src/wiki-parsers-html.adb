@@ -22,7 +22,7 @@ package body Wiki.Parsers.Html is
 
    --  Parse an HTML attribute
    procedure Parse_Attribute_Name (P    : in out Parser;
-                                   Name : in out Wiki.Strings.UString);
+                                   Name : in out Wiki.Strings.BString);
 
    --  Parse a HTML/XML comment to strip it.
    procedure Parse_Comment (P : in out Parser);
@@ -33,7 +33,7 @@ package body Wiki.Parsers.Html is
    procedure Collect_Attributes (P     : in out Parser);
    function Is_Letter (C : in Wiki.Strings.WChar) return Boolean;
    procedure Collect_Attribute_Value (P     : in out Parser;
-                                      Value : in out Wiki.Strings.UString);
+                                      Value : in out Wiki.Strings.BString);
 
    function Is_Letter (C : in Wiki.Strings.WChar) return Boolean is
    begin
@@ -45,10 +45,9 @@ package body Wiki.Parsers.Html is
    --  Parse an HTML attribute
    --  ------------------------------
    procedure Parse_Attribute_Name (P    : in out Parser;
-                                   Name : in out Wiki.Strings.UString) is
+                                   Name : in out Wiki.Strings.BString) is
       C : Wiki.Strings.WChar;
    begin
-      Name := Wiki.Strings.To_UString ("");
       Skip_Spaces (P);
       while not P.Is_Eof loop
          Peek (P, C);
@@ -56,16 +55,16 @@ package body Wiki.Parsers.Html is
             Put_Back (P, C);
             return;
          end if;
-         Wiki.Strings.Append (Name, C);
+         Wiki.Strings.Wide_Wide_Builders.Append (Name, C);
       end loop;
    end Parse_Attribute_Name;
 
    procedure Collect_Attribute_Value (P     : in out Parser;
-                                      Value : in out Wiki.Strings.UString) is
+                                      Value : in out Wiki.Strings.BString) is
       C     : Wiki.Strings.WChar;
       Token : Wiki.Strings.WChar;
    begin
-      Value := Wiki.Strings.To_UString ("");
+--      Value := Wiki.Strings.To_UString ("");
       Peek (P, Token);
       if Wiki.Helpers.Is_Space (Token) then
          return;
@@ -73,14 +72,14 @@ package body Wiki.Parsers.Html is
          Put_Back (P, Token);
          return;
       elsif Token /= ''' and Token /= '"' then
-         Wiki.Strings.Append (Value, Token);
+         Wiki.Strings.Wide_Wide_Builders.Append (Value, Token);
          while not P.Is_Eof loop
             Peek (P, C);
             if C = ''' or C = '"' or C = ' ' or C = '=' or C = '>' or C = '<' or C = '`' then
                Put_Back (P, C);
                return;
             end if;
-            Wiki.Strings.Append (Value, C);
+            Wiki.Strings.Wide_Wide_Builders.Append (Value, C);
          end loop;
       else
          while not P.Is_Eof loop
@@ -88,7 +87,7 @@ package body Wiki.Parsers.Html is
             if C = Token then
                return;
             end if;
-            Wiki.Strings.Append (Value, C);
+            Wiki.Strings.Wide_Wide_Builders.Append (Value, C);
          end loop;
       end if;
    end Collect_Attribute_Value;
@@ -103,9 +102,32 @@ package body Wiki.Parsers.Html is
    --  <name name='value' ...>
    --  ------------------------------
    procedure Collect_Attributes (P     : in out Parser) is
+      procedure Append_Attribute (Name : in Wiki.Strings.WString);
+
       C     : Wiki.Strings.WChar;
-      Name  : Wiki.Strings.UString;
-      Value : Wiki.Strings.UString;
+      Name  : Wiki.Strings.BString (64);
+      Value : Wiki.Strings.BString (256);
+
+      procedure Append_Attribute (Name : in Wiki.Strings.WString) is
+
+         procedure Attribute_Value (Value : in Wiki.Strings.WString);
+
+         procedure Attribute_Value (Value : in Wiki.Strings.WString) is
+         begin
+            Attributes.Append (P.Attributes, Name, Value);
+         end Attribute_Value;
+
+         procedure Attribute_Value is
+           new Wiki.Strings.Wide_Wide_Builders.Get (Attribute_Value);
+
+      begin
+         Attribute_Value (Value);
+      end Append_Attribute;
+      pragma Inline_Always (Append_Attribute);
+
+      procedure Append_Attribute is
+        new Wiki.Strings.Wide_Wide_Builders.Get (Append_Attribute);
+
    begin
       Wiki.Attributes.Clear (P.Attributes);
       while not P.Is_Eof loop
@@ -118,16 +140,19 @@ package body Wiki.Parsers.Html is
          end if;
          if C = '=' then
             Collect_Attribute_Value (P, Value);
-            Attributes.Append (P.Attributes, Name, Value);
-         elsif Wiki.Helpers.Is_Space (C) and Wiki.Strings.Length (Name) > 0 then
-            Attributes.Append (P.Attributes, Name, Wiki.Strings.Null_UString);
+            Append_Attribute (Name);
+            Wiki.Strings.Wide_Wide_Builders.Clear (Name);
+            Wiki.Strings.Wide_Wide_Builders.Clear (Value);
+         elsif Wiki.Strings.Wide_Wide_Builders.Length (Name) > 0 then
+            Put_Back (P, C);
+            Append_Attribute (Name);
+            Wiki.Strings.Wide_Wide_Builders.Clear (Name);
          end if;
       end loop;
-      --  Peek (P, C);
 
       --  Add any pending attribute.
-      if Wiki.Strings.Length (Name) > 0 then
-         Attributes.Append (P.Attributes, Name, Wiki.Strings.Null_UString);
+      if Wiki.Strings.Wide_Wide_Builders.Length (Name) > 0 then
+         Append_Attribute (Name);
       end if;
    end Collect_Attributes;
 
@@ -172,26 +197,12 @@ package body Wiki.Parsers.Html is
    --  or parse an end of HTML element </XXX>
    --  ------------------------------
    procedure Parse_Element (P : in out Parser) is
-      Name : Wiki.Strings.UString;
       C    : Wiki.Strings.WChar;
-      Tag  : Wiki.Html_Tag;
-   begin
-      Peek (P, C);
-      if C = '!' then
-         Peek (P, C);
-         if C = '-' then
-            Parse_Comment (P);
-         else
-            Parse_Doctype (P);
-         end if;
-         return;
-      end if;
-      if C /= '/' then
-         Put_Back (P, C);
-      end if;
-      Parse_Attribute_Name (P, Name);
-      declare
-         Token : constant Wiki.Strings.WString := Wiki.Strings.To_WString (Name);
+
+      procedure Add_Element (Token : in Wiki.Strings.WString);
+
+      procedure Add_Element (Token : in Wiki.Strings.WString) is
+         Tag  : Wiki.Html_Tag;
       begin
          Tag := Wiki.Find_Tag (Token);
          if C = '/' then
@@ -229,7 +240,30 @@ package body Wiki.Parsers.Html is
                Start_Element (P, Tag, P.Attributes);
             end if;
          end if;
-      end;
+      end Add_Element;
+      pragma Inline_Always (Add_Element);
+
+      procedure Add_Element is
+        new Wiki.Strings.Wide_Wide_Builders.Get (Add_Element);
+      pragma Inline_Always (Add_Element);
+
+      Name : Wiki.Strings.BString (64);
+   begin
+      Peek (P, C);
+      if C = '!' then
+         Peek (P, C);
+         if C = '-' then
+            Parse_Comment (P);
+         else
+            Parse_Doctype (P);
+         end if;
+         return;
+      end if;
+      if C /= '/' then
+         Put_Back (P, C);
+      end if;
+      Parse_Attribute_Name (P, Name);
+      Add_Element (Name);
    end Parse_Element;
 
    --  ------------------------------
