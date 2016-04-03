@@ -16,6 +16,7 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Strings.Wide_Wide_Fixed;
+with Interfaces;
 
 with Wiki.Parsers.Html;
 with Wiki.Helpers;
@@ -1704,6 +1705,72 @@ package body Wiki.Parsers is
       Engine.Context.Variables := Context.Variables;
       Engine.Set_Syntax (Context.Syntax);
    end Set_Context;
+
+   --  ------------------------------
+   --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
+   --  defined on the parser. The string is assumed to be in UTF-8 format.
+   --  ------------------------------
+   procedure Parse (Engine : in out Parser;
+                    Text   : in String;
+                    Doc    : in out Wiki.Documents.Document) is
+      procedure Element (Content : in String;
+                         Pos     : in out Natural;
+                         Char    : out Wiki.Strings.WChar);
+      function Length (Content : in String) return Natural;
+
+      procedure Element (Content : in String;
+                         Pos     : in out Natural;
+                         Char    : out Wiki.Strings.WChar) is
+         use Interfaces;
+
+         Val : Unsigned_32;
+      begin
+         Val := Character'Pos (Content (Pos));
+         Pos := Pos + 1;
+
+         --  UTF-8 conversion
+         --  7  U+0000   U+007F   1  0xxxxxxx
+         --  11 U+0080   U+07FF   2  110xxxxx 10xxxxxx
+         --  16 U+0800   U+FFFF   3  1110xxxx 10xxxxxx 10xxxxxx
+         --  21 U+10000  U+1FFFFF 4  11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+         if Val >= 16#80# and Pos <= Content'Last then
+            Val := Shift_Left (Val, 6);
+            Val := Val or (Character'Pos (Content (Pos)) and 16#3F#);
+            Pos := Pos + 1;
+            if Val <= 16#37FF# or Pos > Content'Last then
+               Val := Val and 16#07ff#;
+            else
+               Val := Shift_Left (Val, 6);
+               Val := Val or (Character'Pos (Content (Pos)) and 16#3F#);
+               Pos := Pos + 1;
+               if Val <= 16#EFFFF# or Pos > Content'Last then
+                  Val := Val and 16#FFFF#;
+               else
+                  Val := Shift_Left (Val, 6);
+                  Val := Val or (Character'Pos (Content (Pos)) and 16#3F#);
+                  Val := Val and 16#1FFFFF#;
+                  Pos := Pos + 1;
+               end if;
+            end if;
+         end if;
+         Char := Wiki.Strings.WChar'Val (Val);
+      end Element;
+      pragma Inline (Element);
+
+      function Length (Content : in String) return Natural is
+      begin
+         return Content'Length;
+      end Length;
+      pragma Inline_Always (Length);
+
+      procedure Parse_Text is
+        new Wiki.Helpers.Parser (Engine_Type  => Parser,
+                                 Element_Type => String);
+      pragma Inline_Always (Parse_Text);
+
+   begin
+      Parse_Text (Engine, Text, Doc);
+   end Parse;
 
    --  ------------------------------
    --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
