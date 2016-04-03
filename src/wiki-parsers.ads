@@ -72,6 +72,12 @@ package Wiki.Parsers is
                           Context : in Wiki.Plugins.Plugin_Context);
 
    --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
+   --  defined on the parser.  The string is assumed to be in UTF-8 format.
+   procedure Parse (Engine : in out Parser;
+                    Text   : in String;
+                    Doc    : in out Wiki.Documents.Document);
+
+   --  Parse the wiki text contained in <b>Text</b> according to the wiki syntax
    --  defined on the parser.
    procedure Parse (Engine : in out Parser;
                     Text   : in Wiki.Strings.WString;
