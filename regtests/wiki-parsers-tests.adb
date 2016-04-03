@@ -15,11 +15,14 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
+with Ada.Strings.UTF_Encoding.Wide_Wide_Strings;
 
 with Util.Test_Caller;
 
 with Wiki.Utils;
 with Wiki.Helpers;
+with Wiki.Streams.Builders;
+with Wiki.Render.Text;
 package body Wiki.Parsers.Tests is
 
    use Wiki.Helpers;
@@ -35,7 +38,7 @@ package body Wiki.Parsers.Tests is
       Caller.Add_Test (Suite, "Test Wiki.Parsers.Parse (italic, bold)",
                        Test_Wiki_Formats'Access);
       Caller.Add_Test (Suite, "Test Wiki.Parsers.Parse (headings)",
-                       Test_Wiki_Section'Access);
+                         Test_Wiki_Section'Access);
       Caller.Add_Test (Suite, "Test Wiki.Parsers.Parse (lists)",
                        Test_Wiki_List'Access);
       Caller.Add_Test (Suite, "Test Wiki.Parsers.Parse (links)",
@@ -50,6 +53,8 @@ package body Wiki.Parsers.Tests is
                        Test_Wiki_Preformatted'Access);
       Caller.Add_Test (Suite, "Test Wiki.Text.Renderer",
                        Test_Wiki_Text_Renderer'Access);
+      Caller.Add_Test (Suite, "Test Wiki.Parsers.Parse (String UTF-8)",
+                       Test_Wiki_UTF_8'Access);
    end Add_Tests;
 
    --  ------------------------------
@@ -301,5 +306,56 @@ package body Wiki.Parsers.Tests is
                                 "Preformat rendering invalid");
 
    end Test_Wiki_Text_Renderer;
+
+   --  ------------------------------
+   --  Test the string parser with UTF-8 support.
+   --  ------------------------------
+   procedure Test_Wiki_UTF_8 (T : in out Test) is
+      procedure Check (Text : in Wiki.Strings.WString);
+
+      Test_Chars : constant array (Natural range <>) of Wiki.Strings.WChar
+        := (Wiki.Strings.WChar'Val (16#7f#),
+            Wiki.Strings.WChar'Val (16#80#),
+            Wiki.Strings.WChar'Val (16#AE#),
+            Wiki.Strings.WChar'Val (16#1ff#),
+            Wiki.Strings.WChar'Val (16#1fff#),
+            Wiki.Strings.WChar'Val (16#1ffff#),
+            Wiki.Strings.WChar'Val (16#0fffff#));
+
+      procedure Check (Text : in Wiki.Strings.WString) is
+         procedure Get (Value : in Wiki.Strings.WString);
+
+         Doc      : Wiki.Documents.Document;
+         Engine   : Wiki.Parsers.Parser;
+         Renderer : aliased Wiki.Render.Text.Text_Renderer;
+         Stream   : aliased Wiki.Streams.Builders.Output_Builder_Stream;
+
+         Content : constant String :=
+           Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode (Text);
+
+         procedure Get (Value : in Wiki.Strings.WString) is
+         begin
+            --  Verify that we got the expected characters.
+            T.Assert (Wiki.Helpers.LF & Text = Value, "Invalid parsing for [" & Content & "]");
+         end Get;
+
+      begin
+         Engine.Set_Syntax (SYNTAX_MEDIA_WIKI);
+         Engine.Parse (Content, Doc);
+         Renderer.Set_Output_Stream (Stream'Unchecked_Access);
+         Renderer.Render (Doc);
+         Stream.Iterate (Get'Access);
+      end Check;
+
+   begin
+      for I in Test_Chars'Range loop
+         Check (Test_Chars (I) & "");
+      end loop;
+      for J in Test_Chars'Range loop
+         for I in Test_Chars'Range loop
+            Check (Test_Chars (I) & Test_Chars (J) & "");
+         end loop;
+      end loop;
+   end Test_Wiki_UTF_8;
 
 end Wiki.Parsers.Tests;
