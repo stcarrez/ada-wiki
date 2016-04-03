@@ -1,0 +1,16 @@
+Test hr rule not followed by \n.
+----XXX
+End of hr rule.
+
+* ((mylink|\||\|))
+* ((link-2|\|\|))
+* ((link-3|\|\|
+
+Last section
+!!!!!!!! Big header
+
+
+* {{quote-name\|pipe|url}}
+* {{quote-name\|pipe|url
+
+

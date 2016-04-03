@@ -1,0 +1,19 @@
+
+Test hr rule not followed by \n.
+XXX
+End of hr rule.
+[mylink|\||\|))
+
+[{link-2|\|\|))
+
+{[link-3|\|\|
+Last section
+
+======== Big header
+
+pipe
+pipe
+This is not a pre-section
+}}}
+
+

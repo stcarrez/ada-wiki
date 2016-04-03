@@ -1,0 +1,4 @@
+<p>Test hr rule not followed by n.
+</p><hr />XXX
+End of hr rule.<ul><li><img src="mylink" alt="|" /></li><li><img src="link-2" alt="||" /></li><li><img src="link-3" alt="||" /></li></ul><p>Last section
+</p><h1>!! Big header</h1><ul><li><q lang="url">quote-name|pipe</q></li><li><q lang="url">quote-name|pipe</q></li></ul>
