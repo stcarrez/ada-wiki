@@ -46,15 +46,33 @@ package body Wiki.Filters.Html.Tests is
             Name  : constant String := Html_Tag'Image (I);
             Wname : constant Wide_Wide_String := Html_Tag'Wide_Wide_Image (I);
             Pos   : constant Natural := Util.Strings.Index (Name, '_');
-            Tag   : constant Html_Tag := Find_Tag (Wname (Wname'First .. Pos - 1));
+            Tname : constant Wide_Wide_String := Wname (Wname'First .. Pos - 1);
+            Tag   : constant Html_Tag := Find_Tag (Tname);
          begin
             Log.Info ("Checking tag {0}", Name);
             if I /= ROOT_HTML_TAG then
                Assert_Equals (T, I, Tag, "Find_Tag failed");
             end if;
 
-            Assert_Equals (T, UNKNOWN_TAG, Find_Tag (Wname (Wname'First .. Pos - 1) & "x"),
-                          "Find_Tag must return UNKNOWN_TAG");
+            Assert_Equals (T, UNKNOWN_TAG, Find_Tag (Tname & "x"),
+                           "Find_Tag must return UNKNOWN_TAG");
+
+            for K in Tname'Range loop
+               if K = Tname'First then
+                  Assert_Equals (T, UNKNOWN_TAG,
+                                 Find_Tag ("_" & Tname (Tname'First + 1 .. Tname'Last)),
+                                 "Find_Tag must return UNKNOWN_TAG");
+               elsif K = Tname'Last then
+                  Assert_Equals (T, UNKNOWN_TAG,
+                                 Find_Tag (Tname (Tname'First .. K - 1) & "_"),
+                                 "Find_Tag must return UNKNOWN_TAG");
+               else
+                  Assert_Equals (T, UNKNOWN_TAG,
+                                 Find_Tag (Tname (Tname'First .. K - 1) & "_"
+                                   & Tname (K + 1 .. Tname'Last)),
+                                 "Find_Tag must return UNKNOWN_TAG");
+               end if;
+            end loop;
          end;
       end loop;
    end Test_Find_Tag;
