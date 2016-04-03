@@ -46,9 +46,6 @@ package Wiki.Attributes is
    --  Get the attribute wide value.
    function Get_Wide_Value (Position : in Cursor) return Wiki.Strings.WString;
 
-   --  Get the attribute wide value.
-   function Get_Unbounded_Wide_Value (Position : in Cursor) return Wiki.Strings.UString;
-
    --  Returns True if the cursor has a valid attribute.
    function Has_Element (Position : in Cursor) return Boolean;
 
@@ -64,10 +61,6 @@ package Wiki.Attributes is
 
    --  Find the attribute with the given name and return its value.
    function Get_Attribute (List : in Attribute_List;
-                           Name : in String) return Wiki.Strings.UString;
-
-   --  Find the attribute with the given name and return its value.
-   function Get_Attribute (List : in Attribute_List;
                            Name : in String) return Wiki.Strings.WString;
 
    --  Append the attribute to the attribute list.
@@ -79,11 +72,6 @@ package Wiki.Attributes is
    procedure Append (List  : in out Attribute_List;
                      Name  : in String;
                      Value : in Wiki.Strings.WString);
-
-   --  Append the attribute to the attribute list.
-   procedure Append (List  : in out Attribute_List;
-                     Name  : in Wiki.Strings.UString;
-                     Value : in Wiki.Strings.UString);
 
    --  Append the attribute to the attribute list.
    procedure Append (List  : in out Attribute_List;
