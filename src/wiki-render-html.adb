@@ -88,9 +88,15 @@ package body Wiki.Render.Html is
    begin
       case Node.Kind is
          when Wiki.Nodes.N_HEADER =>
-            Engine.Render_Header (Doc    => Doc,
-                                  Header => Node.Header,
-                                  Level  => Node.Level);
+            if Node.Level > 6 then
+               Engine.Render_Header (Doc    => Doc,
+                                     Header => Node.Header,
+                                     Level  => 6);
+            else
+               Engine.Render_Header (Doc    => Doc,
+                                     Header => Node.Header,
+                                     Level  => Node.Level);
+            end if;
 
          when Wiki.Nodes.N_LINE_BREAK =>
             Engine.Output.Start_Element ("br");
@@ -201,7 +207,7 @@ package body Wiki.Render.Html is
                             Doc    : in Wiki.Documents.Document;
                             Header : in Wiki.Strings.WString;
                             Level  : in Positive) is
-      Tag     : String_Access;
+      Tag   : String_Access;
    begin
       if Engine.Enable_Render_TOC and not Engine.TOC_Rendered and not Doc.Is_Using_TOC then
          Engine.Render_TOC (Doc, 3);
