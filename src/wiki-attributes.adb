@@ -46,15 +46,6 @@ package body Wiki.Attributes is
    end Get_Wide_Value;
 
    --  ------------------------------
-   --  Get the attribute wide value.
-   --  ------------------------------
-   function Get_Unbounded_Wide_Value (Position : in Cursor) return Wiki.Strings.UString is
-      Attr : constant Attribute_Ref := Attribute_Vectors.Element (Position.Pos);
-   begin
-      return Wiki.Strings.To_UString (Attr.Value.Value);
-   end Get_Unbounded_Wide_Value;
-
-   --  ------------------------------
    --  Returns True if the cursor has a valid attribute.
    --  ------------------------------
    function Has_Element (Position : in Cursor) return Boolean is
@@ -89,20 +80,6 @@ package body Wiki.Attributes is
       end loop;
       return Cursor '(Pos => Iter);
    end Find;
-
-   --  ------------------------------
-   --  Find the attribute with the given name and return its value.
-   --  ------------------------------
-   function Get_Attribute (List : in Attribute_List;
-                           Name : in String) return Wiki.Strings.UString is
-      Attr : constant Cursor := Find (List, Name);
-   begin
-      if Has_Element (Attr) then
-         return Get_Unbounded_Wide_Value (Attr);
-      else
-         return Wiki.Strings.Null_UString;
-      end if;
-   end Get_Attribute;
 
    --  ------------------------------
    --  Find the attribute with the given name and return its value.
@@ -148,16 +125,6 @@ package body Wiki.Attributes is
                            Value        => Value);
    begin
       List.List.Append (Attribute_Refs.Create (Attr));
-   end Append;
-
-   --  ------------------------------
-   --  Append the attribute to the attribute list.
-   --  ------------------------------
-   procedure Append (List  : in out Attribute_List;
-                     Name  : in Wiki.Strings.UString;
-                     Value : in Wiki.Strings.UString) is
-   begin
-      Append (List, Wiki.Strings.To_WString (Name), Wiki.Strings.To_WString (Value));
    end Append;
 
    --  ------------------------------
