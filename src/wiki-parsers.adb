@@ -1712,6 +1712,10 @@ package body Wiki.Parsers is
    procedure Parse (Engine : in out Parser;
                     Text   : in Wide_Wide_String;
                     Doc    : in out Wiki.Documents.Document) is
+      procedure Element (Content : in Wide_Wide_String;
+                         Pos     : in out Natural;
+                         Char    : out Wiki.Strings.WChar);
+      function Length (Content : in Wide_Wide_String) return Natural;
 
       procedure Element (Content : in Wide_Wide_String;
                          Pos     : in out Natural;
@@ -1728,38 +1732,9 @@ package body Wiki.Parsers is
       end Length;
       pragma Inline_Always (Length);
 
---        type Wide_Input is new Wiki.Streams.Input_Stream with record
---           Pos : Positive;
---        end record;
---
---        overriding
---        procedure Read (Buf    : in out Wide_Input;
---                        Token  : out Wiki.Strings.WChar;
---                        Is_Eof : out Boolean);
---
---        procedure Read (Buf    : in out Wide_Input;
---                        Token  : out Wiki.Strings.WChar;
---                        Is_Eof : out Boolean) is
---        begin
---           if Buf.Pos > Text'Last then
---              Is_Eof := True;
---              Token := CR;
---           else
---              Token := Text (Buf.Pos);
---              Buf.Pos := Buf.Pos + 1;
---              Is_Eof := False;
---           end if;
---        end Read;
---
---        Buffer : aliased Wide_Input;
---     begin
---        Buffer.Pos   := Text'First;
---        Engine.Parse (Buffer'Unchecked_Access, Doc);
-
-      use Wiki.Strings;
-      procedure Parse_Text
-      is new Wiki.Helpers.Parser (Engine_Type  => Parser,
-                                  Element_Type => Wiki.Strings.WString);
+      procedure Parse_Text is
+        new Wiki.Helpers.Parser (Engine_Type  => Parser,
+                                 Element_Type => Wiki.Strings.WString);
       pragma Inline_Always (Parse_Text);
 
    begin
@@ -1783,10 +1758,10 @@ package body Wiki.Parsers is
       end Element;
       pragma Inline_Always (Element);
 
-      use Wiki.Strings;
-      procedure Parse_Text
-      is new Wiki.Helpers.Parser (Engine_Type  => Parser,
-                                  Element_Type => Wiki.Strings.UString);
+      procedure Parse_Text is
+        new Wiki.Helpers.Parser (Engine_Type  => Parser,
+                                 Element_Type => Wiki.Strings.UString,
+                                 Length       => Wiki.Strings.Length);
       pragma Inline_Always (Parse_Text);
    begin
       Parse_Text (Engine, Text, Doc);
