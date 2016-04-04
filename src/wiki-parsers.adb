@@ -61,6 +61,10 @@ package body Wiki.Parsers is
    procedure Parse_Line_Break (P     : in out Parser;
                                Token : in Wiki.Strings.WChar);
 
+   --  Escape a single character and append it to the wiki text buffer.
+   procedure Parse_Escape (P     : in out Parser;
+                           Token : in Wiki.Strings.WChar);
+
    --  Parse a link.
    --  Example:
    --    [name]
@@ -274,6 +278,23 @@ package body Wiki.Parsers is
    end Parse_Text;
 
    --  ------------------------------
+   --  Escape a single character and append it to the wiki text buffer.
+   --  ------------------------------
+   procedure Parse_Escape (P     : in out Parser;
+                           Token : in Wiki.Strings.WChar) is
+      C : Wiki.Strings.WChar;
+   begin
+      if not P.Is_Eof then
+         Peek (P, C);
+         if C /= CR and C /= LF then
+            Append (P.Text, C);
+         else
+            Put_Back (P, C);
+         end if;
+      end if;
+   end Parse_Escape;
+
+   --  ------------------------------
    --  Skip all the spaces and tabs as well as end of the current line (CR+LF).
    --  ------------------------------
    procedure Skip_End_Of_Line (P : in out Parser) is
@@ -339,7 +360,7 @@ package body Wiki.Parsers is
             Put_Back (P, C);
             return;
          end if;
-      elsif not P.Is_Dotclear or else not P.Empty_Line then
+      elsif not P.Empty_Line or else (not P.Is_Dotclear and P.Context.Syntax /= SYNTAX_MEDIA_WIKI) then
          Parse_Text (P, Token);
          return;
       end if;
@@ -1550,6 +1571,7 @@ package body Wiki.Parsers is
          Character'Pos (';') => Parse_Item'Access,
          Character'Pos ('<') => Parse_Template'Access,
          Character'Pos (':') => Parse_Definition'Access,
+         Character'Pos ('~') => Parse_Escape'Access,
          others => Parse_Text'Access
         );
 
@@ -1592,6 +1614,7 @@ package body Wiki.Parsers is
          Character'Pos (';') => Parse_Item'Access,
          Character'Pos ('{') => Parse_Template'Access,
          Character'Pos (':') => Parse_Definition'Access,
+         Character'Pos ('~') => Parse_Escape'Access,
          others => Parse_Text'Access
         );
 
