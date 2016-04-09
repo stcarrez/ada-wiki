@@ -56,6 +56,9 @@ package Wiki.Documents is
    procedure Pop_Node (From : in out Document;
                        Tag  : in Html_Tag);
 
+   --  Returns True if the current node is the root document node.
+   function Is_Root_Node (Doc : in Document) return Boolean;
+
    --  Append the text with the given format at end of the document.
    procedure Append (Into   : in out Document;
                      Text   : in Wiki.Strings.WString;
