@@ -119,6 +119,7 @@ package body Wiki.Parsers.Html is
 
          procedure Attribute_Value is
            new Wiki.Strings.Wide_Wide_Builders.Get (Attribute_Value);
+         pragma Inline (Attribute_Value);
 
       begin
          Attribute_Value (Value);
