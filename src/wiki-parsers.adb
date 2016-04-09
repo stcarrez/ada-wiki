@@ -360,7 +360,8 @@ package body Wiki.Parsers is
             Put_Back (P, C);
             return;
          end if;
-      elsif not P.Empty_Line or else (not P.Is_Dotclear and P.Context.Syntax /= SYNTAX_MEDIA_WIKI) then
+      elsif not P.Empty_Line or else (not P.Is_Dotclear and P.Context.Syntax /= SYNTAX_MEDIA_WIKI)
+        or else not P.Document.Is_Root_Node then
          Parse_Text (P, Token);
          return;
       end if;
