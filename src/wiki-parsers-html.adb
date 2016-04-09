@@ -124,7 +124,7 @@ package body Wiki.Parsers.Html is
       begin
          Attribute_Value (Value);
       end Append_Attribute;
-      pragma Inline_Always (Append_Attribute);
+      pragma Inline (Append_Attribute);
 
       procedure Append_Attribute is
         new Wiki.Strings.Wide_Wide_Builders.Get (Append_Attribute);
