@@ -224,11 +224,11 @@ package body Wiki.Parsers is
       begin
          P.Context.Filters.Add_Text (P.Document, Content, P.Format);
       end Add_Text;
-      pragma Inline_Always (Add_Text);
+      pragma Inline (Add_Text);
 
       procedure Add_Text is
          new Wiki.Strings.Wide_Wide_Builders.Get (Add_Text);
-      pragma Inline_Always (Add_Text);
+      pragma Inline (Add_Text);
 
    begin
       if Length (P.Text) > 0 then
