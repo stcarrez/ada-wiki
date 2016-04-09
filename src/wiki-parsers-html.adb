@@ -242,11 +242,11 @@ package body Wiki.Parsers.Html is
             end if;
          end if;
       end Add_Element;
-      pragma Inline_Always (Add_Element);
+      pragma Inline (Add_Element);
 
       procedure Add_Element is
         new Wiki.Strings.Wide_Wide_Builders.Get (Add_Element);
-      pragma Inline_Always (Add_Element);
+      pragma Inline (Add_Element);
 
       Name : Wiki.Strings.BString (64);
    begin
