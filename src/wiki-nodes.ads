@@ -113,7 +113,7 @@ package Wiki.Nodes is
 
 private
 
-   NODE_LIST_BLOCK_SIZE : constant Positive := 20;
+   NODE_LIST_BLOCK_SIZE : constant Positive := 16;
 
    type Node_Array is array (Positive range <>) of Node_Type_Access;
 
