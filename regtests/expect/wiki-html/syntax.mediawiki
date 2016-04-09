@@ -5,9 +5,10 @@
 </li><li>item 3
 </li><li>item 3.1
 </li><li>item 3.2</li></ul></ul><ol><li>num 1
-</li><li>num 2</li></ol><p>Section bloc:</p><p> L1: line 1
- L2: line 2
- L3: line 3</p><p>Formatting</p><p><i>emphasis</i></p><p><b>strong</b></p><p><b><i>strong and emphasis</i></b></p><p>Strike text</p><p>Line<br />break</p><p><ins>Insert</ins>
+</li><li>num 2</li></ol><p>Section bloc:</p><pre>L1: line 1
+L2: line 2
+L3: line 3
+</pre><p>Formatting</p><p><i>emphasis</i></p><p><b>strong</b></p><p><b><i>strong and emphasis</i></b></p><p>Strike text</p><p>Line<br />break</p><p><ins>Insert</ins>
 <u>Underline</u>
 <s>Strike</s>
 <del>Delete</del></p><p><a href="A link">A link</a>

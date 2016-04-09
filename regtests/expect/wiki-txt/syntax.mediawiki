@@ -24,9 +24,10 @@ num 1
 
 num 2
 Section bloc:
- L1: line 1
- L2: line 2
- L3: line 3
+L1: line 1
+L2: line 2
+L3: line 3
+
 Formatting
 emphasis
 strong
