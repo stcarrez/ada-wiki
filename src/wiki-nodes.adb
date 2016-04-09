@@ -39,7 +39,7 @@ package body Wiki.Nodes is
       Block : Node_List_Block_Access := Into.Current;
    begin
       if Block.Last = Block.Max then
-         Block.Next := new Node_List_Block (Into.Length);
+         Block.Next := new Node_List_Block (Block.Max * 2);
          Block := Block.Next;
          Into.Current := Block;
       end if;
