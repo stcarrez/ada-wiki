@@ -51,6 +51,14 @@ package body Wiki.Documents is
    end Pop_Node;
 
    --  ------------------------------
+   --  Returns True if the current node is the root document node.
+   --  ------------------------------
+   function Is_Root_Node (Doc : in Document) return Boolean is
+   begin
+      return Doc.Current = null;
+   end Is_Root_Node;
+
+   --  ------------------------------
    --  Append a section header at end of the document.
    --  ------------------------------
    procedure Append (Into   : in out Document;
