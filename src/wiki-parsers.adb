@@ -361,7 +361,7 @@ package body Wiki.Parsers is
             return;
          end if;
       elsif not P.Empty_Line or else (not P.Is_Dotclear and P.Context.Syntax /= SYNTAX_MEDIA_WIKI)
-        or else not P.Document.Is_Root_Node then
+        or else not P.Document.Is_Root_Node` then
          Parse_Text (P, Token);
          return;
       end if;
@@ -1790,7 +1790,7 @@ package body Wiki.Parsers is
       procedure Parse_Text is
         new Wiki.Helpers.Parser (Engine_Type  => Parser,
                                  Element_Type => String);
-      pragma Inline_Always (Parse_Text);
+      pragma Inline (Parse_Text);
 
    begin
       Parse_Text (Engine, Text, Doc);
@@ -1826,7 +1826,7 @@ package body Wiki.Parsers is
       procedure Parse_Text is
         new Wiki.Helpers.Parser (Engine_Type  => Parser,
                                  Element_Type => Wiki.Strings.WString);
-      pragma Inline_Always (Parse_Text);
+      pragma Inline (Parse_Text);
 
    begin
       Parse_Text (Engine, Text, Doc);
@@ -1853,7 +1853,7 @@ package body Wiki.Parsers is
         new Wiki.Helpers.Parser (Engine_Type  => Parser,
                                  Element_Type => Wiki.Strings.UString,
                                  Length       => Wiki.Strings.Length);
-      pragma Inline_Always (Parse_Text);
+      pragma Inline (Parse_Text);
    begin
       Parse_Text (Engine, Text, Doc);
    end Parse;
