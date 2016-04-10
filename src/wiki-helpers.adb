@@ -16,7 +16,6 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Wide_Wide_Characters.Handling;
-
 package body Wiki.Helpers is
 
    --  ------------------------------
@@ -96,5 +95,50 @@ package body Wiki.Helpers is
          end case;
       end if;
    end Need_Close;
+
+   --  ------------------------------
+   --  Get the dimension represented by the string.  The string has one of the following
+   --  formats:
+   --    original           -> Width, Height := Natural'Last
+   --    default            -> Width := 800, Height := 0
+   --    upright            -> Width := 800, Height := 0
+   --    <width>px          -> Width := <width>, Height := 0
+   --    x<height>px        -> Width := 0, Height := <height>
+   --    <width>x<height>px -> Width := <width>, Height := <height>
+   --  ------------------------------
+   procedure Get_Sizes (Dimension : in Wiki.Strings.WString;
+                        Width     : out Natural;
+                        Height    : out Natural) is
+      Pos  : Natural;
+      Last : Natural;
+   begin
+      if Dimension = "original" then
+         Width  := Natural'Last;
+         Height := Natural'Last;
+      elsif Dimension = "default" or Dimension = "upright" then
+         Width  := 800;
+         Height := 0;
+      else
+         Pos  := Wiki.Strings.Index (Dimension, "x");
+         Last := Wiki.Strings.Index (Dimension, "px");
+         if Pos > Dimension'First and Last + 1 /= Pos then
+            Width := Natural'Wide_Wide_Value (Dimension (Dimension'First .. Pos - 1));
+         elsif Last > 0 then
+            Width := Natural'Wide_Wide_Value (Dimension (Dimension'First .. Last - 1));
+         else
+            Width := 0;
+         end if;
+         if Pos < Dimension'Last then
+            Height := Natural'Wide_Wide_Value (Dimension (Pos + 1 .. Last - 1));
+         else
+            Height := 0;
+         end if;
+      end if;
+
+   exception
+      when Constraint_Error =>
+         Width  := 0;
+         Height := 0;
+   end Get_Sizes;
 
 end Wiki.Helpers;
