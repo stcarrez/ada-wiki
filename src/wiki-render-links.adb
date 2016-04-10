@@ -24,8 +24,8 @@ package body Wiki.Render.Links is
    procedure Make_Image_Link (Renderer : in out Default_Link_Renderer;
                               Link     : in Wiki.Strings.WString;
                               URI      : out Wiki.Strings.UString;
-                              Width    : out Natural;
-                              Height   : out Natural) is
+                              Width    : in out Natural;
+                              Height   : in out Natural) is
       pragma Unreferenced (Renderer);
    begin
       URI    := Wiki.Strings.To_UString (Link);
