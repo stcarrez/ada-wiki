@@ -15,7 +15,7 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-
+with Wiki.Helpers;
 package body Wiki.Render.Html is
 
    --  ------------------------------
@@ -471,14 +471,14 @@ package body Wiki.Render.Html is
       Desc       : constant Strings.WString := Attributes.Get_Attribute (Attr, "longdesc");
       Class      : constant Strings.WString := Attributes.Get_Attribute (Attr, "class");
       Style      : constant Strings.WString := Attributes.Get_Attribute (Attr, "style");
---      Size       : constant Strings.WString := Attributes.Get_Attribute (Attr, "size");
+      Size       : constant Strings.WString := Attributes.Get_Attribute (Attr, "size");
       Frame      : constant Strings.WString := Attributes.Get_Attribute (Attr, "frame");
       Align      : constant Strings.WString := Attributes.Get_Attribute (Attr, "align");
       Valign     : constant Strings.WString := Attributes.Get_Attribute (Attr, "valign");
       URI        : Wiki.Strings.UString;
       Frame_Attr : Wiki.Strings.UString;
-      Width      : Natural;
-      Height     : Natural;
+      Width      : Natural := 0;
+      Height     : Natural := 0;
    begin
       if Frame'Length > 0 then
          Strings.Append (Frame_Attr, "wiki-img-");
@@ -506,6 +506,9 @@ package body Wiki.Render.Html is
          Engine.Output.Write_Wide_Attribute ("class", "wiki-img-inner");
       end if;
 
+      if Size'Length > 0 then
+         Wiki.Helpers.Get_Sizes (Size, Width, Height);
+      end if;
       Engine.Output.Start_Element ("img");
       Engine.Links.Make_Image_Link (Src, URI, Width, Height);
       Engine.Output.Write_Wide_Attribute ("src", URI);
