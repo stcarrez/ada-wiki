@@ -33,8 +33,8 @@ package Wiki.Render.Links is
    procedure Make_Image_Link (Renderer : in out Link_Renderer;
                               Link     : in Wiki.Strings.WString;
                               URI      : out Wiki.Strings.UString;
-                              Width    : out Natural;
-                              Height   : out Natural) is abstract;
+                              Width    : in out Natural;
+                              Height   : in out Natural) is abstract;
 
    --  Get the page link that must be rendered from the wiki page link.
    procedure Make_Page_Link (Renderer : in out Link_Renderer;
@@ -49,8 +49,8 @@ package Wiki.Render.Links is
    procedure Make_Image_Link (Renderer : in out Default_Link_Renderer;
                               Link     : in Wiki.Strings.WString;
                               URI      : out Wiki.Strings.UString;
-                              Width    : out Natural;
-                              Height   : out Natural);
+                              Width    : in out Natural;
+                              Height   : in out Natural);
 
    --  Get the page link that must be rendered from the wiki page link.
    overriding
