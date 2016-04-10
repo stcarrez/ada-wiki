@@ -47,4 +47,16 @@ package Wiki.Helpers is
    function Need_Close (Tag         : in Html_Tag;
                         Current_Tag : in Html_Tag) return Boolean;
 
+   --  Get the dimension represented by the string.  The string has one of the following
+   --  formats:
+   --    original           -> Width, Height := Natural'Last
+   --    default            -> Width := 800, Height := 0
+   --    upright            -> Width := 800, Height := 0
+   --    <width>px          -> Width := <width>, Height := 0
+   --    x<height>px        -> Width := 0, Height := <height>
+   --    <width>x<height>px -> Width := <width>, Height := <height>
+   procedure Get_Sizes (Dimension : in Wiki.Strings.WString;
+                        Width     : out Natural;
+                        Height    : out Natural);
+
 end Wiki.Helpers;
