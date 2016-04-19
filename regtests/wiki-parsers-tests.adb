@@ -189,7 +189,8 @@ package body Wiki.Parsers.Tests is
       Util.Tests.Assert_Equals (T, "<p><a href=""name"">name</a></p>",
                                 Wiki.Utils.To_Html ("[name]", SYNTAX_GOOGLE),
                                 "Link rendering invalid");
-      Util.Tests.Assert_Equals (T, "<p><a href=""http://www.joe.com/item"" lang=""en"" title=""some""" &
+      Util.Tests.Assert_Equals (T, "<p><a href=""http://www.joe.com/item"" "
+                                & "lang=""en"" title=""some""" &
                                 ">name </a></p>",
                                 Wiki.Utils.To_Html ("[name |http://www.joe.com/item|en|some]",
                                 SYNTAX_DOTCLEAR),
