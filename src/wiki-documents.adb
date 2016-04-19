@@ -183,6 +183,7 @@ package body Wiki.Documents is
    procedure Add_Preformatted (Into     : in out Document;
                                Text     : in Wiki.Strings.WString;
                                Format   : in Wiki.Strings.WString) is
+      pragma Unreferenced (Format);
    begin
       Append (Into, new Node_Type '(Kind => N_PREFORMAT, Len => Text'Length,
                                     Preformatted => Text, others => <>));
