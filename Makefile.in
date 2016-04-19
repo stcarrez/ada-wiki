@@ -140,11 +140,11 @@ doc:
 	dynamo build-doc -markdown wiki
 
 # Files to package in source distribution
-DISTFILES=README.md LICENSE.txt NOTICE.txt NEWS CHANGES ChangeLog config.guess configure config.sub \
-configure.in Makefile.in install-sh \
+DISTFILES=README.md LICENSE.txt NOTICE.txt NEWS config.guess configure config.sub \
+configure.ac Makefile.in install-sh \
 wiki.gpr.in wiki_tests.gpr.in samples.gpr.in config.gpr \
 src samples regtests \
-doc distrib
+distrib
 
 dist:
 	-rm -rf $(distdir)
