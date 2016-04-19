@@ -282,6 +282,8 @@ package body Wiki.Parsers is
    --  ------------------------------
    procedure Parse_Escape (P     : in out Parser;
                            Token : in Wiki.Strings.WChar) is
+      pragma Unreferenced (Token);
+
       C : Wiki.Strings.WChar;
    begin
       if not P.Is_Eof then
@@ -361,7 +363,8 @@ package body Wiki.Parsers is
             return;
          end if;
       elsif not P.Empty_Line or else (not P.Is_Dotclear and P.Context.Syntax /= SYNTAX_MEDIA_WIKI)
-        or else not P.Document.Is_Root_Node then
+        or else not P.Document.Is_Root_Node
+      then
          Parse_Text (P, Token);
          return;
       end if;
