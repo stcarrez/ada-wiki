@@ -28,13 +28,13 @@
 --
 --  The Ada Wiki engine is organized in several packages:
 --
---  * The [Wiki_Streams Wiki stream] packages define the interface, types and operations for the Wiki
---  engine to read the Wiki or HTML content and for the Wiki renderer to generate the
---  HTML or text outputs.
+--  * The [Wiki_Streams Wiki stream] packages define the interface, types and operations
+--  for the Wiki engine to read the Wiki or HTML content and for the Wiki renderer to generate
+--  the HTML or text outputs.
 --  * The Wiki parser is responsible for parsing HTML or Wiki content according to a
 --  selected Wiki syntax.  It builds the final Wiki document through filters and plugins.
---  * The [Wiki_Filters Wiki filters] provides a simple filter framework that allows to plug specific
---  filters when a Wiki document is parsed and processed.  Filters are used for the
+--  * The [Wiki_Filters Wiki filters] provides a simple filter framework that allows to plug
+--  specific filters when a Wiki document is parsed and processed.  Filters are used for the
 --  table of content generation, for the HTML filtering, to collect words or links
 --  and so on.
 --  * The [Wiki_Plugins Wiki plugins] defines the plugin interface that is used by the Wiki engine
@@ -43,8 +43,8 @@
 --  other systems.
 --  * The Wiki documents and attributes are used for the representation of the Wiki
 --  document after the Wiki content is parsed.
---  * The [Wiki_Render Wiki renderers] are the last packages which are used for the rendering of the
---  Wiki document to produce the final HTML or text.
+--  * The [Wiki_Render Wiki renderers] are the last packages which are used for the rendering
+--  of the Wiki document to produce the final HTML or text.
 --
 --  @include wiki-documents.ads
 --  @include wiki-attributes.ads
