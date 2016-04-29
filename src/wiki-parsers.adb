@@ -1390,7 +1390,8 @@ package body Wiki.Parsers is
       C     : Wiki.Strings.WChar;
    begin
       if P.Empty_Line then
-         if P.Preformat_Column > 0 then
+         --  Skip spaces for multi-space preformatted blocks or when we are within HTML elements.
+         if P.Preformat_Column > 1 or not P.Document.Is_Root_Node then
             loop
                Peek (P, C);
                exit when C /= ' ' and C /= HT;
