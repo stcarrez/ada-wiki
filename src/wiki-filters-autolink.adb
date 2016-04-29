@@ -85,7 +85,7 @@ package body Wiki.Filters.Autolink is
             Pos := Pos + 1;
          end if;
       end loop;
-      if Start < Text'Last then
+      if Start <= Text'Last then
          Filter_Type (Filter).Add_Text (Document, Text (Start .. Text'Last), Format);
       end if;
    end Add_Text;
