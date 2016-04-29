@@ -124,6 +124,7 @@ private
       Check_Image_Link    : Boolean := False;
       Is_Hidden           : Boolean := False;
       Header_Offset       : Integer := 0;
+      Preformat_Column    : Natural := 1;
       Quote_Level         : Natural := 0;
       Escape_Char         : Wiki.Strings.WChar;
       Param_Char          : Wiki.Strings.WChar;
