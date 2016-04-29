@@ -371,10 +371,10 @@ package body Wiki.Parsers is
       Flush_Text (P);
       Flush_List (P);
       if Token = ' ' then
-         Col := 1;
+         Col := P.Preformat_Column + 1;
          while not P.Is_Eof loop
             Peek (P, C);
-            if Col = 0 then
+            if Col < P.Preformat_Column then
                if C /= ' ' then
                   Put_Back (P, C);
                   exit;
@@ -1390,10 +1390,14 @@ package body Wiki.Parsers is
       C     : Wiki.Strings.WChar;
    begin
       if P.Empty_Line then
-         loop
+         if P.Preformat_Column > 0 then
+            loop
+               Peek (P, C);
+               exit when C /= ' ' and C /= HT;
+            end loop;
+         else
             Peek (P, C);
-            exit when C /= ' ' and C /= HT;
-         end loop;
+         end if;
          if C = '*' or C = '#' then
             Parse_List (P, C);
          elsif C = CR or C = LF then
@@ -1905,6 +1909,9 @@ package body Wiki.Parsers is
 
          when SYNTAX_GOOGLE =>
             Engine.Link_No_Space := True;
+
+         when SYNTAX_MARKDOWN =>
+            Engine.Preformat_Column := 4;
 
          when others =>
             null;
