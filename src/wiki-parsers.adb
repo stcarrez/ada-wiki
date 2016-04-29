@@ -667,14 +667,20 @@ package body Wiki.Parsers is
       Index : Positive := 1;
 
       procedure Add_Parameter (Content : in Wiki.Strings.WString) is
+         Last : Natural := Content'Last;
       begin
+         while Last >= Content'First and then Wiki.Helpers.Is_Space (Content (Last)) loop
+            Last := Last - 1;
+         end loop;
          if Index <= Names'Last then
-            Wiki.Attributes.Append (P.Attributes, Names (Index).all, Content);
+            Wiki.Attributes.Append (P.Attributes, Names (Index).all,
+                                    Content (Content'First .. Last));
          else
             declare
                Name : constant String := Positive'Image (Index - Names'Length);
             begin
-               Wiki.Attributes.Append (P.Attributes, Name (Name'First + 1 .. Name'Last), Content);
+               Wiki.Attributes.Append (P.Attributes, Name (Name'First + 1 .. Name'Last),
+                                       Content (Content'First .. Last));
             end;
          end if;
          Index := Index + 1;
