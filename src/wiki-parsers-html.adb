@@ -215,7 +215,7 @@ package body Wiki.Parsers.Html is
             Flush_Text (P);
             if Tag = Wiki.UNKNOWN_TAG then
                if Token = "noinclude" then
-                  P.Is_Hidden := False;
+                  P.Context.Is_Hidden := False;
                end if;
             else
                End_Element (P, Tag);
@@ -235,7 +235,7 @@ package body Wiki.Parsers.Html is
             end if;
             if Tag = UNKNOWN_TAG then
                if Token = "noinclude" then
-                  P.Is_Hidden := True;
+                  P.Context.Is_Hidden := True;
                end if;
             else
                Start_Element (P, Tag, P.Attributes);
