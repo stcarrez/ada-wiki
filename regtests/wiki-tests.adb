@@ -27,6 +27,7 @@ with Wiki.Render.Text;
 with Wiki.Filters.Html;
 with Wiki.Filters.TOC;
 with Wiki.Plugins.Templates;
+with Wiki.Plugins.Conditions;
 with Wiki.Streams.Text_IO;
 with Wiki.Streams.Html.Text_IO;
 with Wiki.Documents;
@@ -49,8 +50,30 @@ package body Wiki.Tests is
       Toc_Filter  : aliased Wiki.Filters.TOC.TOC_Filter;
       Html_Filter : aliased Wiki.Filters.Html.Html_Filter_Type;
       Template    : aliased Wiki.Plugins.Templates.File_Template_Plugin;
+      Condition   : aliased Wiki.Plugins.Conditions.Condition_Plugin;
       Input       : aliased Wiki.Streams.Text_IO.File_Input_Stream;
       Output      : aliased Wiki.Streams.Html.Text_IO.Html_File_Output_Stream;
+
+      type Test_Factory is new Wiki.Plugins.Plugin_Factory with null record;
+
+      --  Find a plugin knowing its name.
+      overriding
+      function Find (Factory : in Test_Factory;
+                     Name    : in String) return Wiki.Plugins.Wiki_Plugin_Access;
+
+      overriding
+      function Find (Factory : in Test_Factory;
+                     Name    : in String) return Wiki.Plugins.Wiki_Plugin_Access is
+         pragma Unreferenced (Factory);
+      begin
+         if Name = "if" or Name = "else" or Name = "elsif" or Name = "end" then
+            return Condition'Unchecked_Access;
+         else
+            return Template.Find (Name);
+         end if;
+      end Find;
+
+      Local_Factory : aliased Test_Factory;
    begin
       if not Exists (Dir) then
          Create_Path (Dir);
@@ -59,11 +82,13 @@ package body Wiki.Tests is
                   Form => "WCEM=8");
       Output.Create (Result_File, "WCEM=8");
       Template.Set_Template_Path (Containing_Directory (To_String (T.File)));
+      Condition.Append ("public", "");
+      Condition.Append ("user", "admin");
       declare
          Time : Util.Measures.Stamp;
       begin
          Engine.Set_Syntax (T.Source);
-         Engine.Set_Plugin_Factory (Template'Unchecked_Access);
+         Engine.Set_Plugin_Factory (Local_Factory'Unchecked_Access);
          Engine.Add_Filter (Toc_Filter'Unchecked_Access);
          Engine.Add_Filter (Html_Filter'Unchecked_Access);
          Engine.Parse (Input'Unchecked_Access, Doc);
