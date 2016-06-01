@@ -104,7 +104,7 @@ private
    type Parser_Table_Access is access constant Parser_Table;
 
    type Parser is tagged limited record
-      Context             : Wiki.Plugins.Plugin_Context;
+      Context             : aliased Wiki.Plugins.Plugin_Context;
       Pending             : Wiki.Strings.WChar;
       Has_Pending         : Boolean;
       Previous_Syntax     : Wiki_Syntax;
@@ -122,7 +122,6 @@ private
       Is_Dotclear         : Boolean := False;
       Link_Title_First    : Boolean := False;
       Check_Image_Link    : Boolean := False;
-      Is_Hidden           : Boolean := False;
       Header_Offset       : Integer := 0;
       Preformat_Column    : Natural := 1;
       Quote_Level         : Natural := 0;
