@@ -40,10 +40,12 @@ package Wiki.Plugins is
                   Name    : in String) return Wiki_Plugin_Access is abstract;
 
    type Plugin_Context is limited record
+      Previous  : access Plugin_Context;
       Filters   : Wiki.Filters.Filter_Chain;
       Factory   : Plugin_Factory_Access;
       Variables : Wiki.Attributes.Attribute_List;
       Syntax    : Wiki.Wiki_Syntax;
+      Is_Hidden : Boolean := False;
    end record;
 
    --  Expand the plugin configured with the parameters for the document.
