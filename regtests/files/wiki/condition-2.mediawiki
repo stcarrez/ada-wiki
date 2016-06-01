@@ -1,0 +1,11 @@
+{{if|authentified}
+Variable authentified does not exist => this is not visible.
+
+== Hidden header ==
+
+{{else}}
+This is the visible section
+
+== Visible header ==
+
+{{end}}
