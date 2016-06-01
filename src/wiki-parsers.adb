@@ -232,7 +232,7 @@ package body Wiki.Parsers is
 
    begin
       if Length (P.Text) > 0 then
-         if not P.Is_Hidden then
+         if not P.Context.Is_Hidden then
             Add_Text (P.Text);
          end if;
          Clear (P.Text);
@@ -245,7 +245,7 @@ package body Wiki.Parsers is
    procedure Flush_List (P : in out Parser) is
    begin
       if P.In_List then
-         if not P.Is_Hidden then
+         if not P.Context.Is_Hidden then
             P.Context.Filters.Pop_Node (P.Document, Wiki.DL_TAG);
          end if;
          P.In_List := False;
@@ -453,7 +453,7 @@ package body Wiki.Parsers is
       if not Is_Html then
          Add_Preformatted (P.Text);
          Clear (P.Text);
-         if not P.Is_Hidden then
+         if not P.Context.Is_Hidden then
             P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
          end if;
          P.In_Paragraph := True;
@@ -532,7 +532,7 @@ package body Wiki.Parsers is
          Level := 1;
       end if;
 
-      if not P.Is_Hidden then
+      if not P.Context.Is_Hidden then
          Add_Header (P.Text);
       end if;
       P.Empty_Line   := True;
@@ -849,7 +849,7 @@ package body Wiki.Parsers is
          end if;
       end if;
       P.Empty_Line := False;
-      if not P.Is_Hidden then
+      if not P.Context.Is_Hidden then
          declare
             Link : constant Strings.WString := Attributes.Get_Attribute (P.Attributes, HREF_ATTR);
             Name : constant Strings.WString := Attributes.Get_Attribute (P.Attributes, NAME_ATTR);
@@ -919,7 +919,7 @@ package body Wiki.Parsers is
       else
          Put_Back (P, C);
       end if;
-      if not P.Is_Hidden then
+      if not P.Context.Is_Hidden then
          declare
             Name : constant String := Attributes.Get_Value (Wiki.Attributes.First (P.Attributes));
          begin
@@ -981,6 +981,7 @@ package body Wiki.Parsers is
          Context : Wiki.Plugins.Plugin_Context;
       begin
          if Plugin /= null then
+            Context.Previous := P.Context'Unchecked_Access;
             Context.Factory := P.Context.Factory;
             Context.Syntax  := P.Context.Syntax;
             Context.Variables := P.Attributes;
@@ -1040,7 +1041,7 @@ package body Wiki.Parsers is
          Put_Back (P, C);
       end if;
       Flush_Text (P);
-      if not P.Is_Hidden then
+      if not P.Context.Is_Hidden then
          Wiki.Attributes.Clear (P.Attributes);
          Wiki.Attributes.Append (P.Attributes, "cite", Link);
          Wiki.Attributes.Append (P.Attributes, "lang", Language);
@@ -1070,7 +1071,7 @@ package body Wiki.Parsers is
       if Count >= 4 then
          Flush_Text (P);
          Flush_List (P);
-         if not P.Is_Hidden then
+         if not P.Context.Is_Hidden then
             P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_HORIZONTAL_RULE);
          end if;
          if C /= LF and C /= CR then
@@ -1141,7 +1142,7 @@ package body Wiki.Parsers is
          Put_Back (P, C);
       end if;
       Flush_Text (P);
-      if not P.Is_Hidden then
+      if not P.Context.Is_Hidden then
          Wiki.Attributes.Clear (P.Attributes);
          Wiki.Attributes.Append (P.Attributes, "src", Link);
          Wiki.Attributes.Append (P.Attributes, "position", Position);
@@ -1271,7 +1272,7 @@ package body Wiki.Parsers is
          Level := Level + 1;
       end loop;
       Flush_Text (P);
-      if not P.Is_Hidden then
+      if not P.Context.Is_Hidden then
          P.Context.Filters.Add_List_Item (P.Document, Level, Token = '#');
       end if;
 
@@ -1296,7 +1297,7 @@ package body Wiki.Parsers is
          Level := Level + 1;
       end loop;
       Flush_Text (P);
-      if not P.Is_Hidden then
+      if not P.Context.Is_Hidden then
          P.Context.Filters.Add_List_Item (P.Document, Level, Token = '#');
       end if;
 
@@ -1320,7 +1321,7 @@ package body Wiki.Parsers is
       end if;
       Flush_Text (P);
       Wiki.Attributes.Clear (P.Attributes);
-      if not P.Is_Hidden then
+      if not P.Context.Is_Hidden then
          if not P.In_List then
             P.Context.Filters.Push_Node (P.Document, Wiki.DL_TAG, P.Attributes);
          end if;
@@ -1343,7 +1344,7 @@ package body Wiki.Parsers is
       end if;
       Flush_Text (P);
       Wiki.Attributes.Clear (P.Attributes);
-      if not P.Is_Hidden then
+      if not P.Context.Is_Hidden then
          P.Context.Filters.Push_Node (P.Document, Wiki.DD_TAG, P.Attributes);
       end if;
    end Parse_Definition;
@@ -1373,7 +1374,7 @@ package body Wiki.Parsers is
       Flush_List (P);
       P.Empty_Line := True;
       P.Quote_Level := Level;
-      if not P.Is_Hidden then
+      if not P.Context.Is_Hidden then
          P.Context.Filters.Add_Blockquote (P.Document, Level);
       end if;
 
@@ -1442,12 +1443,12 @@ package body Wiki.Parsers is
 
          --  Finish the active blockquotes if a new paragraph is started on an empty line.
          if P.Quote_Level > 0 then
-            if not P.Is_Hidden then
+            if not P.Context.Is_Hidden then
                P.Context.Filters.Add_Blockquote (P.Document, 0);
             end if;
             P.Quote_Level := 0;
          end if;
-         if not P.Is_Hidden then
+         if not P.Context.Is_Hidden then
             P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
          end if;
          P.In_Paragraph := True;
@@ -1459,7 +1460,7 @@ package body Wiki.Parsers is
       --  the blockquote.
       if P.Quote_Level > 0 and C /= '>' then
          Flush_Text (P);
-         if not P.Is_Hidden then
+         if not P.Context.Is_Hidden then
             P.Context.Filters.Add_Blockquote (P.Document, 0);
          end if;
          P.Quote_Level := 0;
@@ -1502,7 +1503,7 @@ package body Wiki.Parsers is
       end if;
       P.Empty_Line := True;
       Flush_Text (P);
-      if not P.Is_Hidden then
+      if not P.Context.Is_Hidden then
          P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_LINE_BREAK);
       end if;
    end Parse_Line_Break;
@@ -1679,7 +1680,7 @@ package body Wiki.Parsers is
                             Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       Flush_Text (P);
-      if not P.Is_Hidden then
+      if not P.Context.Is_Hidden then
          P.Context.Filters.Push_Node (P.Document, Tag, Attributes);
       end if;
 
@@ -1694,7 +1695,7 @@ package body Wiki.Parsers is
                           Tag  : in Wiki.Html_Tag) is
    begin
       Flush_Text (P);
-      if not P.Is_Hidden then
+      if not P.Context.Is_Hidden then
          P.Context.Filters.Pop_Node (P.Document, Tag);
       end if;
 
