@@ -1,0 +1,10 @@
+{{if|public}
+This is a public section (visible)
+
+== Visible header ==
+
+{{else}}
+This is a private section (hidden)
+== Hidden header ==
+
+{{end}}
