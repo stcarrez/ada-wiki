@@ -1,0 +1,2 @@
+<p>
+This is a public section (visible)</p><h2>Visible header</h2>
