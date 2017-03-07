@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-strings -- Wiki string types and operations
---  Copyright (C) 2016 Stephane Carrez
+--  Copyright (C) 2016, 2017 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +20,7 @@ with Ada.Strings.Wide_Wide_Maps;
 with Ada.Characters.Conversions;
 with Ada.Wide_Wide_Characters.Handling;
 with Ada.Strings.Wide_Wide_Fixed;
+with Ada.Strings.UTF_Encoding.Wide_Wide_Strings;
 with Util.Texts.Builders;
 
 package Wiki.Strings is
@@ -37,8 +38,8 @@ package Wiki.Strings is
    function To_Char (C : in WChar; Substitute : in Character := ' ') return Character
                      renames Ada.Characters.Conversions.To_Character;
 
-   function To_String (S : in WString; Substitute : in Character := ' ') return String
-                       renames Ada.Characters.Conversions.To_String;
+   function To_String (S : in WString; Output_BOM : in Boolean := False) return String
+                       renames Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Encode;
 
    function To_UString (S : in WString) return UString
                         renames Ada.Strings.Wide_Wide_Unbounded.To_Unbounded_Wide_Wide_String;
@@ -47,7 +48,7 @@ package Wiki.Strings is
                         renames Ada.Strings.Wide_Wide_Unbounded.To_Wide_Wide_String;
 
    function To_WString (S : in String) return WString
-                        renames Ada.Characters.Conversions.To_Wide_Wide_String;
+                        renames Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Decode;
 
    procedure Append (Into : in out UString; S : in WString)
                      renames Ada.Strings.Wide_Wide_Unbounded.Append;
