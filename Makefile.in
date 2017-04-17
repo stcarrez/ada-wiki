@@ -9,7 +9,6 @@ MODE=distrib
 GNATMAKE=@GNATMAKE@
 GNATCLEAN=gnatclean
 GPRINSTALL=@GPRINSTALL@
-SVN=svn
 INSTALL=@INSTALL@
 
 GPRPATH=wiki.gpr
@@ -66,8 +65,8 @@ libname=libada_wiki
 docdir=libada-wiki
 samplesdir=${prefix}/share/doc/$(docdir)
 
-CPUS := @NR_CPUS@
-MAKE_ARGS=-XMODE=${MODE} -XWIKI_LIBRARY_TYPE=${WIKI_LIBRARY_TYPE} -XPROCESSORS=$(CPUS) 
+PROCESSORS=@NR_CPUS@
+MAKE_ARGS=-XMODE=${MODE} -XWIKI_LIBRARY_TYPE=${WIKI_LIBRARY_TYPE} -XPROCESSORS=$(PROCESSORS) 
 ifeq ($(WIKI_LIBRARY_TYPE),relocatable)
 MAKE_ARGS += -XUTIL_BUILD=relocatable -XUTIL_LIBRARY_TYPE=relocatable
 MAKE_ARGS += -XXMLADA_BUILD=relocatable
@@ -102,18 +101,11 @@ obj/wiki/static lib/static:
 # Analyzes only on those sources that have changed.
 # Does not build executables.
 autobuild:
-	$(GNATMAKE) -gnatc -c -k  -P "$(GPRPATH)"
+	$(GNATMAKE) $(MAKE_ARGS) -gnatc -c -k  -P "$(GPRPATH)"
 
 # Clean the root project of all build products.
 clean:
-	-$(GNATCLEAN) -q -P "$(GPRPATH)" -XWIKI_LIBRARY_TYPE=static
-	-$(GNATCLEAN) -q -P "$(GPRPATH)" -XWIKI_LIBRARY_TYPE=relocatable \
-	   -XXMLADA_BUILD=relocatable -XLIBRARY_TYPE=relocatable -XUTIL_BUILD=relocatable \
-	   -XUTIL_LIBRARY_TYPE=relocatable
-ifeq ($(HAVE_ADA_UTIL),yes)
-	-$(GNATCLEAN) -q -Pwiki_tests
-endif
-	-rm -f lib/*.a lib/*.$(DLLEXT)
+	-rm -rf lib obj bin
 
 # Clean root project and all imported projects too.
 clean_tree:
@@ -122,7 +114,7 @@ clean_tree:
 # Check *all* sources for errors, even those not changed.
 # Does not build executables.
 analyze:
-	$(GNATMAKE) -f  -gnatc -c -k  -P "$(GPRPATH)"
+	$(GNATMAKE) $(MAKE_ARGS) -f  -gnatc -c -k  -P "$(GPRPATH)"
 
 # Clean, then build executables for all mains defined by the project.
 rebuild: clean build
@@ -139,38 +131,8 @@ endif
 doc:
 	dynamo build-doc -markdown wiki
 
-# Files to package in source distribution
-DISTFILES=README.md LICENSE.txt NOTICE.txt NEWS config.guess configure config.sub \
-configure.ac Makefile.in install-sh \
-wiki.gpr.in wiki_tests.gpr.in samples.gpr.in config.gpr \
-src samples regtests \
-distrib
-
 dist:
-	-rm -rf $(distdir)
-	mkdir $(distdir)
-	-chmod 777 $(distdir)
-	here=`cd $(top_builddir) && pwd`; \
-	top_distdir=`cd $(distdir) && pwd`; \
-	distdir=`cd $(distdir) && pwd`; \
-	for file in $(DISTFILES); do \
-	  d=$(srcdir); \
-	  if test -d $$d/$$file; then \
-	    cp -pr $$d/$$file $(distdir)/$$file; \
-	  else \
-	    test -f $(distdir)/$$file \
-	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
-	    || cp -p $$d/$$file $(distdir)/$$file || :; \
-	  fi; \
-	done
-	rm -f $(distdir)/distrib/*.gpr
-	rm -rf $(distdir)/regtests/result
-	mkdir $(distdir)/bin
-	mkdir $(distdir)/obj
-	mkdir $(distdir)/lib
-	tar --exclude=.svn --exclude=.git --exclude="*~" --exclude="*.o" --exclude="*.ali" \
-	    --exclude="*.log" --exclude="*.a" \
-	    -cvzf $(DIST_FILE) $(distdir)
+	git archive -o $(DIST_FILE) --prefix=$(distdir)/ HEAD
 
 install_static:
 	$(MAKE) WIKI_LIBRARY_TYPE=static install_lib
