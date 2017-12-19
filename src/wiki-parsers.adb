@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers -- Wiki parser
---  Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2017 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -1101,6 +1101,8 @@ package body Wiki.Parsers is
       --  Parse a image component
       procedure Parse_Image_Token (Into : in out Wiki.Strings.UString);
 
+      use type Wiki.Strings.UString;
+
       Link       : Wiki.Strings.UString;
       Alt        : Wiki.Strings.UString;
       Position   : Wiki.Strings.UString;
@@ -1145,7 +1147,13 @@ package body Wiki.Parsers is
       if not P.Context.Is_Hidden then
          Wiki.Attributes.Clear (P.Attributes);
          Wiki.Attributes.Append (P.Attributes, "src", Link);
-         Wiki.Attributes.Append (P.Attributes, "position", Position);
+         if Position = "L" or Position = "G" then
+            Wiki.Attributes.Append (P.Attributes, String '("align"), "left");
+         elsif Position = "R" or Position = "D" then
+            Wiki.Attributes.Append (P.Attributes, String '("align"), "right");
+         elsif Position = "C" then
+            Wiki.Attributes.Append (P.Attributes, String '("align"), "center");
+         end if;
          Wiki.Attributes.Append (P.Attributes, "longdesc", Desc);
          P.Context.Filters.Add_Image (P.Document, Wiki.Strings.To_WString (Alt), P.Attributes);
       end if;
