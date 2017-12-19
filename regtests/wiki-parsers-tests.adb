@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-tests -- Unit tests for wiki parsing
---  Copyright (C) 2011, 2012, 2013, 2015, 2016 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2017 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -263,7 +263,7 @@ package body Wiki.Parsers.Tests is
                                 "Image rendering invalid");
       Util.Tests.Assert_Equals (T, "<p><img " &
                                 "src=""/image/t.png"" longdesc=""describe"" alt=""title"" /></p>",
-                                Wiki.Utils.To_Html ("((/image/t.png|title|D|describe))",
+                                Wiki.Utils.To_Html ("((/image/t.png|title|x|describe))",
                                                  SYNTAX_DOTCLEAR),
                                 "Image rendering invalid");
    end Test_Wiki_Image;
