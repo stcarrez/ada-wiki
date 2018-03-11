@@ -1,5 +1,5 @@
 dnl Autoconf configure script for Ada Wiki
-dnl Copyright (C) 2015, 2016 Stephane Carrez
+dnl Copyright (C) 2015, 2016, 2018 Stephane Carrez
 dnl Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 dnl
 dnl  Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +30,6 @@ WIKI_VERSION=$WIKI_MAJOR_VERSION.$WIKI_MINOR_VERSION.$WIKI_MICRO_VERSION
 AM_GNAT_CHECK_GPRBUILD
 
 # checking for local tools
-AC_PROG_CC
 AC_PROG_MAKE_SET
 AC_PROG_INSTALL
 AC_PROG_LN_S
@@ -50,6 +49,8 @@ AC_SUBST(NR_CPUS)
 # Check to enable/disable shared library
 ##########################################
 AM_SHARED_LIBRARY_SUPPORT
+AM_DISTRIB_SUPPORT
+AM_COVERAGE_SUPPORT
 
 AC_MSG_CHECKING([Ada Utility Library])
 AC_ARG_WITH(ada-util,
