@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-wiki -- Wiki to Wiki renderer
---  Copyright (C) 2015, 2016 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2018 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -139,7 +139,6 @@ package body Wiki.Render.Wiki is
    procedure Render (Engine : in out Wiki_Renderer;
                      Doc    : in Documents.Document;
                      Node   : in Nodes.Node_Type) is
-      use type Nodes.Node_List_Access;
    begin
       case Node.Kind is
          when Nodes.N_HEADER =>

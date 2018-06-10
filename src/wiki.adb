@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki -- Ada Wiki Engine
---  Copyright (C) 2015, 2016 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2018 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -240,8 +240,7 @@ package body Wiki is
       NOSCRIPT_TAG              => NOSCRIPT_TAG_NAME'Access,
       TEMPLATE_TAG              => TEMPLATE_TAG_NAME'Access,
       CANVAS_TAG                => CANVAS_TAG_NAME'Access,
-      UNKNOWN_TAG               => UNKNOWN_TAG_NAME'Access,
-      others => null
+      UNKNOWN_TAG               => UNKNOWN_TAG_NAME'Access
      );
 
    --  ------------------------------

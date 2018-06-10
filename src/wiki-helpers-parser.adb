@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-helpers-parser -- Generic procedure for the wiki parser
---  Copyright (C) 2016 Stephane Carrez
+--  Copyright (C) 2016, 2018 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,8 +20,6 @@ with Wiki.Streams;
 procedure Wiki.Helpers.Parser (Engine  : in out Engine_Type;
                                Content : in Element_Type;
                                Doc     : in out Wiki.Documents.Document) is
-
-   use type Wiki.Streams.Input_Stream_Access;
 
    type Wide_Input is new Wiki.Streams.Input_Stream with record
       Pos : Positive;

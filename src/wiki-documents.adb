@@ -186,7 +186,7 @@ package body Wiki.Documents is
       pragma Unreferenced (Format);
    begin
       Append (Into, new Node_Type '(Kind => N_PREFORMAT, Len => Text'Length,
-                                    Preformatted => Text, others => <>));
+                                    Preformatted => Text));
    end Add_Preformatted;
 
    --  ------------------------------

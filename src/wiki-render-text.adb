@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-text -- Wiki Text renderer
---  Copyright (C) 2011, 2012, 2013, 2015, 2016 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2018 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -153,7 +153,6 @@ package body Wiki.Render.Text is
    procedure Render (Engine : in out Text_Renderer;
                      Doc    : in Wiki.Documents.Document;
                      Node   : in Wiki.Nodes.Node_Type) is
-      use type Wiki.Html_Tag;
       use type Wiki.Nodes.Node_List_Access;
    begin
       case Node.Kind is
