@@ -224,6 +224,14 @@ package body Wiki.Documents is
    end Is_Visible_TOC;
 
    --  ------------------------------
+   --  Hide the table of contents.
+   --  ------------------------------
+   procedure Hide_TOC (Doc : in out Document) is
+   begin
+      Doc.Visible_TOC := False;
+   end Hide_TOC;
+
+   --  ------------------------------
    --  Get the table of content node associated with the document.
    --  ------------------------------
    procedure Get_TOC (Doc : in out Document;
