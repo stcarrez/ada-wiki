@@ -1,5 +1,6 @@
 Version 1.1.0   -
   - New condition plugins for the conditional inclusion of wiki content
+  - Added support for __NOTOC__ by the TOC filter
 
 Version 1.0.1   - Apr 2016
   - Bug fix in Autolink filter and pre-formatted block parsing
