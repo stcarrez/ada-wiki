@@ -1,0 +1,17 @@
+This is my documentation test.
+
+The document begins:
+
+__NOTOC__
+
+and there is no table of content.
+
+= Header level 1 =
+== Header level 2 ==
+=== Header level 3 ===
+==== Headerlevel4 ====
+== Header level 2 ==
+== Header level 2 ==
+=== Header level 3 ===
+= Header level 1 =
+
