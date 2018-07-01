@@ -216,6 +216,14 @@ package body Wiki.Documents is
    end Is_Using_TOC;
 
    --  ------------------------------
+   --  Returns True if the table of contents is visible and must be rendered.
+   --  ------------------------------
+   function Is_Visible_TOC (Doc : in Document) return Boolean is
+   begin
+      return Doc.Visible_TOC;
+   end Is_Visible_TOC;
+
+   --  ------------------------------
    --  Get the table of content node associated with the document.
    --  ------------------------------
    procedure Get_TOC (Doc : in out Document;
