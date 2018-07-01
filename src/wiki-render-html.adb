@@ -647,7 +647,7 @@ package body Wiki.Render.Html is
    procedure Finish (Engine : in out Html_Renderer;
                      Doc    : in Wiki.Documents.Document) is
    begin
-      if Engine.Enable_Render_TOC then
+      if Engine.Enable_Render_TOC and Doc.Is_Visible_TOC then
          Engine.Render_TOC (Doc, 4);
       end if;
       Engine.Close_Paragraph;
