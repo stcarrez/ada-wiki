@@ -205,7 +205,9 @@ package body Wiki.Render.Html is
                             Level  : in Positive) is
       Tag   : String_Access;
    begin
-      if Engine.Enable_Render_TOC and not Engine.TOC_Rendered and not Doc.Is_Using_TOC then
+      if Engine.Enable_Render_TOC and not Engine.TOC_Rendered and not Doc.Is_Using_TOC
+        and Doc.Is_Visible_TOC
+      then
          Engine.Render_TOC (Doc, 3);
       end if;
       Engine.Close_Paragraph;
