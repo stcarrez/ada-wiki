@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-toc -- Filter for the creation of Table Of Contents
---  Copyright (C) 2016 Stephane Carrez
+--  Copyright (C) 2016, 2018 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,8 +39,16 @@ package body Wiki.Filters.TOC is
             Filter.Add_Node (Document, Wiki.Nodes.N_TOC_DISPLAY);
             First := Pos + 7;
          else
-            Filter_Type (Filter).Add_Text (Document, Text (First .. Text'Last), Format);
-            exit;
+            Pos := Index (Text (First .. Text'Last), "__NOTOC__");
+            if Pos > 0 then
+               Filter_Type (Filter).Add_Text (Document, Text (First .. Pos - 1), Format);
+               Document.Hide_TOC;
+               First := Pos + 9;
+            else
+               Filter_Type (Filter).Add_Text (Document, Text (First .. Text'Last), Format);
+
+               exit;
+            end if;
          end if;
       end loop;
    end Add_Text;
