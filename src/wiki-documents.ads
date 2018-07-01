@@ -114,6 +114,9 @@ package Wiki.Documents is
    --  Returns True if the table of contents is visible and must be rendered.
    function Is_Visible_TOC (Doc : in Document) return Boolean;
 
+   --  Hide the table of contents.
+   procedure Hide_TOC (Doc : in out Document);
+
    --  Get the table of content node associated with the document.
    procedure Get_TOC (Doc : in out Document;
                       TOC : out Wiki.Nodes.Node_List_Ref);
