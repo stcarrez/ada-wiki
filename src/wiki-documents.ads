@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-documents -- Wiki document
---  Copyright (C) 2011, 2015, 2016 Stephane Carrez
+--  Copyright (C) 2011, 2015, 2016, 2018 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -111,6 +111,9 @@ package Wiki.Documents is
    --  Returns True if the document displays the table of contents by itself.
    function Is_Using_TOC (Doc : in Document) return Boolean;
 
+   --  Returns True if the table of contents is visible and must be rendered.
+   function Is_Visible_TOC (Doc : in Document) return Boolean;
+
    --  Get the table of content node associated with the document.
    procedure Get_TOC (Doc : in out Document;
                       TOC : out Wiki.Nodes.Node_List_Ref);
@@ -129,6 +132,7 @@ private
       TOC         : Wiki.Nodes.Node_List_Ref;
       Current     : Wiki.Nodes.Node_Type_Access;
       Using_TOC   : Boolean := False;
+      Visible_TOC : Boolean := True;
    end record;
 
 end Wiki.Documents;
