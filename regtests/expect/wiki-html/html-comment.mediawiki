@@ -1,1 +1,1 @@
-<p>Paragraph A second paragraph</p>
+<p>Paragraph</p><p>A second paragraph</p></p>

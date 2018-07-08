@@ -23,8 +23,8 @@ L3: line 3
 </dd><dt>item 2
 </dt><dd> definition item 2
 </dd><dt>item 3
-</dt><dd> definition item 3</dd></dl><p><pre>
+</dt><dd> definition item 3</dd></dl><pre>
 * item 1
 ''item''
 == dd ==
-</pre></p>
+</pre>

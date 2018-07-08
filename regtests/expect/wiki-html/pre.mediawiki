@@ -1,5 +1,5 @@
-<p><pre>
+<pre>
 * item 1
 ''item''
 == dd ==
-</pre></p><ul><li>item 2</li></ul>
+</pre><ul><li>item 2</li></ul>

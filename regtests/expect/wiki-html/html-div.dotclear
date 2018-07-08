@@ -1,5 +1,5 @@
-<h5>Header 1</h5><p>This is my inline HTML:</p><p><div class="error">
+<h5>Header 1</h5><p>This is my inline HTML:</p><div class="error">
   <span class="item">My item</span>
-</div>
+</div><p>
 
 Last paragraph.</p>

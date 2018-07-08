@@ -1,1 +1,3 @@
-<p><a href="Category/{{{1}}}">{{{1}}}</a></p>
+<p><a href="Category/{{{1}}}">{{{1}}}</a>
+Hidden text 
+</p>
