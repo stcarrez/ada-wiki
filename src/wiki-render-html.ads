@@ -100,6 +100,7 @@ private
       Enable_Render_TOC : Boolean := False;
       TOC_Rendered      : Boolean := False;
       Current_Level     : Natural := 0;
+      Html_Tag          : Wiki.Html_Tag := BODY_TAG;
       List_Styles       : List_Style_Array := (others => False);
       Quote_Level       : Natural := 0;
       Html_Level        : Natural := 0;
@@ -139,5 +140,9 @@ private
                            Doc    : in Wiki.Documents.Document;
                            Title  : in Wiki.Strings.WString;
                            Attr   : in Wiki.Attributes.Attribute_List);
+
+   --  Returns true if the HTML element being included is already contained in a paragraph.
+   --  This include: a, em, strong, small, b, i, u, s, span, ins, del, sub, sup.
+   function Has_Html_Paragraph (Engine : in Html_Renderer) return Boolean;
 
 end Wiki.Render.Html;
