@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-plugins -- Wiki plugins
---  Copyright (C) 2016 Stephane Carrez
+--  Copyright (C) 2016, 2018 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,12 +40,13 @@ package Wiki.Plugins is
                   Name    : in String) return Wiki_Plugin_Access is abstract;
 
    type Plugin_Context is limited record
-      Previous  : access Plugin_Context;
-      Filters   : Wiki.Filters.Filter_Chain;
-      Factory   : Plugin_Factory_Access;
-      Variables : Wiki.Attributes.Attribute_List;
-      Syntax    : Wiki.Wiki_Syntax;
-      Is_Hidden : Boolean := False;
+      Previous    : access Plugin_Context;
+      Filters     : Wiki.Filters.Filter_Chain;
+      Factory     : Plugin_Factory_Access;
+      Variables   : Wiki.Attributes.Attribute_List;
+      Syntax      : Wiki.Wiki_Syntax;
+      Is_Hidden   : Boolean := False;
+      Is_Included : Boolean := False;
    end record;
 
    --  Expand the plugin configured with the parameters for the document.
