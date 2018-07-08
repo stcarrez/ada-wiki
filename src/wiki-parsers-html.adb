@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-html -- Wiki HTML parser
---  Copyright (C) 2015, 2016 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2018 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -215,7 +215,9 @@ package body Wiki.Parsers.Html is
             Flush_Text (P);
             if Tag = Wiki.UNKNOWN_TAG then
                if Token = "noinclude" then
-                  P.Context.Is_Hidden := False;
+                  P.Context.Is_Hidden := not P.Context.Is_Included;
+               elsif Token = "includeonly" then
+                  P.Context.Is_Hidden := P.Context.Is_Included;
                end if;
             else
                End_Element (P, Tag);
@@ -235,7 +237,9 @@ package body Wiki.Parsers.Html is
             end if;
             if Tag = UNKNOWN_TAG then
                if Token = "noinclude" then
-                  P.Context.Is_Hidden := True;
+                  P.Context.Is_Hidden := P.Context.Is_Included;
+               elsif Token = "includeonly" then
+                  P.Context.Is_Hidden := not P.Context.Is_Included;
                end if;
             else
                Start_Element (P, Tag, P.Attributes);
