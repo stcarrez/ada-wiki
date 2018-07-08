@@ -879,6 +879,14 @@ package body Wiki.Parsers is
    end Parse_Link;
 
    --  ------------------------------
+   --  Returns true if we are included from another wiki content.
+   --  ------------------------------
+   function Is_Included (P : in Parser) return Boolean is
+   begin
+      return P.Context.Is_Included;
+   end Is_Included;
+
+   --  ------------------------------
    --  Find the plugin with the given name.
    --  Returns null if there is no such plugin.
    --  ------------------------------
@@ -985,6 +993,7 @@ package body Wiki.Parsers is
             Context.Factory := P.Context.Factory;
             Context.Syntax  := P.Context.Syntax;
             Context.Variables := P.Attributes;
+            Context.Is_Included := True;
             Context.Filters.Set_Chain (P.Context.Filters);
             Plugin.Expand (P.Document, P.Attributes, Context);
          end if;
@@ -1750,6 +1759,7 @@ package body Wiki.Parsers is
       Engine.Context.Filters.Set_Chain (Context.Filters);
       Engine.Context.Factory   := Context.Factory;
       Engine.Context.Variables := Context.Variables;
+      Engine.Context.Is_Included := Context.Is_Included;
       Engine.Set_Syntax (Context.Syntax);
    end Set_Context;
 
