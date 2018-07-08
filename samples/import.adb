@@ -111,11 +111,11 @@ procedure Import is
    procedure Parse_Url (Url : in String) is
       Command : constant String := "wget -q -O - " & Url;
       Pipe    : aliased Util.Streams.Pipes.Pipe_Stream;
-      Buffer  : Util.Streams.Buffered.Buffered_Stream;
+      Buffer  : Util.Streams.Buffered.Input_Buffer_Stream;
       Content : Ada.Strings.Unbounded.Unbounded_String;
    begin
       Pipe.Open (Command);
-      Buffer.Initialize (null, Pipe'Unchecked_Access, 1024 * 1024);
+      Buffer.Initialize (Pipe'Unchecked_Access, 1024 * 1024);
       Buffer.Read (Content);
       Pipe.Close;
       if Pipe.Get_Exit_Status /= 0 then
