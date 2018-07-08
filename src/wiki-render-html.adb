@@ -77,6 +77,27 @@ package body Wiki.Render.Html is
    end Get_Section_Number;
 
    --  ------------------------------
+   --  Returns true if the HTML element being included is already contained in a paragraph.
+   --  This include: a, em, strong, small, b, i, u, s, span, ins, del, sub, sup.
+   --  ------------------------------
+   function Has_Html_Paragraph (Engine : in Html_Renderer) return Boolean is
+   begin
+      return Engine.Html_Tag = Wiki.SPAN_TAG
+        or Engine.Html_Tag = Wiki.A_TAG
+        or Engine.Html_Tag = Wiki.EM_TAG
+        or Engine.Html_Tag = Wiki.STRONG_TAG
+        or Engine.Html_Tag = Wiki.SMALL_TAG
+        or Engine.Html_Tag = Wiki.B_TAG
+        or Engine.Html_Tag = Wiki.I_TAG
+        or Engine.Html_Tag = Wiki.U_TAG
+        or Engine.Html_Tag = Wiki.S_TAG
+        or Engine.Html_Tag = Wiki.SUB_TAG
+        or Engine.Html_Tag = Wiki.SUP_TAG
+        or Engine.Html_Tag = Wiki.INS_TAG
+        or Engine.Html_Tag = Wiki.DEL_TAG;
+   end Has_Html_Paragraph;
+
+   --  ------------------------------
    --  Render the node instance from the document.
    --  ------------------------------
    overriding
@@ -101,14 +122,20 @@ package body Wiki.Render.Html is
             Engine.Output.End_Element ("br");
 
          when Wiki.Nodes.N_HORIZONTAL_RULE =>
-            Engine.Close_Paragraph;
-            Engine.Add_Blockquote (0);
+            if Engine.Html_Level = 0 or not Engine.Has_Html_Paragraph then
+               Engine.Close_Paragraph;
+               Engine.Add_Blockquote (0);
+            end if;
             Engine.Output.Start_Element ("hr");
             Engine.Output.End_Element ("hr");
 
          when Wiki.Nodes.N_PARAGRAPH =>
-            Engine.Close_Paragraph;
-            Engine.Need_Paragraph := True;
+            --  Close the paragraph and start a new one except if the current HTML
+            --  element is within a paragraph (ex: a, b, i, u, span, ...).
+            if Engine.Html_Level = 0 or not Engine.Has_Html_Paragraph then
+               Engine.Close_Paragraph;
+               Engine.Need_Paragraph := True;
+            end if;
 
          when Wiki.Nodes.N_PREFORMAT =>
             Engine.Render_Preformatted (Node.Preformatted, "");
@@ -156,8 +183,10 @@ package body Wiki.Render.Html is
    procedure Render_Tag (Engine : in out Html_Renderer;
                          Doc    : in Wiki.Documents.Document;
                          Node   : in Wiki.Nodes.Node_Type) is
-      Name : constant Wiki.String_Access := Wiki.Get_Tag_Name (Node.Tag_Start);
-      Iter : Wiki.Attributes.Cursor := Wiki.Attributes.First (Node.Attributes);
+      Name         : constant Wiki.String_Access := Wiki.Get_Tag_Name (Node.Tag_Start);
+      Iter         : Wiki.Attributes.Cursor := Wiki.Attributes.First (Node.Attributes);
+      Previous_Tag : constant Wiki.Html_Tag := Engine.Html_Tag;
+      Prev_Para    : Boolean := Engine.Has_Paragraph;
    begin
       if Node.Tag_Start = Wiki.P_TAG then
          Engine.Has_Paragraph := True;
@@ -174,24 +203,62 @@ package body Wiki.Render.Html is
         or Node.Tag_Start = Wiki.H4_TAG
         or Node.Tag_Start = Wiki.H5_TAG
         or Node.Tag_Start = Wiki.H6_TAG
+        or Node.Tag_Start = Wiki.DIV_TAG
         or Node.Tag_Start = Wiki.TABLE_TAG
       then
          Engine.Close_Paragraph;
          Engine.Need_Paragraph := False;
+         Engine.Has_Paragraph := False;
+         Engine.Open_Paragraph;
+      elsif Node.Tag_Start = Wiki.B_TAG
+        or Node.Tag_Start = Wiki.I_TAG
+        or Node.Tag_Start = Wiki.SPAN_TAG
+        or Node.Tag_Start = Wiki.INS_TAG
+        or Node.Tag_Start = Wiki.DEL_TAG
+        or Node.Tag_Start = Wiki.A_TAG
+      then
+         Engine.Open_Paragraph;
+         Prev_Para := Engine.Has_Paragraph;
+      else
+         Engine.Has_Paragraph := False;
+         Engine.Need_Paragraph := False;
+         Engine.Open_Paragraph;
       end if;
-      Engine.Open_Paragraph;
       Engine.Output.Start_Element (Name.all);
       while Wiki.Attributes.Has_Element (Iter) loop
          Engine.Output.Write_Wide_Attribute (Name    => Wiki.Attributes.Get_Name (Iter),
                                              Content => Wiki.Attributes.Get_Wide_Value (Iter));
          Wiki.Attributes.Next (Iter);
       end loop;
+      Engine.Html_Tag := Node.Tag_Start;
       Engine.Html_Level := Engine.Html_Level + 1;
       Engine.Render (Doc, Node.Children);
+      Engine.Html_Tag := Previous_Tag;
       Engine.Html_Level := Engine.Html_Level - 1;
       if Node.Tag_Start = Wiki.P_TAG then
          Engine.Has_Paragraph := False;
          Engine.Need_Paragraph := True;
+      elsif Node.Tag_Start = Wiki.UL_TAG
+        or Node.Tag_Start = Wiki.OL_TAG
+        or Node.Tag_Start = Wiki.DL_TAG
+        or Node.Tag_Start = Wiki.DT_TAG
+        or Node.Tag_Start = Wiki.DD_TAG
+        or Node.Tag_Start = Wiki.LI_TAG
+        or Node.Tag_Start = Wiki.H1_TAG
+        or Node.Tag_Start = Wiki.H2_TAG
+        or Node.Tag_Start = Wiki.H3_TAG
+        or Node.Tag_Start = Wiki.H4_TAG
+        or Node.Tag_Start = Wiki.H5_TAG
+        or Node.Tag_Start = Wiki.H6_TAG
+        or Node.Tag_Start = Wiki.DIV_TAG
+        or Node.Tag_Start = Wiki.TABLE_TAG
+      then
+         Engine.Close_Paragraph;
+         Engine.Has_Paragraph := False;
+         Engine.Need_Paragraph := True;
+      elsif not Engine.Has_Html_Paragraph then
+         --  Leaving the HTML text-element, restore the previous paragraph state.
+         Engine.Has_Paragraph := Prev_Para;
       end if;
       Engine.Output.End_Element (Name.all);
    end Render_Tag;
@@ -329,7 +396,7 @@ package body Wiki.Render.Html is
    --  The blockquote must be closed at the next header.
    --  ------------------------------
    procedure Add_Blockquote (Engine : in out Html_Renderer;
-                             Level    : in Natural) is
+                             Level  : in Natural) is
    begin
       if Engine.Quote_Level /= Level then
          Engine.Close_Paragraph;
@@ -376,7 +443,8 @@ package body Wiki.Render.Html is
 
    procedure Close_Paragraph (Engine : in out Html_Renderer) is
    begin
-      if Engine.Html_Level > 0 then
+      --  Don't close a paragraph if we are within a HTML text-level element.
+      if Engine.Has_Html_Paragraph then
          return;
       end if;
       if Engine.Has_Paragraph then
@@ -399,9 +467,6 @@ package body Wiki.Render.Html is
 
    procedure Open_Paragraph (Engine : in out Html_Renderer) is
    begin
-      if Engine.Html_Level > 0 then
-         return;
-      end if;
       if Engine.Need_Paragraph then
          Engine.Output.Start_Element ("p");
          Engine.Has_Paragraph  := True;
@@ -604,7 +669,7 @@ package body Wiki.Render.Html is
                        Text     : in Wiki.Strings.WString;
                        Format   : in Wiki.Format_Map) is
    begin
-      if Engine.Html_Level = 0 then
+      if not Engine.Has_Html_Paragraph or Engine.Html_Tag = Wiki.P_TAG then
          Engine.Open_Paragraph;
       elsif Engine.Need_Paragraph then
          Engine.Output.Write (' ');
