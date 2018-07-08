@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers -- Wiki parser
---  Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2017 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -984,16 +984,29 @@ package body Wiki.Parsers is
       end if;
       P.Empty_Line := False;
       declare
-         Name   : constant Strings.WString := Attributes.Get_Attribute (P.Attributes, NAME_ATTR);
-         Plugin : constant Wiki.Plugins.Wiki_Plugin_Access := P.Find (Name);
+         use type Wiki.Strings.UString;
+         Name    : constant Strings.WString := Attributes.Get_Attribute (P.Attributes, NAME_ATTR);
+         Plugin  : constant Wiki.Plugins.Wiki_Plugin_Access := P.Find (Name);
          Context : Wiki.Plugins.Plugin_Context;
+         Ctx     : access Wiki.Plugins.Plugin_Context;
       begin
          if Plugin /= null then
+            --  Check that we are not including the template recursively.
+            Ctx := P.Context'Access;
+            while Ctx /= null loop
+               if Ctx.Ident = Name then
+                  Append (P.Text, "Recursive call to ");
+                  Append (P.Text, Name);
+                  return;
+               end if;
+               Ctx := Ctx.Previous;
+            end loop;
             Context.Previous := P.Context'Unchecked_Access;
             Context.Factory := P.Context.Factory;
             Context.Syntax  := P.Context.Syntax;
             Context.Variables := P.Attributes;
             Context.Is_Included := True;
+            Context.Ident := Wiki.Strings.To_UString (Name);
             Context.Filters.Set_Chain (P.Context.Filters);
             Plugin.Expand (P.Document, P.Attributes, Context);
          end if;
@@ -1756,10 +1769,12 @@ package body Wiki.Parsers is
    procedure Set_Context (Engine  : in out Parser;
                           Context : in Wiki.Plugins.Plugin_Context) is
    begin
+      Engine.Context.Previous := Context.Previous;
       Engine.Context.Filters.Set_Chain (Context.Filters);
       Engine.Context.Factory   := Context.Factory;
       Engine.Context.Variables := Context.Variables;
       Engine.Context.Is_Included := Context.Is_Included;
+      Engine.Context.Ident := Context.Ident;
       Engine.Set_Syntax (Context.Syntax);
    end Set_Context;
 
