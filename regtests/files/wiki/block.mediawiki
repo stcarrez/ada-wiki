@@ -1,0 +1,5 @@
+<div class="adafr-block">
+ <h3>{{{1}}}</h3>
+  <p>
+  {{{2}}}
+   </p>

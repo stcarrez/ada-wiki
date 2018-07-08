@@ -1,0 +1,6 @@
+{{block.mediawiki|Title|
+ Description
+ }}
+ * [[Link1]]
+ * [[Link2]]
+</div>
