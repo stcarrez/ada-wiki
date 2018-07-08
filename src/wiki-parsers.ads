@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers -- Wiki parser
---  Copyright (C) 2011, 2015, 2016 Stephane Carrez
+--  Copyright (C) 2011, 2015, 2016, 2018 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -161,6 +161,9 @@ private
    --  Returns a positive index of the start the the image link.
    function Is_Image (P    : in Parser;
                       Link : in Wiki.Strings.WString) return Natural;
+
+   --  Returns true if we are included from another wiki content.
+   function Is_Included (P : in Parser) return Boolean;
 
    --  Find the plugin with the given name.
    --  Returns null if there is no such plugin.
