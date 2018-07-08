@@ -19,6 +19,7 @@
 with Wiki.Attributes;
 with Wiki.Documents;
 with Wiki.Filters;
+with Wiki.Strings;
 
 --  == Plugins ==
 --  The <b>Wiki.Plugins</b> package defines the plugin interface that is used by the wiki
@@ -45,6 +46,7 @@ package Wiki.Plugins is
       Factory     : Plugin_Factory_Access;
       Variables   : Wiki.Attributes.Attribute_List;
       Syntax      : Wiki.Wiki_Syntax;
+      Ident       : Wiki.Strings.UString;
       Is_Hidden   : Boolean := False;
       Is_Included : Boolean := False;
    end record;
