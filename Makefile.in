@@ -10,6 +10,7 @@ GNATMAKE=@GNATMAKE@
 GNATCLEAN=gnatclean
 GPRINSTALL=@GPRINSTALL@
 INSTALL=@INSTALL@
+DYNAMO=dynamo
 
 GPRPATH=wiki.gpr
 
@@ -55,11 +56,8 @@ infix_lib=@ADA_LIB_BASE@
 # lib/ada/adalib
 infix_ali=@ADA_ALI_BASE@
 
-includedir=${prefix}/${infix_inc}
 projectdir=${prefix}/${infix_prj}
 bindir=${prefix}/bin
-libdir=${prefix}/${infix_lib}
-alidir=${prefix}/${infix_ali}
 
 libname=libada_wiki
 docdir=libada-wiki
@@ -77,7 +75,7 @@ endif
 
 ifeq (${BUILDS_SHARED},yes)
 all:     static shared
-install: uninstall install_static install_shared install-info
+install: uninstall install_shared install_static install-info
 else
 all:     static
 install: uninstall install_static install-info
@@ -86,6 +84,7 @@ endif
 # Build executables for all mains defined by the project.
 build:	setup
 	$(GNATMAKE) -m -p -P"$(GPRPATH)" $(MAKE_ARGS)
+	$(GNATMAKE) -p -Pwiki_tests $(MAKE_ARGS)
 
 static:
 	$(MAKE) WIKI_LIBRARY_TYPE=static build
@@ -106,8 +105,12 @@ autobuild:
 	$(GNATMAKE) $(MAKE_ARGS) -gnatc -c -k  -P "$(GPRPATH)"
 
 # Clean the root project of all build products.
-clean:
+clean:	clean_test
 	-rm -rf lib obj bin
+
+# Clean the files produced by the unit tests
+clean_test:
+	rm -rf regtests/result/*
 
 # Clean root project and all imported projects too.
 clean_tree:
@@ -124,14 +127,13 @@ rebuild: clean build
 # Build and run the unit tests
 test:	build
 ifeq ($(HAVE_ADA_UTIL),yes)
-	$(GNATMAKE) -p -Pwiki_tests $(MAKE_ARGS)
 	bin/wiki_harness -xml wiki-aunit.xml
 else
 	@echo "WARNING: Tests are not compiled and not executed because Ada Utility Library is not used"
 endif
 
 doc:
-	dynamo build-doc -markdown wiki
+	$(DYNAMO) build-doc -markdown wiki
 
 dist:
 	git archive -o $(DIST_FILE) --prefix=$(distdir)/ HEAD
@@ -143,38 +145,10 @@ install_shared:
 	$(MAKE) WIKI_LIBRARY_TYPE=relocatable install_lib
 
 install_lib:
-ifneq (${GPRINSTALL},)
 	$(GPRINSTALL) -p -f --prefix=${prefix} $(MAKE_ARGS) \
 		--build-name=$(WIKI_LIBRARY_TYPE) $(GPRPATH)
-else
-	$(MKDIR) -p ${includedir}/ada-wiki
-	$(MKDIR) -p ${projectdir}/
-	${MKDIR} -p ${alidir}/ada-wiki ${bindir}
-	${CP} -p src/*.ad[bs] ${includedir}/ada-wiki
-	sed -e "s,LIBRARY_TYPE,$(WIKI_LIBRARY_TYPE),g" < distrib/wiki.gpr > ${projectdir}/wiki.gpr
-	${CP} -p lib/$(WIKI_LIBRARY_TYPE)/*.ali ${alidir}/ada-wiki/
-ifeq ($(WIKI_LIBRARY_TYPE),static)
-	${CP} lib/$(WIKI_LIBRARY_TYPE)/$(libname).a ${libdir}/
-else
-	${CP} -p lib/$(WIKI_LIBRARY_TYPE)/$(libname).$(LIBVER) ${libdir}/
-ifneq (${OS},Windows_NT)
-	cd ${libdir} && \
-	   rm -f $(libname).$(LIBEXT) && \
-	   ${LN} $(libname).$(LIBVER) $(libname).$(LIBEXT)
-else
-	${CP} -p lib/$(WIKI_LIBRARY_TYPE)/$(libname).$(LIBVER) ${bindir}/
-endif
-endif
-endif
 
 install-info:
-ifeq (${GPRINSTALL},)
-	@echo "Installation directories:"
-	@echo "  Ada source files:    ${includedir}"
-	@echo "  ALI files:           ${alidir}"
-	@echo "  Libraries:           ${libdir}"
-	@echo "  GNAT project:        ${projectdir}"
-endif
 	@echo "Environment setup:"
 	@echo "  export ADA_PROJECT_PATH=${projectdir}:$$ADA_PROJECT_PATH"
 
@@ -185,12 +159,4 @@ install_samples:
 	cp -p $(srcdir)/config.gpr $(samplesdir)
 
 uninstall:
-ifneq (${GPRINSTALL},)
 	-$(GPRINSTALL) -q -f --prefix=${prefix} $(MAKE_ARGS) --uninstall $(GPRPATH)
-else
-	rm -rf ${includedir}/ada-wiki
-	rm -rf ${alidir}/ada-wiki
-	rm -f ${libdir}/$(libname).a
-	rm -f ${libdir}/$(libname).$(LIBEXT)
-	rm -f ${projectdir}/wiki.gpr
-endif
