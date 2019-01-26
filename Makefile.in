@@ -84,7 +84,9 @@ endif
 # Build executables for all mains defined by the project.
 build:	setup
 	$(GNATMAKE) -m -p -P"$(GPRPATH)" $(MAKE_ARGS)
+ifeq ($(HAVE_ADA_UTIL),yes)
 	$(GNATMAKE) -p -Pwiki_tests $(MAKE_ARGS)
+endif
 
 static:
 	$(MAKE) WIKI_LIBRARY_TYPE=static build
