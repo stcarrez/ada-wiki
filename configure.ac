@@ -1,5 +1,5 @@
 dnl Autoconf configure script for Ada Wiki
-dnl Copyright (C) 2015, 2016, 2018 Stephane Carrez
+dnl Copyright (C) 2015, 2016, 2018, 2019 Stephane Carrez
 dnl Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 dnl
 dnl  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,12 +18,9 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT(src/wiki.ads)
 
-AC_CANONICAL_SYSTEM
-dnl AM_MAINTAINER_MODE
-
 # Current release settings
 WIKI_MAJOR_VERSION=1
-WIKI_MINOR_VERSION=1
+WIKI_MINOR_VERSION=2
 WIKI_MICRO_VERSION=0
 WIKI_VERSION=$WIKI_MAJOR_VERSION.$WIKI_MINOR_VERSION.$WIKI_MICRO_VERSION
 
@@ -33,10 +30,7 @@ AC_SUBST(WIKI_MAJOR_VERSION)
 AC_SUBST(WIKI_MINOR_VERSION)
 AC_SUBST(WIKI_MICRO_VERSION)
 
-##########################################
-# Check to enable/disable shared library
-##########################################
-AM_GNAT_LIBRARY_PROJECT(wiki)
+AM_GNAT_LIBRARY_PROJECT(wikiada)
 
 AC_MSG_CHECKING([Ada Utility Library])
 AC_ARG_WITH(ada-util,
@@ -57,13 +51,13 @@ AC_MSG_RESULT(${WIKI_USE_ADA_UTIL})
 # Ada Util library
 ##########################################
 if test T${WIKI_USE_ADA_UTIL} = Tyes; then
-AM_GNAT_FIND_PROJECT([ada-util],[Ada Utility Library],[util],
+AM_GNAT_FIND_PROJECT([ada-util],[Ada Utility Library],[utilada_core],
   [git@github.com:stcarrez/ada-util.git],
   [Building Ada Wiki requires the Ada Utility Library.],
   [
-    UTIL_DIR=${gnat_project_dir_util}
+    UTIL_DIR=${gnat_project_dir_utilada_core}
   ])
-  WITH_ADA_UTIL="with \"${UTIL_DIR}util\";";
+  WITH_ADA_UTIL="with \"${UTIL_DIR}utilada_core\";";
 else
   WITH_ADA_UTIL=''
   UTIL_DIR=''
@@ -72,9 +66,6 @@ AC_SUBST(UTIL_DIR)
 AC_SUBST(WITH_ADA_UTIL)
 AC_SUBST(WIKI_USE_ADA_UTIL)
 
-WIKI_LIBDIR="lib"
-AC_SUBST(WIKI_LIBDIR)
-
 AC_OUTPUT(
-Makefile wiki.gpr wiki_tests.gpr samples.gpr distrib/wiki.gpr
+Makefile.conf wikiada.gpr wikiada_tests.gpr samples.gpr
 )
