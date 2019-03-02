@@ -584,7 +584,6 @@ PACKAGE_URL=
 ac_unique_file="src/wiki.ads"
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
-WIKI_LIBDIR
 WIKI_USE_ADA_UTIL
 WITH_ADA_UTIL
 UTIL_DIR
@@ -595,6 +594,7 @@ ADA_INC_BASE
 GPRINSTALL
 NR_CPUS
 BUILDS_COVERAGE
+BUILDS_QUIET
 MODE
 BUILDS_DISTRIB
 BUILDS_SHARED
@@ -607,10 +607,6 @@ GNATCLEAN
 GPRCLEAN
 GNATMAKE
 GPRBUILD
-WIKI_MICRO_VERSION
-WIKI_MINOR_VERSION
-WIKI_MAJOR_VERSION
-WIKI_VERSION
 target_os
 target_vendor
 target_cpu
@@ -623,6 +619,10 @@ build_os
 build_vendor
 build_cpu
 build
+WIKI_MICRO_VERSION
+WIKI_MINOR_VERSION
+WIKI_MAJOR_VERSION
+WIKI_VERSION
 target_alias
 host_alias
 build_alias
@@ -1734,6 +1734,18 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+# Current release settings
+WIKI_MAJOR_VERSION=1
+WIKI_MINOR_VERSION=2
+WIKI_MICRO_VERSION=0
+WIKI_VERSION=$WIKI_MAJOR_VERSION.$WIKI_MINOR_VERSION.$WIKI_MICRO_VERSION
+
+# Set the version number of Ada Wiki
+
+
+
+
+
 ac_aux_dir=
 for ac_dir in "$srcdir" "$srcdir/.." "$srcdir/../.."; do
   if test -f "$ac_dir/install-sh"; then
@@ -1873,23 +1885,6 @@ test -n "$target_alias" &&
   test "$program_prefix$program_suffix$program_transform_name" = \
     NONENONEs,x,x, &&
   program_prefix=${target_alias}-
-
-
-# Current release settings
-WIKI_MAJOR_VERSION=1
-WIKI_MINOR_VERSION=1
-WIKI_MICRO_VERSION=0
-WIKI_VERSION=$WIKI_MAJOR_VERSION.$WIKI_MINOR_VERSION.$WIKI_MICRO_VERSION
-
-# Set the version number of Ada Wiki
-
-
-
-
-
-##########################################
-# Check to enable/disable shared library
-##########################################
 # Find a good install program.  We prefer a C program (faster),
 # so one script is as good as another.  But avoid the broken or
 # incompatible versions:
@@ -1985,6 +1980,7 @@ test -z "$INSTALL_DATA" && INSTALL_DATA='${INSTALL} -m 644'
 
 
   # checking for local tools
+
 
   for ac_prog in gprbuild
 do
@@ -2233,15 +2229,18 @@ $as_echo "${ac_enable_shared}" >&6; }
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking distribution build" >&5
 $as_echo_n "checking distribution build... " >&6; }
   ac_enable_distrib=yes
+  ac_quiet_mode=-q
   ac_build_mode=distrib
   # Check whether --enable-distrib was given.
 if test "${enable_distrib+set}" = set; then :
   enableval=$enable_distrib; case "${enableval}" in
       no|none)  ac_enable_distrib=no
                 ac_build_mode=debug
+                ac_quiet_mode=
                 ;;
       *)        ac_enable_distrib=yes
                 ac_build_mode=distrib
+                ac_quiet_mode=-q
                 ;;
     esac
 fi
@@ -2252,6 +2251,9 @@ $as_echo "${ac_enable_distrib}" >&6; }
 
 
   MODE=$ac_build_mode
+
+
+  BUILDS_QUIET=$ac_quiet_mode
 
 
 
@@ -2706,11 +2708,13 @@ $as_echo "<prefix>/${ADA_PRJ_BASE}" >&6; }
   fi
 
 
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking preparing for GNAT project wiki" >&5
-$as_echo_n "checking preparing for GNAT project wiki... " >&6; }
-  mkdir -p obj/wiki/static obj/wiki/relocatable lib/wiki/static lib/wiki/relocatable
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking preparing for GNAT project wikiada" >&5
+$as_echo_n "checking preparing for GNAT project wikiada... " >&6; }
+  mkdir -p obj/wikiada/static obj/wikiada/relocatable lib/wikiada/static lib/wikiada/relocatable
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: done" >&5
 $as_echo "done" >&6; }
+
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking Ada Utility Library" >&5
@@ -2745,25 +2749,25 @@ $as_echo_n "checking Ada Utility Library... " >&6; }
 # Check whether --with-ada-util was given.
 if test "${with_ada_util+set}" = set; then :
   withval=$with_ada_util;
-      gnat_project_name_util=${withval}/
+      gnat_project_name_utilada_core=${withval}/
       if test -d "${withval}"; then
-	    gnat_project_name_util=${withval}/util
+	    gnat_project_name_utilada_core=${withval}/utilada_core
 	  fi
 
 else
 
-      gnat_project_name_util=util
+      gnat_project_name_utilada_core=utilada_core
 
 fi
 
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: trying ${gnat_project_name_util}" >&5
-$as_echo "trying ${gnat_project_name_util}" >&6; }
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: trying ${gnat_project_name_utilada_core}" >&5
+$as_echo "trying ${gnat_project_name_utilada_core}" >&6; }
 
   rm -f conftest.gpr
   # Search in the GNAT project path.
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ${gnat_project_name_util} project exists in gnatmake's search path" >&5
-$as_echo_n "checking whether ${gnat_project_name_util} project exists in gnatmake's search path... " >&6; }
-  echo "with \"${gnat_project_name_util}\"; project conftest is for Source_Dirs use (); end conftest;" > conftest.gpr
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether ${gnat_project_name_utilada_core} project exists in gnatmake's search path" >&5
+$as_echo_n "checking whether ${gnat_project_name_utilada_core} project exists in gnatmake's search path... " >&6; }
+  echo "with \"${gnat_project_name_utilada_core}\"; project conftest is for Source_Dirs use (); end conftest;" > conftest.gpr
   if { ac_try='gnat ls -Pconftest.gpr system.ads > /dev/null 2>conftest.out'
   { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_try\""; } >&5
   (eval $ac_try) 2>&5
@@ -2771,16 +2775,16 @@ $as_echo_n "checking whether ${gnat_project_name_util} project exists in gnatmak
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; }
   then
-    gnat_project_util=yes
+    gnat_project_utilada_core=yes
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
   else
-    gnat_project_util=no
+    gnat_project_utilada_core=no
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
-    # Search in ../ada-util-*/util.gpr
-    files=`ls -r ../ada-util/util.gpr ../util/util.gpr ../ada-util-*/util.gpr 2>/dev/null`
+    # Search in ../ada-util-*/utilada_core.gpr
+    files=`ls -r ../ada-util/utilada_core.gpr ../utilada_core/utilada_core.gpr ../ada-util-*/utilada_core.gpr 2>/dev/null`
     for name in $files; do
       dir=`dirname $name`
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Ada Utility Library project in ${dir}" >&5
@@ -2793,39 +2797,39 @@ $as_echo_n "checking for Ada Utility Library project in ${dir}... " >&6; }
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; }
       then
-         gnat_project_util=yes
-		 gnat_project_name_util=${name}
+         gnat_project_utilada_core=yes
+		 gnat_project_name_utilada_core=${name}
          { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
          break
       else
-         gnat_project_util=no
+         gnat_project_utilada_core=no
          { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
       fi
     done
   fi
   rm -f conftest.gpr
-  if test x${gnat_project_util} = xyes; then
-    gnat_project_with_util="with \"${gnat_project_name_util}\";";
-    gnat_project_dir_util=`dirname ${gnat_project_name_util}`
-    if test ${gnat_project_dir_util} = . ; then
-       gnat_project_dir_util=
+  if test x${gnat_project_utilada_core} = xyes; then
+    gnat_project_with_utilada_core="with \"${gnat_project_name_utilada_core}\";";
+    gnat_project_dir_utilada_core=`dirname ${gnat_project_name_utilada_core}`
+    if test ${gnat_project_dir_utilada_core} = . ; then
+       gnat_project_dir_utilada_core=
     else
-       gnat_project_dir_util="${gnat_project_dir_util}/"
+       gnat_project_dir_utilada_core="${gnat_project_dir_utilada_core}/"
     fi
 
-    UTIL_DIR=${gnat_project_dir_util}
+    UTIL_DIR=${gnat_project_dir_utilada_core}
 
   else
-    gnat_project_dir_util=
-    gnat_project_name_util=
+    gnat_project_dir_utilada_core=
+    gnat_project_name_utilada_core=
     if test x"Building Ada Wiki requires the Ada Utility Library." != x; then
       as_fn_error $? "Building Ada Wiki requires the Ada Utility Library.
   You should build and install the Ada Utility Library component.
   It must be available and found by ${GNATMAKE}.
   This project was not found in the ADA_PROJECT_PATH environment variable.
-  This project was not found in ../util nor in ../ada-util-*.
+  This project was not found in ../utilada_core nor in ../ada-util-*.
   The component is available at git@github.com:stcarrez/ada-util.git.
   Please, download and configure Ada Utility Library.
   The current configuration was using:
@@ -2835,7 +2839,7 @@ $as_echo "no" >&6; }
     fi
   fi
 
-  WITH_ADA_UTIL="with \"${UTIL_DIR}util\";";
+  WITH_ADA_UTIL="with \"${UTIL_DIR}utilada_core\";";
 else
   WITH_ADA_UTIL=''
   UTIL_DIR=''
@@ -2844,10 +2848,7 @@ fi
 
 
 
-WIKI_LIBDIR="lib"
-
-
-ac_config_files="$ac_config_files Makefile wiki.gpr wiki_tests.gpr samples.gpr distrib/wiki.gpr"
+ac_config_files="$ac_config_files Makefile.conf wikiada.gpr wikiada_tests.gpr samples.gpr"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -3555,11 +3556,10 @@ cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
 for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
-    "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-    "wiki.gpr") CONFIG_FILES="$CONFIG_FILES wiki.gpr" ;;
-    "wiki_tests.gpr") CONFIG_FILES="$CONFIG_FILES wiki_tests.gpr" ;;
+    "Makefile.conf") CONFIG_FILES="$CONFIG_FILES Makefile.conf" ;;
+    "wikiada.gpr") CONFIG_FILES="$CONFIG_FILES wikiada.gpr" ;;
+    "wikiada_tests.gpr") CONFIG_FILES="$CONFIG_FILES wikiada_tests.gpr" ;;
     "samples.gpr") CONFIG_FILES="$CONFIG_FILES samples.gpr" ;;
-    "distrib/wiki.gpr") CONFIG_FILES="$CONFIG_FILES distrib/wiki.gpr" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
