@@ -1,6 +1,6 @@
 *~
 *.log
-Makefile
+Makefile.conf
 config.status
 CHANGES
 *.cproject
@@ -10,9 +10,8 @@ CHANGES
 ChangeLog
 .settings
 configure.lineno
-Makefile
-wiki.gpr
-wiki_tests.gpr
+wikiada.gpr
+wikiada_tests.gpr
 tests.xml
 wiki-tests.xml
 autom4te.cache
