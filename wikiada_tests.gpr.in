@@ -1,9 +1,10 @@
 with "@UTIL_DIR@config";
-with "@UTIL_DIR@util";
-with "@UTIL_DIR@util_unit";
-with "wiki";
+with "@UTIL_DIR@utilada_core";
+with "@UTIL_DIR@utilada_sys";
+with "@UTIL_DIR@utilada_unit";
+with "wikiada";
 
-project Wiki_Tests is
+project WikiAda_Tests is
 
    for Languages use ("Ada");
 
@@ -31,4 +32,4 @@ project Wiki_Tests is
    package Compiler renames Config.Compiler;
    package Linker renames Config.Linker;
 
-end Wiki_Tests;
+end WikiAda_Tests;

@@ -1,9 +1,9 @@
 with "@UTIL_DIR@config";
 @WITH_ADA_UTIL@
 
-library project Wiki is
+library project WikiAda is
    Version := "@WIKI_VERSION@";
-   Library_Dir := "@WIKI_LIBDIR@";
+   Library_Dir := "lib";
    Library_Type : Config.Library_Type_Type := external ("WIKI_LIBRARY_TYPE", "static");
 
    Use_Ada_Util : Config.Yes_NO := "@WIKI_USE_ADA_UTIL@";
@@ -18,12 +18,12 @@ library project Wiki is
 
    end case;
 
-   for Library_Name use "ada_wiki";
+   for Library_Name use "wikiada";
    for Library_Kind use Library_Type;
    for Library_Version use "lib" & Project'Library_Name & ".so." & Version;
 
-   for Library_Dir use "lib/wiki/" & Project'Library_Kind;
-   for Object_Dir use "obj/wiki/" & Project'Library_Kind;
+   for Library_Dir use "lib/wikiada/" & Project'Library_Kind;
+   for Object_Dir use "obj/wikiada/" & Project'Library_Kind;
 
    package Builder renames Config.Builder;
    package Compiler renames Config.Compiler;
@@ -33,4 +33,4 @@ library project Wiki is
        for Default_Switches ("Ada") use Config.Binder'Default_Switches ("Ada") & ("-a");
    end Binder;
 
-end Wiki;
+end WikiAda;
