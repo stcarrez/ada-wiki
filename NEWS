@@ -1,3 +1,6 @@
+Version 1.2.0   -
+  - Rename GNAT project into wikiada
+
 Version 1.1.0   - Jul 2018
   - New condition plugins for the conditional inclusion of wiki content
   - Added support for __NOTOC__ by the TOC filter
