@@ -12,7 +12,7 @@ GPRINSTALL=@GPRINSTALL@
 INSTALL=@INSTALL@
 DYNAMO=dynamo
 
-GPRPATH=wiki.gpr
+GPRPATH=wikiada.gpr
 
 BUILDS_SHARED=@BUILDS_SHARED@
 
@@ -85,7 +85,7 @@ endif
 build:	setup
 	$(GNATMAKE) -m -p -P"$(GPRPATH)" $(MAKE_ARGS)
 ifeq ($(HAVE_ADA_UTIL),yes)
-	$(GNATMAKE) -p -Pwiki_tests $(MAKE_ARGS)
+	$(GNATMAKE) -p -Pwikiada_tests $(MAKE_ARGS)
 endif
 
 static:
