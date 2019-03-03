@@ -1,6 +1,6 @@
 with "@UTIL_DIR@config";
 @WITH_ADA_UTIL@
-with "wiki";
+with "wikiada";
 
 project Samples is
 
@@ -8,7 +8,7 @@ project Samples is
 
    for Main use Mains;
 
-   case Wiki.Use_Ada_Util is
+   case WikiAda.Use_Ada_Util is
       when "yes" =>
          for Main use Mains & ("import.adb");
 
