@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-text -- Wiki Text renderer
---  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2018 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2018, 2019 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,11 +28,22 @@ package body Wiki.Render.Text is
    end Set_Output_Stream;
 
    --  ------------------------------
+   --  Set the no-newline mode to produce a single line text (disabled by default).
+   --  ------------------------------
+   procedure Set_No_Newline (Engine : in out Text_Renderer;
+                             Enable : in Boolean) is
+   begin
+      Engine.No_Newline := Enable;
+   end Set_No_Newline;
+
+   --  ------------------------------
    --  Emit a new line.
    --  ------------------------------
    procedure New_Line (Document : in out Text_Renderer) is
    begin
-      Document.Output.Write (Wiki.Helpers.LF);
+      if not Document.No_Newline then
+         Document.Output.Write (Wiki.Helpers.LF);
+      end if;
       Document.Empty_Line := True;
    end New_Line;
 
@@ -41,7 +52,9 @@ package body Wiki.Render.Text is
    --  ------------------------------
    procedure Add_Line_Break (Document : in out Text_Renderer) is
    begin
-      Document.Output.Write (Wiki.Helpers.LF);
+      if not Document.No_Newline then
+         Document.Output.Write (Wiki.Helpers.LF);
+      end if;
       Document.Empty_Line := True;
    end Add_Line_Break;
 
@@ -176,6 +189,13 @@ package body Wiki.Render.Text is
             Engine.Close_Paragraph;
             Engine.Need_Paragraph := True;
             Engine.Add_Line_Break;
+
+         when Wiki.Nodes.N_NEWLINE =>
+            if not Engine.No_Newline then
+               Engine.Output.Write (Wiki.Helpers.LF);
+            else
+               Engine.Output.Write (' ');
+            end if;
 
          when Wiki.Nodes.N_INDENT =>
             Engine.Indent_Level := Node.Level;
