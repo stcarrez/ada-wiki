@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-html -- Wiki HTML renderer
---  Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2018 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2018, 2019 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,6 +44,15 @@ package body Wiki.Render.Html is
    begin
       Engine.Enable_Render_TOC := State;
    end Set_Render_TOC;
+
+   --  ------------------------------
+   --  Set the no-newline mode to avoid emitting newlines (disabled by default).
+   --  ------------------------------
+   procedure Set_No_Newline (Engine : in out Html_Renderer;
+                             Enable : in Boolean) is
+   begin
+      Engine.No_Newline := Enable;
+   end Set_No_Newline;
 
    --  ------------------------------
    --  Get the current section number.
@@ -120,6 +129,11 @@ package body Wiki.Render.Html is
          when Wiki.Nodes.N_LINE_BREAK =>
             Engine.Output.Start_Element ("br");
             Engine.Output.End_Element ("br");
+
+         when Wiki.Nodes.N_NEWLINE =>
+            if not Engine.No_Newline then
+               Engine.Output.Write_Wide_Text (Wiki.Helpers.LF & "");
+            end if;
 
          when Wiki.Nodes.N_HORIZONTAL_RULE =>
             if Engine.Html_Level = 0 or not Engine.Has_Html_Paragraph then
