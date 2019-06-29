@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers -- Wiki parser
---  Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -1483,7 +1483,10 @@ package body Wiki.Parsers is
          end if;
          P.In_Paragraph := True;
       elsif (Length (P.Text) > 0 or not P.Empty_Line) and then not P.Is_Eof then
-         Append (P.Text, LF);
+         Flush_Text (P);
+         if not P.Context.Is_Hidden then
+            P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_NEWLINE);
+         end if;
       end if;
 
       --  Finish the active blockquotes if a new paragraph is started immediately after
