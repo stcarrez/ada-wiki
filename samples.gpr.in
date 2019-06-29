@@ -1,5 +1,5 @@
 with "@UTIL_DIR@config";
-@WITH_ADA_UTIL@
+@WITH_ADA_UTIL_SYS@
 with "wikiada";
 
 project Samples is
