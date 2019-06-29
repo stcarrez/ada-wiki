@@ -58,12 +58,16 @@ AM_GNAT_FIND_PROJECT([ada-util],[Ada Utility Library],[utilada_core],
     UTIL_DIR=${gnat_project_dir_utilada_core}
   ])
   WITH_ADA_UTIL="with \"${UTIL_DIR}utilada_core\";";
+  WITH_ADA_UTIL_SYS="with \"${UTIL_DIR}utilada_sys\";";
+
 else
   WITH_ADA_UTIL=''
+  WITH_ADA_UTIL_SYS=''
   UTIL_DIR=''
 fi
 AC_SUBST(UTIL_DIR)
 AC_SUBST(WITH_ADA_UTIL)
+AC_SUBST(WITH_ADA_UTIL_SYS)
 AC_SUBST(WIKI_USE_ADA_UTIL)
 
 AC_OUTPUT(
