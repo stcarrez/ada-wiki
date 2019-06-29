@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-nodes -- Wiki Document Internal representation
---  Copyright (C) 2016 Stephane Carrez
+--  Copyright (C) 2016, 2019 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -99,6 +99,9 @@ package body Wiki.Documents is
 
          when N_PARAGRAPH =>
             Append (Into, new Node_Type '(Kind => N_PARAGRAPH, Len => 0));
+
+         when N_NEWLINE =>
+            Append (Into, new Node_Type '(Kind => N_NEWLINE, Len => 0));
 
          when N_TOC_DISPLAY =>
             Append (Into, new Node_Type '(Kind => N_TOC_DISPLAY, Len => 0));
