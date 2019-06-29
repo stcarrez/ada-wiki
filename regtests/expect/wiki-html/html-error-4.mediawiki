@@ -10,5 +10,5 @@
  <td>Item 4
  </td><td>Item 5
  </td><tr>
- <td>Item 6<img />
- </td><td>Item 7<hr />4<h1>Title</h1></td></tr></tr></table></i></span></b></p>
+ <td>Item 6<img>
+</img> </td><td>Item 7<hr />4<h1>Title</h1></td></tr></tr></table></i></span></b></p>

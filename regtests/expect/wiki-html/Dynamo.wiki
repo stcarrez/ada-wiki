@@ -67,33 +67,33 @@ not yet exist. If a user is specified in the connection string, a grant command 
 issued to create that user and allow him to access the new database.</p><p>Example of connection string for MySQL database:
 </p><pre>mysql://localhost:3306/my_db?user=joe&amp;password=admin
 </pre><p>The MySQL server is running on localhost and TCP/IP port 3306.  The database name is
-<i>my</i>db <i> and the user
-</i>joe <i> is created for the application with the password
-</i>admin. <i> 
-The database tables are created by using the
-</i>create-name-driver.sql <i> script where
-</i>name <i> represents the Dynamo project name.</i></p><h3 id="section_5_4">The create-plugin command</h3><pre>dynamo create-plugin name [ada | web]
-</pre><p><i>Create a new plugin for the current project.  The plugin sources are created in the
-</i><b><i>plugins/\fIname\fR</i></b><i> directory.  The optional last argument controls whether the new plugin contains
-Ada sources or is a Web plugin.  The plugin can be seen as a separate small
-</i>Dynamo <i> project that is used by a project.  Once create, the other
-</i>Dynamo <i> commands can be executed in the new plugin.</i></p><h3 id="section_5_5">The add-layout command</h3><pre>dynamo add-layout name
-</pre><p><i>Create a new XHTML layout file.  The layout file is an XHTML facelet template which can
-be used by a web page to provide a common presentation layout.  When the project is
-created, at least one layout is proposed.  By adding a new layout, the application
-can provide different presentation styles.  The layout files are stored in the
-</i><b><i>web/WEB-INF/layouts</i></b><i> directory.</i></p><h3 id="section_5_6">The add-page command</h3><pre>dynamo add-page name
-</pre><p><i>Create a new presentation page.  The presentation page is an XHTML facelet file
-which contains HTML code as well as ASF facelet components.  The presentation
-pages are stored in the
-</i><b><i>web</i></b><i> directory.</i></p><h3 id="section_5_7">The add-model command</h3><pre>dynamo add-model [module] name
-</pre><p><i>Create a new database table model mapping.  The model mapping is an XML file that
-describes how to map a database table into an Ada type.
-The model mappings are stored in the
-</i><b><i>db</i></b><i> directory.  The database table is mapped to an Ada tagged record in the package
-</i><b>project-name</b><i>.</i>module<i>.Model\fR if a module name is passed otherwise the package
-will have the name </i><b>project-name</b><b><i>.Model</i></b><i>.  The Ada record will have the name
-</i><b>name</b><b>Ref</b>.</p><h3 id="section_5_8">The add-module command</h3><pre>dynamo add-module name
+<i>my</i>db <i> and the user</i>
+joe <i> is created for the application with the password</i>
+admin. <i> </i>
+<i>The database tables are created by using the</i>
+create-name-driver.sql <i> script where</i>
+name <i> represents the Dynamo project name.</i></p><h3 id="section_5_4">The create-plugin command</h3><pre>dynamo create-plugin name [ada | web]
+</pre><p><i>Create a new plugin for the current project.  The plugin sources are created in the</i>
+<b><i>plugins/\fIname\fR</i></b><i> directory.  The optional last argument controls whether the new plugin contains</i>
+<i>Ada sources or is a Web plugin.  The plugin can be seen as a separate small</i>
+Dynamo <i> project that is used by a project.  Once create, the other</i>
+Dynamo <i> commands can be executed in the new plugin.</i></p><h3 id="section_5_5">The add-layout command</h3><pre>dynamo add-layout name
+</pre><p><i>Create a new XHTML layout file.  The layout file is an XHTML facelet template which can</i>
+<i>be used by a web page to provide a common presentation layout.  When the project is</i>
+<i>created, at least one layout is proposed.  By adding a new layout, the application</i>
+<i>can provide different presentation styles.  The layout files are stored in the</i>
+<b><i>web/WEB-INF/layouts</i></b><i> directory.</i></p><h3 id="section_5_6">The add-page command</h3><pre>dynamo add-page name
+</pre><p><i>Create a new presentation page.  The presentation page is an XHTML facelet file</i>
+<i>which contains HTML code as well as ASF facelet components.  The presentation</i>
+<i>pages are stored in the</i>
+<b><i>web</i></b><i> directory.</i></p><h3 id="section_5_7">The add-model command</h3><pre>dynamo add-model [module] name
+</pre><p><i>Create a new database table model mapping.  The model mapping is an XML file that</i>
+<i>describes how to map a database table into an Ada type.</i>
+<i>The model mappings are stored in the</i>
+<b><i>db</i></b><i> directory.  The database table is mapped to an Ada tagged record in the package</i>
+<b>project-name</b><i>.</i>module<i>.Model\fR if a module name is passed otherwise the package</i>
+<i>will have the name </i><b>project-name</b><b><i>.Model</i></b><i>.  The Ada record will have the name</i>
+<b>name</b><b>Ref</b>.</p><h3 id="section_5_8">The add-module command</h3><pre>dynamo add-module name
 </pre><p>Add a new module to the project.  The module is composed of a set of Ada files
 and a set of XHTML presentation files.  The
 <i>name </i> parameter is the name of the Ada child package that represents the module.

@@ -126,16 +126,16 @@ power transistor controlling the output voltage.</p><p><div class="wiki-img-thum
  <th>0.8mm</th>
 </tr></table><p>The auto layout was made with a smaller clearance (0.3mm) and the routing grid of 0.635mm.  After a 100% complete auto route, the clearance was increased to 0.4mm and the PCB was fixed by hand.  The wire-to-wire clearance was put to 0.5mm and the number of clearance errors reduced to 6 (there are two wires which are at 0.45mm each).  The GND, VS1 and VS2 polygon were drawn at the end (otherwise the auto-router skips the routing of these signals!).</p><p><div class="wiki-img-thumb wiki-img-left"><div class="wiki-img-inner"><img src="lps_rectifier_board_picture.jpg" alt="Positive Rectifier Board PCB Picture" /></div><div class="wiki-img-caption">Positive Rectifier Board PCB Picture</div></div>
 </p><br clear="all" /><h2 id="section_5">Datasheets</h2><p>Below is a collection of datasheets, white papers and articles related to the parts used in the board.
-</p><h3 id="section_5_1">Resistors</h3><ul><li>
-</li><li /></ul><h3 id="section_5_2">Capacitors</h3><ul><li>
+</p><h3 id="section_5_1">Resistors</h3><ul>
+<li /></ul><h3 id="section_5_2">Capacitors</h3><ul>
+<li>
 </li><li>
 </li><li>
-</li><li>
-</li><li /></ul><h3 id="section_5_3">Relays</h3><ul><li>
-</li><li /></ul><h3 id="section_5_4">Semiconductors</h3><ul><li>
-</li><li>
-</li><li /></ul><h3 id="section_5_5">Others</h3><ul><li>
-</li><li /></ul><h2 id="section_6">Changes</h2><p>{|border="1"
+</li><li /></ul><h3 id="section_5_3">Relays</h3><ul>
+<li /></ul><h3 id="section_5_4">Semiconductors</h3><ul>
+<li>
+</li><li /></ul><h3 id="section_5_5">Others</h3><ul>
+<li /></ul><h2 id="section_6">Changes</h2><p>{|border="1"
 |-
 |2007-07-28
 |v1.4.1
