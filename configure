@@ -585,6 +585,7 @@ ac_unique_file="src/wiki.ads"
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
 WIKI_USE_ADA_UTIL
+WITH_ADA_UTIL_SYS
 WITH_ADA_UTIL
 UTIL_DIR
 ADA_PRJ_BASE
@@ -2840,10 +2841,14 @@ $as_echo "no" >&6; }
   fi
 
   WITH_ADA_UTIL="with \"${UTIL_DIR}utilada_core\";";
+  WITH_ADA_UTIL_SYS="with \"${UTIL_DIR}utilada_sys\";";
+
 else
   WITH_ADA_UTIL=''
+  WITH_ADA_UTIL_SYS=''
   UTIL_DIR=''
 fi
+
 
 
 
