@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-text -- Wiki Text renderer
---  Copyright (C) 2011, 2012, 2013, 2015, 2016 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2019 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +32,10 @@ package Wiki.Render.Text is
    --  Set the output stream.
    procedure Set_Output_Stream (Engine : in out Text_Renderer;
                                 Stream : in Streams.Output_Stream_Access);
+
+   --  Set the no-newline mode to produce a single line text (disabled by default).
+   procedure Set_No_Newline (Engine : in out Text_Renderer;
+                             Enable : in Boolean);
 
    --  Render the node instance from the document.
    overriding
@@ -87,6 +91,7 @@ private
       Has_Paragraph  : Boolean := False;
       Need_Paragraph : Boolean := False;
       Empty_Line     : Boolean := True;
+      No_Newline     : Boolean := False;
       Indent_Level   : Natural := 0;
    end record;
 
