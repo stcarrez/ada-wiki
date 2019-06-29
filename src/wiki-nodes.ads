@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki -- Ada Wiki Engine
---  Copyright (C) 2016 Stephane Carrez
+--  Copyright (C) 2016, 2019 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +26,7 @@ package Wiki.Nodes is
                       N_HORIZONTAL_RULE,
                       N_TOC_DISPLAY,
                       N_PARAGRAPH,
+                      N_NEWLINE,
                       N_HEADER,
                       N_TOC,
                       N_TOC_ENTRY,
@@ -41,7 +42,7 @@ package Wiki.Nodes is
                       N_IMAGE);
 
    --  Node kinds which are simple markers in the document.
-   subtype Simple_Node_Kind is Node_Kind range N_LINE_BREAK .. N_PARAGRAPH;
+   subtype Simple_Node_Kind is Node_Kind range N_LINE_BREAK .. N_NEWLINE;
 
    type Node_List_Ref is private;
 
