@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-html -- Wiki HTML renderer
---  Copyright (C) 2011, 2012, 2013, 2015, 2016 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2019 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,6 +41,10 @@ package Wiki.Render.Html is
    --  Set the render TOC flag that controls the TOC rendering.
    procedure Set_Render_TOC (Engine : in out Html_Renderer;
                              State  : in Boolean);
+
+   --  Set the no-newline mode to avoid emitting newlines (disabled by default).
+   procedure Set_No_Newline (Engine : in out Html_Renderer;
+                             Enable : in Boolean);
 
    --  Render the node instance from the document.
    overriding
@@ -99,6 +103,7 @@ private
       Has_Item          : Boolean := False;
       Enable_Render_TOC : Boolean := False;
       TOC_Rendered      : Boolean := False;
+      No_Newline        : Boolean := False;
       Current_Level     : Natural := 0;
       Html_Tag          : Wiki.Html_Tag := BODY_TAG;
       List_Styles       : List_Style_Array := (others => False);
