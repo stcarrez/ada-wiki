@@ -16,6 +16,7 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Wiki.Helpers;
+with Wiki.Nodes.Lists;
 package body Wiki.Render.Html is
 
    --  ------------------------------
@@ -387,9 +388,9 @@ package body Wiki.Render.Html is
          Engine.Output.End_Element ("a");
       end Render_Entry;
 
-      Toc : constant Wiki.Nodes.Node_List_Ref := Doc.Get_TOC;
+      Toc : constant Wiki.Nodes.Lists.Node_List_Ref := Doc.Get_TOC;
    begin
-      if Wiki.Nodes.Length (Toc) <= 3 then
+      if Wiki.Nodes.Lists.Length (Toc) <= 3 then
          Engine.Enable_Render_TOC := False;
 
       elsif not Engine.TOC_Rendered then
@@ -397,7 +398,7 @@ package body Wiki.Render.Html is
          Engine.Current_Section := (others => 0);
          Engine.Output.Start_Element ("div");
          Engine.Output.Write_Attribute ("class", "wiki-toc");
-         Wiki.Nodes.Iterate (Toc, Render_Entry'Access);
+         Wiki.Nodes.Lists.Iterate (Toc, Render_Entry'Access);
          Set_Current_Level (0);
          Engine.Output.End_Element ("div");
          Engine.TOC_Rendered := True;
