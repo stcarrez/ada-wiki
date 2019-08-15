@@ -1,5 +1,5 @@
 -----------------------------------------------------------------------
---  wiki -- Ada Wiki Engine
+--  wiki-nodes -- Wiki Document Internal representation
 --  Copyright (C) 2016, 2019 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
@@ -17,7 +17,6 @@
 -----------------------------------------------------------------------
 with Wiki.Attributes;
 with Wiki.Strings;
-with Util.Refs;
 package Wiki.Nodes is
 
    pragma Preelaborate;
@@ -43,8 +42,6 @@ package Wiki.Nodes is
 
    --  Node kinds which are simple markers in the document.
    subtype Simple_Node_Kind is Node_Kind range N_LINE_BREAK .. N_NEWLINE;
-
-   type Node_List_Ref is private;
 
    type Node_List is limited private;
    type Node_List_Access is access all Node_List;
@@ -92,25 +89,8 @@ package Wiki.Nodes is
    procedure Append (Into : in out Node_List;
                      Node : in Node_Type_Access);
 
-   --  Append a node to the node list.
-   procedure Append (Into : in out Node_List_Ref;
-                     Node : in Node_Type_Access);
-
-   --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
-   --  each node instance.
-   procedure Iterate (List    : in Node_List_Access;
-                      Process : not null access procedure (Node : in Node_Type));
-
-   --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
-   --  each node instance.
-   procedure Iterate (List    : in Node_List_Ref;
-                      Process : not null access procedure (Node : in Node_Type));
-
-   --  Returns True if the list reference is empty.
-   function Is_Empty (List : in Node_List_Ref) return Boolean;
-
-   --  Get the number of nodes in the list.
-   function Length (List : in Node_List_Ref) return Natural;
+   --  Finalize the node list to release the allocated memory.
+   procedure Finalize (List : in out Node_List);
 
 private
 
@@ -127,22 +107,10 @@ private
       List  : Node_Array (1 .. Max);
    end record;
 
-   type Node_List is limited new Util.Refs.Ref_Entity with record
+   type Node_List is limited record
       Current : Node_List_Block_Access;
       Length  : Natural := 0;
       First   : aliased Node_List_Block (NODE_LIST_BLOCK_SIZE);
    end record;
-
-   --  Finalize the node list to release the allocated memory.
-   overriding
-   procedure Finalize (List : in out Node_List);
-
-   --  Append a node to the node list.
---   procedure Append (Into : in out Node_List;
---                     Node : in Node_Type_Access);
-
-   package Node_List_Refs is new Util.Refs.References (Node_List, Node_List_Access);
-
-   type Node_List_Ref is new Node_List_Refs.Ref with null record;
 
 end Wiki.Nodes;
