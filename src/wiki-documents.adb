@@ -19,6 +19,7 @@
 package body Wiki.Documents is
 
    use Wiki.Nodes;
+   use Wiki.Nodes.Lists;
 
    --  ------------------------------
    --  Append a HTML tag start node to the document.
@@ -182,7 +183,9 @@ package body Wiki.Documents is
                                     Level => Level, others => <>));
    end Add_Blockquote;
 
+   --  ------------------------------
    --  Add a text block that is pre-formatted.
+   --  ------------------------------
    procedure Add_Preformatted (Into     : in out Document;
                                Text     : in Wiki.Strings.WString;
                                Format   : in Wiki.Strings.WString) is
@@ -207,7 +210,7 @@ package body Wiki.Documents is
    --  ------------------------------
    function Is_Empty (Doc : in Document) return Boolean is
    begin
-      return Wiki.Nodes.Is_Empty (Doc.Nodes);
+      return Wiki.Nodes.Lists.Is_Empty (Doc.Nodes);
    end Is_Empty;
 
    --  ------------------------------
@@ -238,9 +241,9 @@ package body Wiki.Documents is
    --  Get the table of content node associated with the document.
    --  ------------------------------
    procedure Get_TOC (Doc : in out Document;
-                      TOC : out Wiki.Nodes.Node_List_Ref) is
+                      TOC : out Wiki.Nodes.Lists.Node_List_Ref) is
    begin
-      if Wiki.Nodes.Is_Empty (Doc.TOC) then
+      if Wiki.Nodes.Lists.Is_Empty (Doc.TOC) then
          Append (Doc.TOC, new Node_Type '(Kind => N_TOC, Len => 0, others => <>));
       end if;
       TOC := Doc.TOC;
@@ -249,7 +252,7 @@ package body Wiki.Documents is
    --  ------------------------------
    --  Get the table of content node associated with the document.
    --  ------------------------------
-   function Get_TOC (Doc : in Document) return Wiki.Nodes.Node_List_Ref is
+   function Get_TOC (Doc : in Document) return Wiki.Nodes.Lists.Node_List_Ref is
    begin
       return Doc.TOC;
    end Get_TOC;
