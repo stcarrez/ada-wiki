@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-documents -- Wiki document
---  Copyright (C) 2011, 2015, 2016, 2018 Stephane Carrez
+--  Copyright (C) 2011, 2015, 2016, 2018, 2019 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@
 
 with Wiki.Strings;
 with Wiki.Attributes;
-with Wiki.Nodes;
+with Wiki.Nodes.Lists;
 
 --  === Documents ===
 --  The <tt>Document</tt> type is used to hold a Wiki document that was parsed by the parser
@@ -119,10 +119,10 @@ package Wiki.Documents is
 
    --  Get the table of content node associated with the document.
    procedure Get_TOC (Doc : in out Document;
-                      TOC : out Wiki.Nodes.Node_List_Ref);
+                      TOC : out Wiki.Nodes.Lists.Node_List_Ref);
 
    --  Get the table of content node associated with the document.
-   function Get_TOC (Doc : in Document) return Wiki.Nodes.Node_List_Ref;
+   function Get_TOC (Doc : in Document) return Wiki.Nodes.Lists.Node_List_Ref;
 
 private
 
@@ -131,8 +131,8 @@ private
                      Node : in Wiki.Nodes.Node_Type_Access);
 
    type Document is tagged record
-      Nodes       : Wiki.Nodes.Node_List_Ref;
-      TOC         : Wiki.Nodes.Node_List_Ref;
+      Nodes       : Wiki.Nodes.Lists.Node_List_Ref;
+      TOC         : Wiki.Nodes.Lists.Node_List_Ref;
       Current     : Wiki.Nodes.Node_Type_Access;
       Using_TOC   : Boolean := False;
       Visible_TOC : Boolean := True;
