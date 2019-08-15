@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render -- Wiki renderer
---  Copyright (C) 2015, 2016 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2019 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +15,7 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
+with Wiki.Nodes.Lists;
 package body Wiki.Render is
 
    --  ------------------------------
@@ -34,7 +35,7 @@ package body Wiki.Render is
 
    begin
       if List /= null then
-         Wiki.Nodes.Iterate (List, Process'Access);
+         Wiki.Nodes.Lists.Iterate (List, Process'Access);
       end if;
    end Render;
 
