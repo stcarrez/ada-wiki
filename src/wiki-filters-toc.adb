@@ -16,7 +16,7 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Strings.Wide_Wide_Fixed;
-with Wiki.Nodes;
+with Wiki.Nodes.Lists;
 package body Wiki.Filters.TOC is
 
    --  ------------------------------
@@ -61,10 +61,10 @@ package body Wiki.Filters.TOC is
                          Document  : in out Wiki.Documents.Document;
                          Header    : in Wiki.Strings.WString;
                          Level     : in Natural) is
-      T : Wiki.Nodes.Node_List_Ref;
+      T : Wiki.Nodes.Lists.Node_List_Ref;
    begin
       Document.Get_TOC (T);
-      Wiki.Nodes.Append (T, new Wiki.Nodes.Node_Type '(Kind   => Wiki.Nodes.N_TOC_ENTRY,
+      Wiki.Nodes.Lists.Append (T, new Wiki.Nodes.Node_Type '(Kind   => Wiki.Nodes.N_TOC_ENTRY,
                                                        Len    => Header'Length,
                                                        Header => Header,
                                                        Level  => Level));
