@@ -1,0 +1,18 @@
+{{block.mediawiki|Title|
+ Description
+ }}
+ * [[Link1]]
+ * [[Link2]]
+
+Para
+
+{{template-7.mediawiki|test}}
+
+* Item1
+* Item2
+* Item3
+
+
+Para
+
+</div>
