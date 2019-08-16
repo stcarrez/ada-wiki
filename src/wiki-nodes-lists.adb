@@ -36,7 +36,7 @@ package body Wiki.Nodes.Lists is
    --  ------------------------------
    procedure Iterate (List    : in Node_List_Accessor;
                       Process : not null access procedure (Node : in Node_Type)) is
-      Block : Node_List_Block_Access := List.First'Access;
+      Block : access Node_List_Block := List.First'Access;
    begin
       loop
          for I in 1 .. Block.Last loop
