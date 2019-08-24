@@ -51,11 +51,11 @@ AC_MSG_RESULT(${WIKI_USE_ADA_UTIL})
 # Ada Util library
 ##########################################
 if test T${WIKI_USE_ADA_UTIL} = Tyes; then
-AM_GNAT_FIND_PROJECT([ada-util],[Ada Utility Library],[utilada_core],
+AM_GNAT_FIND_PROJECT([ada-util],[Ada Utility Library],[utilada_base],
   [git@github.com:stcarrez/ada-util.git],
   [Building Ada Wiki requires the Ada Utility Library.],
   [
-    UTIL_DIR=${gnat_project_dir_utilada_core}
+    UTIL_DIR=${ac_cv_gnat_project_dir_utilada_base}
   ])
   WITH_ADA_UTIL="with \"${UTIL_DIR}utilada_core\";";
   WITH_ADA_UTIL_SYS="with \"${UTIL_DIR}utilada_sys\";";
