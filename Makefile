@@ -19,7 +19,7 @@ endif
 # Build and run the unit tests
 test:	build-test
 ifeq ($(HAVE_ADA_UTIL),yes)
-	bin/wiki_harness -xml wiki-aunit.xml
+	bin/wiki_harness -l $(NAME): -xml wiki-aunit.xml
 else
 	@echo "WARNING: Tests are not compiled and not executed because Ada Utility Library is not used"
 endif
