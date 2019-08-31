@@ -4,7 +4,7 @@ with "@UTIL_DIR@config";
 library project WikiAda is
    Version := "@WIKI_VERSION@";
    Library_Dir := "lib";
-   Library_Type : Config.Library_Type_Type := external ("WIKI_LIBRARY_TYPE", "static");
+   Library_Type : Config.Library_Type_Type := external ("WIKI_LIBRARY_TYPE", "@DEFAULT_LIBRARY_TYPE@");
 
    Use_Ada_Util : Config.Yes_NO := "@WIKI_USE_ADA_UTIL@";
 
