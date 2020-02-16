@@ -1,5 +1,5 @@
 #!/bin/sh
-NAME=wikiada.cov
+NAME=wiki.cov
 lcov --quiet --base-directory . --directory . -c -o $NAME
 lcov --quiet --remove $NAME "/usr*" -o $NAME
 lcov --quiet --remove $NAME "/build*" -o $NAME
