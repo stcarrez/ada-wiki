@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers -- Wiki parser
---  Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019 Stephane Carrez
+--  Copyright (C) 2011 - 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -123,6 +123,12 @@ package body Wiki.Parsers is
    --    ((url|alt text|position||description))
    procedure Parse_Image (P     : in out Parser;
                           Token : in Wiki.Strings.WChar);
+
+   --  Parse a markdown image.
+   --  Example:
+   --    ![title](link)
+   procedure Parse_Markdown_Image (P     : in out Parser;
+                                   Token : in Wiki.Strings.WChar);
 
    --  Parse a quote.
    --  Example:
@@ -879,6 +885,57 @@ package body Wiki.Parsers is
    end Parse_Link;
 
    --  ------------------------------
+   --  Parse a markdown link.
+   --  Example:
+   --    [title](url)
+   --  ------------------------------
+   procedure Parse_Markdown_Link (P     : in out Parser;
+                                  Token : in Wiki.Strings.WChar) is
+
+      --  Parse a title/link component
+      procedure Parse_Link_Token (Into   : in out Wiki.Strings.UString;
+                                   Marker : in Wiki.Strings.WChar);
+
+      Link       : Wiki.Strings.UString;
+      Title      : Wiki.Strings.UString;
+      C          : Wiki.Strings.WChar;
+
+      procedure Parse_Link_Token (Into   : in out Wiki.Strings.UString;
+                                   Marker : in Wiki.Strings.WChar) is
+      begin
+         loop
+            Peek (P, C);
+            if C = P.Escape_Char then
+               Peek (P, C);
+            else
+               exit when C = LF or C = CR or C = Marker;
+            end if;
+            Wiki.Strings.Append (Into, C);
+         end loop;
+      end Parse_Link_Token;
+
+   begin
+      Parse_Link_Token (Title, ']');
+      Peek (P, C);
+      if C /= '(' then
+         Append (P.Text, '[');
+         Append (P.Text, Wiki.Strings.To_WString (Title));
+         Append (P.Text, ']');
+         Put_Back (P, C);
+         return;
+      end if;
+      Parse_Link_Token (Link, ')');
+      Flush_Text (P);
+      if not P.Context.Is_Hidden then
+         Wiki.Attributes.Clear (P.Attributes);
+         Wiki.Attributes.Append (P.Attributes, HREF_ATTR, Link);
+         P.Context.Filters.Add_Link (P.Document, Wiki.Strings.To_WString (Title),
+                                     P.Attributes);
+      end if;
+      P.Empty_Line := False;
+   end Parse_Markdown_Link;
+
+   --  ------------------------------
    --  Returns true if we are included from another wiki content.
    --  ------------------------------
    function Is_Included (P : in Parser) return Boolean is
@@ -1184,6 +1241,58 @@ package body Wiki.Parsers is
          Put_Back (P, C);
       end if;
    end Parse_Image;
+
+   --  ------------------------------
+   --  Parse a markdown image.
+   --  Example:
+   --    ![title](link)
+   --  ------------------------------
+   procedure Parse_Markdown_Image (P     : in out Parser;
+                                   Token : in Wiki.Strings.WChar) is
+
+      --  Parse a image component
+      procedure Parse_Image_Token (Into   : in out Wiki.Strings.UString;
+                                   Marker : in Wiki.Strings.WChar);
+
+      Link       : Wiki.Strings.UString;
+      Title      : Wiki.Strings.UString;
+      C          : Wiki.Strings.WChar;
+
+      procedure Parse_Image_Token (Into   : in out Wiki.Strings.UString;
+                                   Marker : in Wiki.Strings.WChar) is
+      begin
+         loop
+            Peek (P, C);
+            if C = P.Escape_Char then
+               Peek (P, C);
+            else
+               exit when C = LF or C = CR or C = Marker;
+            end if;
+            Wiki.Strings.Append (Into, C);
+         end loop;
+      end Parse_Image_Token;
+
+   begin
+      Peek (P, C);
+      if C /= '[' then
+         Append (P.Text, Token);
+         Put_Back (P, C);
+         return;
+      end if;
+
+      Parse_Image_Token (Title, ']');
+      Peek (P, C);
+      if C = '(' then
+         Parse_Image_Token (Link, ')');
+      end if;
+      Flush_Text (P);
+      if not P.Context.Is_Hidden then
+         Wiki.Attributes.Clear (P.Attributes);
+         Wiki.Attributes.Append (P.Attributes, "src", Link);
+         P.Context.Filters.Add_Image (P.Document, Wiki.Strings.To_WString (Title),
+                                      P.Attributes);
+      end if;
+   end Parse_Markdown_Image;
 
    procedure Toggle_Format (P      : in out Parser;
                             Format : in Format_Type) is
@@ -1637,10 +1746,12 @@ package body Wiki.Parsers is
          Character'Pos ('-') => Parse_Double_Strikeout'Access,
          Character'Pos ('+') => Parse_Double_Strikeout'Access,
          Character'Pos (',') => Parse_Double_Subscript'Access,
-         Character'Pos ('[') => Parse_Link'Access,
+         Character'Pos ('!') => Parse_Markdown_Image'Access,
+         Character'Pos ('[') => Parse_Markdown_Link'Access,
          Character'Pos ('\') => Parse_Line_Break'Access,
          Character'Pos ('{') => Parse_Image'Access,
          Character'Pos ('%') => Parse_Line_Break'Access,
+         Character'Pos ('>') => Parse_Blockquote'Access,
          Character'Pos ('<') => Parse_Maybe_Html'Access,
          Character'Pos ('`') => Parse_Preformatted'Access,
          others => Parse_Text'Access
