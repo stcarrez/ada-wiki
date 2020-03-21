@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  Render Tests - Unit tests for AWA Wiki rendering
---  Copyright (C) 2013, 2016 Stephane Carrez
+--  Copyright (C) 2013, 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -221,6 +221,8 @@ package body Wiki.Tests is
                      Format := Wiki.SYNTAX_PHPBB;
                   elsif Ext = "mediawiki" then
                      Format := Wiki.SYNTAX_MEDIA_WIKI;
+                  elsif Ext = "markdown" then
+                     Format := Wiki.SYNTAX_MARKDOWN;
                   else
                      Format := Wiki.SYNTAX_MIX;
                   end if;
