@@ -1,5 +1,6 @@
 Version 1.2.1   -
   - Minor configuration and code coverage support
+  - Corrections in the Markdown syntax parser
 
 Version 1.2.0   - Dec 2019
   - Rename GNAT project into wikiada
