@@ -130,6 +130,9 @@ package body Wiki.Parsers is
    procedure Parse_Markdown_Image (P     : in out Parser;
                                    Token : in Wiki.Strings.WChar);
 
+   procedure Parse_Markdown_Link (P     : in out Parser;
+                                  Token : in Wiki.Strings.WChar);
+
    --  Parse a quote.
    --  Example:
    --    {{name}}
@@ -891,6 +894,7 @@ package body Wiki.Parsers is
    --  ------------------------------
    procedure Parse_Markdown_Link (P     : in out Parser;
                                   Token : in Wiki.Strings.WChar) is
+      pragma Unreferenced (Token);
 
       --  Parse a title/link component
       procedure Parse_Link_Token (Into   : in out Wiki.Strings.UString;
