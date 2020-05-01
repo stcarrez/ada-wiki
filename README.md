@@ -24,7 +24,7 @@ for the implementation of the blog and wiki online plugins.
 - Minor configuration and code coverage support
 - Corrections in the Markdown syntax parser
 
-[List all versions](https://github.com/stcarrez/ada-security/blob/master/NEWS.md)
+[List all versions](https://github.com/stcarrez/ada-wiki/blob/master/NEWS.md)
 
 # Build
 
