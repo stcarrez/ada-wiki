@@ -1,5 +1,6 @@
 # Ada Wiki
 
+[![Alire](https://img.shields.io/endpoint?url=https://alire.ada.dev/badges/wikiada.json)](https://alire.ada.dev/crates/wikiada)
 [![Build Status](https://img.shields.io/jenkins/s/http/jenkins.vacs.fr/Ada-Wiki.svg)](https://jenkins.vacs.fr/job/Ada-Wiki/)
 [![Test Status](https://img.shields.io/jenkins/t/http/jenkins.vacs.fr/Ada-Wiki.svg)](https://jenkins.vacs.fr/job/Ada-Wiki/)
 [![codecov](https://codecov.io/gh/stcarrez/ada-wiki/branch/master/graph/badge.svg)](https://codecov.io/gh/stcarrez/ada-wiki)
