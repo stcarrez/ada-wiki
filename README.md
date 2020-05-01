@@ -3,9 +3,9 @@
 [![Build Status](https://img.shields.io/jenkins/s/http/jenkins.vacs.fr/Ada-Wiki.svg)](https://jenkins.vacs.fr/job/Ada-Wiki/)
 [![Test Status](https://img.shields.io/jenkins/t/http/jenkins.vacs.fr/Ada-Wiki.svg)](https://jenkins.vacs.fr/job/Ada-Wiki/)
 [![codecov](https://codecov.io/gh/stcarrez/ada-wiki/branch/master/graph/badge.svg)](https://codecov.io/gh/stcarrez/ada-wiki)
-[![Download](https://img.shields.io/badge/download-1.2.0-brightgreen.svg)](http://download.vacs.fr/ada-wiki/ada-wiki-1.2.0.tar.gz)
+[![Download](https://img.shields.io/badge/download-1.2.1-brightgreen.svg)](http://download.vacs.fr/ada-wiki/ada-wiki-1.2.1.tar.gz)
 [![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](LICENSE)
-![Commits](https://img.shields.io/github/commits-since/stcarrez/ada-wiki/1.2.0.svg)
+![Commits](https://img.shields.io/github/commits-since/stcarrez/ada-wiki/1.2.1.svg)
 
 Ada Wiki is a small library that provides and focuses only on the Wiki engine.
 
@@ -16,8 +16,17 @@ The library allows to:
 * Filter out the wiki, HTML or text through customizable filters,
 * Render the wiki text in HTML, text or another wiki format
 
-The Ada Wiki library is used by Ada Web Application for the
-implementation of the blog and wiki online plugins.
+The Ada Wiki library is used by [Ada Web Application](https://github.com/stcarrez/ada-awa)
+for the implementation of the blog and wiki online plugins.
+
+## Version 1.2.1 - May 2020
+
+- Minor configuration and code coverage support
+- Corrections in the Markdown syntax parser
+
+[List all versions](https://github.com/stcarrez/ada-security/blob/master/NEWS.md)
+
+# Build
 
 To use Ada Wiki library, configure as follows:
 ```
