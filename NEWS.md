@@ -1,4 +1,4 @@
-Version 1.2.1   -
+Version 1.2.1   - May 2020
   - Minor configuration and code coverage support
   - Corrections in the Markdown syntax parser
 
