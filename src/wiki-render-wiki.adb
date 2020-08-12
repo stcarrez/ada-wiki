@@ -23,6 +23,10 @@ package body Wiki.Render.Wiki is
 
    HEADER_CREOLE             : aliased constant Strings.WString := "=";
    BOLD_CREOLE               : aliased constant Strings.WString := "**";
+   ITALIC_CREOLE             : aliased constant Strings.WString := "//";
+   SUPERSCRIPT_CREOLE        : aliased constant Strings.WString := "^^";
+   SUBSCRIPT_CREOLE          : aliased constant Strings.WString := ",,";
+   UNDERLINE_CREOLE          : aliased constant Strings.WString := "__";
    LINE_BREAK_CREOLE         : aliased constant Strings.WString := "%%%";
    IMG_START_CREOLE          : aliased constant Strings.WString := "{{";
    IMG_END_CREOLE            : aliased constant Strings.WString := "}}";
@@ -37,6 +41,11 @@ package body Wiki.Render.Wiki is
    ESCAPE_CREOLE             : aliased constant Strings.WString := "~";
 
    HEADER_DOTCLEAR           : aliased constant Strings.WString := "!";
+   BOLD_DOTCLEAR             : aliased constant Strings.WString := "__";
+   ITALIC_DOTCLEAR           : aliased constant Strings.WString := "''";
+   INSERT_DOTCLEAR           : aliased constant Strings.WString := "++";
+   DELETE_DOTCLEAR           : aliased constant Strings.WString := "--";
+   CODE_DOTCLEAR             : aliased constant Strings.WString := "@@";
    IMG_START_DOTCLEAR        : aliased constant Strings.WString := "((";
    IMG_END_DOTCLEAR          : aliased constant Strings.WString := "))";
    LINK_START_DOTCLEAR       : aliased constant Strings.WString := "[";
@@ -47,6 +56,7 @@ package body Wiki.Render.Wiki is
 
    LINE_BREAK_MEDIAWIKI      : aliased constant Strings.WString := "<br />";
    BOLD_MEDIAWIKI            : aliased constant Strings.WString := "'''";
+   ITALIC_MEDIAWIKI          : aliased constant Strings.WString := "''";
    PREFORMAT_START_MEDIAWIKI : aliased constant Strings.WString := "<pre>";
    PREFORMAT_END_MEDIAWIKI   : aliased constant Strings.WString := "</pre>";
    IMG_START_MEDIAWIKI       : aliased constant Strings.WString := "[[File:";
@@ -63,8 +73,14 @@ package body Wiki.Render.Wiki is
       Engine.Syntax := Format;
       case Format is
          when SYNTAX_DOTCLEAR =>
-            Engine.Style_Start_Tags (BOLD)   := BOLD_CREOLE'Access;
-            Engine.Style_End_Tags (BOLD)     := BOLD_CREOLE'Access;
+            Engine.Style_Start_Tags (BOLD)   := BOLD_DOTCLEAR'Access;
+            Engine.Style_End_Tags (BOLD)     := BOLD_DOTCLEAR'Access;
+            Engine.Style_Start_Tags (ITALIC) := ITALIC_DOTCLEAR'Access;
+            Engine.Style_End_Tags (ITALIC)   := ITALIC_DOTCLEAR'Access;
+            Engine.Style_Start_Tags (STRIKEOUT) := DELETE_DOTCLEAR'Access;
+            Engine.Style_End_Tags (STRIKEOUT)   := DELETE_DOTCLEAR'Access;
+            Engine.Style_Start_Tags (CODE) := CODE_DOTCLEAR'Access;
+            Engine.Style_End_Tags (CODE)   := CODE_DOTCLEAR'Access;
             Engine.Tags (Header_Start) := HEADER_DOTCLEAR'Access;
             Engine.Tags (Line_Break)   := LINE_BREAK_CREOLE'Access;
             Engine.Tags (Img_Start)    := IMG_START_DOTCLEAR'Access;
@@ -85,6 +101,8 @@ package body Wiki.Render.Wiki is
          when SYNTAX_MEDIA_WIKI =>
             Engine.Style_Start_Tags (BOLD)   := BOLD_MEDIAWIKI'Access;
             Engine.Style_End_Tags (BOLD)     := BOLD_MEDIAWIKI'Access;
+            Engine.Style_Start_Tags (ITALIC) := ITALIC_MEDIAWIKI'Access;
+            Engine.Style_End_Tags (ITALIC)   := ITALIC_MEDIAWIKI'Access;
             Engine.Tags (Header_Start) := HEADER_CREOLE'Access;
             Engine.Tags (Header_End)   := HEADER_CREOLE'Access;
             Engine.Tags (Line_Break)   := LINE_BREAK_MEDIAWIKI'Access;
@@ -104,6 +122,14 @@ package body Wiki.Render.Wiki is
          when others =>
             Engine.Style_Start_Tags (BOLD)   := BOLD_CREOLE'Access;
             Engine.Style_End_Tags (BOLD)     := BOLD_CREOLE'Access;
+            Engine.Style_Start_Tags (ITALIC) := ITALIC_CREOLE'Access;
+            Engine.Style_End_Tags (ITALIC)   := ITALIC_CREOLE'Access;
+            Engine.Style_Start_Tags (SUPERSCRIPT) := SUPERSCRIPT_CREOLE'Access;
+            Engine.Style_End_Tags (SUPERSCRIPT)   := SUPERSCRIPT_CREOLE'Access;
+            Engine.Style_Start_Tags (SUBSCRIPT) := SUBSCRIPT_CREOLE'Access;
+            Engine.Style_End_Tags (SUBSCRIPT)   := SUBSCRIPT_CREOLE'Access;
+            Engine.Style_Start_Tags (CODE) := UNDERLINE_CREOLE'Access;
+            Engine.Style_End_Tags (CODE)   := UNDERLINE_CREOLE'Access;
             Engine.Tags (Header_Start) := HEADER_CREOLE'Access;
             Engine.Tags (Header_End)   := HEADER_CREOLE'Access;
             Engine.Tags (Line_Break)   := LINE_BREAK_CREOLE'Access;
@@ -450,7 +476,7 @@ package body Wiki.Render.Wiki is
                Engine.Current_Style (ITALIC) := True;
             end if;
 
-         when U_TAG =>
+         when U_TAG | TT_TAG | CODE_TAG | KBD_TAG =>
             if not Engine.Keep_Content then
                Engine.Current_Style (CODE) := True;
             end if;
@@ -531,7 +557,7 @@ package body Wiki.Render.Wiki is
                Engine.Current_Style (ITALIC) := False;
             end if;
 
-         when U_TAG =>
+         when U_TAG | TT_TAG | CODE_TAG | KBD_TAG =>
             if not Engine.Keep_Content then
                Engine.Current_Style (CODE) := False;
             end if;
