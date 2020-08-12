@@ -84,5 +84,6 @@ A complete online Wiki application is part of AWA (https://github.com/stcarrez/a
 
 The Ada Wiki sources as well as a wiki documentation is provided on:
 
-   https://github.com/stcarrez/ada-wiki/wiki
+* https://github.com/stcarrez/ada-wiki/wiki
 
+* [Using the Ada Wiki Engine](https://blog.vacs.fr/vacs/blogs/post.html?post=2016/04/30/Using-the-Ada-Wiki-Engine)
