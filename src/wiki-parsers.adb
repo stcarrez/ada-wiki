@@ -134,6 +134,9 @@ package body Wiki.Parsers is
    procedure Parse_Markdown_Link (P     : in out Parser;
                                   Token : in Wiki.Strings.WChar);
 
+   procedure Parse_Markdown_Escape (P     : in out Parser;
+                                    Token : in Wiki.Strings.WChar);
+
    --  Parse a quote.
    --  Example:
    --    {{name}}
@@ -328,150 +331,6 @@ package body Wiki.Parsers is
          end if;
       end if;
    end Skip_End_Of_Line;
-
-   --  ------------------------------
-   --  Parse a pre-formatted text which starts either by a space or by a sequence
-   --  of characters.  Example:
-   --    {{{
-   --    pre-formatted
-   --    }}}
-   --    ' pre-formattted'
-   --  ------------------------------
-   procedure Parse_Preformatted (P     : in out Parser;
-                                 Token : in Wiki.Strings.WChar) is
-      use Ada.Wide_Wide_Characters.Handling;
-      procedure Add_Preformatted (Content : in Wiki.Strings.WString);
-
-      C          : Wiki.Strings.WChar;
-      Stop_Token : Wiki.Strings.WChar;
-      Format     : Wiki.Strings.UString;
-      Col        : Natural;
-      Is_Html    : Boolean := False;
-
-      procedure Add_Preformatted (Content : in Wiki.Strings.WString) is
-      begin
-         P.Context.Filters.Add_Preformatted (P.Document, Content,
-                                             Wiki.Strings.To_WString (Format));
-      end Add_Preformatted;
-
-      procedure Add_Preformatted is
-         new Wiki.Strings.Wide_Wide_Builders.Get (Add_Preformatted);
-      pragma Inline (Add_Preformatted);
-
-   begin
-      if Token /= ' ' then
-         Peek (P, C);
-         if C /= Token then
-            Parse_Text (P, Token);
-            Put_Back (P, C);
-            return;
-         end if;
-         Peek (P, C);
-         if C /= Token then
-            Parse_Text (P, Token);
-            Parse_Text (P, Token);
-            Put_Back (P, C);
-            return;
-         end if;
-      elsif not P.Empty_Line or else (not P.Is_Dotclear and P.Context.Syntax /= SYNTAX_MEDIA_WIKI)
-        or else not P.Document.Is_Root_Node
-      then
-         Parse_Text (P, Token);
-         return;
-      end if;
-      Flush_Text (P);
-      Flush_List (P);
-      if Token = ' ' then
-         Col := P.Preformat_Column + 1;
-         while not P.Is_Eof loop
-            Peek (P, C);
-            if Col < P.Preformat_Column then
-               if C /= ' ' then
-                  Put_Back (P, C);
-                  exit;
-               end if;
-               Col := Col + 1;
-            elsif C = LF or C = CR then
-               Col := 0;
-               --  Check for CR + LF and treat it as a single LF.
-               if C = CR and then not P.Is_Eof then
-                  Peek (P, C);
-                  if C = LF then
-                     Append (P.Text, C);
-                  else
-                     Put_Back (P, C);
-                     Append (P.Text, LF);
-                  end if;
-               else
-                  Append (P.Text, C);
-               end if;
-            else
-               Col := Col + 1;
-               Append (P.Text, C);
-            end if;
-         end loop;
-      else
-         Peek (P, C);
-         if Token = '{' then
-            if C /= LF and C /= CR then
-               Put_Back (P, C);
-               P.Format (CODE) := True;
-               return;
-            end if;
-         elsif Token = '}' then
-            Put_Back (P, C);
-            P.Format (CODE) := True;
-            return;
-         elsif Token /= ' ' then
-            while not P.Is_Eof and C /= LF and C /= CR loop
-               if Strings.Is_Alphanumeric (C) then
-                  Wiki.Strings.Append (Format, To_Lower (C));
-               end if;
-               Peek (P, C);
-            end loop;
-         end if;
-         if Token = '{' then
-            Stop_Token := '}';
-         else
-            Stop_Token := Token;
-         end if;
-         Flush_List (P);
-         Is_Html := Wiki.Strings.To_WString (Format) = "html";
-         Col := 0;
-         while not P.Is_Eof loop
-            Peek (P, C);
-            if Stop_Token = C and Col = 0 then
-               Peek (P, C);
-               if C = Stop_Token then
-                  Peek (P, C);
-                  exit when C = Stop_Token;
-               end if;
-               Append (P.Text, Stop_Token);
-               Col := Col + 1;
-            elsif C = LF or C = CR then
-               Col := 0;
-            else
-               Col := Col + 1;
-            end if;
-            if Is_Html and C = '<' then
-               Wiki.Parsers.Html.Parse_Element (P);
-            else
-               Append (P.Text, C);
-            end if;
-         end loop;
-         Skip_End_Of_Line (P);
-      end if;
-      P.Empty_Line := True;
-
-      if not Is_Html then
-         Add_Preformatted (P.Text);
-         Clear (P.Text);
-         if not P.Context.Is_Hidden then
-            P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
-         end if;
-         P.In_Paragraph := True;
-      end if;
-   end Parse_Preformatted;
 
    --  ------------------------------
    --  Parse a wiki heading.  The heading could start with '=' or '!'.
@@ -944,6 +803,38 @@ package body Wiki.Parsers is
    end Parse_Markdown_Link;
 
    --  ------------------------------
+   --  Parse a line break or escape character for Markdown.
+   --  Example:
+   --     \
+   --     \`
+   --  ------------------------------
+   procedure Parse_Markdown_Escape (P     : in out Parser;
+                                    Token : in Wiki.Strings.WChar) is
+      C : Wiki.Strings.WChar;
+   begin
+      Peek (P, C);
+
+      case C is
+         when LF | CR =>
+            P.Empty_Line := True;
+            Flush_Text (P);
+            if not P.Context.Is_Hidden then
+               P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_LINE_BREAK);
+            end if;
+
+         when '\' | '`' | '*' | '_' | '{' | '}'
+            | '[' | ']' | '(' | ')' | '#' | '+'
+            | '-' | '.' | '!' =>
+            Parse_Text (P, C);
+
+         when others =>
+            Parse_Text (P, Token);
+            Put_Back (P, C);
+
+      end case;
+   end Parse_Markdown_Escape;
+
+   --  ------------------------------
    --  Returns true if we are included from another wiki content.
    --  ------------------------------
    function Is_Included (P : in Parser) return Boolean is
@@ -1404,6 +1295,154 @@ package body Wiki.Parsers is
       Put_Back (P, C);
    end Parse_Bold_Italic;
 
+   --  ------------------------------
+   --  Parse a pre-formatted text which starts either by a space or by a sequence
+   --  of characters.  Example:
+   --    {{{
+   --    pre-formatted
+   --    }}}
+   --    ' pre-formattted'
+   --  ------------------------------
+   procedure Parse_Preformatted (P     : in out Parser;
+                                 Token : in Wiki.Strings.WChar) is
+      use Ada.Wide_Wide_Characters.Handling;
+      procedure Add_Preformatted (Content : in Wiki.Strings.WString);
+
+      C          : Wiki.Strings.WChar;
+      Stop_Token : Wiki.Strings.WChar;
+      Format     : Wiki.Strings.UString;
+      Col        : Natural;
+      Is_Html    : Boolean := False;
+
+      procedure Add_Preformatted (Content : in Wiki.Strings.WString) is
+      begin
+         P.Context.Filters.Add_Preformatted (P.Document, Content,
+                                             Wiki.Strings.To_WString (Format));
+      end Add_Preformatted;
+
+      procedure Add_Preformatted is
+         new Wiki.Strings.Wide_Wide_Builders.Get (Add_Preformatted);
+      pragma Inline (Add_Preformatted);
+
+   begin
+      if Token /= ' ' then
+         Peek (P, C);
+         if C /= Token then
+            if Token = '`' then
+               Parse_Single_Code (P, Token);
+            else
+               Parse_Text (P, Token);
+            end if;
+            Put_Back (P, C);
+            return;
+         end if;
+         Peek (P, C);
+         if C /= Token then
+            Parse_Text (P, Token);
+            Parse_Text (P, Token);
+            Put_Back (P, C);
+            return;
+         end if;
+      elsif not P.Empty_Line or else (not P.Is_Dotclear and P.Context.Syntax /= SYNTAX_MEDIA_WIKI)
+        or else not P.Document.Is_Root_Node
+      then
+         Parse_Text (P, Token);
+         return;
+      end if;
+      Flush_Text (P);
+      Flush_List (P);
+      if Token = ' ' then
+         Col := P.Preformat_Column + 1;
+         while not P.Is_Eof loop
+            Peek (P, C);
+            if Col < P.Preformat_Column then
+               if C /= ' ' then
+                  Put_Back (P, C);
+                  exit;
+               end if;
+               Col := Col + 1;
+            elsif C = LF or C = CR then
+               Col := 0;
+               --  Check for CR + LF and treat it as a single LF.
+               if C = CR and then not P.Is_Eof then
+                  Peek (P, C);
+                  if C = LF then
+                     Append (P.Text, C);
+                  else
+                     Put_Back (P, C);
+                     Append (P.Text, LF);
+                  end if;
+               else
+                  Append (P.Text, C);
+               end if;
+            else
+               Col := Col + 1;
+               Append (P.Text, C);
+            end if;
+         end loop;
+      else
+         Peek (P, C);
+         if Token = '{' then
+            if C /= LF and C /= CR then
+               Put_Back (P, C);
+               P.Format (CODE) := True;
+               return;
+            end if;
+         elsif Token = '}' then
+            Put_Back (P, C);
+            P.Format (CODE) := True;
+            return;
+         elsif Token /= ' ' then
+            while not P.Is_Eof and C /= LF and C /= CR loop
+               if Strings.Is_Alphanumeric (C) then
+                  Wiki.Strings.Append (Format, To_Lower (C));
+               end if;
+               Peek (P, C);
+            end loop;
+         end if;
+         if Token = '{' then
+            Stop_Token := '}';
+         else
+            Stop_Token := Token;
+         end if;
+         Flush_List (P);
+         Is_Html := Wiki.Strings.To_WString (Format) = "html";
+         Col := 0;
+         while not P.Is_Eof loop
+            Peek (P, C);
+            if Stop_Token = C and Col = 0 then
+               Peek (P, C);
+               if C = Stop_Token then
+                  Peek (P, C);
+                  exit when C = Stop_Token;
+               end if;
+               Append (P.Text, Stop_Token);
+               Col := Col + 1;
+            elsif C = LF or C = CR then
+               Col := 0;
+            else
+               Col := Col + 1;
+            end if;
+            if Is_Html and C = '<' then
+               Wiki.Parsers.Html.Parse_Element (P);
+            else
+               Append (P.Text, C);
+            end if;
+         end loop;
+         Skip_End_Of_Line (P);
+      end if;
+      P.Empty_Line := True;
+
+      if not Is_Html then
+         Add_Preformatted (P.Text);
+         Clear (P.Text);
+         if not P.Context.Is_Hidden then
+            P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
+         end if;
+         P.In_Paragraph := True;
+      end if;
+   end Parse_Preformatted;
+
    procedure Parse_List (P     : in out Parser;
                          Token : in Wiki.Strings.WChar) is
       C     : Wiki.Strings.WChar;
@@ -1756,7 +1795,7 @@ package body Wiki.Parsers is
          Character'Pos (',') => Parse_Double_Subscript'Access,
          Character'Pos ('!') => Parse_Markdown_Image'Access,
          Character'Pos ('[') => Parse_Markdown_Link'Access,
-         Character'Pos ('\') => Parse_Line_Break'Access,
+         Character'Pos ('\') => Parse_Markdown_Escape'Access,
          Character'Pos ('{') => Parse_Image'Access,
          Character'Pos ('%') => Parse_Line_Break'Access,
          Character'Pos ('>') => Parse_Blockquote'Access,
