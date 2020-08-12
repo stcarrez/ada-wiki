@@ -12,7 +12,7 @@ Ada Wiki is a small library that provides and focuses only on the Wiki engine.
 
 The library allows to:
 
-* Parse a wiki text such as Mediawiki, Creole, PhpBB, Dotclear and Google Code
+* Parse a wiki text such as Markdown, Mediawiki, Creole, PhpBB, Dotclear and Google Code
 * Parse HTML content in embedded wiki text,
 * Filter out the wiki, HTML or text through customizable filters,
 * Render the wiki text in HTML, text or another wiki format
