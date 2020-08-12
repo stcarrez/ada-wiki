@@ -21,7 +21,7 @@ Section bloc:
  L2: line 2
  L3: line 3
 Formatting
-`code`
+code
 strong
 __underline__
 A link (https://link-url/)

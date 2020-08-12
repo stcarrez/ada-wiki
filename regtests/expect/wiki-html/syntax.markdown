@@ -6,7 +6,7 @@
 *# item 3.1
 *# item 3.2</p><h1 id="section_2">num 1</h1><h1 id="section_3">num 2</h1><p>Section bloc:</p><p> L1: line 1
  L2: line 2
- L3: line 3</p><p>Formatting</p><p>`code`</p><p><b>strong</b></p><p>__underline__</p><p><a href="https://link-url/">A link</a></p><pre>  Some code
+ L3: line 3</p><p>Formatting</p><p><tt>code</tt></p><p><b>strong</b></p><p>__underline__</p><p><a href="https://link-url/">A link</a></p><pre>  Some code
 
   Pre-formatted
 </pre><p>P1</p><blockquote><p>A quote 1
