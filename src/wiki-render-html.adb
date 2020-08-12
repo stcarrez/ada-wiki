@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-html -- Wiki HTML renderer
---  Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2018, 2019 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2018, 2019, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -153,7 +153,8 @@ package body Wiki.Render.Html is
             end if;
 
          when Wiki.Nodes.N_PREFORMAT =>
-            Engine.Render_Preformatted (Node.Preformatted, "");
+            Engine.Render_Preformatted (Node.Preformatted,
+                                        Strings.To_WString (Node.Language));
 
          when Wiki.Nodes.N_INDENT =>
             null;
@@ -715,7 +716,14 @@ package body Wiki.Render.Html is
          Engine.Output.Write (Text);
       else
          Engine.Output.Start_Element ("pre");
-         Engine.Output.Write_Wide_Text (Text);
+         if Format'Length > 0 then
+            Engine.Output.Start_Element ("code");
+            Engine.Output.Write_Attribute ("class", "lang-" & Strings.To_String (Format));
+            Engine.Output.Write_Wide_Text (Text);
+            Engine.Output.End_Element ("code");
+         else
+            Engine.Output.Write_Wide_Text (Text);
+         end if;
          Engine.Output.End_Element ("pre");
       end if;
    end Render_Preformatted;
