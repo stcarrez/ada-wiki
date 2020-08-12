@@ -16,6 +16,7 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Strings.Wide_Wide_Fixed;
+with Ada.Wide_Wide_Characters.Handling;
 with Interfaces;
 
 with Wiki.Parsers.Html;
@@ -338,6 +339,7 @@ package body Wiki.Parsers is
    --  ------------------------------
    procedure Parse_Preformatted (P     : in out Parser;
                                  Token : in Wiki.Strings.WChar) is
+      use Ada.Wide_Wide_Characters.Handling;
       procedure Add_Preformatted (Content : in Wiki.Strings.WString);
 
       C          : Wiki.Strings.WChar;
@@ -422,7 +424,9 @@ package body Wiki.Parsers is
             return;
          elsif Token /= ' ' then
             while not P.Is_Eof and C /= LF and C /= CR loop
-               Wiki.Strings.Append (Format, C);
+               if Strings.Is_Alphanumeric (C) then
+                  Wiki.Strings.Append (Format, To_Lower (C));
+               end if;
                Peek (P, C);
             end loop;
          end if;
