@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki -- Ada Wiki Engine
---  Copyright (C) 2015, 2016 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -147,6 +147,9 @@ package Wiki is
       --  Section 4.11 Scripting
       SCRIPT_TAG, NOSCRIPT_TAG,
       TEMPLATE_TAG, CANVAS_TAG,
+
+      --  Deprecated tags but still used widely
+      TT_TAG,
 
       --  Unknown tags
       UNKNOWN_TAG
