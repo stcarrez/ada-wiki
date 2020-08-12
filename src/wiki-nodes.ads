@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-nodes -- Wiki Document Internal representation
---  Copyright (C) 2016, 2019 Stephane Carrez
+--  Copyright (C) 2016, 2019, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -70,6 +70,7 @@ package Wiki.Nodes is
             Parent     : Node_Type_Access;
 
          when N_PREFORMAT =>
+            Language     : Wiki.Strings.UString;
             Preformatted : Wiki.Strings.WString (1 .. Len);
 
          when N_TOC =>
