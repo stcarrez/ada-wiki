@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki -- Ada Wiki Engine
---  Copyright (C) 2015, 2016, 2018 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2018, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -128,6 +128,7 @@ package body Wiki is
    NOSCRIPT_TAG_NAME            : aliased constant String := "noscript";
    TEMPLATE_TAG_NAME            : aliased constant String := "template";
    CANVAS_TAG_NAME              : aliased constant String := "canvas";
+   TT_TAG_NAME                  : aliased constant String := "tt";
    UNKNOWN_TAG_NAME             : aliased constant String := "unknown";
 
    Tag_Names : constant Tag_Array :=
@@ -240,6 +241,7 @@ package body Wiki is
       NOSCRIPT_TAG              => NOSCRIPT_TAG_NAME'Access,
       TEMPLATE_TAG              => TEMPLATE_TAG_NAME'Access,
       CANVAS_TAG                => CANVAS_TAG_NAME'Access,
+      TT_TAG                    => TT_TAG_NAME'Access,
       UNKNOWN_TAG               => UNKNOWN_TAG_NAME'Access
      );
 
@@ -385,6 +387,8 @@ package body Wiki is
                      return TD_TAG;
                   when 'h' | 'H' =>
                      return TH_TAG;
+                  when 't' | 'T' =>
+                     return TT_TAG;
                   when others =>
                      return UNKNOWN_TAG;
                end case;
