@@ -9,4 +9,4 @@ _   : Low dash / Underscore
 +   : Sign more
 -   : Less sign / hyphen
 !   : Exclamation dot
-.   : Dot</p>
+.   : Dot</p><p>Not escaped: \a \s \b \$</p>

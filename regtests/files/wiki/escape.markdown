@@ -10,3 +10,7 @@
 \-   : Less sign / hyphen
 \!   : Exclamation dot
 \.   : Dot
+
+
+Not escaped: \a \s \b \$
+
