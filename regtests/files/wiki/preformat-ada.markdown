@@ -1,0 +1,25 @@
+This is a paragraph:
+
+```ada
+procedure Test is
+begin
+   null;
+end Test;
+```
+Second bloc
+
+``` Ada
+procedure Test is
+begin
+   null;
+end Test;
+```
+Third bloc
+``` [Ada]
+procedure Test is
+begin
+   null;
+end Test;
+```
+
+A last paragraph.
