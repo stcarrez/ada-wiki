@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-nodes -- Wiki Document Internal representation
---  Copyright (C) 2016, 2019 Stephane Carrez
+--  Copyright (C) 2016, 2019, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -189,10 +189,10 @@ package body Wiki.Documents is
    procedure Add_Preformatted (Into     : in out Document;
                                Text     : in Wiki.Strings.WString;
                                Format   : in Wiki.Strings.WString) is
-      pragma Unreferenced (Format);
    begin
       Append (Into, new Node_Type '(Kind => N_PREFORMAT, Len => Text'Length,
-                                    Preformatted => Text));
+                                    Preformatted => Text,
+                                    Language => Strings.To_UString (Format)));
    end Add_Preformatted;
 
    --  ------------------------------
