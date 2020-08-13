@@ -1,0 +1,7 @@
+Include 1 (img):
+
+<<img.creole>>
+
+Include 2 (pre):
+
+<<pre.creole>>

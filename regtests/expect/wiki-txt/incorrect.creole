@@ -11,8 +11,9 @@ Last section
 
 ======== Big header
 
-pipe
-pipe
+pipe|url}}
+
+pipe|url
 This is not a pre-section
 }}}
 

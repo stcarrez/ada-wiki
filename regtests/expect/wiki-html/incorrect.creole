@@ -3,5 +3,6 @@ XXX
 End of hr rule.</p><ul><li>[mylink|\||\|))
 </li><li>[{link-2|\|\|))
 </li><li>{[link-3|\|\|</li></ul><p>Last section
-</p><h6>======== Big header</h6><ul><li><img src="quote-name\" alt="pipe" /></li><li><img src="quote-name\" alt="pipe" /></li></ul><p><img src="[" />This is not a pre-section
+</p><h6>======== Big header</h6><ul><li><img src="quote-name\" alt="pipe" />|url}}
+</li><li><img src="quote-name\" alt="pipe" />|url</li></ul><p><img src="[" />This is not a pre-section
 }}}</p>

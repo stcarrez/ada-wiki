@@ -40,10 +40,9 @@ A link
 title (A link)
 
 
-Alt text}}Alt text
+Alt textAlt text|center}}
 
-A pre-formatted section 
+//A// **pre**-formatted section 
+== [[Nowiki]]
 
-[[Nowiki]]
-}}}
 
