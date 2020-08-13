@@ -125,6 +125,16 @@ package body Wiki.Parsers is
    procedure Parse_Image (P     : in out Parser;
                           Token : in Wiki.Strings.WChar);
 
+   --  Parse an image or a pre-formatted section.
+   --  Example:
+   --    {{url|alt text}}
+   --    {{{text}}}
+   --    {{{
+   --    pre-formatted
+   --    }}}
+   procedure Parse_Creole_Image_Or_Preformatted (P     : in out Parser;
+                                                 Token : in Wiki.Strings.WChar);
+
    --  Parse a markdown image.
    --  Example:
    --    ![title](link)
@@ -156,6 +166,9 @@ package body Wiki.Parsers is
 
    procedure Parse_Preformatted (P     : in out Parser;
                                  Token : in Wiki.Strings.WChar);
+
+   procedure Parse_Preformatted_Block (P     : in out Parser;
+                                       Token : in Wiki.Strings.WChar);
 
    --  Parse a blockquote.
    --  Example:
@@ -1142,6 +1155,83 @@ package body Wiki.Parsers is
    end Parse_Image;
 
    --  ------------------------------
+   --  Parse an image or a pre-formatted section.
+   --  Example:
+   --    {{url|alt text}}
+   --    {{{text}}}
+   --    {{{
+   --    pre-formatted
+   --    }}}
+   --  ------------------------------
+   procedure Parse_Creole_Image_Or_Preformatted (P     : in out Parser;
+                                                 Token : in Wiki.Strings.WChar) is
+
+      --  Parse a image component
+      procedure Parse_Image_Token (Into : in out Wiki.Strings.UString);
+
+      use type Wiki.Strings.UString;
+
+      Link       : Wiki.Strings.UString;
+      Alt        : Wiki.Strings.UString;
+      C          : Wiki.Strings.WChar;
+      Format     : Wiki.Strings.UString;
+
+      procedure Parse_Image_Token (Into : in out Wiki.Strings.UString) is
+      begin
+         loop
+            Peek (P, C);
+            if C = P.Escape_Char then
+               Peek (P, C);
+            else
+               exit when C = LF or C = CR or C = '}' or C = '|';
+            end if;
+            Wiki.Strings.Append (Into, C);
+         end loop;
+      end Parse_Image_Token;
+
+   begin
+      Peek (P, C);
+      if C /= Token then
+         Append (P.Text, Token);
+         Put_Back (P, C);
+         return;
+      end if;
+
+      Peek (P, C);
+      if C = Token then
+         Peek (P, C);
+         if C /= LF and C /= CR then
+            Put_Back (P, C);
+            P.Format (CODE) := True;
+            return;
+         end if;
+
+         Put_Back (P, C);
+         Parse_Preformatted_Block (P, Token);
+         return;
+      end if;
+      Put_Back (P, C);
+
+      Parse_Image_Token (Link);
+      if C = '|' then
+         Parse_Image_Token (Alt);
+      end if;
+      if C /= '}' then
+         Put_Back (P, C);
+      end if;
+      Flush_Text (P);
+      if not P.Context.Is_Hidden then
+         Wiki.Attributes.Clear (P.Attributes);
+         Wiki.Attributes.Append (P.Attributes, "src", Link);
+         P.Context.Filters.Add_Image (P.Document, Wiki.Strings.To_WString (Alt), P.Attributes);
+      end if;
+      Peek (P, C);
+      if C /= '}' then
+         Put_Back (P, C);
+      end if;
+   end Parse_Creole_Image_Or_Preformatted;
+
+   --  ------------------------------
    --  Parse a markdown image.
    --  Example:
    --    ![title](link)
@@ -1343,12 +1433,64 @@ package body Wiki.Parsers is
             Put_Back (P, C);
             return;
          end if;
+         Peek (P, C);
+
+         if Token = '{' then
+            if C /= LF and C /= CR then
+               Put_Back (P, C);
+               Flush_Text (P);
+               P.Format (CODE) := True;
+               return;
+            end if;
+            Put_Back (P, C);
+         elsif Token = '}' then
+            Put_Back (P, C);
+            Flush_Text (P);
+            P.Format (CODE) := True;
+            return;
+         else
+            Put_Back (P, C);
+         end if;
+
       elsif not P.Empty_Line or else (not P.Is_Dotclear and P.Context.Syntax /= SYNTAX_MEDIA_WIKI)
         or else not P.Document.Is_Root_Node
       then
          Parse_Text (P, Token);
          return;
       end if;
+
+      Parse_Preformatted_Block (P, Token);
+   end Parse_Preformatted;
+
+   --  ------------------------------
+   --  Parse a pre-formatted text which starts either by a space or by a sequence
+   --  of characters.  Example:
+   --    {{{
+   --    pre-formatted
+   --    }}}
+   --  ------------------------------
+   procedure Parse_Preformatted_Block (P     : in out Parser;
+                                       Token : in Wiki.Strings.WChar) is
+      use Ada.Wide_Wide_Characters.Handling;
+      procedure Add_Preformatted (Content : in Wiki.Strings.WString);
+
+      C          : Wiki.Strings.WChar;
+      Stop_Token : Wiki.Strings.WChar;
+      Format     : Wiki.Strings.UString;
+      Col        : Natural;
+      Is_Html    : Boolean := False;
+
+      procedure Add_Preformatted (Content : in Wiki.Strings.WString) is
+      begin
+         P.Context.Filters.Add_Preformatted (P.Document, Content,
+                                             Wiki.Strings.To_WString (Format));
+      end Add_Preformatted;
+
+      procedure Add_Preformatted is
+         new Wiki.Strings.Wide_Wide_Builders.Get (Add_Preformatted);
+      pragma Inline (Add_Preformatted);
+
+   begin
       Flush_Text (P);
       Flush_List (P);
       if Token = ' ' then
@@ -1382,24 +1524,12 @@ package body Wiki.Parsers is
          end loop;
       else
          Peek (P, C);
-         if Token = '{' then
-            if C /= LF and C /= CR then
-               Put_Back (P, C);
-               P.Format (CODE) := True;
-               return;
+         while not P.Is_Eof and C /= LF and C /= CR loop
+            if Strings.Is_Alphanumeric (C) then
+               Wiki.Strings.Append (Format, To_Lower (C));
             end if;
-         elsif Token = '}' then
-            Put_Back (P, C);
-            P.Format (CODE) := True;
-            return;
-         elsif Token /= ' ' then
-            while not P.Is_Eof and C /= LF and C /= CR loop
-               if Strings.Is_Alphanumeric (C) then
-                  Wiki.Strings.Append (Format, To_Lower (C));
-               end if;
-               Peek (P, C);
-            end loop;
-         end if;
+            Peek (P, C);
+         end loop;
          if Token = '{' then
             Stop_Token := '}';
          else
@@ -1441,7 +1571,7 @@ package body Wiki.Parsers is
          end if;
          P.In_Paragraph := True;
       end if;
-   end Parse_Preformatted;
+   end Parse_Preformatted_Block;
 
    procedure Parse_List (P     : in out Parser;
                          Token : in Wiki.Strings.WChar) is
@@ -1771,7 +1901,7 @@ package body Wiki.Parsers is
          Character'Pos ('[') => Parse_Link'Access,
          Character'Pos ('\') => Parse_Line_Break'Access,
          Character'Pos ('#') => Parse_List'Access,
-         Character'Pos ('{') => Parse_Image'Access,
+         Character'Pos ('{') => Parse_Creole_Image_Or_Preformatted'Access,
          Character'Pos ('%') => Parse_Line_Break'Access,
          Character'Pos (';') => Parse_Item'Access,
          Character'Pos ('<') => Parse_Template'Access,
@@ -1796,7 +1926,6 @@ package body Wiki.Parsers is
          Character'Pos ('!') => Parse_Markdown_Image'Access,
          Character'Pos ('[') => Parse_Markdown_Link'Access,
          Character'Pos ('\') => Parse_Markdown_Escape'Access,
-         Character'Pos ('{') => Parse_Image'Access,
          Character'Pos ('%') => Parse_Line_Break'Access,
          Character'Pos ('>') => Parse_Blockquote'Access,
          Character'Pos ('<') => Parse_Maybe_Html'Access,
@@ -2114,6 +2243,7 @@ package body Wiki.Parsers is
 
          when SYNTAX_MARKDOWN =>
             Engine.Preformat_Column := 4;
+            Engine.Escape_Char := '\';
 
          when others =>
             null;
