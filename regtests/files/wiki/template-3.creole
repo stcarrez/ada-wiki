@@ -1,0 +1,7 @@
+Call Template with parameter:
+
+* No param: <<template-1-param.creole>>
+* One param: <<template-1-param.creole This~ is~ first~ parameter>>
+* Two params: <<template-1-param.creole First This~ is~ second~ parameter>>
+
+En<<this template does not exist.creole Parm1 Param2 Param3>>d
