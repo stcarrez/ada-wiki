@@ -1169,12 +1169,9 @@ package body Wiki.Parsers is
       --  Parse a image component
       procedure Parse_Image_Token (Into : in out Wiki.Strings.UString);
 
-      use type Wiki.Strings.UString;
-
       Link       : Wiki.Strings.UString;
       Alt        : Wiki.Strings.UString;
       C          : Wiki.Strings.WChar;
-      Format     : Wiki.Strings.UString;
 
       procedure Parse_Image_Token (Into : in out Wiki.Strings.UString) is
       begin
@@ -1395,25 +1392,7 @@ package body Wiki.Parsers is
    --  ------------------------------
    procedure Parse_Preformatted (P     : in out Parser;
                                  Token : in Wiki.Strings.WChar) is
-      use Ada.Wide_Wide_Characters.Handling;
-      procedure Add_Preformatted (Content : in Wiki.Strings.WString);
-
       C          : Wiki.Strings.WChar;
-      Stop_Token : Wiki.Strings.WChar;
-      Format     : Wiki.Strings.UString;
-      Col        : Natural;
-      Is_Html    : Boolean := False;
-
-      procedure Add_Preformatted (Content : in Wiki.Strings.WString) is
-      begin
-         P.Context.Filters.Add_Preformatted (P.Document, Content,
-                                             Wiki.Strings.To_WString (Format));
-      end Add_Preformatted;
-
-      procedure Add_Preformatted is
-         new Wiki.Strings.Wide_Wide_Builders.Get (Add_Preformatted);
-      pragma Inline (Add_Preformatted);
-
    begin
       if Token /= ' ' then
          Peek (P, C);
@@ -1834,8 +1813,12 @@ package body Wiki.Parsers is
    --  ------------------------------
    procedure Parse_Maybe_Html (P     : in out Parser;
                                Token : in Wiki.Strings.WChar) is
-      pragma Unreferenced (Token);
    begin
+      --  Don't parse HTML if a formatting text mode is setup.
+      if (for some Mode of P.Format => Mode) then
+         Parse_Text (P, Token);
+         return;
+      end if;
       Wiki.Parsers.Html.Parse_Element (P);
    end Parse_Maybe_Html;
 
