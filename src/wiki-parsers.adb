@@ -147,6 +147,12 @@ package body Wiki.Parsers is
    procedure Parse_Markdown_Escape (P     : in out Parser;
                                     Token : in Wiki.Strings.WChar);
 
+   --  Parse a markdown table/column.
+   --  Example:
+   --    | col1 | col2 | ... | colN |
+   procedure Parse_Markdown_Table (P     : in out Parser;
+                                   Token : in Wiki.Strings.WChar);
+
    --  Parse a quote.
    --  Example:
    --    {{name}}
@@ -846,6 +852,38 @@ package body Wiki.Parsers is
 
       end case;
    end Parse_Markdown_Escape;
+
+   --  Parse a markdown table/column.
+   --  Example:
+   --    | col1 | col2 | ... | colN |
+   procedure Parse_Markdown_Table (P     : in out Parser;
+                                   Token : in Wiki.Strings.WChar) is
+      C : Wiki.Strings.WChar;
+   begin
+      if not P.In_Table then
+         if not P.Empty_Line then
+            P.Parse_Text (Token);
+            return;
+         end if;
+         P.In_Table := True;
+         P.Context.Filters.Add_Row (P.Document);
+         Wiki.Attributes.Clear (P.Attributes);
+         P.Context.Filters.Add_Column (P.Document, P.Attributes);
+         return;
+      end if;
+      Flush_Text (P);
+      Flush_List (P);
+      Peek (P, C);
+      if C = CR or C = LF then
+         Put_Back (P, C);
+         return;
+      end if;
+      if P.Empty_Line then
+         P.Context.Filters.Add_Row (P.Document);
+      end if;
+      Wiki.Attributes.Clear (P.Attributes);
+      P.Context.Filters.Add_Column (P.Document, P.Attributes);
+   end Parse_Markdown_Table;
 
    --  ------------------------------
    --  Returns true if we are included from another wiki content.
@@ -1736,6 +1774,12 @@ package body Wiki.Parsers is
          Flush_Text (P);
          Flush_List (P);
 
+         --  Finish the active table.
+         if P.In_Table then
+            P.Context.Filters.Finish_Table (P.Document);
+            P.In_Table := False;
+         end if;
+
          --  Finish the active blockquotes if a new paragraph is started on an empty line.
          if P.Quote_Level > 0 then
             if not P.Context.Is_Hidden then
@@ -1913,6 +1957,7 @@ package body Wiki.Parsers is
          Character'Pos ('>') => Parse_Blockquote'Access,
          Character'Pos ('<') => Parse_Maybe_Html'Access,
          Character'Pos ('`') => Parse_Preformatted'Access,
+         Character'Pos ('|') => Parse_Markdown_Table'Access,
          others => Parse_Text'Access
         );
 
