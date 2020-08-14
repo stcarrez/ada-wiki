@@ -116,6 +116,7 @@ private
       Is_Eof              : Boolean := False;
       In_Paragraph        : Boolean := False;
       In_List             : Boolean := False;
+      In_Table            : Boolean := False;
       Need_Paragraph      : Boolean := True;
       Link_Double_Bracket : Boolean := False;
       Link_No_Space       : Boolean := False;
