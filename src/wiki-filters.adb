@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters -- Wiki filters
---  Copyright (C) 2015, 2016 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -82,7 +82,7 @@ package body Wiki.Filters is
    --  ------------------------------
    procedure Pop_Node (Filter   : in out Filter_Type;
                        Document : in out Wiki.Documents.Document;
-                       Tag     : in Wiki.Html_Tag) is
+                       Tag      : in Wiki.Html_Tag) is
    begin
       if Filter.Next /= null then
          Filter.Next.Pop_Node (Document, Tag);
@@ -181,6 +181,47 @@ package body Wiki.Filters is
          Document.Add_Preformatted (Text, Format);
       end if;
    end Add_Preformatted;
+
+   --  ------------------------------
+   --  Add a new row to the current table.
+   --  ------------------------------
+   procedure Add_Row (Filter   : in out Filter_Type;
+                      Document : in out Wiki.Documents.Document) is
+   begin
+      if Filter.Next /= null then
+         Filter.Next.Add_Row (Document);
+      else
+         Document.Add_Row;
+      end if;
+   end Add_Row;
+
+   --  ------------------------------
+   --  Add a column to the current table row.  The column is configured with the
+   --  given attributes.  The column content is provided through calls to Append.
+   --  ------------------------------
+   procedure Add_Column (Filter     : in out Filter_Type;
+                         Document   : in out Wiki.Documents.Document;
+                         Attributes : in out Wiki.Attributes.Attribute_List) is
+   begin
+      if Filter.Next /= null then
+         Filter.Next.Add_Column (Document, Attributes);
+      else
+         Document.Add_Column (Attributes);
+      end if;
+   end Add_Column;
+
+   --  ------------------------------
+   --  Finish the creation of the table.
+   --  ------------------------------
+   procedure Finish_Table (Filter   : in out Filter_Type;
+                           Document : in out Wiki.Documents.Document) is
+   begin
+      if Filter.Next /= null then
+         Filter.Next.Finish_Table (Document);
+      else
+         Document.Finish_Table;
+      end if;
+   end Finish_Table;
 
    --  ------------------------------
    --  Finish the document after complete wiki text has been parsed.
