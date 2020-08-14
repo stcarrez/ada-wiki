@@ -68,6 +68,7 @@ package body Wiki.Documents is
    begin
       Append (Into, new Node_Type '(Kind   => N_HEADER,
                                     Len    => Header'Length,
+                                    Parent => Into.Current,
                                     Header => Header,
                                     Level  => Level));
    end Append;
@@ -93,19 +94,24 @@ package body Wiki.Documents is
    begin
       case Kind is
          when N_LINE_BREAK =>
-            Append (Into, new Node_Type '(Kind => N_LINE_BREAK, Len => 0));
+            Append (Into, new Node_Type '(Kind => N_LINE_BREAK, Len => 0,
+                                          Parent => Into.Current));
 
          when N_HORIZONTAL_RULE =>
-            Append (Into, new Node_Type '(Kind => N_HORIZONTAL_RULE, Len => 0));
+            Append (Into, new Node_Type '(Kind => N_HORIZONTAL_RULE, Len => 0,
+                                          Parent => Into.Current));
 
          when N_PARAGRAPH =>
-            Append (Into, new Node_Type '(Kind => N_PARAGRAPH, Len => 0));
+            Append (Into, new Node_Type '(Kind => N_PARAGRAPH, Len => 0,
+                                          Parent => Into.Current));
 
          when N_NEWLINE =>
-            Append (Into, new Node_Type '(Kind => N_NEWLINE, Len => 0));
+            Append (Into, new Node_Type '(Kind => N_NEWLINE, Len => 0,
+                                          Parent => Into.Current));
 
          when N_TOC_DISPLAY =>
-            Append (Into, new Node_Type '(Kind => N_TOC_DISPLAY, Len => 0));
+            Append (Into, new Node_Type '(Kind => N_TOC_DISPLAY, Len => 0,
+                                          Parent => Into.Current));
             Into.Using_TOC := True;
 
       end  case;
@@ -119,6 +125,7 @@ package body Wiki.Documents is
                      Format : in Format_Map) is
    begin
       Append (Into, new Node_Type '(Kind => N_TEXT, Len => Text'Length,
+                                    Parent => Into.Current,
                                     Text => Text, Format => Format));
    end Append;
 
@@ -130,6 +137,7 @@ package body Wiki.Documents is
                        Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       Append (Into, new Node_Type '(Kind => N_LINK, Len => Name'Length,
+                                    Parent => Into.Current,
                                     Title => Name, Link_Attr => Attributes));
    end Add_Link;
 
@@ -141,6 +149,7 @@ package body Wiki.Documents is
                         Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       Append (Into, new Node_Type '(Kind => N_IMAGE, Len => Name'Length,
+                                    Parent => Into.Current,
                                     Title => Name, Link_Attr => Attributes));
    end Add_Image;
 
@@ -152,6 +161,7 @@ package body Wiki.Documents is
                         Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       Append (Into, new Node_Type '(Kind => N_QUOTE, Len => Name'Length,
+                                    Parent => Into.Current,
                                     Title => Name, Link_Attr => Attributes));
    end Add_Quote;
 
@@ -165,9 +175,11 @@ package body Wiki.Documents is
    begin
       if Ordered then
          Append (Into, new Node_Type '(Kind => N_NUM_LIST, Len => 0,
+                                       Parent => Into.Current,
                                        Level => Level, others => <>));
       else
          Append (Into, new Node_Type '(Kind => N_LIST, Len => 0,
+                                       Parent => Into.Current,
                                        Level => Level, others => <>));
       end if;
    end Add_List_Item;
@@ -180,6 +192,7 @@ package body Wiki.Documents is
                              Level    : in Natural) is
    begin
       Append (Into, new Node_Type '(Kind => N_BLOCKQUOTE, Len => 0,
+                                    Parent => Into.Current,
                                     Level => Level, others => <>));
    end Add_Blockquote;
 
@@ -191,9 +204,89 @@ package body Wiki.Documents is
                                Format   : in Wiki.Strings.WString) is
    begin
       Append (Into, new Node_Type '(Kind => N_PREFORMAT, Len => Text'Length,
+                                    Parent => Into.Current,
                                     Preformatted => Text,
                                     Language => Strings.To_UString (Format)));
    end Add_Preformatted;
+
+   --  ------------------------------
+   --  Add a new row to the current table.
+   --  ------------------------------
+   procedure Add_Row (Into : in out Document) is
+      Table : Node_Type_Access;
+      Row   : Node_Type_Access;
+   begin
+      --  Identify the current table.
+      Table := Into.Current;
+      while Table /= null and then Table.Kind /= N_TABLE loop
+         Table := Table.Parent;
+      end loop;
+
+      --  Create the current table.
+      if Table = null then
+         Table := new Node_Type '(Kind       => N_TABLE,
+                                  Len        => 0,
+                                  Tag_Start  => TABLE_TAG,
+                                  Children   => null,
+                                  Parent     => Into.Current,
+                                  others     => <>);
+         Append (Into, Table);
+      end if;
+
+      --  Add the row.
+      Row := new Node_Type '(Kind       => N_ROW,
+                             Len        => 0,
+                             Tag_Start  => TR_TAG,
+                             Children   => null,
+                             Parent     => Table,
+                             others     => <>);
+      Append (Table, Row);
+      Into.Current := Row;
+   end Add_Row;
+
+   --  ------------------------------
+   --  Add a column to the current table row.  The column is configured with the
+   --  given attributes.  The column content is provided through calls to Append.
+   --  ------------------------------
+   procedure Add_Column (Into : in out Document;
+                         Attributes : in out Wiki.Attributes.Attribute_List) is
+      Row  : Node_Type_Access;
+      Col  : Node_Type_Access;
+   begin
+      --  Identify the current row.
+      Row := Into.Current;
+      while Row /= null and then Row.Kind /= N_ROW loop
+         Row := Row.Parent;
+      end loop;
+
+      --  Add the new column.
+      Col := new Node_Type '(Kind       => N_COLUMN,
+                             Len        => 0,
+                             Tag_Start  => TD_TAG,
+                             Children   => null,
+                             Parent     => Row,
+                             Attributes => Attributes);
+      Append (Row, Col);
+      Into.Current := Col;
+   end Add_Column;
+
+   --  ------------------------------
+   --  Finish the creation of the table.
+   --  ------------------------------
+   procedure Finish_Table (Into : in out Document) is
+      Table : Node_Type_Access;
+   begin
+      --  Identify the current table.
+      Table := Into.Current;
+      while Table /= null and then Table.Kind /= N_TABLE loop
+         Table := Table.Parent;
+      end loop;
+      if Table /= null then
+         Into.Current := Table.Parent;
+      else
+         Into.Current := null;
+      end if;
+   end Finish_Table;
 
    --  ------------------------------
    --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
