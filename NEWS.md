@@ -1,3 +1,7 @@
+Version 1.3.0   -
+  - Add support for Markdown tables
+  - Fixes in the Markdown and Creole syntax parsers
+
 Version 1.2.1   - May 2020
   - Minor configuration and code coverage support
   - Corrections in the Markdown syntax parser

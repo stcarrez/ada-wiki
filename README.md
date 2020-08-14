@@ -20,10 +20,10 @@ The library allows to:
 The Ada Wiki library is used by [Ada Web Application](https://github.com/stcarrez/ada-awa)
 for the implementation of the blog and wiki online plugins.
 
-## Version 1.2.1 - May 2020
+## Version 1.3.0 -
 
-- Minor configuration and code coverage support
-- Corrections in the Markdown syntax parser
+- Add support for Markdown tables
+- Fixes in the Markdown and Creole syntax parsers
 
 [List all versions](https://github.com/stcarrez/ada-wiki/blob/master/NEWS.md)
 
