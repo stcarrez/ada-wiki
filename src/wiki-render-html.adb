@@ -193,6 +193,15 @@ package body Wiki.Render.Html is
          when Wiki.Nodes.N_TOC_DISPLAY =>
             Engine.Render_TOC (Doc, 3);
 
+         when Wiki.Nodes.N_TABLE =>
+            Engine.Render_Table (Doc, Node, "table");
+
+         when Wiki.Nodes.N_ROW =>
+            Engine.Render_Table (Doc, Node, "tr");
+
+         when Wiki.Nodes.N_COLUMN =>
+            Engine.Render_Table (Doc, Node, "td");
+
       end case;
    end Render;
 
@@ -727,6 +736,35 @@ package body Wiki.Render.Html is
          Engine.Output.End_Element ("pre");
       end if;
    end Render_Preformatted;
+
+   --  ------------------------------
+   --  Render a table component such as N_TABLE, N_ROW or N_COLUMN.
+   --  ------------------------------
+   procedure Render_Table (Engine : in out Html_Renderer;
+                           Doc    : in Wiki.Documents.Document;
+                           Node   : in Wiki.Nodes.Node_Type;
+                           Tag    : in String) is
+      Iter         : Wiki.Attributes.Cursor := Wiki.Attributes.First (Node.Attributes);
+   begin
+      Engine.Close_Paragraph;
+      Engine.Need_Paragraph := False;
+      Engine.Has_Paragraph := False;
+      Engine.Open_Paragraph;
+
+      Engine.Output.Start_Element (Tag);
+      while Wiki.Attributes.Has_Element (Iter) loop
+         Engine.Output.Write_Wide_Attribute (Name    => Wiki.Attributes.Get_Name (Iter),
+                                             Content => Wiki.Attributes.Get_Wide_Value (Iter));
+         Wiki.Attributes.Next (Iter);
+      end loop;
+      Engine.Render (Doc, Node.Children);
+
+      Engine.Close_Paragraph;
+      Engine.Has_Paragraph := False;
+      Engine.Need_Paragraph := True;
+
+      Engine.Output.End_Element (Tag);
+   end Render_Table;
 
    --  ------------------------------
    --  Finish the document after complete wiki text has been parsed.
