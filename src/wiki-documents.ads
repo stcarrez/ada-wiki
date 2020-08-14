@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-documents -- Wiki document
---  Copyright (C) 2011, 2015, 2016, 2018, 2019 Stephane Carrez
+--  Copyright (C) 2011, 2015, 2016, 2018, 2019, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -99,6 +99,17 @@ package Wiki.Documents is
    procedure Add_Preformatted (Into     : in out Document;
                                Text     : in Wiki.Strings.WString;
                                Format   : in Wiki.Strings.WString);
+
+   --  Add a new row to the current table.
+   procedure Add_Row (Into : in out Document);
+
+   --  Add a column to the current table row.  The column is configured with the
+   --  given attributes.  The column content is provided through calls to Append.
+   procedure Add_Column (Into : in out Document;
+                         Attributes : in out Wiki.Attributes.Attribute_List);
+
+   --  Finish the creation of the table.
+   procedure Finish_Table (Into : in out Document);
 
    --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
    --  each node instance.
