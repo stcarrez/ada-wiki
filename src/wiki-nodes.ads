@@ -33,6 +33,9 @@ package Wiki.Nodes is
                       N_QUOTE,
                       N_TAG_START,
                       N_PREFORMAT,
+                      N_TABLE,
+                      N_ROW,
+                      N_COLUMN,
                       N_LIST,
                       N_NUM_LIST,
                       N_INDENT,
@@ -50,6 +53,7 @@ package Wiki.Nodes is
    type Node_Type_Access is access all Node_Type;
 
    type Node_Type (Kind : Node_Kind; Len : Natural) is limited record
+      Parent     : Node_Type_Access;
       case Kind is
          when N_HEADER | N_BLOCKQUOTE | N_INDENT | N_LIST | N_NUM_LIST | N_TOC_ENTRY =>
             Level  : Natural := 0;
@@ -63,11 +67,10 @@ package Wiki.Nodes is
             Link_Attr  : Wiki.Attributes.Attribute_List;
             Title      : Wiki.Strings.WString (1 .. Len);
 
-         when N_TAG_START =>
+         when N_TAG_START | N_TABLE | N_ROW | N_COLUMN =>
             Tag_Start  : Html_Tag;
             Attributes : Wiki.Attributes.Attribute_List;
             Children   : Node_List_Access;
-            Parent     : Node_Type_Access;
 
          when N_PREFORMAT =>
             Language     : Wiki.Strings.UString;
