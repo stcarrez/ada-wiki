@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-html -- Wiki HTML renderer
---  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2019 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2019, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -77,6 +77,12 @@ package Wiki.Render.Html is
    procedure Render_Preformatted (Engine : in out Html_Renderer;
                                   Text   : in Wiki.Strings.WString;
                                   Format : in Wiki.Strings.WString);
+
+   --  Render a table component such as N_TABLE, N_ROW or N_COLUMN.
+   procedure Render_Table (Engine : in out Html_Renderer;
+                           Doc    : in Wiki.Documents.Document;
+                           Node   : in Wiki.Nodes.Node_Type;
+                           Tag    : in String);
 
    --  Finish the document after complete wiki text has been parsed.
    overriding
