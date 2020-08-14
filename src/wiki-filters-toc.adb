@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-toc -- Filter for the creation of Table Of Contents
---  Copyright (C) 2016, 2018 Stephane Carrez
+--  Copyright (C) 2016, 2018, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -65,9 +65,10 @@ package body Wiki.Filters.TOC is
    begin
       Document.Get_TOC (T);
       Wiki.Nodes.Lists.Append (T, new Wiki.Nodes.Node_Type '(Kind   => Wiki.Nodes.N_TOC_ENTRY,
-                                                       Len    => Header'Length,
-                                                       Header => Header,
-                                                       Level  => Level));
+                                                             Len    => Header'Length,
+                                                             Header => Header,
+                                                             Parent => null,
+                                                             Level  => Level));
       Filter_Type (Filter).Add_Header (Document, Header, Level);
    end Add_Header;
 
