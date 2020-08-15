@@ -147,6 +147,14 @@ package body Wiki.Parsers is
    procedure Parse_Markdown_Escape (P     : in out Parser;
                                     Token : in Wiki.Strings.WChar);
 
+   --  Parse an italic or bold sequence or a list.
+   --  Example:
+   --    *name*         (italic)
+   --    **name**       (bold)
+   --    * item         (list)
+   procedure Parse_Markdown_Bold_Italic (P     : in out Parser;
+                                         Token : in Wiki.Strings.WChar);
+
    --  Parse a markdown table/column.
    --  Example:
    --    | col1 | col2 | ... | colN |
@@ -852,6 +860,31 @@ package body Wiki.Parsers is
 
       end case;
    end Parse_Markdown_Escape;
+
+   --  ------------------------------
+   --  Parse an italic or bold sequence or a list.
+   --  Example:
+   --    *name*         (italic)
+   --    **name**       (bold)
+   --    * item         (list)
+   --  ------------------------------
+   procedure Parse_Markdown_Bold_Italic (P     : in out Parser;
+                                         Token : in Wiki.Strings.WChar) is
+      C     : Wiki.Strings.WChar;
+   begin
+      Peek (P, C);
+      if Token = '*' and P.Empty_Line and C = ' ' then
+         Put_Back (P, C);
+         Parse_List (P, Token);
+         return;
+      end if;
+      if C = Token then
+         Toggle_Format (P, BOLD);
+      else
+         Toggle_Format (P, ITALIC);
+         Put_Back (P, C);
+      end if;
+   end Parse_Markdown_Bold_Italic;
 
    --  Parse a markdown table/column.
    --  Example:
@@ -1943,17 +1976,14 @@ package body Wiki.Parsers is
          16#0D# => Parse_End_Line'Access,
          Character'Pos (' ') => Parse_Space'Access,
          Character'Pos ('#') => Parse_Header'Access,
-         Character'Pos ('*') => Parse_Double_Bold'Access,
-         Character'Pos ('/') => Parse_Double_Italic'Access,
-         Character'Pos ('@') => Parse_Double_Code'Access,
+         Character'Pos ('*') => Parse_Markdown_Bold_Italic'Access,
+         Character'Pos ('_') => Parse_Markdown_Bold_Italic'Access,
          Character'Pos ('^') => Parse_Single_Superscript'Access,
-         Character'Pos ('-') => Parse_Double_Strikeout'Access,
-         Character'Pos ('+') => Parse_Double_Strikeout'Access,
+         Character'Pos ('~') => Parse_Double_Strikeout'Access,
          Character'Pos (',') => Parse_Double_Subscript'Access,
          Character'Pos ('!') => Parse_Markdown_Image'Access,
          Character'Pos ('[') => Parse_Markdown_Link'Access,
          Character'Pos ('\') => Parse_Markdown_Escape'Access,
-         Character'Pos ('%') => Parse_Line_Break'Access,
          Character'Pos ('>') => Parse_Blockquote'Access,
          Character'Pos ('<') => Parse_Maybe_Html'Access,
          Character'Pos ('`') => Parse_Preformatted'Access,
