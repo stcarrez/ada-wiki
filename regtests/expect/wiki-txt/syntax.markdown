@@ -6,14 +6,17 @@ Section h2
 Section h3
 Section h4
 Section h5
-
-* item 1
+----
+item 1
  item 1.1
  item 1.2
-* item 2
-* item 3
-*# item 3.1
-*# item 3.2
+
+item 2
+
+item 3
+
+item 3.1
+item 3.2
 num 1
 num 2
 Section bloc:
@@ -23,7 +26,7 @@ Section bloc:
 Formatting
 code
 strong
-__underline__
+underline
 A link (https://link-url/)
 
   Some code
