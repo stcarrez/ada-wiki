@@ -1,4 +1,5 @@
 Version 1.3.0   -
+  - New plugin and filter to setup and expand variables in Wiki texts
   - Add support for Markdown tables
   - Fixes in the Markdown and Creole syntax parsers
 
