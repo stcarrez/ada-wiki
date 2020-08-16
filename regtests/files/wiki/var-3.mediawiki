@@ -1,0 +1,12 @@
+{{set|myname|Joe Roger}}
+
+== Name: $(myname) ==
+
+Expand: `${myname}`
+
+{{set|myname|Buck Roger}}
+
+== Alias: $(myname) ==
+
+Expand: [[/path/url|${myname}]]
+

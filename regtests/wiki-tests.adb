@@ -26,8 +26,10 @@ with Wiki.Render.Html;
 with Wiki.Render.Text;
 with Wiki.Filters.Html;
 with Wiki.Filters.TOC;
+with Wiki.Filters.Variables;
 with Wiki.Plugins.Templates;
 with Wiki.Plugins.Conditions;
+with Wiki.Plugins.Variables;
 with Wiki.Streams.Text_IO;
 with Wiki.Streams.Html.Text_IO;
 with Wiki.Documents;
@@ -49,8 +51,10 @@ package body Wiki.Tests is
       Engine      : Wiki.Parsers.Parser;
       Toc_Filter  : aliased Wiki.Filters.TOC.TOC_Filter;
       Html_Filter : aliased Wiki.Filters.Html.Html_Filter_Type;
+      Var_Filter  : aliased Wiki.Filters.Variables.Variable_Filter;
       Template    : aliased Wiki.Plugins.Templates.File_Template_Plugin;
       Condition   : aliased Wiki.Plugins.Conditions.Condition_Plugin;
+      Variables   : aliased Wiki.Plugins.Variables.Variable_Plugin;
       Input       : aliased Wiki.Streams.Text_IO.File_Input_Stream;
       Output      : aliased Wiki.Streams.Html.Text_IO.Html_File_Output_Stream;
 
@@ -68,6 +72,8 @@ package body Wiki.Tests is
       begin
          if Name = "if" or Name = "else" or Name = "elsif" or Name = "end" then
             return Condition'Unchecked_Access;
+         elsif Name = "set" then
+            return Variables'Unchecked_Access;
          else
             return Template.Find (Name);
          end if;
@@ -91,6 +97,7 @@ package body Wiki.Tests is
          Engine.Set_Plugin_Factory (Local_Factory'Unchecked_Access);
          Engine.Add_Filter (Toc_Filter'Unchecked_Access);
          Engine.Add_Filter (Html_Filter'Unchecked_Access);
+         Engine.Add_Filter (Var_Filter'Unchecked_Access);
          Engine.Parse (Input'Unchecked_Access, Doc);
          Util.Measures.Report (Time, "Parse " & To_String (T.Name));
          if T.Source = Wiki.SYNTAX_HTML then
