@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-strings -- Wiki string types and operations
---  Copyright (C) 2016, 2017 Stephane Carrez
+--  Copyright (C) 2016, 2017, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +15,10 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
+with Ada.Containers;
 with Ada.Strings.Wide_Wide_Unbounded;
 with Ada.Strings.Wide_Wide_Maps;
+with Ada.Strings.Wide_Wide_Hash;
 with Ada.Characters.Conversions;
 with Ada.Wide_Wide_Characters.Handling;
 with Ada.Strings.Wide_Wide_Fixed;
@@ -49,6 +51,9 @@ package Wiki.Strings is
 
    function To_WString (S : in String) return WString
                         renames Ada.Strings.UTF_Encoding.Wide_Wide_Strings.Decode;
+
+   function Hash (S : in WString) return Ada.Containers.Hash_Type
+     renames Ada.Strings.Wide_Wide_Hash;
 
    procedure Append (Into : in out UString; S : in WString)
                      renames Ada.Strings.Wide_Wide_Unbounded.Append;
