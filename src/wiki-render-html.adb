@@ -15,6 +15,7 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
+with Util.Strings;
 with Wiki.Helpers;
 with Wiki.Nodes.Lists;
 package body Wiki.Render.Html is
@@ -601,10 +602,10 @@ package body Wiki.Render.Html is
       Engine.Links.Make_Image_Link (Src, URI, Width, Height);
       Engine.Output.Write_Wide_Attribute ("src", URI);
       if Width > 0 then
-         Engine.Output.Write_Attribute ("width", Natural'Image (Width));
+         Engine.Output.Write_Attribute ("width", Util.Strings.Image (Width));
       end if;
       if Height > 0 then
-         Engine.Output.Write_Attribute ("height", Natural'Image (Height));
+         Engine.Output.Write_Attribute ("height", Util.Strings.Image (Height));
       end if;
       if Desc'Length > 0 then
          Engine.Output.Write_Wide_Attribute ("longdesc", Desc);
