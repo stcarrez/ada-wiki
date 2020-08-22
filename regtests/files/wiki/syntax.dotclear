@@ -64,3 +64,11 @@ Line%%%break
 
 A @@code@@ statement.
 
+<<plugin-name param1 param2 param\ 3>>
+
+<<plugin-name name1=param1 name2=param2 name3=param\ 3>>
+
+<<<name1>>>
+
+<<set myname Joe\ Roger>>
+

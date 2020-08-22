@@ -1,0 +1,6 @@
+<<set myname Joe\ Roger>>
+
+!! Name: $(myname)
+
+Expand: @@${myname}@@
+
