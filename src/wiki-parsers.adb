@@ -1942,6 +1942,7 @@ package body Wiki.Parsers is
          Character'Pos ('/') => Parse_Preformatted'Access,
          Character'Pos ('%') => Parse_Line_Break'Access,
          Character'Pos ('>') => Parse_Blockquote'Access,
+         Character'Pos ('<') => Parse_Template'Access,
          others => Parse_Text'Access
         );
 
