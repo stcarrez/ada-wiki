@@ -193,4 +193,18 @@ package body Wiki.Filters.Variables is
       end loop;
    end Iterate;
 
+   procedure Iterate (Chain   : in Wiki.Filters.Filter_Chain;
+                      Process : not null
+                        access procedure (Name, Value : in Strings.WString)) is
+      Filter : Filter_Type_Access := Chain.Next;
+   begin
+      while Filter /= null loop
+         if Filter.all in Variable_Filter'Class then
+            Variable_Filter'Class (Filter.all).Iterate (Process);
+            return;
+         end if;
+         Filter := Filter.Next;
+      end loop;
+   end Iterate;
+
 end Wiki.Filters.Variables;
