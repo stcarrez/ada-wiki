@@ -303,6 +303,20 @@ package body Wiki.Parsers.Html is
          end if;
       end loop;
 
+      if Len > 0 and then Name (Name'First) = '#'
+        and then Name (Name'First + 1) >= '0' and then Name (Name'First + 1) <= '9'
+      then
+         begin
+            C := Wiki.Strings.WChar'Val (Natural'Value (Name (Name'First + 1 .. Len)));
+            Parse_Text (P, C);
+            return;
+
+         exception
+            when Constraint_Error =>
+               null;
+         end;
+      end if;
+
       --  The HTML entity is not recognized: we must treat it as plain wiki text.
       Parse_Text (P, '&');
       for I in 1 .. Len loop
