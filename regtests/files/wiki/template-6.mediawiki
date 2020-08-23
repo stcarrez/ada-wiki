@@ -6,7 +6,7 @@
 
 Para
 
-{{template-7.mediawiki|test}}
+{{template-7-missing.mediawiki|test}}
 
 * Item1
 * Item2

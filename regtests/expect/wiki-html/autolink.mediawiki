@@ -1,2 +1,2 @@
-<p>This site http://www.sun.com is a great site.</p><ul><li>http://www.oracle.com/
-</li><li>https://www.oracle.com/servers/sparc/silicon-expression-of-oracle-strategy.html</li></ul><p><i>Style content https://en.wikibooks.org/wiki/Ada_Programming with link</i></p>
+<p>This site <a href="http://www.sun.com">http://www.sun.com</a> is a great site.</p><ul><li><a href="http://www.oracle.com/">http://www.oracle.com/</a>
+</li><li><a href="https://www.oracle.com/servers/sparc/silicon-expression-of-oracle-strategy.html">https://www.oracle.com/servers/sparc/silicon-expression-of-oracle-strategy.html</a></li></ul><p><i>Style content </i><a href="https://en.wikibooks.org/wiki/Ada_Programming">https://en.wikibooks.org/wiki/Ada_Programming</a><i> with link</i></p>

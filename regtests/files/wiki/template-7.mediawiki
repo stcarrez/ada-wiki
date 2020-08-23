@@ -1,0 +1,5 @@
+{{missing-template.mediawiki|Title|
+ Description
+ }}
+ * [[Link1]]
+ * [[Link2]]
