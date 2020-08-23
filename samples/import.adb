@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  import -- Import some HTML content and generate Wiki text
---  Copyright (C) 2015, 2016 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,9 +16,11 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Text_IO;
+with Ada.Wide_Wide_Text_IO;
 with Ada.IO_Exceptions;
 with Ada.Strings.Unbounded;
 with Ada.Characters.Conversions;
+with Ada.Strings.UTF_Encoding.Wide_Wide_Strings;
 
 with GNAT.Command_Line;
 
@@ -27,6 +29,7 @@ with Util.Streams.Pipes;
 with Util.Streams.Buffered;
 with Util.Strings.Transforms;
 
+with Wiki.Strings;
 with Wiki.Filters.Html;
 with Wiki.Filters.TOC;
 with Wiki.Streams.Builders;
@@ -42,11 +45,13 @@ procedure Import is
    use GNAT.Command_Line;
    use Ada.Strings.Unbounded;
    use Ada.Characters.Conversions;
+   use Ada.Strings.UTF_Encoding;
 
    procedure Usage;
    function Is_Url (Name : in String) return Boolean;
    procedure Parse_Url (Url : in String);
    procedure Parse (Content : in String);
+   procedure Print (Item : in Wiki.Strings.WString);
 
    Html_Filter : aliased Wiki.Filters.Html.Html_Filter_Type;
    TOC         : aliased Wiki.Filters.TOC.TOC_Filter;
@@ -66,6 +71,11 @@ procedure Import is
       Ada.Text_IO.Put_Line ("  -c      Convert to Creole");
    end Usage;
 
+   procedure Print (Item : in Wiki.Strings.WString) is
+   begin
+      Ada.Wide_Wide_Text_IO.Put (Item);
+   end Print;
+
    procedure Parse (Content : in String) is
       Doc    : Wiki.Documents.Document;
       Engine : Wiki.Parsers.Parser;
@@ -78,10 +88,10 @@ procedure Import is
             Renderer : aliased Wiki.Render.Wiki.Wiki_Renderer;
          begin
             Engine.Set_Syntax (Wiki.SYNTAX_HTML);
-            Engine.Parse (To_Wide_Wide_String (Content), Doc);
+            Engine.Parse (Wide_Wide_Strings.Decode (Content), Doc);
             Renderer.Set_Output_Stream (Stream'Unchecked_Access, Syntax);
             Renderer.Render (Doc);
-            Ada.Text_IO.Put_Line (Stream.To_String);
+            Stream.Iterate (Print'Access);
          end;
       elsif Html_Mode then
          declare
@@ -89,10 +99,10 @@ procedure Import is
             Renderer : aliased Wiki.Render.Html.Html_Renderer;
          begin
             Engine.Set_Syntax (Syntax);
-            Engine.Parse (To_Wide_Wide_String (Content), Doc);
+            Engine.Parse (Wide_Wide_Strings.Decode (Content), Doc);
             Renderer.Set_Output_Stream (Stream'Unchecked_Access);
             Renderer.Render (Doc);
-            Ada.Text_IO.Put_Line (Stream.To_String);
+            Stream.Iterate (Print'Access);
          end;
       else
          declare
@@ -100,12 +110,13 @@ procedure Import is
             Renderer : aliased Wiki.Render.Text.Text_Renderer;
          begin
             Engine.Set_Syntax (Syntax);
-            Engine.Parse (To_Wide_Wide_String (Content), Doc);
+            Engine.Parse (Wide_Wide_Strings.Decode (Content), Doc);
             Renderer.Set_Output_Stream (Stream'Unchecked_Access);
             Renderer.Render (Doc);
-            Ada.Text_IO.Put_Line (Stream.To_String);
+            Stream.Iterate (Print'Access);
          end;
       end if;
+      Ada.Wide_Wide_Text_IO.New_Line;
    end Parse;
 
    procedure Parse_Url (Url : in String) is
