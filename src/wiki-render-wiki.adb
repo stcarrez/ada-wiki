@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-wiki -- Wiki to Wiki renderer
---  Copyright (C) 2015, 2016, 2018 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2018, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,6 +50,9 @@ package body Wiki.Render.Wiki is
    IMG_END_DOTCLEAR          : aliased constant Strings.WString := "))";
    LINK_START_DOTCLEAR       : aliased constant Strings.WString := "[";
    LINK_END_DOTCLEAR         : aliased constant Strings.WString := "]";
+   QUOTE_START_DOTCLEAR      : aliased constant Strings.WString := "{{";
+   QUOTE_END_DOTCLEAR        : aliased constant Strings.WString := "}}";
+   QUOTE_SEPARATOR_DOTCLEAR  : aliased constant Strings.WString := "|";
    PREFORMAT_START_DOTCLEAR  : aliased constant Strings.WString := "///";
    PREFORMAT_END_DOTCLEAR    : aliased constant Strings.WString := "///" & LF;
    ESCAPE_DOTCLEAR           : aliased constant Strings.WString := "\";
@@ -88,6 +91,9 @@ package body Wiki.Render.Wiki is
             Engine.Tags (Link_Start)   := LINK_START_DOTCLEAR'Access;
             Engine.Tags (Link_End)     := LINK_END_DOTCLEAR'Access;
             Engine.Tags (Link_Separator)  := LINK_SEPARATOR_CREOLE'Access;
+            Engine.Tags (Quote_Start)     := QUOTE_START_DOTCLEAR'Access;
+            Engine.Tags (Quote_End)       := QUOTE_END_DOTCLEAR'Access;
+            Engine.Tags (Quote_Separator)  := QUOTE_SEPARATOR_DOTCLEAR'Access;
             Engine.Tags (Preformat_Start) := PREFORMAT_START_DOTCLEAR'Access;
             Engine.Tags (Preformat_End)   := PREFORMAT_END_DOTCLEAR'Access;
             Engine.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
@@ -138,6 +144,9 @@ package body Wiki.Render.Wiki is
             Engine.Tags (Link_Start)   := LINK_START_CREOLE'Access;
             Engine.Tags (Link_End)     := LINK_END_CREOLE'Access;
             Engine.Tags (Link_Separator)  := LINK_SEPARATOR_CREOLE'Access;
+            Engine.Tags (Quote_Start)     := LINK_START_CREOLE'Access;
+            Engine.Tags (Quote_End)       := LINK_END_CREOLE'Access;
+            Engine.Tags (Quote_Separator)  := LINK_SEPARATOR_CREOLE'Access;
             Engine.Tags (List_Item)       := LIST_ITEM_CREOLE'Access;
             Engine.Tags (List_Ordered_Item) := LIST_ORDERED_ITEM_CREOLE'Access;
             Engine.Tags (Preformat_Start) := PREFORMAT_START_CREOLE'Access;
@@ -321,8 +330,24 @@ package body Wiki.Render.Wiki is
    procedure Render_Quote (Engine : in out Wiki_Renderer;
                            Title  : in Strings.WString;
                            Attrs  : in Attributes.Attribute_List) is
+      Link : constant Strings.WString := Attributes.Get_Attribute (Attrs, "cite");
+      Lang : constant Strings.WString := Attributes.Get_Attribute (Attrs, "lang");
    begin
-      null;
+      Engine.Output.Write (Engine.Tags (Quote_Start).all);
+      Engine.Output.Write (Title);
+      if Engine.Allow_Link_Language and Lang'Length > 0 then
+         Engine.Output.Write (Engine.Tags (Quote_Separator).all);
+         Engine.Output.Write (Lang);
+      end if;
+      if Link'Length > 0 then
+         if Lang'Length = 0 then
+            Engine.Output.Write (Engine.Tags (Quote_Separator).all);
+         end if;
+         Engine.Output.Write (Engine.Tags (Quote_Separator).all);
+         Engine.Output.Write (Link);
+      end if;
+      Engine.Output.Write (Engine.Tags (Quote_End).all);
+      Engine.Empty_Line := False;
    end Render_Quote;
 
    --  Set the text style format.
@@ -492,7 +517,10 @@ package body Wiki.Render.Wiki is
             end if;
 
          when P_TAG =>
-            Engine.New_Line;
+            Engine.Set_Format (Empty_Formats);
+            if not Engine.Empty_Line then
+               Engine.New_Line;
+            end if;
 
          when PRE_TAG =>
             Engine.Start_Keep_Content;
@@ -546,6 +574,10 @@ package body Wiki.Render.Wiki is
             Engine.Render_Quote (Title    => Strings.To_WString (Engine.Content),
                                  Attrs    => Node.Attributes);
             Engine.Keep_Content := False;
+
+         when P_TAG =>
+            Engine.Set_Format (Empty_Formats);
+            Engine.New_Line;
 
          when B_TAG | EM_TAG | STRONG_TAG =>
             if not Engine.Keep_Content then
