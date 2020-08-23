@@ -152,6 +152,7 @@ private
       Allow_Link_Language : Boolean := False;
       Link_First          : Boolean := False;
       Html_Blockquote     : Boolean := False;
+      Line_Count          : Natural := 0;
       Current_Level       : Natural := 0;
       Quote_Level         : Natural := 0;
       UL_List_Level       : Natural := 0;
