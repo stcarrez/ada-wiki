@@ -28,6 +28,15 @@ package Wiki.Plugins.Variables is
    procedure Expand (Plugin   : in out Variable_Plugin;
                      Document : in out Wiki.Documents.Document;
                      Params   : in out Wiki.Attributes.Attribute_List;
-                     Context  : in Plugin_Context);
+                     Context  : in out Plugin_Context);
+
+   type List_Variable_Plugin is new Wiki_Plugin with null record;
+
+   --  List the variables from the `Wiki.Filters.Variable` filter.
+   overriding
+   procedure Expand (Plugin   : in out List_Variable_Plugin;
+                     Document : in out Wiki.Documents.Document;
+                     Params   : in out Wiki.Attributes.Attribute_List;
+                     Context  : in out Plugin_Context);
 
 end Wiki.Plugins.Variables;
