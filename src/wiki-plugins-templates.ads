@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-plugins-template -- Template Plugin
---  Copyright (C) 2016 Stephane Carrez
+--  Copyright (C) 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,7 +41,7 @@ package Wiki.Plugins.Templates is
    procedure Expand (Plugin   : in out Template_Plugin;
                      Document : in out Wiki.Documents.Document;
                      Params   : in out Wiki.Attributes.Attribute_List;
-                     Context  : in Plugin_Context);
+                     Context  : in out Plugin_Context);
 
    type File_Template_Plugin is new Wiki_Plugin and Plugin_Factory with private;
 
@@ -63,7 +63,7 @@ package Wiki.Plugins.Templates is
    procedure Expand (Plugin   : in out File_Template_Plugin;
                      Document : in out Wiki.Documents.Document;
                      Params   : in out Wiki.Attributes.Attribute_List;
-                     Context  : in Plugin_Context);
+                     Context  : in out Plugin_Context);
 
 private
 
