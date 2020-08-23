@@ -43,7 +43,6 @@ package body Wiki.Render.Wiki is
    HEADER_DOTCLEAR           : aliased constant Strings.WString := "!";
    BOLD_DOTCLEAR             : aliased constant Strings.WString := "__";
    ITALIC_DOTCLEAR           : aliased constant Strings.WString := "''";
-   INSERT_DOTCLEAR           : aliased constant Strings.WString := "++";
    DELETE_DOTCLEAR           : aliased constant Strings.WString := "--";
    CODE_DOTCLEAR             : aliased constant Strings.WString := "@@";
    IMG_START_DOTCLEAR        : aliased constant Strings.WString := "((";
@@ -68,7 +67,6 @@ package body Wiki.Render.Wiki is
    PREFORMAT_END_MARKDOWN    : aliased constant Strings.WString := "```" & LF;
    HORIZONTAL_RULE_MARKDOWN  : aliased constant Strings.WString := LF & "----" & LF & LF;
    IMG_START_MARKDOWN        : aliased constant Strings.WString := "![";
-   IMG_SEPARATOR_MARKDOWN    : aliased constant Strings.WString := "](";
    IMG_END_MARKDOWN          : aliased constant Strings.WString := ")";
    LINK_START_MARKDOWN       : aliased constant Strings.WString := "[";
    LINK_SEPARATOR_MARKDOWN   : aliased constant Strings.WString := "](";
@@ -373,21 +371,21 @@ package body Wiki.Render.Wiki is
 
    --  Render an image.
    procedure Render_Image (Engine : in out Wiki_Renderer;
-                           Link   : in Strings.WString;
+                           Title  : in Strings.WString;
                            Attrs  : in Attributes.Attribute_List) is
-      Alt : constant Strings.WString := Attributes.Get_Attribute (Attrs, "alt");
+      Src  : constant Strings.WString := Attributes.Get_Attribute (Attrs, "src");
    begin
       Engine.Output.Write (Engine.Tags (Img_Start).all);
       if Engine.Link_First then
-         Engine.Output.Write (Link);
-         if Alt'Length > 0 then
+         Engine.Output.Write (Src);
+         if Title'Length > 0 then
             Engine.Output.Write (Engine.Tags (Link_Separator).all);
-            Engine.Output.Write (Alt);
+            Engine.Output.Write (Title);
          end if;
       else
-         Engine.Output.Write (Alt);
+         Engine.Output.Write (Title);
          Engine.Output.Write (Engine.Tags (Link_Separator).all);
-         Engine.Output.Write (Link);
+         Engine.Output.Write (Src);
       end if;
       Engine.Output.Write (Engine.Tags (Img_End).all);
       Engine.Empty_Line := False;
@@ -443,7 +441,6 @@ package body Wiki.Render.Wiki is
       Start        : Natural := Text'First;
       Last         : Natural := Text'Last;
       Apply_Format : Boolean := True;
-      Check_Escape : Boolean := True;
    begin
       if Engine.Keep_Content or Engine.Empty_Line then
          while Start <= Text'Last and then Helpers.Is_Space_Or_Newline (Text (Start)) loop
@@ -554,7 +551,7 @@ package body Wiki.Render.Wiki is
             Engine.Start_Keep_Content;
 
          when IMG_TAG =>
-            Engine.Render_Image (Link  => Get_Attribute (Node.Attributes, "src"),
+            Engine.Render_Image (Title => Get_Attribute (Node.Attributes, "alt"),
                                  Attrs => Node.Attributes);
 
          when A_TAG | Q_TAG =>
@@ -731,10 +728,5 @@ package body Wiki.Render.Wiki is
          Engine.New_Line;
       end if;
    end Close_Paragraph;
-
-   procedure Open_Paragraph (Engine : in out Wiki_Renderer) is
-   begin
-      null;
-   end Open_Paragraph;
 
 end Wiki.Render.Wiki;
