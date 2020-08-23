@@ -26,6 +26,7 @@ with Wiki.Render.Html;
 with Wiki.Render.Text;
 with Wiki.Filters.Html;
 with Wiki.Filters.TOC;
+with Wiki.Filters.Autolink;
 with Wiki.Filters.Variables;
 with Wiki.Plugins.Templates;
 with Wiki.Plugins.Conditions;
@@ -52,6 +53,7 @@ package body Wiki.Tests is
       Toc_Filter  : aliased Wiki.Filters.TOC.TOC_Filter;
       Html_Filter : aliased Wiki.Filters.Html.Html_Filter_Type;
       Var_Filter  : aliased Wiki.Filters.Variables.Variable_Filter;
+      Auto_Filter : aliased Wiki.Filters.Autolink.Autolink_Filter;
       Template    : aliased Wiki.Plugins.Templates.File_Template_Plugin;
       Condition   : aliased Wiki.Plugins.Conditions.Condition_Plugin;
       Variables   : aliased Wiki.Plugins.Variables.Variable_Plugin;
@@ -96,6 +98,7 @@ package body Wiki.Tests is
          Engine.Set_Syntax (T.Source);
          Engine.Set_Plugin_Factory (Local_Factory'Unchecked_Access);
          Engine.Add_Filter (Toc_Filter'Unchecked_Access);
+         Engine.Add_Filter (Auto_Filter'Unchecked_Access);
          Engine.Add_Filter (Html_Filter'Unchecked_Access);
          Engine.Add_Filter (Var_Filter'Unchecked_Access);
          Engine.Parse (Input'Unchecked_Access, Doc);
