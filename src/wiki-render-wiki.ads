@@ -150,6 +150,8 @@ private
       In_List             : Boolean := False;
       Invert_Header_Level : Boolean := False;
       Allow_Link_Language : Boolean := False;
+      Link_First          : Boolean := False;
+      Html_Blockquote     : Boolean := False;
       Current_Level       : Natural := 0;
       Quote_Level         : Natural := 0;
       UL_List_Level       : Natural := 0;
