@@ -34,7 +34,7 @@ package body Wiki.Render.Wiki is
    LINK_END_CREOLE           : aliased constant Strings.WString := "]]";
    PREFORMAT_START_CREOLE    : aliased constant Strings.WString := "{{{";
    PREFORMAT_END_CREOLE      : aliased constant Strings.WString := "}}}" & LF;
-   HORIZONTAL_RULE_CREOLE    : aliased constant Strings.WString := "----" & LF;
+   HORIZONTAL_RULE_CREOLE    : aliased constant Strings.WString := LF & "----" & LF & LF;
    LINK_SEPARATOR_CREOLE     : aliased constant Strings.WString := "|";
    LIST_ITEM_CREOLE          : aliased constant Strings.WString := "*";
    LIST_ORDERED_ITEM_CREOLE  : aliased constant Strings.WString := "#";
@@ -215,6 +215,7 @@ package body Wiki.Render.Wiki is
    begin
       Engine.Output.Write (LF);
       Engine.Empty_Line := True;
+      Engine.Line_Count := Engine.Line_Count + 1;
    end New_Line;
 
    --  ------------------------------
@@ -238,7 +239,7 @@ package body Wiki.Render.Wiki is
             Engine.Output.Write (Engine.Tags (Horizontal_Rule).all);
 
          when Nodes.N_PARAGRAPH =>
-            Engine.Close_Paragraph;
+            Engine.Add_Paragraph;
 
          when Nodes.N_TEXT =>
             Engine.Render_Text (Node.Text, Node.Format);
@@ -274,6 +275,7 @@ package body Wiki.Render.Wiki is
          Engine.Output.Write (LF);
       end if;
       Engine.Close_Paragraph;
+      Engine.Output.Write (LF);
       if Engine.Invert_Header_Level then
          if Count > 5 then
             Count := 5;
@@ -303,10 +305,12 @@ package body Wiki.Render.Wiki is
    procedure Add_Paragraph (Engine : in out Wiki_Renderer) is
    begin
       Engine.Close_Paragraph;
-      if not Engine.Empty_Line then
+      if Engine.Line_Count > 0 then
+         if not Engine.Empty_Line then
+            Engine.New_Line;
+         end if;
          Engine.New_Line;
       end if;
-      Engine.New_Line;
    end Add_Paragraph;
 
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
@@ -457,8 +461,7 @@ package body Wiki.Render.Wiki is
                   if Apply_Format and then Engine.Format /= Empty_Formats then
                      Engine.Set_Format (Empty_Formats);
                   end if;
-                  Engine.Output.Write (LF);
-                  Engine.Empty_Line := True;
+                  Engine.New_Line;
                end if;
             elsif not Engine.Empty_Line or else not Helpers.Is_Space (Text (I)) then
                if Engine.Empty_Line and Engine.Quote_Level > 0 then
@@ -521,7 +524,6 @@ package body Wiki.Render.Wiki is
       end if;
       Engine.Output.Write (Engine.Tags (Preformat_End).all);
       Engine.New_Line;
-      Engine.Empty_Line := True;
    end Render_Preformatted;
 
    procedure Start_Keep_Content (Engine : in out Wiki_Renderer) is
