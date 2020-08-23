@@ -58,6 +58,24 @@ package body Wiki.Render.Wiki is
    ESCAPE_DOTCLEAR           : aliased constant Strings.WString := "\";
    QUOTE_DOTCLEAR            : aliased constant Strings.WString := ">";
 
+   BOLD_MARKDOWN             : aliased constant Strings.WString := "**";
+   ITALIC_MARKDOWN           : aliased constant Strings.WString := "__";
+   CODE_MARKDOWN             : aliased constant Strings.WString := "`";
+   HEADER_MARKDOWN           : aliased constant Strings.WString := "#";
+   ESCAPE_MARKDOWN           : aliased constant Strings.WString := "\";
+   QUOTE_MARKDOWN            : aliased constant Strings.WString := ">";
+   PREFORMAT_START_MARKDOWN  : aliased constant Strings.WString := "```";
+   PREFORMAT_END_MARKDOWN    : aliased constant Strings.WString := "```" & LF;
+   HORIZONTAL_RULE_MARKDOWN  : aliased constant Strings.WString := LF & "----" & LF & LF;
+   IMG_START_MARKDOWN        : aliased constant Strings.WString := "![";
+   IMG_SEPARATOR_MARKDOWN    : aliased constant Strings.WString := "](";
+   IMG_END_MARKDOWN          : aliased constant Strings.WString := ")";
+   LINK_START_MARKDOWN       : aliased constant Strings.WString := "[";
+   LINK_SEPARATOR_MARKDOWN   : aliased constant Strings.WString := "](";
+   LINK_END_MARKDOWN         : aliased constant Strings.WString := ")";
+   LIST_ITEM_MARKDOWN        : aliased constant Strings.WString := "*";
+   LIST_ORDERED_ITEM_MARKDOWN : aliased constant Strings.WString := "*";
+
    LINE_BREAK_MEDIAWIKI      : aliased constant Strings.WString := "<br />";
    BOLD_MEDIAWIKI            : aliased constant Strings.WString := "'''";
    ITALIC_MEDIAWIKI          : aliased constant Strings.WString := "''";
@@ -104,6 +122,7 @@ package body Wiki.Render.Wiki is
             Engine.Tags (Blockquote_Start)  := QUOTE_DOTCLEAR'Access;
             Engine.Invert_Header_Level := True;
             Engine.Allow_Link_Language := True;
+            Engine.Link_First := True;
             Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("-+_*{}][/=\");
 
          when SYNTAX_MEDIA_WIKI =>
@@ -125,7 +144,35 @@ package body Wiki.Render.Wiki is
             Engine.Tags (Preformat_End)   := PREFORMAT_END_MEDIAWIKI'Access;
             Engine.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
             Engine.Tags (Escape_Rule)     := ESCAPE_CREOLE'Access;
+            Engine.Link_First := True;
+            Engine.Html_Blockquote := True;
             Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("'+_-*(){}][!");
+
+         when SYNTAX_MARKDOWN =>
+            Engine.Style_Start_Tags (BOLD)   := BOLD_MARKDOWN'Access;
+            Engine.Style_End_Tags (BOLD)     := BOLD_MARKDOWN'Access;
+            Engine.Style_Start_Tags (ITALIC) := ITALIC_MARKDOWN'Access;
+            Engine.Style_End_Tags (ITALIC)   := ITALIC_MARKDOWN'Access;
+            Engine.Style_Start_Tags (CODE)   := CODE_MARKDOWN'Access;
+            Engine.Style_End_Tags (CODE)     := CODE_MARKDOWN'Access;
+            Engine.Tags (Header_Start)       := HEADER_MARKDOWN'Access;
+            Engine.Tags (Line_Break)         := LINE_BREAK_MEDIAWIKI'Access;
+            Engine.Tags (Img_Start)          := IMG_START_MARKDOWN'Access;
+            Engine.Tags (Img_End)            := IMG_END_MARKDOWN'Access;
+            --  Engine.Tags (Img_Separator)      := LINK_SEPARATOR_MARKDOWN'Access;
+            Engine.Tags (Link_Start)         := LINK_START_MARKDOWN'Access;
+            Engine.Tags (Link_End)           := LINK_END_MARKDOWN'Access;
+            Engine.Tags (Link_Separator)     := LINK_SEPARATOR_MARKDOWN'Access;
+            Engine.Tags (List_Item)          := LIST_ITEM_MARKDOWN'Access;
+            Engine.Tags (List_Ordered_Item)  := LIST_ORDERED_ITEM_MARKDOWN'Access;
+            Engine.Tags (Preformat_Start)    := PREFORMAT_START_MARKDOWN'Access;
+            Engine.Tags (Preformat_End)      := PREFORMAT_END_MARKDOWN'Access;
+            Engine.Tags (Horizontal_Rule)    := HORIZONTAL_RULE_MARKDOWN'Access;
+            Engine.Tags (Escape_Rule)        := ESCAPE_MARKDOWN'Access;
+            Engine.Tags (Blockquote_Start)   := QUOTE_MARKDOWN'Access;
+            Engine.Link_First := False;
+            Engine.Html_Blockquote := False;
+            Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("`'+_-*(){}][!#|\");
 
          when others =>
             Engine.Style_Start_Tags (BOLD)   := BOLD_CREOLE'Access;
@@ -156,6 +203,7 @@ package body Wiki.Render.Wiki is
             Engine.Tags (Horizontal_Rule) := HORIZONTAL_RULE_CREOLE'Access;
             Engine.Tags (Escape_Rule)     := ESCAPE_CREOLE'Access;
             Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("'+_-*(){}][!");
+            Engine.Link_First := True;
 
       end case;
    end Set_Output_Stream;
@@ -299,14 +347,20 @@ package body Wiki.Render.Wiki is
       Lang : constant Strings.WString := Attributes.Get_Attribute (Attrs, "lang");
    begin
       Engine.Output.Write (Engine.Tags (Link_Start).all);
-      Engine.Output.Write (Link);
-      if Name'Length > 0 then
-         Engine.Output.Write (Engine.Tags (Link_Separator).all);
+      if Engine.Link_First then
+         Engine.Output.Write (Link);
+         if Name'Length > 0 then
+            Engine.Output.Write (Engine.Tags (Link_Separator).all);
+            Engine.Output.Write (Name);
+         end if;
+         if Engine.Allow_Link_Language and Lang'Length > 0 then
+            Engine.Output.Write (Engine.Tags (Link_Separator).all);
+            Engine.Output.Write (Lang);
+         end if;
+      else
          Engine.Output.Write (Name);
-      end if;
-      if Engine.Allow_Link_Language and Lang'Length > 0 then
          Engine.Output.Write (Engine.Tags (Link_Separator).all);
-         Engine.Output.Write (Lang);
+         Engine.Output.Write (Link);
       end if;
       Engine.Output.Write (Engine.Tags (Link_End).all);
       Engine.Empty_Line := False;
@@ -319,10 +373,16 @@ package body Wiki.Render.Wiki is
       Alt : constant Strings.WString := Attributes.Get_Attribute (Attrs, "alt");
    begin
       Engine.Output.Write (Engine.Tags (Img_Start).all);
-      Engine.Output.Write (Link);
-      if Alt'Length > 0 then
-         Engine.Output.Write (Engine.Tags (Link_Separator).all);
+      if Engine.Link_First then
+         Engine.Output.Write (Link);
+         if Alt'Length > 0 then
+            Engine.Output.Write (Engine.Tags (Link_Separator).all);
+            Engine.Output.Write (Alt);
+         end if;
+      else
          Engine.Output.Write (Alt);
+         Engine.Output.Write (Engine.Tags (Link_Separator).all);
+         Engine.Output.Write (Link);
       end if;
       Engine.Output.Write (Engine.Tags (Img_End).all);
       Engine.Empty_Line := False;
@@ -418,13 +478,8 @@ package body Wiki.Render.Wiki is
                   Engine.Set_Format (Format);
                   Apply_Format := False;
                end if;
-               if Check_Escape then
-                  if Ada.Strings.Wide_Wide_Maps.Is_In (Text (I), Engine.Escape_Set) then
-                     Engine.Output.Write (Engine.Tags (Escape_Rule).all);
-                     Check_Escape := False;
-                  end if;
-               else
-                  Check_Escape := True;
+               if Ada.Strings.Wide_Wide_Maps.Is_In (Text (I), Engine.Escape_Set) then
+                  Engine.Output.Write (Engine.Tags (Escape_Rule).all);
                end if;
                Engine.Output.Write (Text (I));
                Engine.Empty_Line := False;
@@ -547,6 +602,10 @@ package body Wiki.Render.Wiki is
                Engine.New_Line;
             end if;
             Engine.Quote_Level := Engine.Quote_Level + 1;
+            if Engine.Html_Blockquote then
+               --  Make sure there is en empty line before the HTML <blockquote>.
+               Engine.Output.Write (LF & "<blockquote>" & LF);
+            end if;
 
          when others =>
             null;
@@ -637,6 +696,10 @@ package body Wiki.Render.Wiki is
                Engine.New_Line;
             end if;
             Engine.Quote_Level := Engine.Quote_Level - 1;
+            if Engine.Html_Blockquote then
+               --  Make sure there is an empty line after the HTML </blockquote>.
+               Engine.Output.Write ("</blockquote>" & LF & LF);
+            end if;
 
          when others =>
             null;
