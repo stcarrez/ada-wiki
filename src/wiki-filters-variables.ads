@@ -78,6 +78,11 @@ package Wiki.Filters.Variables is
    function Expand (Filter : in Variable_Filter;
                     Text   : in Wiki.Strings.WString) return Wiki.Strings.WString;
 
+   --  Iterate over the filter variables.
+   procedure Iterate (Filter  : in Variable_Filter;
+                      Process : not null
+                        access procedure (Name, Value : in Strings.WString));
+
 private
 
    package Variable_Maps is
