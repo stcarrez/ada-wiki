@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-plugins-template -- Template Plugin
---  Copyright (C) 2016 Stephane Carrez
+--  Copyright (C) 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,7 +35,7 @@ package body Wiki.Plugins.Templates is
    procedure Expand (Plugin   : in out Template_Plugin;
                      Document : in out Wiki.Documents.Document;
                      Params   : in out Wiki.Attributes.Attribute_List;
-                     Context  : in Plugin_Context) is
+                     Context  : in out Plugin_Context) is
       P       : Wiki.Parsers.Parser;
       Content : Wiki.Strings.UString;
    begin
@@ -79,7 +79,7 @@ package body Wiki.Plugins.Templates is
    procedure Expand (Plugin   : in out File_Template_Plugin;
                      Document : in out Wiki.Documents.Document;
                      Params   : in out Wiki.Attributes.Attribute_List;
-                     Context  : in Plugin_Context) is
+                     Context  : in out Plugin_Context) is
       First : constant Wiki.Attributes.Cursor := Wiki.Attributes.First (Params);
       Name  : constant String := Wiki.Attributes.Get_Value (First);
       Input : aliased Wiki.Streams.Text_IO.File_Input_Stream;
