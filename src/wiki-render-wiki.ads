@@ -73,7 +73,7 @@ package Wiki.Render.Wiki is
 
    --  Render an image.
    procedure Render_Image (Engine : in out Wiki_Renderer;
-                           Link   : in Strings.WString;
+                           Title  : in Strings.WString;
                            Attrs  : in Attributes.Attribute_List);
 
    --  Render a quote.
@@ -127,7 +127,6 @@ private
    procedure New_Line (Engine : in out Wiki_Renderer);
 
    procedure Close_Paragraph (Engine : in out Wiki_Renderer);
-   procedure Open_Paragraph (Engine : in out Wiki_Renderer);
    procedure Start_Keep_Content (Engine : in out Wiki_Renderer);
 
    type List_Style_Array is array (1 .. 32) of Boolean;
