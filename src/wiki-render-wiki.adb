@@ -27,7 +27,7 @@ package body Wiki.Render.Wiki is
    SUPERSCRIPT_CREOLE        : aliased constant Strings.WString := "^^";
    SUBSCRIPT_CREOLE          : aliased constant Strings.WString := ",,";
    UNDERLINE_CREOLE          : aliased constant Strings.WString := "__";
-   LINE_BREAK_CREOLE         : aliased constant Strings.WString := "%%%";
+   LINE_BREAK_CREOLE         : aliased constant Strings.WString := "%%%" & LF;
    IMG_START_CREOLE          : aliased constant Strings.WString := "{{";
    IMG_END_CREOLE            : aliased constant Strings.WString := "}}";
    LINK_START_CREOLE         : aliased constant Strings.WString := "[[";
@@ -75,8 +75,9 @@ package body Wiki.Render.Wiki is
    LINK_END_MARKDOWN         : aliased constant Strings.WString := ")";
    LIST_ITEM_MARKDOWN        : aliased constant Strings.WString := "*";
    LIST_ORDERED_ITEM_MARKDOWN : aliased constant Strings.WString := "*";
+   LINE_BREAK_MARKDOWN       : aliased constant Strings.WString := "\" & LF;
 
-   LINE_BREAK_MEDIAWIKI      : aliased constant Strings.WString := "<br />";
+   LINE_BREAK_MEDIAWIKI      : aliased constant Strings.WString := "<br />" & LF;
    BOLD_MEDIAWIKI            : aliased constant Strings.WString := "'''";
    ITALIC_MEDIAWIKI          : aliased constant Strings.WString := "''";
    PREFORMAT_START_MEDIAWIKI : aliased constant Strings.WString := "<pre>";
@@ -156,7 +157,7 @@ package body Wiki.Render.Wiki is
             Engine.Style_Start_Tags (CODE)   := CODE_MARKDOWN'Access;
             Engine.Style_End_Tags (CODE)     := CODE_MARKDOWN'Access;
             Engine.Tags (Header_Start)       := HEADER_MARKDOWN'Access;
-            Engine.Tags (Line_Break)         := LINE_BREAK_MEDIAWIKI'Access;
+            Engine.Tags (Line_Break)         := LINE_BREAK_MARKDOWN'Access;
             Engine.Tags (Img_Start)          := IMG_START_MARKDOWN'Access;
             Engine.Tags (Img_End)            := IMG_END_MARKDOWN'Access;
             --  Engine.Tags (Img_Separator)      := LINK_SEPARATOR_MARKDOWN'Access;
