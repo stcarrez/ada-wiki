@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-wiki -- Wiki to Wiki renderer
---  Copyright (C) 2015, 2016 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -112,6 +112,7 @@ private
    type Wiki_Tag_Type is (Header_Start, Header_End,
                           Img_Start, Img_End,
                           Link_Start, Link_End, Link_Separator,
+                          Quote_Start, Quote_End, Quote_Separator,
                           Preformat_Start, Preformat_End,
                           List_Start, List_Item, List_Ordered_Item,
                           Line_Break, Escape_Rule,
