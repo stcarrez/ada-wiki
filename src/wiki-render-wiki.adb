@@ -481,7 +481,11 @@ package body Wiki.Render.Wiki is
                if Ada.Strings.Wide_Wide_Maps.Is_In (Text (I), Engine.Escape_Set) then
                   Engine.Output.Write (Engine.Tags (Escape_Rule).all);
                end if;
-               Engine.Output.Write (Text (I));
+               if Text (I) = NBSP then
+                  Engine.Output.Write (' ');
+               else
+                  Engine.Output.Write (Text (I));
+               end if;
                Engine.Empty_Line := False;
             end if;
          end loop;
