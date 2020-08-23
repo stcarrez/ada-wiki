@@ -21,6 +21,7 @@ with Ada.Directories;
 
 with Util.Measures;
 
+with Wiki.Strings;
 with Wiki.Render.Wiki;
 with Wiki.Render.Html;
 with Wiki.Render.Text;
@@ -105,8 +106,9 @@ package body Wiki.Tests is
          Engine.Add_Filter (Html_Filter'Unchecked_Access);
          Engine.Add_Filter (Var_Filter'Unchecked_Access);
          Engine.Parse (Input'Unchecked_Access, Doc);
+         Var_Filter.Add_Variable (String '("file"), Wiki.Strings.To_WString (To_String (T.Name)));
          Util.Measures.Report (Time, "Parse " & To_String (T.Name));
-         if T.Source = Wiki.SYNTAX_HTML or T.Is_Cvt Then
+         if T.Source = Wiki.SYNTAX_HTML or T.Is_Cvt then
             declare
                Renderer    : aliased Wiki.Render.Wiki.Wiki_Renderer;
             begin
