@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-plugins -- Wiki plugins
---  Copyright (C) 2016, 2018 Stephane Carrez
+--  Copyright (C) 2016, 2018, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -55,6 +55,6 @@ package Wiki.Plugins is
    procedure Expand (Plugin   : in out Wiki_Plugin;
                      Document : in out Wiki.Documents.Document;
                      Params   : in out Wiki.Attributes.Attribute_List;
-                     Context  : in Plugin_Context) is abstract;
+                     Context  : in out Plugin_Context) is abstract;
 
 end Wiki.Plugins;
