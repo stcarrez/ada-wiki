@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  Render Tests - Unit tests for AWA Wiki rendering
---  Copyright (C) 2013, 2016 Stephane Carrez
+--  Copyright (C) 2013, 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +32,7 @@ package Wiki.Tests is
       Source  : Wiki.Wiki_Syntax;
       Format  : Wiki.Wiki_Syntax;
       Is_Html : Boolean := False;
+      Is_Cvt  : Boolean := False;
    end record;
    type Test_Case_Access is access all Test;
 
