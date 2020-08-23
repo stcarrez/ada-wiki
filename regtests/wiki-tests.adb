@@ -283,6 +283,10 @@ package body Wiki.Tests is
                            Tst := Create_Test (Name & ".mediawiki", Path & "/" & Simple,
                                                Syntax, "/wiki-import/", True);
 
+                        when Wiki.SYNTAX_MARKDOWN =>
+                           Tst := Create_Test (Name & ".markdown", Path & "/" & Simple,
+                                               Syntax, "/wiki-import/", True);
+
                         when others =>
                            Tst := null;
 
