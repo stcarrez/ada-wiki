@@ -1402,6 +1402,7 @@ package body Wiki.Parsers is
    procedure Parse_Double_Code is new Parse_Double_Format (CODE);
    --  procedure Parse_Double_Superscript is new Parse_Double_Format (SUPERSCRIPT);
    procedure Parse_Double_Subscript is new Parse_Double_Format (SUBSCRIPT);
+   procedure Parse_Double_Superscript is new Parse_Double_Format (SUPERSCRIPT);
    procedure Parse_Double_Strikeout is new Parse_Double_Format (STRIKEOUT);
 
    --  ------------------------------
@@ -1955,7 +1956,7 @@ package body Wiki.Parsers is
          Character'Pos ('*') => Parse_List_Or_Bold'Access,
          Character'Pos ('/') => Parse_Double_Italic'Access,
          Character'Pos ('@') => Parse_Double_Code'Access,
-         Character'Pos ('^') => Parse_Single_Superscript'Access,
+         Character'Pos ('^') => Parse_Double_Superscript'Access,
          Character'Pos ('-') => Parse_Double_Strikeout'Access,
          Character'Pos ('+') => Parse_Double_Strikeout'Access,
          Character'Pos (',') => Parse_Double_Subscript'Access,
