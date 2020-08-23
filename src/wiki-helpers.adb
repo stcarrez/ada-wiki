@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-helpers -- Helper operations for wiki parsers and renderer
---  Copyright (C) 2016 Stephane Carrez
+--  Copyright (C) 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,7 @@ package body Wiki.Helpers is
    --  ------------------------------
    function Is_Space (C : in Wiki.Strings.WChar) return Boolean is
    begin
-      return Ada.Wide_Wide_Characters.Handling.Is_Space (C) or C = HT;
+      return Ada.Wide_Wide_Characters.Handling.Is_Space (C) or C = HT or C = NBSP;
    end Is_Space;
 
    --  ------------------------------
