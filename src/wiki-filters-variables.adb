@@ -18,6 +18,8 @@
 
 package body Wiki.Filters.Variables is
 
+   function Need_Expand (Text : in Wiki.Strings.WString) return Boolean;
+
    function Need_Expand (Text : in Wiki.Strings.WString) return Boolean is
    begin
       return Wiki.Strings.Index (Text, "$") > 0;
@@ -176,5 +178,19 @@ package body Wiki.Filters.Variables is
       end if;
       return Strings.Wide_Wide_Builders.To_Array (Result);
    end Expand;
+
+   --  ------------------------------
+   --  Iterate over the filter variables.
+   --  ------------------------------
+   procedure Iterate (Filter  : in Variable_Filter;
+                      Process : not null
+                        access procedure (Name, Value : in Strings.WString)) is
+      Iter : Variable_Cursor := Filter.Variables.First;
+   begin
+      while Variable_Maps.Has_Element (Iter) loop
+         Variable_Maps.Query_Element (Iter, Process);
+         Variable_Maps.Next (Iter);
+      end loop;
+   end Iterate;
 
 end Wiki.Filters.Variables;
