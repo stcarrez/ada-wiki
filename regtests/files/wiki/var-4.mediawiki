@@ -1,0 +1,28 @@
+__NOTOC__
+
+== Empty variables ==
+
+{{list}}
+
+== One variable ==
+
+{{set|myname|Joe Roger}}
+
+{{list}}
+
+== Two variables ==
+
+{{set|admin|Buck Roger}}
+
+{{list}}
+
+== More variables ==
+
+{{set|0|Zero}}
+{{set|1|Un}}
+{{set|7|Sept}}
+{{set|3|Trois}}
+{{set|Quatre|4 (chiffre)}}
+
+{{list}}
+
