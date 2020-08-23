@@ -56,6 +56,7 @@ package body Wiki.Render.Wiki is
    PREFORMAT_START_DOTCLEAR  : aliased constant Strings.WString := "///";
    PREFORMAT_END_DOTCLEAR    : aliased constant Strings.WString := "///" & LF;
    ESCAPE_DOTCLEAR           : aliased constant Strings.WString := "\";
+   QUOTE_DOTCLEAR            : aliased constant Strings.WString := ">";
 
    LINE_BREAK_MEDIAWIKI      : aliased constant Strings.WString := "<br />";
    BOLD_MEDIAWIKI            : aliased constant Strings.WString := "'''";
@@ -100,6 +101,7 @@ package body Wiki.Render.Wiki is
             Engine.Tags (List_Item)       := LIST_ITEM_CREOLE'Access;
             Engine.Tags (List_Ordered_Item) := LIST_ORDERED_ITEM_CREOLE'Access;
             Engine.Tags (Escape_Rule)       := ESCAPE_DOTCLEAR'Access;
+            Engine.Tags (Blockquote_Start)  := QUOTE_DOTCLEAR'Access;
             Engine.Invert_Header_Level := True;
             Engine.Allow_Link_Language := True;
             Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("-+_*{}][/=\");
@@ -399,6 +401,11 @@ package body Wiki.Render.Wiki is
                   Engine.Empty_Line := True;
                end if;
             elsif not Engine.Empty_Line or else not Helpers.Is_Space (Text (I)) then
+               if Engine.Empty_Line and Engine.Quote_Level > 0 then
+                  for Level in 1 .. Engine.Quote_Level loop
+                     Engine.Output.Write (Engine.Tags (Blockquote_Start).all);
+                  end loop;
+               end if;
                if Engine.In_List then
                   if Engine.UL_List_Level > Engine.OL_List_Level then
                      Engine.Add_List_Item (Engine.UL_List_Level, False);
@@ -534,6 +541,13 @@ package body Wiki.Render.Wiki is
          when LI_TAG =>
             Engine.In_List := True;
 
+         when BLOCKQUOTE_TAG =>
+            Engine.Set_Format (Empty_Formats);
+            if not Engine.Empty_Line then
+               Engine.New_Line;
+            end if;
+            Engine.Quote_Level := Engine.Quote_Level + 1;
+
          when others =>
             null;
 
@@ -616,6 +630,13 @@ package body Wiki.Render.Wiki is
 
          when LI_TAG =>
             Engine.In_List := False;
+
+         when BLOCKQUOTE_TAG =>
+            Engine.Set_Format (Empty_Formats);
+            if not Engine.Empty_Line then
+               Engine.New_Line;
+            end if;
+            Engine.Quote_Level := Engine.Quote_Level - 1;
 
          when others =>
             null;
