@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-plugins-conditions -- Condition Plugin
---  Copyright (C) 2016 Stephane Carrez
+--  Copyright (C) 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,7 +46,7 @@ package Wiki.Plugins.Conditions is
    procedure Expand (Plugin   : in out Condition_Plugin;
                      Document : in out Wiki.Documents.Document;
                      Params   : in out Wiki.Attributes.Attribute_List;
-                     Context  : in Plugin_Context);
+                     Context  : in out Plugin_Context);
 
    --  Append the attribute name/value to the condition plugin parameter list.
    procedure Append (Plugin   : in out Condition_Plugin;
