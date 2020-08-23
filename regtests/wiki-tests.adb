@@ -57,6 +57,7 @@ package body Wiki.Tests is
       Template    : aliased Wiki.Plugins.Templates.File_Template_Plugin;
       Condition   : aliased Wiki.Plugins.Conditions.Condition_Plugin;
       Variables   : aliased Wiki.Plugins.Variables.Variable_Plugin;
+      List_Vars   : aliased Wiki.Plugins.Variables.List_Variable_Plugin;
       Input       : aliased Wiki.Streams.Text_IO.File_Input_Stream;
       Output      : aliased Wiki.Streams.Html.Text_IO.Html_File_Output_Stream;
 
@@ -76,6 +77,8 @@ package body Wiki.Tests is
             return Condition'Unchecked_Access;
          elsif Name = "set" then
             return Variables'Unchecked_Access;
+         elsif Name = "list" then
+            return List_Vars'Unchecked_Access;
          else
             return Template.Find (Name);
          end if;
