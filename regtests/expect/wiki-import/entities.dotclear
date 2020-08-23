@@ -1,4 +1,4 @@
-< ¢©>&
+< ¢©>&
 Alpha: Α
 Beta: Β
 Gamma: Γ
