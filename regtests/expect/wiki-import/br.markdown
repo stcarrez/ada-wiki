@@ -1,1 +1,3 @@
-lorem ipsum,<br />dolor sit amet,<br />consectetur adipiscing elit.
+lorem ipsum,\
+dolor sit amet,\
+consectetur adipiscing elit.
