@@ -106,7 +106,7 @@ package body Wiki.Tests is
          Engine.Add_Filter (Var_Filter'Unchecked_Access);
          Engine.Parse (Input'Unchecked_Access, Doc);
          Util.Measures.Report (Time, "Parse " & To_String (T.Name));
-         if T.Source = Wiki.SYNTAX_HTML then
+         if T.Source = Wiki.SYNTAX_HTML or T.Is_Cvt Then
             declare
                Renderer    : aliased Wiki.Render.Wiki.Wiki_Renderer;
             begin
@@ -172,6 +172,7 @@ package body Wiki.Tests is
 
       procedure Add_Import_Tests;
       procedure Add_Wiki_Tests;
+      procedure Add_Convert_Tests;
       function Create_Test (Name    : in String;
                             Path    : in String;
                             Format  : in Wiki.Wiki_Syntax;
@@ -301,9 +302,80 @@ package body Wiki.Tests is
          end loop;
       end Add_Import_Tests;
 
+      procedure Add_Convert_Tests is
+         Dir         : constant String := "regtests/files/convert";
+         Path        : constant String := Util.Tests.Get_Path (Dir);
+      begin
+         if Kind (Path) /= Directory then
+            Ada.Text_IO.Put_Line ("Cannot read test directory: " & Path);
+         end if;
+
+         Start_Search (Search, Directory => Path, Pattern => "*.*", Filter => Filter);
+         while More_Entries (Search) loop
+            Get_Next_Entry (Search, Ent);
+            declare
+               Simple : constant String := Simple_Name (Ent);
+               Ext    : constant String := Ada.Directories.Extension (Simple);
+               Name   : constant String := Base_Name (Simple);
+               Tst    : Test_Case_Access;
+               Format : Wiki.Wiki_Syntax;
+            begin
+               if Simple /= "." and then Simple /= ".."
+                 and then Simple /= ".svn" and then Simple (Simple'Last) /= '~'
+               then
+                  if Ext = "wiki" then
+                     Format := Wiki.SYNTAX_GOOGLE;
+                  elsif Ext = "dotclear" then
+                     Format := Wiki.SYNTAX_DOTCLEAR;
+                  elsif Ext = "creole" then
+                     Format := Wiki.SYNTAX_CREOLE;
+                  elsif Ext = "phpbb" then
+                     Format := Wiki.SYNTAX_PHPBB;
+                  elsif Ext = "mediawiki" then
+                     Format := Wiki.SYNTAX_MEDIA_WIKI;
+                  elsif Ext = "markdown" then
+                     Format := Wiki.SYNTAX_MARKDOWN;
+                  else
+                     Format := Wiki.SYNTAX_MIX;
+                  end if;
+
+                  for Syntax in Wiki.Wiki_Syntax'Range loop
+                     case Syntax is
+                        when Wiki.SYNTAX_CREOLE =>
+                           Tst := Create_Test (Name & ".creole", Path & "/" & Simple,
+                                               Syntax, "/wiki-convert/", True);
+
+                        when Wiki.SYNTAX_DOTCLEAR =>
+                           Tst := Create_Test (Name & ".dotclear", Path & "/" & Simple,
+                                               Syntax, "/wiki-convert/", True);
+
+                        when Wiki.SYNTAX_MEDIA_WIKI =>
+                           Tst := Create_Test (Name & ".mediawiki", Path & "/" & Simple,
+                                               Syntax, "/wiki-convert/", True);
+
+                        when Wiki.SYNTAX_MARKDOWN =>
+                           Tst := Create_Test (Name & ".markdown", Path & "/" & Simple,
+                                               Syntax, "/wiki-convert/", True);
+
+                        when others =>
+                           Tst := null;
+
+                     end case;
+                     if Tst /= null then
+                        Tst.Is_Cvt := True;
+                        Tst.Source := Format;
+                        Suite.Add_Test (Tst.all'Access);
+                     end if;
+                  end loop;
+               end if;
+            end;
+         end loop;
+      end Add_Convert_Tests;
+
    begin
       Add_Wiki_Tests;
       Add_Import_Tests;
+      Add_Convert_Tests;
    end Add_Tests;
 
 end Wiki.Tests;
