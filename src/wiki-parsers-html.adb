@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-html -- Wiki HTML parser
---  Copyright (C) 2015, 2016, 2018 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2018, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -308,6 +308,9 @@ package body Wiki.Parsers.Html is
       for I in 1 .. Len loop
          Parse_Text (P, Wiki.Strings.To_WChar (Name (I)));
       end loop;
+      if Len > 0 and then Len < Name'Last and then C = ';' then
+         Parse_Text (P, ';');
+      end if;
    end Parse_Entity;
 
 end Wiki.Parsers.Html;
