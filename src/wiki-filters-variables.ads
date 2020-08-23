@@ -16,7 +16,7 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 
-private with Ada.Containers.Indefinite_Hashed_Maps;
+private with Ada.Containers.Indefinite_Ordered_Maps;
 
 --  === Variables Filters ===
 --  The `Wiki.Filters.Variables` package defines a filter that replaces variables
@@ -83,14 +83,15 @@ package Wiki.Filters.Variables is
                       Process : not null
                         access procedure (Name, Value : in Strings.WString));
 
+   procedure Iterate (Chain   : in Wiki.Filters.Filter_Chain;
+                      Process : not null
+                        access procedure (Name, Value : in Strings.WString));
+
 private
 
    package Variable_Maps is
-     new Ada.Containers.Indefinite_Hashed_Maps (Key_Type        => Strings.WString,
-                                                Element_Type    => Strings.WString,
-                                                Hash            => Strings.Hash,
-                                                Equivalent_Keys => "=",
-                                                "="             => "=");
+     new Ada.Containers.Indefinite_Ordered_Maps (Key_Type        => Strings.WString,
+                                                 Element_Type    => Strings.WString);
 
    subtype Variable_Map is Variable_Maps.Map;
    subtype Variable_Cursor is Variable_Maps.Cursor;
