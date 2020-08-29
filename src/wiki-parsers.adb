@@ -1566,7 +1566,7 @@ package body Wiki.Parsers is
                      Append (P.Text, LF);
                   end if;
                else
-                  Append (P.Text, C);
+                  Append (P.Text, LF);
                end if;
             else
                Col := Col + 1;
@@ -1599,6 +1599,13 @@ package body Wiki.Parsers is
                end if;
                Append (P.Text, Stop_Token);
                Col := Col + 1;
+            elsif C = CR then
+               Col := 0;
+               Peek (P, C);
+               if C /= LF then
+                  Put_Back (P, C);
+               end if;
+               C := LF;
             elsif C = LF or C = CR then
                Col := 0;
             else
