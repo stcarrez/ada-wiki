@@ -1,0 +1,31 @@
+== Words ==
+Delete 1
+First 1
+Formatting 1
+Insert 1
+Line 1
+Second 1
+Section 6
+Strike 2
+Underline 1
+and 1
+bloc 1
+break 1
+definition 3
+emphasis 2
+h1 1
+h2 1
+h3 1
+h4 1
+h5 1
+item 15
+line 3
+num 2
+paragraph 2
+strong 2
+text 1
+== Links ==
+A link 2
+http://en.wikipedia.org/wiki/Rectifier 1
+http://www.sun.com 1
+== Images ==

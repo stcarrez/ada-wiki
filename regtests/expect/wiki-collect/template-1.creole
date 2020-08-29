@@ -1,0 +1,8 @@
+== Words ==
+Include 2
+img 1
+item 3
+pre 1
+== Links ==
+== Images ==
+photo.jpg 1

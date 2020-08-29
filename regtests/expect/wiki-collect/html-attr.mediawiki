@@ -1,0 +1,9 @@
+== Words ==
+Article 1
+Discussion 1
+Main 1
+Page 1
+== Links ==
+/index.php?title=Talk:Main_Page&amp;action=edit&amp;redlink=1 1
+Main_Page 1
+== Images ==
