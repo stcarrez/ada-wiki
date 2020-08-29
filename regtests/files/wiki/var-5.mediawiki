@@ -1,0 +1,7 @@
+{{set|myname|Joe Roger}}
+
+$(myname) is captain.
+
+$(admin) is unkown
+
+$(buck) and $(myname) is ok.
