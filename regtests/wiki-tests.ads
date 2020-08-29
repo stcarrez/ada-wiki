@@ -29,6 +29,8 @@ package Wiki.Tests is
       File    : Ada.Strings.Unbounded.Unbounded_String;
       Expect  : Ada.Strings.Unbounded.Unbounded_String;
       Result  : Ada.Strings.Unbounded.Unbounded_String;
+      Collect : Ada.Strings.Unbounded.Unbounded_String;
+      Expect_Collect : Ada.Strings.Unbounded.Unbounded_String;
       Source  : Wiki.Wiki_Syntax;
       Format  : Wiki.Wiki_Syntax;
       Is_Html : Boolean := False;
