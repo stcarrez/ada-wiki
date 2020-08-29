@@ -166,12 +166,13 @@ package body Wiki.Filters.Variables is
          Item := Filter.Variables.Find (Text (Name_Start .. Name_End));
          if Variable_Maps.Has_Element (Item) then
             Strings.Wide_Wide_Builders.Append (Result, Variable_Maps.Element (Item));
+            First := Last;
          elsif Last > Text'Last then
             exit;
          else
             Strings.Wide_Wide_Builders.Append (Result, Text (First .. Last));
+            First := Last + 1;
          end if;
-         First := Last;
       end loop;
       if First <= Text'Last then
          Strings.Wide_Wide_Builders.Append (Result, Text (First .. Text'Last));
