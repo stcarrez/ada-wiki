@@ -17,6 +17,7 @@
 -----------------------------------------------------------------------
 
 with Ada.Text_IO;
+with Ada.Wide_Wide_Text_IO;
 with Ada.Directories;
 
 with Util.Measures;
@@ -29,6 +30,7 @@ with Wiki.Filters.Html;
 with Wiki.Filters.TOC;
 with Wiki.Filters.Autolink;
 with Wiki.Filters.Variables;
+with Wiki.Filters.Collectors;
 with Wiki.Plugins.Templates;
 with Wiki.Plugins.Conditions;
 with Wiki.Plugins.Variables;
@@ -55,6 +57,9 @@ package body Wiki.Tests is
       Html_Filter : aliased Wiki.Filters.Html.Html_Filter_Type;
       Var_Filter  : aliased Wiki.Filters.Variables.Variable_Filter;
       Auto_Filter : aliased Wiki.Filters.Autolink.Autolink_Filter;
+      Words       : aliased Wiki.Filters.Collectors.Word_Collector_Type;
+      Links       : aliased Wiki.Filters.Collectors.Link_Collector_Type;
+      Images      : aliased Wiki.Filters.Collectors.Image_Collector_Type;
       Template    : aliased Wiki.Plugins.Templates.File_Template_Plugin;
       Condition   : aliased Wiki.Plugins.Conditions.Condition_Plugin;
       Variables   : aliased Wiki.Plugins.Variables.Variable_Plugin;
@@ -86,6 +91,7 @@ package body Wiki.Tests is
       end Find;
 
       Local_Factory : aliased Test_Factory;
+      Has_Collector : constant Boolean := Length (T.Collect) > 0;
    begin
       if not Exists (Dir) then
          Create_Path (Dir);
@@ -101,6 +107,11 @@ package body Wiki.Tests is
       begin
          Engine.Set_Syntax (T.Source);
          Engine.Set_Plugin_Factory (Local_Factory'Unchecked_Access);
+         if Has_Collector then
+            Engine.Add_Filter (Words'Unchecked_Access);
+            Engine.Add_Filter (Links'Unchecked_Access);
+            Engine.Add_Filter (Images'Unchecked_Access);
+         end if;
          Engine.Add_Filter (Toc_Filter'Unchecked_Access);
          Engine.Add_Filter (Auto_Filter'Unchecked_Access);
          Engine.Add_Filter (Html_Filter'Unchecked_Access);
@@ -143,6 +154,44 @@ package body Wiki.Tests is
                                      Expect  => To_String (T.Expect),
                                      Test    => Result_File,
                                      Message => "Render");
+
+      if Has_Collector then
+         declare
+            procedure Print (Pos : in Wiki.Filters.Collectors.Cursor);
+
+            Path : constant String := To_String (T.Collect);
+            Dir  : constant String := Containing_Directory (Path);
+            File : Ada.Wide_Wide_Text_IO.File_Type;
+
+            procedure Print (Pos : in Wiki.Filters.Collectors.Cursor) is
+               use Wiki.Filters.Collectors;
+
+               Word : constant Wiki.Strings.WString := WString_Maps.Key (Pos);
+               Count : constant Natural := WString_Maps.Element (Pos);
+            begin
+               Ada.Wide_Wide_Text_IO.Put (File, Word);
+               Ada.Wide_Wide_Text_IO.Put_Line (File, Natural'Wide_Wide_Image (Count));
+            end Print;
+
+         begin
+            if not Exists (Dir) then
+               Create_Path (Dir);
+            end if;
+            Ada.Wide_Wide_Text_IO.Create (File, Ada.Wide_Wide_Text_IO.Out_File, Path);
+            Ada.Wide_Wide_Text_IO.Put_Line (File, "== Words ==");
+            Words.Iterate (Print'Access);
+            Ada.Wide_Wide_Text_IO.Put_Line (File, "== Links ==");
+            Links.Iterate (Print'Access);
+            Ada.Wide_Wide_Text_IO.Put_Line (File, "== Images ==");
+            Images.Iterate (Print'Access);
+            Ada.Wide_Wide_Text_IO.Close (File);
+
+            Util.Tests.Assert_Equal_Files (T       => T,
+                                           Expect  => To_String (T.Expect_Collect),
+                                           Test    => Path,
+                                           Message => "Collect");
+         end;
+      end if;
    end Test_Render;
 
    --  ------------------------------
@@ -179,6 +228,7 @@ package body Wiki.Tests is
                             Path    : in String;
                             Format  : in Wiki.Wiki_Syntax;
                             Prefix  : in String;
+                            Collect : in String;
                             Is_Html : in Boolean) return Test_Case_Access;
 
       Result_Dir  : constant String := "regtests/result";
@@ -193,6 +243,7 @@ package body Wiki.Tests is
                             Path    : in String;
                             Format  : in Wiki.Wiki_Syntax;
                             Prefix  : in String;
+                            Collect : in String;
                             Is_Html : in Boolean) return Test_Case_Access is
          Tst    : Test_Case_Access;
       begin
@@ -202,6 +253,10 @@ package body Wiki.Tests is
          Tst.File    := To_Unbounded_String (Path);
          Tst.Expect  := To_Unbounded_String (Expect_Path & Prefix & Name);
          Tst.Result  := To_Unbounded_String (Result_Path & Prefix & Name);
+         if Collect'Length > 0 then
+            Tst.Collect := To_Unbounded_String (Result_Path & Collect & Name);
+            Tst.Expect_Collect  := To_Unbounded_String (Expect_Path & Collect & Name);
+         end if;
          Tst.Format  := Format;
          Tst.Source  := Format;
          return Tst;
@@ -243,10 +298,12 @@ package body Wiki.Tests is
                      Format := Wiki.SYNTAX_MIX;
                   end if;
 
-                  Tst := Create_Test (Simple, Path & "/" & Simple, Format, "/wiki-html/", True);
+                  Tst := Create_Test (Simple, Path & "/" & Simple, Format, "/wiki-html/",
+                                      "/wiki-collect/", True);
                   Suite.Add_Test (Tst.all'Access);
 
-                  Tst := Create_Test (Simple, Path & "/" & Simple, Format, "/wiki-txt/", False);
+                  Tst := Create_Test (Simple, Path & "/" & Simple, Format, "/wiki-txt/",
+                                      "", False);
                   Suite.Add_Test (Tst.all'Access);
                end if;
             end;
@@ -276,19 +333,19 @@ package body Wiki.Tests is
                      case Syntax is
                         when Wiki.SYNTAX_CREOLE =>
                            Tst := Create_Test (Name & ".creole", Path & "/" & Simple,
-                                               Syntax, "/wiki-import/", True);
+                                               Syntax, "/wiki-import/", "", True);
 
                         when Wiki.SYNTAX_DOTCLEAR =>
                            Tst := Create_Test (Name & ".dotclear", Path & "/" & Simple,
-                                               Syntax, "/wiki-import/", True);
+                                               Syntax, "/wiki-import/", "", True);
 
                         when Wiki.SYNTAX_MEDIA_WIKI =>
                            Tst := Create_Test (Name & ".mediawiki", Path & "/" & Simple,
-                                               Syntax, "/wiki-import/", True);
+                                               Syntax, "/wiki-import/", "", True);
 
                         when Wiki.SYNTAX_MARKDOWN =>
                            Tst := Create_Test (Name & ".markdown", Path & "/" & Simple,
-                                               Syntax, "/wiki-import/", True);
+                                               Syntax, "/wiki-import/", "", True);
 
                         when others =>
                            Tst := null;
@@ -345,19 +402,19 @@ package body Wiki.Tests is
                      case Syntax is
                         when Wiki.SYNTAX_CREOLE =>
                            Tst := Create_Test (Name & ".creole", Path & "/" & Simple,
-                                               Syntax, "/wiki-convert/", True);
+                                               Syntax, "/wiki-convert/", "", True);
 
                         when Wiki.SYNTAX_DOTCLEAR =>
                            Tst := Create_Test (Name & ".dotclear", Path & "/" & Simple,
-                                               Syntax, "/wiki-convert/", True);
+                                               Syntax, "/wiki-convert/", "", True);
 
                         when Wiki.SYNTAX_MEDIA_WIKI =>
                            Tst := Create_Test (Name & ".mediawiki", Path & "/" & Simple,
-                                               Syntax, "/wiki-convert/", True);
+                                               Syntax, "/wiki-convert/", "", True);
 
                         when Wiki.SYNTAX_MARKDOWN =>
                            Tst := Create_Test (Name & ".markdown", Path & "/" & Simple,
-                                               Syntax, "/wiki-convert/", True);
+                                               Syntax, "/wiki-convert/", "", True);
 
                         when others =>
                            Tst := null;
