@@ -1,0 +1,7 @@
+
+<pre>
+   ./configure
+   make
+</pre>
+
+

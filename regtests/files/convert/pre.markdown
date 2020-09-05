@@ -1,0 +1,4 @@
+```
+   ./configure
+   make
+```

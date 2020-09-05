@@ -1,0 +1,21 @@
+
+= Presentations =
+
+* [[https://fr.slideshare.net/StephaneCarrez1/persistence-with-ada-database-objects-ado|Persistence with Ada Database Objects]] FOSDEM 2019
+* [[https://fr.slideshare.net/StephaneCarrez1/ada-techdays2019awa|Ada for Web Development]] AdaCore Tech Days 2019
+* [[https://fr.slideshare.net/StephaneCarrez1/secure-web-applications-with-awa|Secure Web Applications with AWA]] FOSDEM 2019
+* [[https://fr.slideshare.net/StephaneCarrez1/protect-sensitive-data-with-ada-keystore|Protect Sensitive Data with Ada Keystore]] Ada devroom FOSDEM 2020
+
+
+= Articles =
+
+* [[https://www.electronicdesign.com/technologies/embedded-revolution/article/21119177/use-ada-for-your-web-development|Use Ada for Your Web Development | Electronic Design]]
+
+
+= Sites Using AWA =
+
+* [[https://blog.vacs.fr/|Java 2 Ada]]
+* [[https://www.ada-france.org/adafr/index.html|Ada France]]
+* [[https://demo.vacs.fr/atlas/index.html|Atlas]]
+* [[https://vdo.vacs.fr/vdo/index.html|Jason]]
+
