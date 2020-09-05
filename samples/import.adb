@@ -19,7 +19,6 @@ with Ada.Text_IO;
 with Ada.Wide_Wide_Text_IO;
 with Ada.IO_Exceptions;
 with Ada.Strings.Unbounded;
-with Ada.Characters.Conversions;
 with Ada.Strings.UTF_Encoding.Wide_Wide_Strings;
 
 with GNAT.Command_Line;
@@ -44,7 +43,6 @@ procedure Import is
 
    use GNAT.Command_Line;
    use Ada.Strings.Unbounded;
-   use Ada.Characters.Conversions;
    use Ada.Strings.UTF_Encoding;
 
    procedure Usage;
@@ -95,7 +93,7 @@ procedure Import is
          end;
       elsif Html_Mode then
          declare
-            Stream   : aliased Wiki.Streams.Html.Builders.Html_Output_Builder_Stream;
+            Stream   : aliased Wiki.Streams.Html.Builders.Html_Output_Stream;
             Renderer : aliased Wiki.Render.Html.Html_Renderer;
          begin
             Engine.Set_Syntax (Syntax);

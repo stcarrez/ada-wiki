@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  render -- Wiki rendering example
---  Copyright (C) 2015, 2016 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,7 +58,7 @@ procedure Render is
 
    procedure Render_Html (Doc   : in out Wiki.Documents.Document;
                           Style : in Unbounded_String) is
-      Output   : aliased Wiki.Streams.Html.Text_IO.Html_File_Output_Stream;
+      Output   : aliased Wiki.Streams.Html.Text_IO.Html_Output_Stream;
       Renderer : aliased Wiki.Render.Html.Html_Renderer;
    begin
       if Length (Style) > 0 then
