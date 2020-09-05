@@ -210,12 +210,29 @@ package body Wiki.Render.Wiki is
    --  ------------------------------
    --  Emit a new line.
    --  ------------------------------
-   procedure New_Line (Engine : in out Wiki_Renderer) is
+   procedure New_Line (Engine   : in out Wiki_Renderer;
+                       Optional : in Boolean := False) is
    begin
+      if Optional and then (Engine.Line_Count = 0 or else Engine.Empty_Line) then
+         return;
+      end if;
       Engine.Output.Write (LF);
       Engine.Empty_Line := True;
+      Engine.Need_Newline := False;
       Engine.Line_Count := Engine.Line_Count + 1;
    end New_Line;
+
+   procedure Need_Separator_Line (Engine   : in out Wiki_Renderer) is
+   begin
+      if not Engine.Empty_Line then
+         Engine.Output.Write (LF);
+         Engine.Empty_Line := True;
+         Engine.Line_Count := Engine.Line_Count + 1;
+      end if;
+      if Engine.Line_Count > 0 then
+         Engine.Need_Newline := True;
+      end if;
+   end Need_Separator_Line;
 
    --  ------------------------------
    --  Render the node instance from the document.
@@ -239,6 +256,12 @@ package body Wiki.Render.Wiki is
 
          when Nodes.N_PARAGRAPH =>
             Engine.Add_Paragraph;
+
+         when Nodes.N_LIST =>
+            Engine.Add_List_Item (Node.Level, False);
+
+         when Nodes.N_NUM_LIST =>
+            Engine.Add_List_Item (Node.Level, True);
 
          when Nodes.N_TEXT =>
             Engine.Render_Text (Node.Text, Node.Format);
@@ -349,6 +372,14 @@ package body Wiki.Render.Wiki is
       Link : constant Strings.WString := Attributes.Get_Attribute (Attrs, "href");
       Lang : constant Strings.WString := Attributes.Get_Attribute (Attrs, "lang");
    begin
+      if Engine.Empty_Line and Engine.In_List then
+         if Engine.UL_List_Level > Engine.OL_List_Level then
+            Engine.Add_List_Item (Engine.UL_List_Level, False);
+         else
+            Engine.Add_List_Item (Engine.OL_List_Level, True);
+         end if;
+         Engine.In_List := False;
+      end if;
       Engine.Output.Write (Engine.Tags (Link_Start).all);
       if Engine.Link_First then
          Engine.Output.Write (Link);
@@ -584,17 +615,21 @@ package body Wiki.Render.Wiki is
 
          when P_TAG =>
             Engine.Set_Format (Empty_Formats);
-            if not Engine.Empty_Line then
-               Engine.New_Line;
-            end if;
+            Engine.Need_Separator_Line;
 
          when PRE_TAG =>
             Engine.Start_Keep_Content;
 
          when UL_TAG =>
+            if Engine.UL_List_Level = 0 then
+               Engine.Need_Separator_Line;
+            end if;
             Engine.UL_List_Level := Engine.UL_List_Level + 1;
 
          when OL_TAG =>
+            if Engine.OL_List_Level = 0 then
+               Engine.Need_Separator_Line;
+            end if;
             Engine.OL_List_Level := Engine.OL_List_Level + 1;
 
          when LI_TAG =>
@@ -602,9 +637,7 @@ package body Wiki.Render.Wiki is
 
          when BLOCKQUOTE_TAG =>
             Engine.Set_Format (Empty_Formats);
-            if not Engine.Empty_Line then
-               Engine.New_Line;
-            end if;
+            Engine.Need_Separator_Line;
             Engine.Quote_Level := Engine.Quote_Level + 1;
             if Engine.Html_Blockquote then
                --  Make sure there is en empty line before the HTML <blockquote>.
@@ -687,18 +720,22 @@ package body Wiki.Render.Wiki is
 
          when UL_TAG =>
             Engine.UL_List_Level := Engine.UL_List_Level - 1;
+            if Engine.UL_List_Level = 0 then
+               Engine.Need_Separator_Line;
+            end if;
 
          when OL_TAG =>
             Engine.OL_List_Level := Engine.OL_List_Level - 1;
+            if Engine.UL_List_Level = 0 then
+               Engine.Need_Separator_Line;
+            end if;
 
          when LI_TAG =>
             Engine.In_List := False;
 
          when BLOCKQUOTE_TAG =>
             Engine.Set_Format (Empty_Formats);
-            if not Engine.Empty_Line then
-               Engine.New_Line;
-            end if;
+            Engine.Need_Separator_Line;
             Engine.Quote_Level := Engine.Quote_Level - 1;
             if Engine.Html_Blockquote then
                --  Make sure there is an empty line after the HTML </blockquote>.
@@ -723,8 +760,13 @@ package body Wiki.Render.Wiki is
    end Finish;
 
    procedure Close_Paragraph (Engine : in out Wiki_Renderer) is
+      Need_Newline : constant Boolean := Engine.Need_Newline;
    begin
       if not Engine.Empty_Line then
+         Engine.New_Line;
+      end if;
+      Engine.Has_Item := False;
+      if Need_Newline then
          Engine.New_Line;
       end if;
    end Close_Paragraph;
