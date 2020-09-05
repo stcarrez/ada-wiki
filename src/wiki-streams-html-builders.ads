@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-streams-html-builders -- Wiki writer to a string builder
---  Copyright (C) 2011, 2012, 2013, 2015, 2016 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,7 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Wiki.Streams.Builders;
+with Wiki.Streams.Html.Stream;
 
 --  === HTML Output Builder Stream ===
 --  The <tt>Html_Output_Builder_Stream</tt> type defines a HTML output stream that collects the
@@ -23,41 +24,4 @@ with Wiki.Streams.Builders;
 --  retrieved either by the <tt>To_String</tt> or the <tt>Iterate</tt> operations.
 --
 package Wiki.Streams.Html.Builders is
-
-   type Html_Output_Builder_Stream is limited new Wiki.Streams.Builders.Output_Builder_Stream
-     and Wiki.Streams.Html.Html_Output_Stream with private;
-   type Html_Output_Builder_Stream_Access is access all Html_Output_Builder_Stream'Class;
-
-   overriding
-   procedure Write_Wide_Attribute (Stream  : in out Html_Output_Builder_Stream;
-                                   Name    : in String;
-                                   Content : in Wiki.Strings.UString);
-
-   --  Write an XML attribute within an XML element.
-   --  The attribute value is escaped according to the XML escape rules.
-   overriding
-   procedure Write_Wide_Attribute (Stream  : in out Html_Output_Builder_Stream;
-                                   Name    : in String;
-                                   Content : in Wiki.Strings.WString);
-
-   overriding
-   procedure Start_Element (Stream : in out Html_Output_Builder_Stream;
-                            Name   : in String);
-
-   overriding
-   procedure End_Element (Stream : in out Html_Output_Builder_Stream;
-                          Name   : in String);
-
-   overriding
-   procedure Write_Wide_Text (Stream  : in out Html_Output_Builder_Stream;
-                              Content : in Wiki.Strings.WString);
-
-private
-
-   type Html_Output_Builder_Stream is limited new Wiki.Streams.Builders.Output_Builder_Stream
-     and Wiki.Streams.Html.Html_Output_Stream with record
-      --  Whether an XML element must be closed (that is a '>' is necessary)
-      Close_Start : Boolean := False;
-   end record;
-
-end Wiki.Streams.Html.Builders;
+   new Wiki.Streams.Html.Stream (Wiki.Streams.Builders.Output_Builder_Stream);
