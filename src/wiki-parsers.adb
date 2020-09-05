@@ -1642,7 +1642,7 @@ package body Wiki.Parsers is
       end if;
       loop
          Peek (P, C);
-         exit when C /= '#' and C /= '*';
+         exit when C /= Token;
          Level := Level + 1;
       end loop;
       Flush_Text (P);
@@ -1987,6 +1987,7 @@ package body Wiki.Parsers is
          Character'Pos ('#') => Parse_Header'Access,
          Character'Pos ('*') => Parse_Markdown_Bold_Italic'Access,
          Character'Pos ('_') => Parse_Markdown_Bold_Italic'Access,
+         Character'Pos ('-') => Parse_List'Access,
          Character'Pos ('^') => Parse_Single_Superscript'Access,
          --  Character'Pos ('~') => Parse_Double_Strikeout'Access,
          --  Character'Pos (',') => Parse_Double_Subscript'Access,
