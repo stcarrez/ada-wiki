@@ -124,7 +124,9 @@ private
    type Wiki_Format_Array is array (Format_Type) of Wide_String_Access;
 
    --  Emit a new line.
-   procedure New_Line (Engine : in out Wiki_Renderer);
+   procedure New_Line (Engine   : in out Wiki_Renderer;
+                       Optional : in Boolean := False);
+   procedure Need_Separator_Line (Engine   : in out Wiki_Renderer);
 
    procedure Close_Paragraph (Engine : in out Wiki_Renderer);
    procedure Start_Keep_Content (Engine : in out Wiki_Renderer);
@@ -151,6 +153,7 @@ private
       Allow_Link_Language : Boolean := False;
       Link_First          : Boolean := False;
       Html_Blockquote     : Boolean := False;
+      Need_Newline        : Boolean := False;
       Line_Count          : Natural := 0;
       Current_Level       : Natural := 0;
       Quote_Level         : Natural := 0;
