@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-utils -- Wiki utility operations
---  Copyright (C) 2015, 2016 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +30,7 @@ package body Wiki.Utils is
    --  ------------------------------
    function To_Html (Text   : in Wiki.Strings.WString;
                      Syntax : in Wiki.Wiki_Syntax) return String is
-      Stream   : aliased Wiki.Streams.Html.Builders.Html_Output_Builder_Stream;
+      Stream   : aliased Wiki.Streams.Html.Builders.Html_Output_Stream;
       Renderer : aliased Wiki.Render.Html.Html_Renderer;
       Doc      : Wiki.Documents.Document;
       Filter   : aliased Wiki.Filters.Html.Html_Filter_Type;
