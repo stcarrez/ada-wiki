@@ -65,7 +65,7 @@ package body Wiki.Tests is
       Variables   : aliased Wiki.Plugins.Variables.Variable_Plugin;
       List_Vars   : aliased Wiki.Plugins.Variables.List_Variable_Plugin;
       Input       : aliased Wiki.Streams.Text_IO.File_Input_Stream;
-      Output      : aliased Wiki.Streams.Html.Text_IO.Html_File_Output_Stream;
+      Output      : aliased Wiki.Streams.Html.Text_IO.Html_Output_Stream;
 
       type Test_Factory is new Wiki.Plugins.Plugin_Factory with null record;
 
