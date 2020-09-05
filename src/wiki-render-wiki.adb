@@ -257,6 +257,10 @@ package body Wiki.Render.Wiki is
          when Nodes.N_PARAGRAPH =>
             Engine.Add_Paragraph;
 
+         when Nodes.N_PREFORMAT =>
+            Engine.Render_Preformatted (Node.Preformatted,
+                                        Strings.To_WString (Node.Language));
+
          when Nodes.N_LIST =>
             Engine.Add_List_Item (Node.Level, False);
 
