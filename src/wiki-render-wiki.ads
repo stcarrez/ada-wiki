@@ -147,6 +147,7 @@ private
       Has_Item            : Boolean := False;
       Need_Paragraph      : Boolean := False;
       Empty_Line          : Boolean := True;
+      Empty_Previous_Line : Boolean := True;
       Keep_Content        : Boolean := False;
       In_List             : Boolean := False;
       Invert_Header_Level : Boolean := False;
