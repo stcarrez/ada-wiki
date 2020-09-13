@@ -313,7 +313,9 @@ package body Wiki.Parsers is
    procedure Parse_Text (P     : in out Parser;
                          Token : in Wiki.Strings.WChar) is
    begin
-      Append (P.Text, Token);
+      if Token /= CR then
+         Append (P.Text, Token);
+      end if;
       P.Empty_Line := False;
    end Parse_Text;
 
@@ -885,6 +887,42 @@ package body Wiki.Parsers is
          Put_Back (P, C);
       end if;
    end Parse_Markdown_Bold_Italic;
+
+   --  ------------------------------
+   --  Parse a horizontal rule or a list.
+   --  Example:
+   --    ---  (horizontal rule)
+   --    -    (list)
+   --  ------------------------------
+   procedure Parse_Markdown_Horizontal_Rule (P     : in out Parser;
+                                             Token : in Wiki.Strings.WChar) is
+      C     : Wiki.Strings.WChar;
+      Count : Natural := 1;
+   begin
+      loop
+         Peek (P, C);
+         exit when C /= Token;
+         Count := Count + 1;
+      end loop;
+      if Count >= 4 then
+         Flush_Text (P);
+         Flush_List (P);
+         if not P.Context.Is_Hidden then
+            P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_HORIZONTAL_RULE);
+         end if;
+         if C /= LF and C /= CR then
+            Put_Back (P, C);
+         end if;
+      elsif P.Is_Dotclear and Count = 2 then
+         Toggle_Format (P, STRIKEOUT);
+         Put_Back (P, C);
+      else
+         for I in 1 .. Count loop
+            Append (P.Text, Token);
+         end loop;
+         Put_Back (P, C);
+      end if;
+   end Parse_Markdown_Horizontal_Rule;
 
    --  Parse a markdown table/column.
    --  Example:
@@ -1782,6 +1820,8 @@ package body Wiki.Parsers is
          end if;
          if C = '*' or C = '#' then
             Parse_List (P, C);
+         elsif C = '-' then
+            Parse_Horizontal_Rule (P, C);
          elsif C = CR or C = LF then
             Parse_End_Line (P, C);
          else
