@@ -736,6 +736,9 @@ package body Wiki.Render.Wiki is
 
          when LI_TAG =>
             Engine.In_List := False;
+            if not Engine.Empty_Line then
+               Engine.New_Line;
+            end if;
 
          when BLOCKQUOTE_TAG =>
             Engine.Set_Format (Empty_Formats);
