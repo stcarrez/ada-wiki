@@ -1,4 +1,5 @@
 The quote:
+
 >Line a
 >Line b
 

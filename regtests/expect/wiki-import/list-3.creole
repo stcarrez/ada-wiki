@@ -1,0 +1,7 @@
+* [[/vacs/blogs/tagged.html?tag=Ada|Ada]]
+* [[/vacs/blogs/tagged.html?tag=Tutorial|Tutorial]]
+* [[/vacs/blogs/tagged.html?tag=files|files]]
+
+Reading a file to get its content in a __String__ is a simple operation
+
+
