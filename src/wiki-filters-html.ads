@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-html -- Wiki HTML filters
---  Copyright (C) 2015, 2016 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -137,10 +137,11 @@ private
                                          TITLE_TAG     => False,
                                          others        => True);
 
-      Hidden     : Tag_Boolean_Array := (UNKNOWN_TAG => False,
-                                         SCRIPT_TAG  => True,
-                                         STYLE_TAG   => True,
-                                         others      => False);
+      Hidden     : Tag_Boolean_Array := (UNKNOWN_TAG  => False,
+                                         SCRIPT_TAG   => True,
+                                         STYLE_TAG    => True,
+                                         NOSCRIPT_TAG => True,
+                                         others       => False);
       Stack      : Tag_Vector;
       Hide_Level : Natural := 0;
    end record;
