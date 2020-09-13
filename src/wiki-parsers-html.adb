@@ -16,6 +16,7 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 
+with Interfaces;
 with Wiki.Helpers;
 with Wiki.Parsers.Html.Entities;
 package body Wiki.Parsers.Html is
@@ -271,6 +272,24 @@ package body Wiki.Parsers.Html is
       Add_Element (Name);
    end Parse_Element;
 
+   use Interfaces;
+
+   function From_Hex (C : in Character) return Interfaces.Unsigned_8 is
+      (if C >= '0' and C <= '9' then Character'Pos (C) - Character'Pos ('0')
+      elsif C >= 'A' and C <= 'F' then Character'Pos (C) - Character'Pos ('A') + 10
+      elsif C >= 'a' and C <= 'f' then Character'Pos (C) - Character'Pos ('a') + 10
+      else raise Constraint_Error);
+
+   function From_Hex (Value : in String) return Wiki.Strings.WChar is
+      Result : Interfaces.Unsigned_32 := 0;
+   begin
+      for C of Value loop
+         Result := Interfaces.Shift_Left (Result, 4);
+         Result := Result + Interfaces.Unsigned_32 (From_Hex (C));
+      end loop;
+      return Wiki.Strings.WChar'Val (Result);
+   end From_Hex;
+
    --  ------------------------------
    --  Parse an HTML entity such as &nbsp; and replace it with the corresponding code.
    --  ------------------------------
@@ -303,18 +322,29 @@ package body Wiki.Parsers.Html is
          end if;
       end loop;
 
-      if Len > 0 and then Name (Name'First) = '#'
-        and then Name (Name'First + 1) >= '0' and then Name (Name'First + 1) <= '9'
-      then
-         begin
-            C := Wiki.Strings.WChar'Val (Natural'Value (Name (Name'First + 1 .. Len)));
-            Parse_Text (P, C);
-            return;
+      if Len > 0 and then Name (Name'First) = '#' then
+         if Name (Name'First + 1) >= '0' and then Name (Name'First + 1) <= '9' then
+            begin
+               C := Wiki.Strings.WChar'Val (Natural'Value (Name (Name'First + 1 .. Len)));
+               Parse_Text (P, C);
+               return;
 
-         exception
-            when Constraint_Error =>
-               null;
-         end;
+            exception
+               when Constraint_Error =>
+                  null;
+            end;
+         elsif Name (Name'First + 1) = 'x' then
+            begin
+               C := From_Hex (Name (Name'First + 2 .. Len));
+               Parse_Text (P, C);
+               return;
+
+            exception
+               when Constraint_Error =>
+                  null;
+            end;
+
+         end if;
       end if;
 
       --  The HTML entity is not recognized: we must treat it as plain wiki text.
