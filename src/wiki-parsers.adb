@@ -300,7 +300,7 @@ package body Wiki.Parsers is
    begin
       while not P.Is_Eof loop
          Peek (P, C);
-         if not Wiki.Helpers.Is_Space (C) then
+         if not Wiki.Helpers.Is_Space_Or_Newline (C) then
             Put_Back (P, C);
             return;
          end if;
