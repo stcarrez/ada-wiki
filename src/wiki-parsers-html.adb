@@ -65,7 +65,6 @@ package body Wiki.Parsers.Html is
       C     : Wiki.Strings.WChar;
       Token : Wiki.Strings.WChar;
    begin
---      Value := Wiki.Strings.To_UString ("");
       Peek (P, Token);
       if Wiki.Helpers.Is_Space (Token) then
          return;
@@ -141,6 +140,7 @@ package body Wiki.Parsers.Html is
             exit;
          end if;
          if C = '=' then
+            Skip_Spaces (P);
             Collect_Attribute_Value (P, Value);
             Append_Attribute (Name);
             Wiki.Strings.Wide_Wide_Builders.Clear (Name);
