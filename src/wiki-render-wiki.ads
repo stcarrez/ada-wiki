@@ -146,6 +146,8 @@ private
       Has_Paragraph       : Boolean := False;
       Has_Item            : Boolean := False;
       Need_Paragraph      : Boolean := False;
+      Need_Newline        : Boolean := False;
+      Need_Space          : Boolean := False;
       Empty_Line          : Boolean := True;
       Empty_Previous_Line : Boolean := True;
       Keep_Content        : Boolean := False;
@@ -154,7 +156,6 @@ private
       Allow_Link_Language : Boolean := False;
       Link_First          : Boolean := False;
       Html_Blockquote     : Boolean := False;
-      Need_Newline        : Boolean := False;
       Line_Count          : Natural := 0;
       Current_Level       : Natural := 0;
       Quote_Level         : Natural := 0;
