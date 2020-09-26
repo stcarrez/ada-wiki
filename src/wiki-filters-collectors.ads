@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-collectors -- Wiki word and link collectors
---  Copyright (C) 2016 Stephane Carrez
+--  Copyright (C) 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -139,11 +139,22 @@ package Wiki.Filters.Collectors is
                         Name       : in Wiki.Strings.WString;
                         Attributes : in out Wiki.Attributes.Attribute_List);
 
+   --  Push a HTML node with the given tag to the document.
+   overriding
+   procedure Push_Node (Filter     : in out Image_Collector_Type;
+                        Document   : in out Wiki.Documents.Document;
+                        Tag        : in Wiki.Html_Tag;
+                        Attributes : in out Wiki.Attributes.Attribute_List);
+
 private
 
    type Collector_Type is new Filter_Type with record
       Items : WString_Maps.Map;
    end record;
+
+   procedure Collect_Attribute (Filter     : in out Collector_Type;
+                                Attributes : in Wiki.Attributes.Attribute_List;
+                                Name       : in String);
 
    type Word_Collector_Type is new Collector_Type with null record;
 
@@ -151,10 +162,6 @@ private
                             Content : in Wiki.Strings.WString);
 
    type Link_Collector_Type is new Collector_Type with null record;
-
-   procedure Collect_Link (Filter     : in out Link_Collector_Type;
-                           Attributes : in Wiki.Attributes.Attribute_List;
-                           Name       : in String);
 
    type Image_Collector_Type is new Collector_Type with null record;
 
