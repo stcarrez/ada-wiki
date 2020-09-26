@@ -66,12 +66,18 @@ package body Wiki.Parsers.Html is
       Token : Wiki.Strings.WChar;
    begin
       Peek (P, Token);
-      if Wiki.Helpers.Is_Space (Token) then
-         return;
+      if Wiki.Helpers.Is_Space_Or_Newline (Token) then
+         Skip_Spaces (P);
+         Peek (P, Token);
+         if Token /= ''' and Token /= '"' then
+            Put_Back (P, Token);
+            return;
+         end if;
       elsif Token = '>' then
          Put_Back (P, Token);
          return;
-      elsif Token /= ''' and Token /= '"' then
+      end if;
+      if Token /= ''' and Token /= '"' then
          Wiki.Strings.Wide_Wide_Builders.Append (Value, Token);
          while not P.Is_Eof loop
             Peek (P, C);
@@ -140,7 +146,6 @@ package body Wiki.Parsers.Html is
             exit;
          end if;
          if C = '=' then
-            Skip_Spaces (P);
             Collect_Attribute_Value (P, Value);
             Append_Attribute (Name);
             Wiki.Strings.Wide_Wide_Builders.Clear (Name);
