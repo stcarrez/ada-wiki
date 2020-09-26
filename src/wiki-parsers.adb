@@ -272,6 +272,12 @@ package body Wiki.Parsers is
 
    begin
       if Length (P.Text) > 0 then
+         if P.Previous_Tag /= UNKNOWN_TAG and then No_End_Tag (P.Previous_Tag) then
+            if not P.Context.Is_Hidden then
+               P.Context.Filters.Pop_Node (P.Document, P.Previous_Tag);
+            end if;
+            P.Previous_Tag := UNKNOWN_TAG;
+         end if;
          if not P.Context.Is_Hidden then
             Add_Text (P.Text);
          end if;
@@ -2107,6 +2113,12 @@ package body Wiki.Parsers is
                             Tag        : in Wiki.Html_Tag;
                             Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
+      if P.Previous_Tag /= UNKNOWN_TAG and then No_End_Tag (P.Previous_Tag) then
+         if not P.Context.Is_Hidden then
+            P.Context.Filters.Pop_Node (P.Document, P.Previous_Tag);
+         end if;
+         P.Previous_Tag := UNKNOWN_TAG;
+      end if;
       Flush_Text (P);
       if not P.Context.Is_Hidden then
          P.Context.Filters.Push_Node (P.Document, Tag, Attributes);
@@ -2117,11 +2129,18 @@ package body Wiki.Parsers is
          P.Previous_Syntax := P.Context.Syntax;
          P.Set_Syntax (SYNTAX_HTML);
       end if;
+      P.Previous_Tag := Tag;
    end Start_Element;
 
    procedure End_Element (P    : in out Parser;
                           Tag  : in Wiki.Html_Tag) is
+      Previous_Tag : constant Wiki.Html_Tag := P.Previous_Tag;
    begin
+      P.Previous_Tag := UNKNOWN_TAG;
+      if Previous_Tag /= UNKNOWN_TAG and then Previous_Tag /= Tag And then No_End_Tag (Previous_Tag) then
+         End_Element (P, Previous_Tag);
+      end if;
+
       Flush_Text (P);
       if not P.Context.Is_Hidden then
          P.Context.Filters.Pop_Node (P.Document, Tag);
