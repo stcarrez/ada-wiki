@@ -502,16 +502,21 @@ package body Wiki.Render.Wiki is
       Has_Endline  : Boolean := False;
       Last_Char    : Strings.WChar;
    begin
-      if Engine.Keep_Content or Engine.Empty_Line then
+      if Engine.Keep_Content > 0 or Engine.Empty_Line then
          while Start <= Text'Last and then Helpers.Is_Space_Or_Newline (Text (Start)) loop
             Start := Start + 1;
          end loop;
       end if;
-      if Engine.Keep_Content then
+      if Engine.Keep_Content > 0 then
          while Last >= Start and then Helpers.Is_Space_Or_Newline (Text (Last)) loop
             Last := Last - 1;
          end loop;
+         if Engine.Need_Space then
+            Append (Engine.Content, ' ');
+            Engine.Need_Space := False;
+         end if;
          Append (Engine.Content, Text (Start .. Last));
+         Engine.Need_Space := True;
       else
          --  Some rules:
          --  o avoid several consecutive LF
@@ -600,8 +605,10 @@ package body Wiki.Render.Wiki is
 
    procedure Start_Keep_Content (Engine : in out Wiki_Renderer) is
    begin
-      Engine.Keep_Content := True;
-      Engine.Content := Strings.To_UString ("");
+      Engine.Keep_Content := Engine.Keep_Content + 1;
+      if Engine.Keep_Content = 1 then
+         Engine.Content := Strings.To_UString ("");
+      end if;
    end Start_Keep_Content;
 
    procedure Render_Tag (Engine : in out Wiki_Renderer;
@@ -633,27 +640,27 @@ package body Wiki.Render.Wiki is
             Engine.Start_Keep_Content;
 
          when B_TAG | EM_TAG | STRONG_TAG =>
-            if not Engine.Keep_Content then
+            if Engine.Keep_Content = 0 then
                Engine.Current_Style (BOLD) := True;
             end if;
 
          when I_TAG =>
-            if not Engine.Keep_Content then
+            if Engine.Keep_Content = 0 then
                Engine.Current_Style (ITALIC) := True;
             end if;
 
          when U_TAG | TT_TAG | CODE_TAG | KBD_TAG =>
-            if not Engine.Keep_Content then
+            if Engine.Keep_Content = 0 then
                Engine.Current_Style (CODE) := True;
             end if;
 
          when SUP_TAG =>
-            if not Engine.Keep_Content then
+            if Engine.Keep_Content = 0 then
                Engine.Current_Style (SUPERSCRIPT) := True;
             end if;
 
          when SUB_TAG =>
-            if not Engine.Keep_Content then
+            if Engine.Keep_Content = 0 then
                Engine.Current_Style (SUBSCRIPT) := True;
             end if;
 
@@ -704,71 +711,98 @@ package body Wiki.Render.Wiki is
 
       case Node.Tag_Start is
          when H1_TAG =>
-            Engine.Render_Header (Strings.To_WString (Engine.Content), 1);
-            Engine.Keep_Content := False;
+            if Engine.Keep_Content = 1 then
+               Engine.Need_Space := False;
+               Engine.Render_Header (Strings.To_WString (Engine.Content), 1);
+            end if;
+            Engine.Keep_Content := Engine.Keep_Content - 1;
 
          when H2_TAG =>
-            Engine.Render_Header (Strings.To_WString (Engine.Content), 2);
-            Engine.Keep_Content := False;
+            if Engine.Keep_Content = 1 then
+               Engine.Need_Space := False;
+               Engine.Render_Header (Strings.To_WString (Engine.Content), 2);
+            end if;
+            Engine.Keep_Content := Engine.Keep_Content - 1;
 
          when H3_TAG =>
-            Engine.Render_Header (Strings.To_WString (Engine.Content), 3);
-            Engine.Keep_Content := False;
+            if Engine.Keep_Content = 1 then
+               Engine.Need_Space := False;
+               Engine.Render_Header (Strings.To_WString (Engine.Content), 3);
+            end if;
+            Engine.Keep_Content := Engine.Keep_Content - 1;
 
          when H4_TAG =>
-            Engine.Render_Header (Strings.To_WString (Engine.Content), 4);
-            Engine.Keep_Content := False;
+            if Engine.Keep_Content = 1 then
+               Engine.Need_Space := False;
+               Engine.Render_Header (Strings.To_WString (Engine.Content), 4);
+            end if;
+            Engine.Keep_Content := Engine.Keep_Content - 1;
 
          when H5_TAG =>
-            Engine.Render_Header (Strings.To_WString (Engine.Content), 5);
-            Engine.Keep_Content := False;
+            if Engine.Keep_Content = 1 then
+               Engine.Need_Space := False;
+               Engine.Render_Header (Strings.To_WString (Engine.Content), 5);
+            end if;
+            Engine.Keep_Content := Engine.Keep_Content - 1;
 
          when H6_TAG =>
-            Engine.Render_Header (Strings.To_WString (Engine.Content), 6);
-            Engine.Keep_Content := False;
+            if Engine.Keep_Content = 1 then
+               Engine.Need_Space := False;
+               Engine.Render_Header (Strings.To_WString (Engine.Content), 6);
+            end if;
+            Engine.Keep_Content := Engine.Keep_Content - 1;
 
          when A_TAG =>
-            Engine.Render_Link (Name     => Strings.To_WString (Engine.Content),
-                                Attrs    => Node.Attributes);
-            Engine.Keep_Content := False;
+            if Engine.Keep_Content = 1 then
+               Engine.Need_Space := False;
+               Engine.Render_Link (Name     => Strings.To_WString (Engine.Content),
+                                   Attrs    => Node.Attributes);
+            end if;
+            Engine.Keep_Content := Engine.Keep_Content - 1;
 
          when Q_TAG =>
-            Engine.Render_Quote (Title    => Strings.To_WString (Engine.Content),
-                                 Attrs    => Node.Attributes);
-            Engine.Keep_Content := False;
+            if Engine.Keep_Content = 1 then
+               Engine.Need_Space := False;
+               Engine.Render_Quote (Title    => Strings.To_WString (Engine.Content),
+                                    Attrs    => Node.Attributes);
+            end if;
+            Engine.Keep_Content := Engine.Keep_Content - 1;
 
          when P_TAG =>
             Engine.Set_Format (Empty_Formats);
             Engine.New_Line;
 
          when B_TAG | EM_TAG | STRONG_TAG =>
-            if not Engine.Keep_Content then
+            if Engine.Keep_Content = 0 then
                Engine.Current_Style (BOLD) := False;
             end if;
 
          when I_TAG =>
-            if not Engine.Keep_Content then
+            if Engine.Keep_Content = 0 then
                Engine.Current_Style (ITALIC) := False;
             end if;
 
          when U_TAG | TT_TAG | CODE_TAG | KBD_TAG =>
-            if not Engine.Keep_Content then
+            if Engine.Keep_Content = 0 then
                Engine.Current_Style (CODE) := False;
             end if;
 
          when SUP_TAG =>
-            if not Engine.Keep_Content then
+            if Engine.Keep_Content = 0 then
                Engine.Current_Style (SUPERSCRIPT) := False;
             end if;
 
          when SUB_TAG =>
-            if not Engine.Keep_Content then
+            if Engine.Keep_Content = 0 then
                Engine.Current_Style (SUBSCRIPT) := False;
             end if;
 
          when PRE_TAG =>
-            Engine.Render_Preformatted (Strings.To_WString (Engine.Content), "");
-            Engine.Keep_Content := False;
+            if Engine.Keep_Content = 1 then
+               Engine.Need_Space := False;
+               Engine.Render_Preformatted (Strings.To_WString (Engine.Content), "");
+            end if;
+            Engine.Keep_Content := Engine.Keep_Content - 1;
 
          when UL_TAG =>
             Engine.UL_List_Level := Engine.UL_List_Level - 1;
