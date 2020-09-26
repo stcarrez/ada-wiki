@@ -171,7 +171,7 @@ package body Wiki.Render.Wiki is
             Engine.Tags (Blockquote_Start)   := QUOTE_MARKDOWN'Access;
             Engine.Link_First := False;
             Engine.Html_Blockquote := False;
-            Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("`'+_-*(){}][!#|\");
+            Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("\`*_{}[]()#+-!");
 
          when others =>
             Engine.Style_Start_Tags (BOLD)   := BOLD_CREOLE'Access;
@@ -220,8 +220,17 @@ package body Wiki.Render.Wiki is
       Engine.Empty_Previous_Line := Engine.Empty_Line;
       Engine.Empty_Line := True;
       Engine.Need_Newline := False;
+      Engine.Need_Space := False;
       Engine.Line_Count := Engine.Line_Count + 1;
    end New_Line;
+
+   procedure Write_Optional_Space (Engine : in out Wiki_Renderer) is
+   begin
+      if Engine.Need_Space then
+         Engine.Need_Space := False;
+         Engine.Output.Write (' ');
+      end if;
+   end Write_Optional_Space;
 
    procedure Need_Separator_Line (Engine   : in out Wiki_Renderer) is
    begin
@@ -249,6 +258,7 @@ package body Wiki.Render.Wiki is
          when Nodes.N_LINE_BREAK =>
             Engine.Output.Write (Engine.Tags (Line_Break).all);
             Engine.Empty_Line := False;
+            Engine.Need_Space := False;
 
          when Nodes.N_HORIZONTAL_RULE =>
             Engine.Close_Paragraph;
@@ -268,7 +278,14 @@ package body Wiki.Render.Wiki is
             Engine.Add_List_Item (Node.Level, True);
 
          when Nodes.N_TEXT =>
-            Engine.Render_Text (Node.Text, Node.Format);
+            declare
+               F : Format_Map := Node.Format;
+            begin
+               for I in F'Range loop
+                  F (I) := F (I) or Engine.Current_Style (I);
+               end loop;
+               Engine.Render_Text (Node.Text, F);
+            end;
 
          when Nodes.N_LINK =>
             Engine.Render_Link (Node.Title, Node.Link_Attr);
@@ -355,6 +372,7 @@ package body Wiki.Render.Wiki is
                             Level    : in Positive;
                             Ordered  : in Boolean) is
    begin
+      Engine.Need_Space := False;
       Engine.Close_Paragraph;
       Engine.Output.Write (Engine.Tags (List_Start).all);
       for I in 1 .. Level loop
@@ -386,6 +404,7 @@ package body Wiki.Render.Wiki is
          end if;
          Engine.In_List := False;
       end if;
+      Engine.Write_Optional_Space;
       Engine.Output.Write (Engine.Tags (Link_Start).all);
       if Engine.Link_First then
          Engine.Output.Write (Link);
@@ -412,6 +431,7 @@ package body Wiki.Render.Wiki is
                            Attrs  : in Attributes.Attribute_List) is
       Src  : constant Strings.WString := Attributes.Get_Attribute (Attrs, "src");
    begin
+      Engine.Write_Optional_Space;
       Engine.Output.Write (Engine.Tags (Img_Start).all);
       if Engine.Link_First then
          Engine.Output.Write (Src);
@@ -455,20 +475,21 @@ package body Wiki.Render.Wiki is
    --  Set the text style format.
    procedure Set_Format (Engine : in out Wiki_Renderer;
                          Format : in Format_Map) is
-      F : Boolean;
    begin
-      for I in Format'Range loop
-         F := Format (I) or Engine.Current_Style (I);
-         if Engine.Format (I) /= F then
-            if F then
-               Engine.Output.Write (Engine.Style_Start_Tags (I).all);
-               Engine.Format (I) := True;
-            else
-               Engine.Output.Write (Engine.Style_End_Tags (I).all);
-               Engine.Format (I) := False;
+      if Engine.Format /= Format then
+         for I in Format'Range loop
+            if Format (I) xor Engine.Format (I) then
+               if Format (I) then
+                  Engine.Output.Write (Engine.Style_Start_Tags (I).all);
+                  Engine.Format (I) := True;
+               else
+                  Engine.Output.Write (Engine.Style_End_Tags (I).all);
+                  Engine.Format (I) := False;
+               end if;
             end if;
-         end if;
-      end loop;
+         end loop;
+         Engine.Need_Space := False;
+      end if;
    end Set_Format;
 
    --  Add a text block with the given format.
@@ -478,6 +499,8 @@ package body Wiki.Render.Wiki is
       Start        : Natural := Text'First;
       Last         : Natural := Text'Last;
       Apply_Format : Boolean := True;
+      Has_Endline  : Boolean := False;
+      Last_Char    : Strings.WChar;
    begin
       if Engine.Keep_Content or Engine.Empty_Line then
          while Start <= Text'Last and then Helpers.Is_Space_Or_Newline (Text (Start)) loop
@@ -490,15 +513,25 @@ package body Wiki.Render.Wiki is
          end loop;
          Append (Engine.Content, Text (Start .. Last));
       else
+         --  Some rules:
+         --  o avoid several consecutive LF
+         --  o drop spaces at beginning of a text (because it can be interpreted)
+         --  o emit the blockquote if we are at beginning of a new line
+         --  o emit the list item if we are at beginning of a new line
+         Last_Char := ' ';
          for I in Start .. Last loop
-            if Helpers.Is_Newline (Text (I)) then
+            Last_Char := Text (I);
+            if Helpers.Is_Newline (Last_Char) then
                if Engine.Empty_Line = False then
                   if Apply_Format and then Engine.Format /= Empty_Formats then
                      Engine.Set_Format (Empty_Formats);
                   end if;
+                  Engine.Write_Optional_Space;
                   Engine.New_Line;
+               else
+                  Has_Endline := True;
                end if;
-            elsif not Engine.Empty_Line or else not Helpers.Is_Space (Text (I)) then
+            elsif not Engine.Empty_Line or else not Helpers.Is_Space (Last_Char) then
                if Engine.Empty_Line and Engine.Quote_Level > 0 then
                   for Level in 1 .. Engine.Quote_Level loop
                      Engine.Output.Write (Engine.Tags (Blockquote_Start).all);
@@ -515,18 +548,22 @@ package body Wiki.Render.Wiki is
                if Apply_Format then
                   Engine.Set_Format (Format);
                   Apply_Format := False;
+                  Engine.Write_Optional_Space;
                end if;
-               if Ada.Strings.Wide_Wide_Maps.Is_In (Text (I), Engine.Escape_Set) then
+               if Ada.Strings.Wide_Wide_Maps.Is_In (Last_Char, Engine.Escape_Set) then
                   Engine.Output.Write (Engine.Tags (Escape_Rule).all);
                end if;
-               if Text (I) = NBSP then
-                  Engine.Output.Write (' ');
-               else
-                  Engine.Output.Write (Text (I));
+               if Last_Char = NBSP then
+                  Last_Char := ' ';
                end if;
+               Engine.Output.Write (Last_Char);
                Engine.Empty_Line := False;
+               Has_Endline := False;
             end if;
          end loop;
+         if not Helpers.Is_Space_Or_Newline (Last_Char) and not Engine.Empty_Line Then
+            Engine.Need_Space := True;
+         end if;
       end if;
    end Render_Text;
 
@@ -575,6 +612,7 @@ package body Wiki.Render.Wiki is
          when BR_TAG =>
             Engine.Output.Write (Engine.Tags (Line_Break).all);
             Engine.Empty_Line := False;
+            Engine.Need_Space := False;
             return;
 
          when HR_TAG =>
@@ -638,10 +676,15 @@ package body Wiki.Render.Wiki is
             if Engine.OL_List_Level = 0 then
                Engine.Need_Separator_Line;
             end if;
+            Engine.Close_Paragraph;
             Engine.OL_List_Level := Engine.OL_List_Level + 1;
 
          when LI_TAG =>
             Engine.In_List := True;
+            if Engine.UL_List_Level + Engine.OL_List_Level = 0 then
+               Engine.Need_Separator_Line;
+               Engine.Close_Paragraph;
+            end if;
 
          when BLOCKQUOTE_TAG =>
             Engine.Set_Format (Empty_Formats);
@@ -749,6 +792,7 @@ package body Wiki.Render.Wiki is
             Engine.Set_Format (Empty_Formats);
             Engine.Need_Separator_Line;
             Engine.Quote_Level := Engine.Quote_Level - 1;
+            Engine.Need_Space := False;
             if Engine.Html_Blockquote then
                --  Make sure there is an empty line after the HTML </blockquote>.
                Engine.Output.Write ("</blockquote>" & LF & LF);
@@ -777,6 +821,7 @@ package body Wiki.Render.Wiki is
       if not Engine.Empty_Line then
          Engine.New_Line;
       end if;
+      Engine.Need_Space := False;
       Engine.Has_Item := False;
       if Need_Newline and not Engine.Empty_Previous_Line then
          Engine.New_Line;
