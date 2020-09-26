@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-html -- Wiki HTML filters
---  Copyright (C) 2015, 2019 Stephane Carrez
+--  Copyright (C) 2015, 2019, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -61,15 +61,6 @@ package body Wiki.Filters.Html is
    begin
       if Filter.Hide_Level > 0 then
          return;
-      elsif not Filter.Stack.Is_Empty then
-         declare
-            Current_Tag : constant Html_Tag := Filter.Stack.Last_Element;
-         begin
-            if No_End_Tag (Current_Tag) then
-               Filter_Type (Filter).Pop_Node (Document, Current_Tag);
-               Filter.Stack.Delete_Last;
-            end if;
-         end;
       end if;
       Filter_Type (Filter).Add_Text (Document, Text, Format);
    end Add_Text;
@@ -105,7 +96,7 @@ package body Wiki.Filters.Html is
             end if;
             Filter.Stack.Delete_Last;
          end if;
-         exit when not No_End_Tag (Current_Tag);
+         exit;
       end loop;
       if Filter.Hidden (Tag) then
          Filter.Hide_Level := Filter.Hide_Level + 1;
