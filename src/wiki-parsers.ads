@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers -- Wiki parser
---  Copyright (C) 2011, 2015, 2016, 2018 Stephane Carrez
+--  Copyright (C) 2011, 2015, 2016, 2018, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -129,6 +129,7 @@ private
       Escape_Char         : Wiki.Strings.WChar;
       Param_Char          : Wiki.Strings.WChar;
       List_Level          : Natural := 0;
+      Previous_Tag        : Html_Tag := UNKNOWN_TAG;
       Reader              : Wiki.Streams.Input_Stream_Access := null;
       Attributes          : Wiki.Attributes.Attribute_List;
    end record;
