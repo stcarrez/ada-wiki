@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-collectors -- Wiki word and link collectors
---  Copyright (C) 2016 Stephane Carrez
+--  Copyright (C) 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,6 +60,16 @@ package body Wiki.Filters.Collectors is
    begin
       Map.Items.Iterate (Process);
    end Iterate;
+
+   procedure Collect_Attribute (Filter     : in out Collector_Type;
+                                Attributes : in Wiki.Attributes.Attribute_List;
+                                Name       : in String) is
+      Value : constant Wiki.Strings.WString := Wiki.Attributes.Get_Attribute (Attributes, Name);
+   begin
+      if Value'Length > 0 then
+         Add_String (Filter.Items, Value);
+      end if;
+   end Collect_Attribute;
 
    --  ------------------------------
    --  Word Collector type
@@ -156,16 +166,6 @@ package body Wiki.Filters.Collectors is
       Filter_Type (Filter).Add_Preformatted (Document, Text, Format);
    end Add_Preformatted;
 
-   procedure Collect_Link (Filter     : in out Link_Collector_Type;
-                           Attributes : in Wiki.Attributes.Attribute_List;
-                           Name       : in String) is
-      Href : constant Wiki.Strings.WString := Wiki.Attributes.Get_Attribute (Attributes, Name);
-   begin
-      if Href'Length > 0 then
-         Add_String (Filter.Items, Href);
-      end if;
-   end Collect_Link;
-
    --  ------------------------------
    --  Add a link.
    --  ------------------------------
@@ -175,7 +175,7 @@ package body Wiki.Filters.Collectors is
                        Name       : in Wiki.Strings.WString;
                        Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
-      Collect_Link (Filter, Attributes, "href");
+      Collect_Attribute (Filter, Attributes, "href");
       Filter_Type (Filter).Add_Link (Document, Name, Attributes);
    end Add_Link;
 
@@ -189,7 +189,7 @@ package body Wiki.Filters.Collectors is
                         Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
       if Tag = A_TAG then
-         Collect_Link (Filter, Attributes, "href");
+         Collect_Attribute (Filter, Attributes, "href");
       end if;
       Filter_Type (Filter).Push_Node (Document, Tag, Attributes);
    end Push_Node;
@@ -202,10 +202,24 @@ package body Wiki.Filters.Collectors is
                         Document   : in out Wiki.Documents.Document;
                         Name       : in Wiki.Strings.WString;
                         Attributes : in out Wiki.Attributes.Attribute_List) is
-      Src : constant Wiki.Strings.WString := Wiki.Attributes.Get_Attribute (Attributes, "src");
    begin
-      Add_String (Filter.Items, Src);
+      Collect_Attribute (Filter, Attributes, "src");
       Filter_Type (Filter).Add_Image (Document, Name, Attributes);
    end Add_Image;
+
+   --  ------------------------------
+   --  Push a HTML node with the given tag to the document.
+   --  ------------------------------
+   overriding
+   procedure Push_Node (Filter     : in out Image_Collector_Type;
+                        Document   : in out Wiki.Documents.Document;
+                        Tag        : in Wiki.Html_Tag;
+                        Attributes : in out Wiki.Attributes.Attribute_List) is
+   begin
+      if Tag = IMG_TAG then
+         Collect_Attribute (Filter, Attributes, "src");
+      end if;
+      Filter_Type (Filter).Push_Node (Document, Tag, Attributes);
+   end Push_Node;
 
 end Wiki.Filters.Collectors;
