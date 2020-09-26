@@ -1,0 +1,5 @@
+some text
+
+## Features
+* **Written in C** \- It runs on any unix machine, including Linux, BSD, ...
+
