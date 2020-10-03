@@ -19,8 +19,8 @@ with Ada.Strings.Unbounded;
 with Wiki.Strings;
 
 --  === Template Plugins ===
---  The <b>Wiki.Plugins.Templates</b> package defines an abstract template plugin.
---  To use the template plugin, the <tt>Get_Template</tt> procedure must be implemented.
+--  The `Wiki.Plugins.Templates` package defines an abstract template plugin.
+--  To use the template plugin, the `Get_Template` procedure must be implemented.
 --  It is responsible for getting the template content according to the plugin parameters.
 --
 package Wiki.Plugins.Templates is

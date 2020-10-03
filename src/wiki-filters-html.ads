@@ -18,17 +18,31 @@
 private with Ada.Containers.Vectors;
 
 --  === HTML Filters ===
---  The <b>Wiki.Filters.Html</b> package implements a customizable HTML filter that verifies
+--  The `Wiki.Filters.Html` package implements a customizable HTML filter that verifies
 --  the HTML content embedded in the Wiki text.  The HTML filter can be customized to indicate
 --  the HTML tags that must be accepted or ignored.  By default, the filter accepts all HTML
---  tags except 'script', 'style'.
+--  tags except 'script', 'noscript', 'style'.
+--
+--  * A tag can be `Forbidden` in which case it is not passed to the document.
+--    If this tag contains inner HTML elements, they are passed to the document.
+--    By default, the `html`, `head`, `meta`, `title`, `script`, `body` are not
+--    passed to the document.
+--  * A tag can be `Hidden` in which case it is not passed to the document and
+--    the inner HTML elements it contains are also silently ignored.
+--    By default this is the case for `script`, `noscript` and `style`.
 --
 --  The HTML filter may be declared and configured as follows:
 --
 --    F : aliased Wiki.Filters.Html.Html_Filter_Type;
 --    ...
---    F.Forbidden (Wiki.Filters.Html.SCRIPT_TAG);
 --    F.Forbidden (Wiki.Filters.Html.A_TAG);
+--
+--  With this configuration the HTML links will be ignored by the parser.
+--  The following configuration:
+--
+--    F.Hide (Wiki.Filters.Html.TABLE_TAG);
+--
+--  will remove the table and its content.
 --
 --  The filter is added to the Wiki parser filter chain by using the <tt>Add_Filter</tt>
 --  operation:

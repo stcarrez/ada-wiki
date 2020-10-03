@@ -16,39 +16,47 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 
---  == Wiki ==
---  The Wiki engine parses a Wiki text in several Wiki syntax such as <tt>MediaWiki</tt>,
---  <tt>Creole</tt>, <tt>Markdown</tt> and renders the result either in HTML, text or into
+--  = Wiki =
+--  The Wiki engine parses a Wiki text in several Wiki syntax such as `MediaWiki`,
+--  `Creole`, `Markdown`, `Dotclear` and renders the result either in HTML, text or into
 --  another Wiki format.  The Wiki engine is used in two steps:
 --
 --  * The Wiki text is parsed according to its syntax to produce a Wiki Document instance.
 --  * The Wiki document is then rendered by a renderer to produce the final HTML, text.
 --
+--  Through this process, it is possible to insert filters and plugins to customize the
+--  parsing and the rendering.
+--
 --  [images/ada-wiki.png]
 --
 --  The Ada Wiki engine is organized in several packages:
 --
---  * The [Wiki_Streams Wiki stream] packages define the interface, types and operations
+--  * The [Wiki Streams](#wiki-streams) packages define the interface, types and operations
 --  for the Wiki engine to read the Wiki or HTML content and for the Wiki renderer to generate
 --  the HTML or text outputs.
---  * The Wiki parser is responsible for parsing HTML or Wiki content according to a
+--  * The [Wiki parser](#wiki-parsers) is responsible for parsing HTML or Wiki content according to a
 --  selected Wiki syntax.  It builds the final Wiki document through filters and plugins.
---  * The [Wiki_Filters Wiki filters] provides a simple filter framework that allows to plug
+--  * The [Wiki Filters](#wiki-filters) provides a simple filter framework that allows to plug
 --  specific filters when a Wiki document is parsed and processed.  Filters are used for the
 --  table of content generation, for the HTML filtering, to collect words or links
 --  and so on.
---  * The [Wiki_Plugins Wiki plugins] defines the plugin interface that is used by the Wiki engine
+--  * The [Wiki Plugins](#wiki-plugins) defines the plugin interface that is used by the Wiki engine
 --  to provide pluggable extensions in the Wiki.  Plugins are used for the Wiki template
 --  support, to hide some Wiki text content when it is rendered or to interact with
 --  other systems.
 --  * The Wiki documents and attributes are used for the representation of the Wiki
 --  document after the Wiki content is parsed.
---  * The [Wiki_Render Wiki renderers] are the last packages which are used for the rendering
+--  * The [Wiki renderers](@wiki-render) are the last packages which are used for the rendering
 --  of the Wiki document to produce the final HTML or text.
 --
+--  @include-doc docs/Tutorial.md
 --  @include wiki-documents.ads
 --  @include wiki-attributes.ads
 --  @include wiki-parsers.ads
+--  @include wiki-filters.ads
+--  @include wiki-plugins.ads
+--  @include wiki-render.ads
+--  @include wiki-streams.ads
 package Wiki is
 
    pragma Preelaborate;

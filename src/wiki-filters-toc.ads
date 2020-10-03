@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-toc -- Filter for the creation of Table Of Contents
---  Copyright (C) 2016 Stephane Carrez
+--  Copyright (C) 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,10 +17,10 @@
 -----------------------------------------------------------------------
 
 --  === TOC Filter ===
---  The <tt>TOC_Filter</tt> is a filter used to build the table of contents.
+--  The `TOC_Filter` is a filter used to build the table of contents.
 --  It collects the headers with the section level as they are added to the
 --  wiki document.  The TOC is built in the wiki document as a separate node
---  and it can be retrieved by using the <tt>Get_TOC</tt> function.  To use
+--  and it can be retrieved by using the `Get_TOC` function.  To use
 --  the filter, declare an aliased instance:
 --
 --     TOC : aliased Wiki.Filters.TOC.TOC_Filter;

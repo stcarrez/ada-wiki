@@ -18,11 +18,16 @@
 with Ada.Containers.Indefinite_Ordered_Maps;
 
 --  === Collector Filters ===
---  The <tt>Wiki.Filters.Collectors</tt> package defines three filters that can be used to
+--  The `Wiki.Filters.Collectors` package defines three filters that can be used to
 --  collect words, links or images contained in a Wiki document.  The collector filters are
 --  inserted in the filter chain and they collect the data as the Wiki text is parsed.
 --  After the parsing, the collector filters have collected either the words or the links
---  and they can be queried by using the <tt>Find</tt> or <tt>Iterate</tt> operations.
+--  and they can be queried by using the `Find` or `Iterate` operations.
+--  The following collectors are defined:
+--
+--  * The `Word_Collector_Type` collects words from text, headers, links,
+--  * The `Link_Collector_Type` collects links,
+--  * The `Image_Collector_Type` collects images,
 --
 --  The filter is inserted in the filter chain before parsing the Wiki document.
 --
@@ -31,7 +36,7 @@ with Ada.Containers.Indefinite_Ordered_Maps;
 --    Engine.Add_Filter (Words'Unchecked_Access);
 --
 --  Once the document is parsed, the collector filters contains the data that was collected.
---  The <tt>Iterate</tt> procedure can be used to have a procedure called for each value
+--  The `Iterate` procedure can be used to have a procedure called for each value
 --  collected by the filter.
 --
 --    Words.Iterate (Print'Access);

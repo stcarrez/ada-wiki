@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render -- Wiki renderer
---  Copyright (C) 2015, 2016 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,8 +18,8 @@
 with Wiki.Nodes;
 with Wiki.Documents;
 
---  == Wiki Renderer ==
---  The <tt>Wiki.Render</tt> package represents the renderer that takes a wiki document
+--  == Wiki Renderer {#wiki-render} ==
+--  The `Wiki.Render` package represents the renderer that takes a wiki document
 --  and render the result either in text, HTML or another format.
 --
 --  @include wiki-render-html.ads

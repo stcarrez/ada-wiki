@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-text -- Wiki Text renderer
---  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2019 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2019, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,8 +19,8 @@ with Wiki.Attributes;
 with Wiki.Streams;
 with Wiki.Strings;
 
---  == Text Renderer ==
---  The <tt>Text_Renderer</tt> allows to render a wiki document into a text content.
+--  === Text Renderer ===
+--  The `Text_Renderer` allows to render a wiki document into a text content.
 --  The formatting rules are ignored except for the paragraphs and sections.
 package Wiki.Render.Text is
 

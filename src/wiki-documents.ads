@@ -20,20 +20,24 @@ with Wiki.Strings;
 with Wiki.Attributes;
 with Wiki.Nodes.Lists;
 
---  === Documents ===
---  The <tt>Document</tt> type is used to hold a Wiki document that was parsed by the parser
---  with one of the supported syntax.  The <tt>Document</tt> holds two distinct parts:
+--  == Documents ==
+--  The `Document` type is used to hold a Wiki document that was parsed by the parser
+--  with one of the supported syntax.  The `Document` holds two distinct parts:
 --
 --  * A main document body that represents the Wiki content that was parsed.
 --  * A table of contents part that was built while Wiki sections are collected.
 --
---  Most of the operations provided by the <tt>Wiki.Documents</tt> package are intended to
+--  Most of the operations provided by the `Wiki.Documents` package are intended to
 --  be used by the wiki parser and filters to build the document.  The document is made of
 --  nodes whose knowledge is required by the renderer.
 --
 --  A document instance must be declared before parsing a text:
 --
 --     Doc    : Wiki.Documents.Document;
+--
+--  After parsing some HTML or Wiki text, it will contain a representation of the
+--  HTML or Wiki text.  It is possible to populate the document by using one of
+--  the `Append`, `Add_Link`, `Add_Image` operation.
 package Wiki.Documents is
 
    pragma Preelaborate;

@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-attributes -- Wiki document attributes
---  Copyright (C) 2015, 2016 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,9 +20,9 @@ private with Ada.Containers.Vectors;
 private with Ada.Finalization;
 private with Util.Refs;
 
---  === Attributes ===
---  The <tt>Attributes</tt> package defines a simple management of attributes for
---  the wiki document parser.  Attribute lists are described by the <tt>Attribute_List</tt>
+--  == Attributes ==
+--  The `Attributes` package defines a simple management of attributes for
+--  the wiki document parser.  Attribute lists are described by the `Attribute_List`
 --  with some operations to append or query for an attribute.  Attributes are used for
 --  the Wiki document representation to describe the HTML attributes that were parsed and
 --  several parameters that describe Wiki content (links, ...).

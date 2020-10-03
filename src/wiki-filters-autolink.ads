@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-autolink -- Autolink filter to identify links in wiki
---  Copyright (C) 2016 Stephane Carrez
+--  Copyright (C) 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,12 +17,12 @@
 -----------------------------------------------------------------------
 
 --  === Autolink Filters ===
---  The <tt>Wiki.Filters.Autolink</tt> package defines a filter that transforms URLs
+--  The `Wiki.Filters.Autolink` package defines a filter that transforms URLs
 --  in the Wiki text into links.  The filter should be inserted in the filter chain
 --  after the HTML and after the collector filters.  The filter looks for the
---  text and transforms http:// and https:// links into real links.  When such links
---  are found, the text is split so that next filters see only the text without
---  links and the <tt>Add_Link</tt> filter operations are called with the link.
+--  text and transforms `http://`, `https://`, `ftp://` and `ftps://` links into real links.
+--  When such links are found, the text is split so that next filters see only the text without
+--  links and the `Add_Link` filter operations are called with the link.
 package Wiki.Filters.Autolink is
 
    pragma Preelaborate;

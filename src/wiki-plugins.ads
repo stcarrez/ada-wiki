@@ -21,10 +21,22 @@ with Wiki.Documents;
 with Wiki.Filters;
 with Wiki.Strings;
 
---  == Plugins ==
---  The <b>Wiki.Plugins</b> package defines the plugin interface that is used by the wiki
---  engine to provide pluggable extensions in the Wiki.
+--  == Plugins {#wiki-plugins} ==
+--  The `Wiki.Plugins` package defines the plugin interface that is used by the wiki
+--  engine to provide pluggable extensions in the Wiki.  The plugins works by using
+--  a factory that finds and gives access to a plugin given its name.
+--  The plugin factory is represented by the `Wiki_Plugin` limited interface which
+--  must only implement the `Find` function.  A simple plugin factory can be created
+--  by declaring a tagged record that implements the interface:
 --
+--    type Factory is new Wiki.Plugins.Plugin_Factory with null record;
+--    overriding function
+--    Find (Factory : in Factory;
+--          Name    : in String) return Wiki.Plugins.Wiki_Plugin_Access;
+--
+--  @include wiki-plugins-variables.ads
+--  @include wiki-plugins-conditions.ads
+--  @include wiki-plugins-templates.ads
 package Wiki.Plugins is
 
    pragma Preelaborate;

@@ -23,8 +23,8 @@ with Wiki.Attributes;
 with Wiki.Streams;
 with Wiki.Strings;
 
---  == Wiki Renderer ==
---  The <tt>Wiki_Renderer</tt> allows to render a wiki document into another wiki content.
+--  === Wiki Renderer ===
+--  The `Wiki_Renderer</tt> allows to render a wiki document into another wiki content.
 --  The formatting rules are ignored except for the paragraphs and sections.
 package Wiki.Render.Wiki is
 

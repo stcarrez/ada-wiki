@@ -20,8 +20,8 @@ with Wiki.Streams.Html;
 with Wiki.Strings;
 with Wiki.Render.Links;
 
---  == HTML Renderer ==
---  The <tt>Html_Renderer</tt> allows to render a wiki document into an HTML content.
+--  === HTML Renderer ===
+--  The `Html_Renderer` allows to render a wiki document into an HTML content.
 --
 package Wiki.Render.Html is
 

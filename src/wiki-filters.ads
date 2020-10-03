@@ -23,19 +23,18 @@ with Wiki.Nodes;
 with Wiki.Strings;
 
 --  == Filters ==
---  The <b>Wiki.Filters</b> package provides a simple filter framework that allows to plug
---  specific filters when a wiki document is parsed and processed.  The <tt>Filter_Type</tt>
---  implements the <tt>Document_Reader</tt> interface to catch all the wiki document operations
---  and it forwards the different calls to a next wiki document instance.  A filter can do some
---  operations while calls are made so that it can:
+--  The `Wiki.Filters` package provides a simple filter framework that allows to plug
+--  specific filters when a wiki document is parsed and processed.  The `Filter_Type`
+--  implements the operations that the `Wiki.Parsers` will use to populate the document.
+--  A filter can do some operations while calls are made so that it can:
 --
 --  * Get the text content and filter it by looking at forbidden words in some dictionary,
 --  * Ignore some formatting construct (for example to forbid the use of links),
 --  * Verify and do some corrections on HTML content embedded in wiki text,
 --  * Expand some plugins, specific links to complex content.
 --
---  To implement a new filter, the <tt>Filter_Type</tt> type must be used as a base type
---  and some of the operations have to be overriden.  The default <tt>Filter_Type</tt> operations
+--  To implement a new filter, the `Filter_Type` type must be used as a base type
+--  and some of the operations have to be overriden.  The default `Filter_Type` operations
 --  just propagate the call to the attached wiki document instance (ie, a kind of pass
 --  through filter).
 --
@@ -43,6 +42,7 @@ with Wiki.Strings;
 --  @include wiki-filters-html.ads
 --  @include wiki-filters-collectors.ads
 --  @include wiki-filters-autolink.ads
+--  @include wiki-filters-variables.ads
 package Wiki.Filters is
 
    pragma Preelaborate;

@@ -25,6 +25,17 @@ private with Ada.Containers.Indefinite_Ordered_Maps;
 --  The list of variables is either configured programatically through the
 --  `Add_Variable` procedures but it can also be set from the Wiki text by using
 --  the `Wiki.Plugins.Variables` plugin.
+--
+--  The variable filter must be configured with the plugin by declaring the instance:
+--
+--    F : aliased Wiki.Filters.Html.Html_Filter_Type;
+--
+--     Engine.Add_Filter (F'Unchecked_Access);
+--
+--  And variables can be inserted by using the `Add_Variable` procedure:
+--
+--    F.Add_Variable ("username", "gandalf");
+--
 package Wiki.Filters.Variables is
 
    pragma Preelaborate;
