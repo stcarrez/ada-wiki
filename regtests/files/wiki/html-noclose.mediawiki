@@ -1,0 +1,4 @@
+<p>
+  <img src="/link">
+  <b>Bold</b>
+</p>
