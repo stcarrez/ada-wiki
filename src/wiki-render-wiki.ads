@@ -123,6 +123,8 @@ private
 
    type Wiki_Format_Array is array (Format_Type) of Wide_String_Access;
 
+   procedure Write_Optional_Space (Engine : in out Wiki_Renderer);
+
    --  Emit a new line.
    procedure New_Line (Engine   : in out Wiki_Renderer;
                        Optional : in Boolean := False);
