@@ -8,6 +8,21 @@ SHARED_MAKE_ARGS += -XUTILADA_BASE_BUILD=relocatable -XUTIL_LIBRARY_TYPE=relocat
 SHARED_MAKE_ARGS += -XXMLADA_BUILD=relocatable
 SHARED_MAKE_ARGS += -XLIBRARY_TYPE=relocatable
 
+WIKI_DOC=\
+  title.md \
+  pagebreak.tex \
+  index.md \
+  pagebreak.tex \
+  Installation.md \
+  pagebreak.tex \
+  Wiki.md \
+  pagebreak.tex
+
+DOC_OPTIONS=-f markdown -o wiki-book.pdf
+DOC_OPTIONS+= --listings --number-sections --toc
+HTML_OPTIONS=-f markdown -o wiki-book.html
+HTML_OPTIONS+= --listings --number-sections --toc --css pandoc.css
+
 include Makefile.defaults
 
 # Build executables for all mains defined by the project.
@@ -31,3 +46,4 @@ install-samples:
 	cp -p $(srcdir)/config.gpr $(samplesdir)
 
 $(eval $(call ada_library,$(NAME)))
+$(eval $(call pandoc_build,wiki,$(WIKI_DOC)))
