@@ -32,6 +32,9 @@ AC_SUBST(WIKI_MICRO_VERSION)
 
 AM_GNAT_LIBRARY_PROJECT(wikiada)
 
+AC_CHECK_PROG(HAVE_PANDOC,pandoc,yes)
+AC_CHECK_PROG(HAVE_DYNAMO,dynamo,yes)
+
 AC_MSG_CHECKING([Ada Utility Library])
 AC_ARG_WITH(ada-util,
 AS_HELP_STRING([--with-ada-util=x], [Path for Ada Utility Library]),
