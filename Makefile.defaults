@@ -172,6 +172,26 @@ clean::
 
 endef
 
+define pandoc_build
+
+ifeq (${HAVE_PANDOC},yes)
+ifeq (${HAVE_DYNAMO},yes)
+
+doc::  docs/$(1).pdf docs/$(1).html
+	$(DYNAMO) build-doc -markdown wiki
+
+docs/$(1).pdf:  force
+	$(DYNAMO) build-doc -pandoc docs
+	cd docs && pandoc $(DOC_OPTIONS) --template=./eisvogel.tex $(2)
+
+docs/$(1).html: docs/$(1).pdf force
+	cd docs && pandoc $(HTML_OPTIONS) $(2)
+
+endif
+endif
+
+endef
+
 force:
 
 build-test::
