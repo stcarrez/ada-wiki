@@ -608,6 +608,7 @@ package body Wiki.Render.Wiki is
       Engine.Keep_Content := Engine.Keep_Content + 1;
       if Engine.Keep_Content = 1 then
          Engine.Content := Strings.To_UString ("");
+         Engine.Need_Space := False;
       end if;
    end Start_Keep_Content;
 
