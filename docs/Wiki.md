@@ -403,23 +403,23 @@ The formatting rules are ignored except for the paragraphs and sections.
 
 
 ## Input and Output streams {#wiki-streams}
-The <tt>Wiki.Streams</tt> package defines the interfaces used by
+The `Wiki.Streams` package defines the interfaces used by
 the parser or renderer to read and write their outputs.
 
-The <tt>Input_Stream</tt> interface defines the interface that must be implemented to
-read the source Wiki content.  The <tt>Read</tt> procedure is called by the parser
+The `Input_Stream` interface defines the interface that must be implemented to
+read the source Wiki content.  The `Read` procedure is called by the parser
 repeatedly while scanning the Wiki content.
 
-The <tt>Output_Stream</tt> interface is the interface used by the renderer
-to write their outpus.  It defines the <tt>Write</tt> procedure to write
+The `Output_Stream` interface is the interface used by the renderer
+to write their outpus.  It defines the `Write` procedure to write
 a single character or a string.
 
 ### HTML Output Stream
-The <tt>Wiki.Writers</tt> package defines the interfaces used by the renderer to write
+The `Wiki.Writers` package defines the interfaces used by the renderer to write
 their outputs.
 
-The <tt>Input_Stream</tt> interface defines the interface that must be implemented to
-read the source Wiki content.  The <tt>Read</tt> procedure is called by the parser
+The `Input_Stream` interface defines the interface that must be implemented to
+read the source Wiki content.  The `Read` procedure is called by the parser
 repeatedly while scanning the Wiki content.
 
 ### Output Builder Stream
@@ -429,21 +429,21 @@ content can be retrieved at the end by using the <tt>To_String</tt>
 or <tt>Iterate</tt> operation.
 
 ### HTML Output Builder Stream
-The <tt>Html_Output_Builder_Stream</tt> type defines a HTML output stream that collects the
+The `Html_Output_Builder_Stream` type defines a HTML output stream that collects the
 HTML into expandable buffers.  Once the complete HTML document is rendered, the content is
-retrieved either by the <tt>To_String</tt> or the <tt>Iterate</tt> operations.
+retrieved either by the `To_String` or the `Iterate` operations.
 
 
 ### Text_IO Input and Output streams
-The <tt>Wiki.Streams.Text_IO</tt> package defines the <tt>File_Input_Stream</tt> and
-the <tt>File_Output_Stream</tt/ types which use the <tt>Ada.Wide_Wide_Text_IO</tt> package
+The `Wiki.Streams.Text_IO` package defines the `File_Input_Stream` and
+the `File_Output_Stream` types which use the `Ada.Wide_Wide_Text_IO` package
 to read or write the output streams.
 
-By default the <tt>File_Input_Stream</tt> is configured to read the standard input.
-The <tt>Open</tt> procedure can be used to read from a file knowing its name.
+By default the `File_Input_Stream` is configured to read the standard input.
+The `Open` procedure can be used to read from a file knowing its name.
 
-The <tt>File_Output_Stream</tt> is configured to write on the standard output.
-The <tt>Open</tt> and <tt>Create</tt> procedure can be used to write on a file.
+The `File_Output_Stream` is configured to write on the standard output.
+The `Open` and `Create` procedure can be used to write on a file.
 
 
 
