@@ -12,6 +12,7 @@ ChangeLog
 configure.lineno
 wikiada.gpr
 wikiada_tests.gpr
+samples.gpr
 tests.xml
 wiki-tests.xml
 autom4te.cache
@@ -19,3 +20,7 @@ bin/
 obj/
 lib/
 wiki-aunit.xml
+docs/wiki-book.html
+wikiada.cov
+cover/
+regtests/result
