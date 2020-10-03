@@ -56,7 +56,7 @@ package body Wiki.Plugins.Variables is
                                 Value : in Wiki.Strings.WString);
 
       Has_Table  : Boolean := False;
-      Format     : Format_Map := (others => False);
+      Format     : constant Format_Map := (others => False);
       Attributes : Wiki.Attributes.Attribute_List;
 
       procedure Print_Variable (Name  : in Wiki.Strings.WString;
