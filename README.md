@@ -27,6 +27,7 @@ You can play with the Wiki engine by using [Wi2wic](https://github.com/stcarrez/
 - New plugin and filter to setup and expand variables in Wiki texts
 - Add support for Markdown tables
 - Fixes in the Markdown and Creole syntax parsers
+- New Ada Wiki Engine Programmer's Guide
 
 [List all versions](https://github.com/stcarrez/ada-wiki/blob/master/NEWS.md)
 
@@ -99,12 +100,13 @@ document.  The next command reports the links used in the document:
 bin/words -l -M content.wiki
 ```
 
-A complete online Wiki application is part of AWA (https://github.com/stcarrez/ada-awa).
+A complete online Wiki application is part of AWA (https://github.com/stcarrez/ada-awa)
+and can be tried online with [Atlas](https://demo.vacs.fr/atlas/index.html)
 
 # Documentation
 
-The Ada Wiki sources as well as a wiki documentation is provided on:
-
-* https://github.com/stcarrez/ada-wiki/wiki
+* [Ada Wiki Programmer's Guide](https://ada-wiki.readthedocs.io/en/latest/)
 
 * [Using the Ada Wiki Engine](https://blog.vacs.fr/vacs/blogs/post.html?post=2016/04/30/Using-the-Ada-Wiki-Engine)
+
+

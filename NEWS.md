@@ -2,6 +2,7 @@ Version 1.3.0   -
   - New plugin and filter to setup and expand variables in Wiki texts
   - Add support for Markdown tables
   - Fixes in the Markdown and Creole syntax parsers
+  - New Ada Wiki Engine Programmer's Guide
 
 Version 1.2.1   - May 2020
   - Minor configuration and code coverage support
