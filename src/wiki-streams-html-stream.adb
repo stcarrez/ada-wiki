@@ -21,6 +21,10 @@ package body Wiki.Streams.Html.Stream is
    --  Close the current XML entity if an entity was started
    procedure Close_Current (Stream : in out Html_Output_Stream'Class);
 
+   --  Write the string to the stream.
+   procedure Write_String (Stream  : in out Html_Output_Stream'Class;
+                           Content : in String);
+
    --  ------------------------------
    --  Close the current XML entity if an entity was started
    --  ------------------------------
