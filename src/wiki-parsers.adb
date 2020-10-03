@@ -2137,7 +2137,10 @@ package body Wiki.Parsers is
       Previous_Tag : constant Wiki.Html_Tag := P.Previous_Tag;
    begin
       P.Previous_Tag := UNKNOWN_TAG;
-      if Previous_Tag /= UNKNOWN_TAG and then Previous_Tag /= Tag And then No_End_Tag (Previous_Tag) then
+      if Previous_Tag /= UNKNOWN_TAG
+        and then Previous_Tag /= Tag
+        and then No_End_Tag (Previous_Tag)
+      then
          End_Element (P, Previous_Tag);
       end if;
 
