@@ -18,15 +18,15 @@
 with Wiki.Strings;
 
 --  == Input and Output streams {#wiki-streams} ==
---  The <tt>Wiki.Streams</tt> package defines the interfaces used by
+--  The `Wiki.Streams` package defines the interfaces used by
 --  the parser or renderer to read and write their outputs.
 --
---  The <tt>Input_Stream</tt> interface defines the interface that must be implemented to
---  read the source Wiki content.  The <tt>Read</tt> procedure is called by the parser
+--  The `Input_Stream` interface defines the interface that must be implemented to
+--  read the source Wiki content.  The `Read` procedure is called by the parser
 --  repeatedly while scanning the Wiki content.
 --
---  The <tt>Output_Stream</tt> interface is the interface used by the renderer
---  to write their outpus.  It defines the <tt>Write</tt> procedure to write
+--  The `Output_Stream` interface is the interface used by the renderer
+--  to write their outpus.  It defines the `Write` procedure to write
 --  a single character or a string.
 --
 --  @include wiki-streams-html.ads

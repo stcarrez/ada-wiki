@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-streams-html -- Wiki HTML output stream
---  Copyright (C) 2011, 2012, 2013, 2015, 2016 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,11 +18,11 @@
 with Wiki.Strings;
 
 --  === HTML Output Stream ===
---  The <tt>Wiki.Writers</tt> package defines the interfaces used by the renderer to write
+--  The `Wiki.Writers` package defines the interfaces used by the renderer to write
 --  their outputs.
 --
---  The <tt>Input_Stream</tt> interface defines the interface that must be implemented to
---  read the source Wiki content.  The <tt>Read</tt> procedure is called by the parser
+--  The `Input_Stream` interface defines the interface that must be implemented to
+--  read the source Wiki content.  The `Read` procedure is called by the parser
 --  repeatedly while scanning the Wiki content.
 package Wiki.Streams.Html is
 

@@ -19,9 +19,9 @@ with Wiki.Streams.Builders;
 with Wiki.Streams.Html.Stream;
 
 --  === HTML Output Builder Stream ===
---  The <tt>Html_Output_Builder_Stream</tt> type defines a HTML output stream that collects the
+--  The `Html_Output_Builder_Stream` type defines a HTML output stream that collects the
 --  HTML into expandable buffers.  Once the complete HTML document is rendered, the content is
---  retrieved either by the <tt>To_String</tt> or the <tt>Iterate</tt> operations.
+--  retrieved either by the `To_String` or the `Iterate` operations.
 --
 package Wiki.Streams.Html.Builders is
    new Wiki.Streams.Html.Stream (Wiki.Streams.Builders.Output_Builder_Stream);

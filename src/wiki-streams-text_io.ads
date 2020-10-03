@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-streams-text_io -- Text_IO input output streams
---  Copyright (C) 2016 Stephane Carrez
+--  Copyright (C) 2016, 2020 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,15 +19,15 @@ with Ada.Wide_Wide_Text_IO;
 with Ada.Finalization;
 
 --  === Text_IO Input and Output streams ===
---  The <tt>Wiki.Streams.Text_IO</tt> package defines the <tt>File_Input_Stream</tt> and
---  the <tt>File_Output_Stream</tt/ types which use the <tt>Ada.Wide_Wide_Text_IO</tt> package
+--  The `Wiki.Streams.Text_IO` package defines the `File_Input_Stream` and
+--  the `File_Output_Stream` types which use the `Ada.Wide_Wide_Text_IO` package
 --  to read or write the output streams.
 --
---  By default the <tt>File_Input_Stream</tt> is configured to read the standard input.
---  The <tt>Open</tt> procedure can be used to read from a file knowing its name.
+--  By default the `File_Input_Stream` is configured to read the standard input.
+--  The `Open` procedure can be used to read from a file knowing its name.
 --
---  The <tt>File_Output_Stream</tt> is configured to write on the standard output.
---  The <tt>Open</tt> and <tt>Create</tt> procedure can be used to write on a file.
+--  The `File_Output_Stream` is configured to write on the standard output.
+--  The `Open` and `Create` procedure can be used to write on a file.
 --
 package Wiki.Streams.Text_IO is
 
