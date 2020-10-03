@@ -326,11 +326,8 @@ package body Wiki.Render.Html is
          when 5 =>
             Tag := Get_Tag_Name (H5_TAG);
 
-         when 6 =>
-            Tag := Get_Tag_Name (H6_TAG);
-
          when others =>
-            Tag := Get_Tag_Name (H3_TAG);
+            Tag := Get_Tag_Name (H6_TAG);
 
       end case;
       Engine.Output.Start_Element (Tag.all);
