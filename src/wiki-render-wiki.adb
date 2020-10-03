@@ -499,7 +499,6 @@ package body Wiki.Render.Wiki is
       Start        : Natural := Text'First;
       Last         : Natural := Text'Last;
       Apply_Format : Boolean := True;
-      Has_Endline  : Boolean := False;
       Last_Char    : Strings.WChar;
    begin
       if Engine.Keep_Content > 0 or Engine.Empty_Line then
@@ -533,8 +532,6 @@ package body Wiki.Render.Wiki is
                   end if;
                   Engine.Write_Optional_Space;
                   Engine.New_Line;
-               else
-                  Has_Endline := True;
                end if;
             elsif not Engine.Empty_Line or else not Helpers.Is_Space (Last_Char) then
                if Engine.Empty_Line and Engine.Quote_Level > 0 then
@@ -563,10 +560,9 @@ package body Wiki.Render.Wiki is
                end if;
                Engine.Output.Write (Last_Char);
                Engine.Empty_Line := False;
-               Has_Endline := False;
             end if;
          end loop;
-         if not Helpers.Is_Space_Or_Newline (Last_Char) and not Engine.Empty_Line Then
+         if not Helpers.Is_Space_Or_Newline (Last_Char) and not Engine.Empty_Line then
             Engine.Need_Space := True;
          end if;
       end if;
