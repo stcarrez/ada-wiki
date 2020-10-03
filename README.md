@@ -105,7 +105,7 @@ and can be tried online with [Atlas](https://demo.vacs.fr/atlas/index.html)
 
 # Documentation
 
-* [Ada Wiki Programmer's Guide](https://ada-wiki.readthedocs.io/en/latest/)
+* [Ada Wiki Programmer's Guide](https://ada-wiki.readthedocs.io/en/latest/) [PDF](https://github.com/stcarrez/ada-wiki/blob/master/docs/wiki-book.pdf)
 
 * [Using the Ada Wiki Engine](https://blog.vacs.fr/vacs/blogs/post.html?post=2016/04/30/Using-the-Ada-Wiki-Engine)
 
