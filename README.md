@@ -4,9 +4,9 @@
 [![Build Status](https://img.shields.io/jenkins/s/http/jenkins.vacs.fr/Ada-Wiki.svg)](https://jenkins.vacs.fr/job/Ada-Wiki/)
 [![Test Status](https://img.shields.io/jenkins/t/http/jenkins.vacs.fr/Ada-Wiki.svg)](https://jenkins.vacs.fr/job/Ada-Wiki/)
 [![codecov](https://codecov.io/gh/stcarrez/ada-wiki/branch/master/graph/badge.svg)](https://codecov.io/gh/stcarrez/ada-wiki)
-[![Download](https://img.shields.io/badge/download-1.2.1-brightgreen.svg)](http://download.vacs.fr/ada-wiki/ada-wiki-1.2.1.tar.gz)
+[![Download](https://img.shields.io/badge/download-1.3.0-brightgreen.svg)](http://download.vacs.fr/ada-wiki/ada-wiki-1.3.0.tar.gz)
 [![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](LICENSE)
-![Commits](https://img.shields.io/github/commits-since/stcarrez/ada-wiki/1.2.1.svg)
+![Commits](https://img.shields.io/github/commits-since/stcarrez/ada-wiki/1.3.0.svg)
 
 Ada Wiki is a small library that provides a Wiki engine supporting several Wiki syntaxes.
 
@@ -22,7 +22,7 @@ for the implementation of the blog and wiki online plugins.
 
 You can play with the Wiki engine by using [Wi2wic](https://github.com/stcarrez/wi2wic) on https://wi2wic.vacs.fr/wi2wic/index.html
 
-## Version 1.3.0 -
+## Version 1.3.0 - Nov 2020
 
 - New plugin and filter to setup and expand variables in Wiki texts
 - Add support for Markdown tables
