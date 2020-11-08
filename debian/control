@@ -7,13 +7,14 @@ Build-Depends:
  dh-ada-library,
  gnat, gnat-7,
 # This line is parsed by debian/rules.
- gprbuild (>= 2015-2)
+ gprbuild (>= 2015-2),
 # 2015-2 is compatible with gnat-6
-# libada-util1-dev,
+ libutilada-sys1-dev,
+ libutilada-unit1-dev
 Standards-Version: 4.1.4
 Homepage: https://github.com/stcarrez/ada-wiki/
-Vcs-Git: https://github.com/stcarrez/ada-debian-pkg.git
-Vcs-Browser: https://github.com/stcarrez/ada-debian-pkg
+Vcs-Git: https://github.com/stcarrez/ada-wiki.git -b debian-gnat-7
+Vcs-Browser: https://github.com/stcarrez/ada-wiki/tree/debian-gnat-7
 
 Package: libwikiada1.3.0
 Section: libs
