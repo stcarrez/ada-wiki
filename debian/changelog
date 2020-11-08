@@ -1,0 +1,11 @@
+libwikiada (1.3.0) unstable; urgency=medium
+
+  * Update for release 1.3.0
+
+ -- Stephane Carrez <Stephane.Carrez@gmail.com>  Sun, 8 Nov 2020 16:21:06 +0100
+
+libwikiada (1.1.0) UNRELEASED; urgency=medium
+
+  * Initial release to setup a debian library and development package
+
+ -- Stephane Carrez <Stephane.Carrez@gmail.com>  Sun, 24 Jun 2018 10:01:06 +0200

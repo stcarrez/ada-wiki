@@ -1,0 +1,1 @@
+MODE=distrib WIKI_LIBRARY_TYPE=relocatable wikiada.gpr
