@@ -5,16 +5,16 @@ Maintainer: Stephane Carrez <Stephane.Carrez@gmail.com>
 Build-Depends:
  debhelper (>= 10),
  dh-ada-library,
- gnat, gnat-7,
+ gnat, gnat-9,
 # This line is parsed by debian/rules.
  gprbuild (>= 2015-2),
 # 2015-2 is compatible with gnat-6
- libutilada-sys1-dev,
- libutilada-unit1-dev
+ libutilada-sys2-dev,
+ libutilada-unit2-dev
 Standards-Version: 4.1.4
 Homepage: https://github.com/stcarrez/ada-wiki/
-Vcs-Git: https://github.com/stcarrez/ada-wiki.git -b debian-gnat-7
-Vcs-Browser: https://github.com/stcarrez/ada-wiki/tree/debian-gnat-7
+Vcs-Git: https://github.com/stcarrez/ada-wiki.git -b debian-gnat-9
+Vcs-Browser: https://github.com/stcarrez/ada-wiki/tree/debian-gnat-9
 
 Package: libwikiada1.3.0
 Section: libs
@@ -30,7 +30,7 @@ Description: Ada Wiki Engine (runtime)
   * Filter out the wiki, HTML or text through customizable filters,
   * Render the wiki text in HTML, text or another wiki format
 
-Package: libwikiada1-dev
+Package: libwikiada2-dev
 Section: libdevel
 Architecture: any
 Depends: ${misc:Depends}, ${ada:Depends}
