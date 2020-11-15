@@ -18,9 +18,9 @@ WIKI_DOC=\
   Wiki.md \
   pagebreak.tex
 
-DOC_OPTIONS=-f markdown -o wiki-book.pdf
+DOC_OPTIONS=-f markdown -o wikiada-book.pdf
 DOC_OPTIONS+= --listings --number-sections --toc
-HTML_OPTIONS=-f markdown -o wiki-book.html
+HTML_OPTIONS=-f markdown -o wikiada-book.html
 HTML_OPTIONS+= --listings --number-sections --toc --css pandoc.css
 
 include Makefile.defaults

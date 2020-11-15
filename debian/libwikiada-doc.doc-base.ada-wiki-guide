@@ -1,0 +1,17 @@
+Document: ada-wiki-guide
+Title: Ada Wiki Engine - Programmer's Guide
+Author: Stephane Carrez
+Section: Programming/Ada
+Abstract: This manual documents the Ada Wiki Engine.
+ Ada Wiki Engine is a small library that provides a Wiki
+ engine supporting several Wiki syntaxes. The library allows to
+ parse a wiki text such as Markdown, Mediawiki, Creole, Dotclear.
+ It is able to parse HTML content in embedded wiki text
+ and render the wiki text in HTML or another wiki format.
+ 
+ Format: HTML
+ Index: /usr/share/doc/libwikiada-doc/wikiada-book.html
+ Files: /usr/share/doc/libwikiada-doc/wikiada-book.html
+ 
+ Format: pdf
+ Files: /usr/share/doc/libwikiada-doc/wikiada-book.pdf.gz

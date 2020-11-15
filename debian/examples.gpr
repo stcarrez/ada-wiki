@@ -1,0 +1,42 @@
+with "config";
+with "utilada_sys";
+with "wikiada";
+
+project Examples is
+
+   Mains := ("render.adb", "words.adb");
+
+   for Main use Mains;
+
+   case WikiAda.Use_Ada_Util is
+      when "yes" =>
+         for Main use Mains & ("import.adb");
+
+      when "no" =>
+         null;
+
+   end case;
+
+   for Source_Dirs use (".");
+
+   for Object_Dir use "./" & Config'Object_Dir & "/obj";
+   for Exec_Dir use "./" & Config'Exec_Dir & "/bin";
+
+   package binder is
+      case Config.Mode is
+         when "debug" =>
+            for Default_Switches ("Ada") use ("-E", "-W8");
+
+	 when others =>
+            for Default_Switches ("Ada") use ("-E", "-W8");
+
+      end case;
+   end binder;
+
+   package Builder renames Config.Builder;
+
+   package Compiler renames Config.Compiler;
+
+   package Linker renames Config.Linker;
+
+end Examples;
