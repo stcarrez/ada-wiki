@@ -174,28 +174,6 @@ clean::
 
 endef
 
-define pandoc_build
-
-ifeq (${HAVE_PANDOC},yes)
-
-doc::  docs/$(1).pdf docs/$(1).html
-ifeq (${HAVE_DYNAMO},yes)
-	$(DYNAMO) build-doc -markdown wiki
-endif
-
-docs/$(1).pdf:  force
-ifeq (${HAVE_DYNAMO},yes)
-	$(DYNAMO) build-doc -pandoc docs
-endif
-	cd docs && pandoc $(DOC_OPTIONS) --template=./eisvogel.tex $(2)
-
-docs/$(1).html: docs/$(1).pdf force
-	cd docs && pandoc $(HTML_OPTIONS) $(2)
-
-endif
-
-endef
-
 force:
 
 build-test::
@@ -203,5 +181,11 @@ build-test::
 uninstall::
 
 install-static::
+
+endif
+
+ifdef DESTDIR
+
+.NOTPARALLEL:
 
 endif
