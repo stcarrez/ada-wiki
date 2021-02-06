@@ -23,4 +23,6 @@ wiki-aunit.xml
 docs/wiki-book.html
 wikiada.cov
 cover/
-regtests/result
+regtests/results
+wiki
+alire
