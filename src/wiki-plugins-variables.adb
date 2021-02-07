@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-plugins-variables -- Variables plugin
---  Copyright (C) 2020 Stephane Carrez
+--  Copyright (C) 2020, 2021 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,7 +51,7 @@ package body Wiki.Plugins.Variables is
                      Document : in out Wiki.Documents.Document;
                      Params   : in out Wiki.Attributes.Attribute_List;
                      Context  : in out Plugin_Context) is
-      pragma Unreferenced (Plugin);
+      pragma Unreferenced (Plugin, Params);
       procedure Print_Variable (Name  : in Wiki.Strings.WString;
                                 Value : in Wiki.Strings.WString);
 

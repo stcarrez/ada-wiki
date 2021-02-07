@@ -163,6 +163,7 @@ package body Wiki.Parsers is
 
    procedure Parse_Markdown_Horizontal_Rule (P     : in out Parser;
                                              Token : in Wiki.Strings.WChar);
+   pragma Unreferenced (Parse_Markdown_Horizontal_Rule);
 
    --  Parse a quote.
    --  Example:
