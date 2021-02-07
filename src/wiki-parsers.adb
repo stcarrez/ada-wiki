@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers -- Wiki parser
---  Copyright (C) 2011 - 2020 Stephane Carrez
+--  Copyright (C) 2011 - 2021 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -160,6 +160,9 @@ package body Wiki.Parsers is
    --    | col1 | col2 | ... | colN |
    procedure Parse_Markdown_Table (P     : in out Parser;
                                    Token : in Wiki.Strings.WChar);
+
+   procedure Parse_Markdown_Horizontal_Rule (P     : in out Parser;
+                                             Token : in Wiki.Strings.WChar);
 
    --  Parse a quote.
    --  Example:

@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-html -- Wiki HTML parser
---  Copyright (C) 2015, 2016, 2018, 2020 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2018, 2020, 2021 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,6 +33,7 @@ package body Wiki.Parsers.Html is
 
    procedure Collect_Attributes (P     : in out Parser);
    function Is_Letter (C : in Wiki.Strings.WChar) return Boolean;
+   function From_Hex (Value : in String) return Wiki.Strings.WChar;
    procedure Collect_Attribute_Value (P     : in out Parser;
                                       Value : in out Wiki.Strings.BString);
 
