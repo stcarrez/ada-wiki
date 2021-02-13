@@ -1,3 +1,6 @@
+Version 1.3.1   - Feb 2021
+  - Minor cleanup for the build
+
 Version 1.3.0   - Nov 2020
   - New plugin and filter to setup and expand variables in Wiki texts
   - Add support for Markdown tables
