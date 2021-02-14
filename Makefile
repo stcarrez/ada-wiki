@@ -18,9 +18,9 @@ WIKI_DOC=\
   Wiki.md \
   pagebreak.tex
 
-DOC_OPTIONS=-f markdown -o wikiada-book.pdf
+DOC_OPTIONS=-f markdown
 DOC_OPTIONS+= --listings --number-sections --toc
-HTML_OPTIONS=-f markdown -o wikiada-book.html
+HTML_OPTIONS=-f markdown
 HTML_OPTIONS+= --listings --number-sections --toc --css pandoc.css
 
 include Makefile.defaults
@@ -46,4 +46,4 @@ install-samples:
 	cp -p $(srcdir)/config.gpr $(samplesdir)
 
 $(eval $(call ada_library,$(NAME)))
-$(eval $(call pandoc_build,wiki,$(WIKI_DOC)))
+$(eval $(call pandoc_build,wikiada-book,$(WIKI_DOC)))
