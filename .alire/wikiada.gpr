@@ -2,7 +2,7 @@ with "wikiada_config";
 with "utilada_core";
 
 library project WikiAda is
-   Version := "1.3.0";
+   Version := "1.3.1";
    Library_Dir := "lib";
    Library_Type : WikiAda_Config.Library_Type_Type := external ("WIKI_LIBRARY_TYPE", "static");
 
