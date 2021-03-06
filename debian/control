@@ -5,7 +5,7 @@ Maintainer: Stephane Carrez <Stephane.Carrez@gmail.com>
 Build-Depends:
  debhelper (>= 10),
  dh-ada-library,
- gnat, gnat-9,
+ gnat, gnat-8,
 # This line is parsed by debian/rules.
  gprbuild (>= 2015-2),
 # 2015-2 is compatible with gnat-6
@@ -15,8 +15,8 @@ Build-Depends:
  pandoc, texlive-fonts-extra
 Standards-Version: 4.1.4
 Homepage: https://github.com/stcarrez/ada-wiki/
-Vcs-Git: https://github.com/stcarrez/ada-wiki.git -b debian-gnat-9
-Vcs-Browser: https://github.com/stcarrez/ada-wiki/tree/debian-gnat-9
+Vcs-Git: https://github.com/stcarrez/ada-wiki.git -b debian-gnat-8
+Vcs-Browser: https://github.com/stcarrez/ada-wiki/tree/debian-gnat-8
 
 Package: libwikiada1.3.1
 Section: libs
