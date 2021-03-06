@@ -9,8 +9,8 @@ Build-Depends:
 # This line is parsed by debian/rules.
  gprbuild (>= 2015-2),
 # 2015-2 is compatible with gnat-6
- libutilada-sys2-dev,
- libutilada-unit2-dev,
+ libutilada-sys3-dev,
+ libutilada-unit3-dev,
 # pandoc requires texlive-fonts-extra for PDF
  pandoc, texlive-fonts-extra
 Standards-Version: 4.1.4
@@ -31,7 +31,7 @@ Description: Ada Wiki Engine (runtime)
   * Filter out the wiki, HTML or text through customizable filters,
   * Render the wiki text in HTML, text or another wiki format.
 
-Package: libwikiada2-dev
+Package: libwikiada3-dev
 Section: libdevel
 Architecture: any
 Depends: ${misc:Depends}, ${ada:Depends}
