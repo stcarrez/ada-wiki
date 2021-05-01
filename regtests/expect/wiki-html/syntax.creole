@@ -7,7 +7,7 @@
 </li><li>item 3.2</li></ul></ul><ol><li>num 1
 </li><li>num 2</li></ol><p>Section bloc:</p><p> L1: line 1
  L2: line 2
- L3: line 3</p><p>Formatting</p><p><i>emphasis</i></p><ul><ul><li>strong</li></ul></ul><p><b>Line</b><br /><b>break</b></p><p><b><sup>superscript</sup></b></p><p><b><sub>subscript</sub></b></p><p><b>__underline__</b></p><p><a href="A link">A link</a><b>
+ L3: line 3</p><p>Formatting</p><p><i>emphasis</i></p><ul><ul><li>strong</li></ul></ul><p><b>Line</b><br><b>break</b></p><p><b><sup>superscript</sup></b></p><p><b><sub>subscript</sub></b></p><p><b>__underline__</b></p><p><a href="A link">A link</a><b>
 </b>
 <a href="A link">title</a><b>
 </b></p><p><img src="link" alt="Alt text" /><img src="link" alt="Alt text" /><b>|center}}</b></p><pre>//A// **pre**-formatted section 
