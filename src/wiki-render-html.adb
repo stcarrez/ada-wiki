@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-html -- Wiki HTML renderer
---  Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2018, 2019, 2020 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2018, 2019, 2020, 2021 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -129,8 +129,7 @@ package body Wiki.Render.Html is
             end if;
 
          when Wiki.Nodes.N_LINE_BREAK =>
-            Engine.Output.Start_Element ("br");
-            Engine.Output.End_Element ("br");
+            Engine.Output.Write ("<br>");
 
          when Wiki.Nodes.N_NEWLINE =>
             if not Engine.No_Newline then
@@ -142,8 +141,7 @@ package body Wiki.Render.Html is
                Engine.Close_Paragraph;
                Engine.Add_Blockquote (0);
             end if;
-            Engine.Output.Start_Element ("hr");
-            Engine.Output.End_Element ("hr");
+            Engine.Output.Write ("<hr>");
 
          when Wiki.Nodes.N_PARAGRAPH =>
             --  Close the paragraph and start a new one except if the current HTML
@@ -245,6 +243,12 @@ package body Wiki.Render.Html is
       then
          Engine.Open_Paragraph;
          Prev_Para := Engine.Has_Paragraph;
+      elsif Node.Tag_Start = Wiki.BR_TAG then
+         Engine.Output.Write ("<br>");
+         return;
+      elsif Node.Tag_Start = Wiki.HR_TAG then
+         Engine.Output.Write ("<hr>");
+         return;
       else
          Engine.Has_Paragraph := False;
          Engine.Need_Paragraph := False;
