@@ -1,2 +1,2 @@
 <p>Line 1
-</p><hr />Line 2
+</p><hr>Line 2

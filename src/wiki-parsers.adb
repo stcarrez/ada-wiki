@@ -863,7 +863,7 @@ package body Wiki.Parsers is
 
          when '\' | '`' | '*' | '_' | '{' | '}'
             | '[' | ']' | '(' | ')' | '#' | '+'
-            | '-' | '.' | '!' =>
+            | '-' | '.' | '!' | '^' =>
             Parse_Text (P, C);
 
          when others =>

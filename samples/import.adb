@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  import -- Import some HTML content and generate Wiki text
---  Copyright (C) 2015, 2016, 2020 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020, 2021 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -61,10 +61,11 @@ procedure Import is
    procedure Usage is
    begin
       Ada.Text_IO.Put_Line ("Import HTML into a target Wiki format");
-      Ada.Text_IO.Put_Line ("Usage: import [-t] [-m] [-M] [-d] [-c] {URL | file}");
+      Ada.Text_IO.Put_Line ("Usage: import [-t] [-m] [-M] [-H] [-d] [-c] {URL | file}");
       Ada.Text_IO.Put_Line ("  -t      Convert to text only");
       Ada.Text_IO.Put_Line ("  -m      Convert to Markdown");
       Ada.Text_IO.Put_Line ("  -M      Convert to Mediawiki");
+      Ada.Text_IO.Put_Line ("  -H      Convert to HTML");
       Ada.Text_IO.Put_Line ("  -d      Convert to Dotclear");
       Ada.Text_IO.Put_Line ("  -c      Convert to Creole");
    end Usage;
@@ -147,7 +148,7 @@ procedure Import is
 
 begin
    loop
-      case Getopt ("m M d c t f:") is
+      case Getopt ("m M H d c t f:") is
          when 'm' =>
             Syntax := Wiki.SYNTAX_MARKDOWN;
             Wiki_Mode := True;
@@ -155,6 +156,9 @@ begin
          when 'M' =>
             Syntax := Wiki.SYNTAX_MEDIA_WIKI;
             Wiki_Mode := True;
+
+         when 'H' =>
+            Syntax := Wiki.SYNTAX_HTML;
 
          when 'c' =>
             Syntax := Wiki.SYNTAX_CREOLE;

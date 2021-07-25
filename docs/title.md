@@ -1,7 +1,7 @@
 ---
 title: "Ada Wiki Engine Programmer's Guide"
 author: [Stephane Carrez]
-date: 2020-10-03
+date: 2021-07-25
 subject: "Ada Wiki Engine"
 tags: [Ada, Wiki, Markdown, MediaWiki, Creole, Dotclear, HTML, Convert]
 titlepage: true

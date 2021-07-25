@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  render -- Wiki rendering example
---  Copyright (C) 2015, 2016, 2020 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020, 2021 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,10 +46,11 @@ procedure Render is
    procedure Usage is
    begin
       Ada.Text_IO.Put_Line ("Render a wiki text file into HTML (default) or text");
-      Ada.Text_IO.Put_Line ("Usage: render [-t] [-m] [-M] [-d] [-c] [-s style] {wiki-file}");
+      Ada.Text_IO.Put_Line ("Usage: render [-t] [-m] [-M] [-H] [-d] [-c] [-s style] {wiki-file}");
       Ada.Text_IO.Put_Line ("  -t        Render to text only");
       Ada.Text_IO.Put_Line ("  -m        Render a Markdown wiki content");
       Ada.Text_IO.Put_Line ("  -M        Render a Mediawiki wiki content");
+      Ada.Text_IO.Put_Line ("  -H        Render a HTML wiki content");
       Ada.Text_IO.Put_Line ("  -d        Render a Dotclear wiki content");
       Ada.Text_IO.Put_Line ("  -g        Render a Google wiki content");
       Ada.Text_IO.Put_Line ("  -c        Render a Creole wiki content");
@@ -95,7 +96,7 @@ procedure Render is
    Style     : Unbounded_String;
 begin
    loop
-      case Getopt ("m M d c g t s:") is
+      case Getopt ("m M d c g t H s:") is
          when 'm' =>
             Syntax := Wiki.SYNTAX_MARKDOWN;
 
@@ -107,6 +108,9 @@ begin
 
          when 'd' =>
             Syntax := Wiki.SYNTAX_DOTCLEAR;
+
+         when 'H' =>
+            Syntax := Wiki.SYNTAX_HTML;
 
          when 'g' =>
             Syntax := Wiki.SYNTAX_GOOGLE;

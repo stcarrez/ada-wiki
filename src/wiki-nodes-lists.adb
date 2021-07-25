@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-nodes-lists -- Wiki Document Internal representation
---  Copyright (C) 2016, 2019 Stephane Carrez
+--  Copyright (C) 2016, 2019, 2021 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +25,7 @@ package body Wiki.Nodes.Lists is
    begin
       if Into.Is_Null then
          Node_List_Refs.Ref (Into) := Node_List_Refs.Create;
-         Into.Value.Current := Into.Value.First'Access;
+         Into.Value.Current := Into.Value.First'Unchecked_Access;
       end if;
       Append (Into.Value, Node);
    end Append;
