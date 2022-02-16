@@ -26,7 +26,7 @@ with Wiki.Strings;
 --  repeatedly while scanning the Wiki content.
 --
 --  The `Output_Stream` interface is the interface used by the renderer
---  to write their outpus.  It defines the `Write` procedure to write
+--  to write their outputs.  It defines the `Write` procedure to write
 --  a single character or a string.
 --
 --  @include wiki-streams-html.ads

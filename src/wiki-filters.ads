@@ -34,7 +34,7 @@ with Wiki.Strings;
 --  * Expand some plugins, specific links to complex content.
 --
 --  To implement a new filter, the `Filter_Type` type must be used as a base type
---  and some of the operations have to be overriden.  The default `Filter_Type` operations
+--  and some of the operations have to be overridden.  The default `Filter_Type` operations
 --  just propagate the call to the attached wiki document instance (ie, a kind of pass
 --  through filter).
 --
