@@ -107,4 +107,9 @@ and can be tried online with [Atlas](https://demo.vacs.fr/atlas/index.html)
 
 * [Using the Ada Wiki Engine](https://blog.vacs.fr/vacs/blogs/post.html?post=2016/04/30/Using-the-Ada-Wiki-Engine)
 
+# Sites Using Ada Wiki
+
+  * [Java 2 Ada](https://blog.vacs.fr/)
+  * [Ada France](https://www.ada-france.org/adafr/index.html)
+  * [Atlas](https://demo.vacs.fr/atlas/index.html)
 
