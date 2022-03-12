@@ -190,4 +190,101 @@ private
 
    procedure Parse_Token (P     : in out Parser);
 
+   procedure Toggle_Format (P      : in out Parser;
+                            Format : in Format_Type);
+
+   --  Parse the beginning or the end of a double character sequence.  This procedure
+   --  is instantiated for several format types (bold, italic, superscript, subscript, code).
+   --  Example:
+   --    --name--  **bold** ~~strike~~
+   generic
+      Format : Format_Type;
+   procedure Parse_Double_Format (P     : in out Parser;
+                                  Token : in Wiki.Strings.WChar);
+
+   --  Parse the beginning or the end of a single character sequence.  This procedure
+   --  is instantiated for several format types (bold, italic, superscript, subscript, code).
+   --  Example:
+   --    _name_    *bold*   `code`
+   generic
+      Format : Format_Type;
+   procedure Parse_Single_Format (P     : in out Parser;
+                                  Token : in Wiki.Strings.WChar);
+
+   --  Parse a space and take necessary formatting actions.
+   --  Example:
+   --    item1 item2   => add space in text buffer
+   --    ' * item'     => start a bullet list (Google)
+   --    ' # item'     => start an ordered list (Google)
+   --    ' item'       => preformatted text (Google, Creole)
+   procedure Parse_Space (P     : in out Parser;
+                          Token : in Wiki.Strings.WChar);
+
+   --  Parse a wiki heading.  The heading could start with '=' or '!'.
+   --  The trailing equals are ignored.
+   --  Example:
+   --    == Level 2 ==
+   --    !!! Level 3
+   procedure Parse_Header (P     : in out Parser;
+                           Token : in Wiki.Strings.WChar);
+   --  Parse a blockquote.
+   --  Example:
+   --    >>>quote level 3
+   --    >>quote level 2
+   --    >quote level 1
+   procedure Parse_Blockquote (P     : in out Parser;
+                               Token : in Wiki.Strings.WChar);
+
+   procedure Parse_List_Or_Bold (P     : in out Parser;
+                                 Token : in Wiki.Strings.WChar);
+
+   --  Parse a HTML component.
+   --  Example:
+   --     <b> or </b>
+   procedure Parse_Maybe_Html (P     : in out Parser;
+                               Token : in Wiki.Strings.WChar);
+
+   --  Parse a list definition:
+   --    ;item 1
+   --    : definition 1
+   procedure Parse_Item (P     : in out Parser;
+                         Token : in Wiki.Strings.WChar);
+
+   --  Parse a list definition:
+   --    ;item 1
+   --    : definition 1
+   procedure Parse_Definition (P     : in out Parser;
+                               Token : in Wiki.Strings.WChar);
+
+   --  Parse a quote.
+   --  Example:
+   --    {{name}}
+   --    {{name|language}}
+   --    {{name|language|url}}
+   procedure Parse_Quote (P     : in out Parser;
+                          Token : in Wiki.Strings.WChar);
+
+   --  Parse a horizontal rule.
+   --  Example:
+   --    ----
+   procedure Parse_Horizontal_Rule (P     : in out Parser;
+                                    Token : in Wiki.Strings.WChar);
+
+   procedure Parse_End_Line (P     : in out Parser;
+                             Token : in Wiki.Strings.WChar);
+
+   procedure Parse_Preformatted (P     : in out Parser;
+                                 Token : in Wiki.Strings.WChar);
+
+   procedure Parse_Preformatted_Block (P     : in out Parser;
+                                       Token : in Wiki.Strings.WChar);
+
+   procedure Parse_List (P     : in out Parser;
+                         Token : in Wiki.Strings.WChar);
+
+   NAME_ATTR  : aliased constant String := "name";
+   HREF_ATTR  : aliased constant String := "href";
+   LANG_ATTR  : aliased constant String := "lang";
+   TITLE_ATTR : aliased constant String := "title";
+
 end Wiki.Parsers;
