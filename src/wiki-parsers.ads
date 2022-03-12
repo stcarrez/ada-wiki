@@ -97,6 +97,8 @@ package Wiki.Parsers is
 
 private
 
+   use Wiki.Strings.Wide_Wide_Builders;
+
    type Parser_Handler is access procedure (P     : in out Parser;
                                             Token : in Wiki.Strings.WChar);
 
@@ -174,13 +176,6 @@ private
 
    type String_Array is array (Positive range <>) of Wiki.String_Access;
 
-   --  Extract a list of parameters separated by the given separator (ex: '|').
-   procedure Parse_Parameters (P          : in out Parser;
-                               Separator  : in Wiki.Strings.WChar;
-                               Terminator : in Wiki.Strings.WChar;
-                               Names      : in String_Array;
-                               Max        : in Positive := 200);
-
    procedure Start_Element (P          : in out Parser;
                             Tag        : in Wiki.Html_Tag;
                             Attributes : in out Wiki.Attributes.Attribute_List);
@@ -220,67 +215,14 @@ private
    procedure Parse_Space (P     : in out Parser;
                           Token : in Wiki.Strings.WChar);
 
-   --  Parse a wiki heading.  The heading could start with '=' or '!'.
-   --  The trailing equals are ignored.
-   --  Example:
-   --    == Level 2 ==
-   --    !!! Level 3
-   procedure Parse_Header (P     : in out Parser;
-                           Token : in Wiki.Strings.WChar);
-   --  Parse a blockquote.
-   --  Example:
-   --    >>>quote level 3
-   --    >>quote level 2
-   --    >quote level 1
-   procedure Parse_Blockquote (P     : in out Parser;
-                               Token : in Wiki.Strings.WChar);
-
-   procedure Parse_List_Or_Bold (P     : in out Parser;
-                                 Token : in Wiki.Strings.WChar);
-
    --  Parse a HTML component.
    --  Example:
    --     <b> or </b>
    procedure Parse_Maybe_Html (P     : in out Parser;
                                Token : in Wiki.Strings.WChar);
 
-   --  Parse a list definition:
-   --    ;item 1
-   --    : definition 1
-   procedure Parse_Item (P     : in out Parser;
-                         Token : in Wiki.Strings.WChar);
-
-   --  Parse a list definition:
-   --    ;item 1
-   --    : definition 1
-   procedure Parse_Definition (P     : in out Parser;
-                               Token : in Wiki.Strings.WChar);
-
-   --  Parse a quote.
-   --  Example:
-   --    {{name}}
-   --    {{name|language}}
-   --    {{name|language|url}}
-   procedure Parse_Quote (P     : in out Parser;
-                          Token : in Wiki.Strings.WChar);
-
-   --  Parse a horizontal rule.
-   --  Example:
-   --    ----
-   procedure Parse_Horizontal_Rule (P     : in out Parser;
-                                    Token : in Wiki.Strings.WChar);
-
    procedure Parse_End_Line (P     : in out Parser;
                              Token : in Wiki.Strings.WChar);
-
-   procedure Parse_Preformatted (P     : in out Parser;
-                                 Token : in Wiki.Strings.WChar);
-
-   procedure Parse_Preformatted_Block (P     : in out Parser;
-                                       Token : in Wiki.Strings.WChar);
-
-   procedure Parse_List (P     : in out Parser;
-                         Token : in Wiki.Strings.WChar);
 
    NAME_ATTR  : aliased constant String := "name";
    HREF_ATTR  : aliased constant String := "href";
