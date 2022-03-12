@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki -- Ada Wiki Engine
---  Copyright (C) 2015, 2016, 2020, 2021 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020, 2021, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -82,6 +82,10 @@ package Wiki is
 
          --  Markdown
          SYNTAX_MARKDOWN,
+
+         --  Textile syntax
+         --  https://www.redmine.org/projects/redmine/wiki/RedmineTextFormattingTextile
+         SYNTAX_TEXTILE,
 
          --  A mix of the above
          SYNTAX_MIX,
