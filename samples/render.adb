@@ -50,6 +50,7 @@ procedure Render is
       Ada.Text_IO.Put_Line ("  -t        Render to text only");
       Ada.Text_IO.Put_Line ("  -m        Render a Markdown wiki content");
       Ada.Text_IO.Put_Line ("  -M        Render a Mediawiki wiki content");
+      Ada.Text_IO.Put_Line ("  -T        Render a Textile wiki content");
       Ada.Text_IO.Put_Line ("  -H        Render a HTML wiki content");
       Ada.Text_IO.Put_Line ("  -d        Render a Dotclear wiki content");
       Ada.Text_IO.Put_Line ("  -g        Render a Google wiki content");
@@ -96,7 +97,7 @@ procedure Render is
    Style     : Unbounded_String;
 begin
    loop
-      case Getopt ("m M d c g t H s:") is
+      case Getopt ("m M d c g t T H s:") is
          when 'm' =>
             Syntax := Wiki.SYNTAX_MARKDOWN;
 
@@ -111,6 +112,9 @@ begin
 
          when 'H' =>
             Syntax := Wiki.SYNTAX_HTML;
+
+         when 'T' =>
+            Syntax := Wiki.SYNTAX_TEXTILE;
 
          when 'g' =>
             Syntax := Wiki.SYNTAX_GOOGLE;
