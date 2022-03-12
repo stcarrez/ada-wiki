@@ -21,7 +21,41 @@ package body Wiki.Parsers.Markdown is
 
    use Wiki.Helpers;
    use Wiki.Nodes;
-   use Wiki.Strings.Wide_Wide_Builders;
+
+   --  ------------------------------
+   --  Parse a blockquote.
+   --  Example:
+   --    >>>quote level 3
+   --    >>quote level 2
+   --    >quote level 1
+   --  ------------------------------
+   procedure Parse_Blockquote (P     : in out Parser;
+                               Token : in Wiki.Strings.WChar) is
+      C     : Wiki.Strings.WChar;
+      Level : Natural := 1;
+   begin
+      if not P.Empty_Line then
+         Parse_Text (P, Token);
+         return;
+      end if;
+      loop
+         Peek (P, C);
+         exit when C /= '>';
+         Level := Level + 1;
+      end loop;
+      Flush_Text (P);
+      Flush_List (P);
+      P.Empty_Line := True;
+      P.Quote_Level := Level;
+      if not P.Context.Is_Hidden then
+         P.Context.Filters.Add_Blockquote (P.Document, Level);
+      end if;
+
+      --  Ignore the first white space after the quote character.
+      if C /= ' ' and C /= HT then
+         Put_Back (P, C);
+      end if;
+   end Parse_Blockquote;
 
    --  ------------------------------
    --  Parse a markdown link.
@@ -173,7 +207,7 @@ package body Wiki.Parsers.Markdown is
       Peek (P, C);
       if Token = '*' and P.Empty_Line and C = ' ' then
          Put_Back (P, C);
-         Parse_List (P, Token);
+         Common.Parse_List (P, Token);
          return;
       end if;
       if C = Token then

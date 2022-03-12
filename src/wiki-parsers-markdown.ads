@@ -15,10 +15,18 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-
+with Wiki.Parsers.Common;
 private package Wiki.Parsers.Markdown is
 
    pragma Preelaborate;
+
+   --  Parse a blockquote.
+   --  Example:
+   --    >>>quote level 3
+   --    >>quote level 2
+   --    >quote level 1
+   procedure Parse_Blockquote (P     : in out Parser;
+                               Token : in Wiki.Strings.WChar);
 
    --  Parse a markdown image.
    --  Example:
@@ -57,17 +65,17 @@ private package Wiki.Parsers.Markdown is
          16#0A# => Parse_End_Line'Access,
          16#0D# => Parse_End_Line'Access,
          Character'Pos (' ') => Parse_Space'Access,
-         Character'Pos ('#') => Parse_Header'Access,
+         Character'Pos ('#') => Common.Parse_Header'Access,
          Character'Pos ('*') => Parse_Markdown_Bold_Italic'Access,
          Character'Pos ('_') => Parse_Markdown_Bold_Italic'Access,
-         Character'Pos ('-') => Parse_List'Access,
-         Character'Pos ('^') => Parse_Single_Superscript'Access,
+         Character'Pos ('-') => Common.Parse_List'Access,
+         Character'Pos ('^') => Common.Parse_Single_Superscript'Access,
          Character'Pos ('!') => Parse_Markdown_Image'Access,
          Character'Pos ('[') => Parse_Markdown_Link'Access,
          Character'Pos ('\') => Parse_Markdown_Escape'Access,
          Character'Pos ('>') => Parse_Blockquote'Access,
          Character'Pos ('<') => Parse_Maybe_Html'Access,
-         Character'Pos ('`') => Parse_Preformatted'Access,
+         Character'Pos ('`') => Common.Parse_Preformatted'Access,
          Character'Pos ('|') => Parse_Markdown_Table'Access,
          others => Parse_Text'Access
         );
