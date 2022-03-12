@@ -45,5 +45,10 @@ install-samples:
 	cp -p $(srcdir)/samples.gpr $(samplesdir)
 	cp -p $(srcdir)/config.gpr $(samplesdir)
 
+samples:
+	$(GNATMAKE) $(GPRFLAGS) -p -Psamples $(MAKE_ARGS)
+
 $(eval $(call ada_library,$(NAME)))
 $(eval $(call pandoc_build,wikiada-book,$(WIKI_DOC)))
+
+.PHONY: samples
