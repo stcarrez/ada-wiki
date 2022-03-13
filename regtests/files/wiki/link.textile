@@ -1,0 +1,5 @@
+"a link title":http://some.site.com/link
+
+Not a link: "item is here
+Not a link: "item" is quoted
+
