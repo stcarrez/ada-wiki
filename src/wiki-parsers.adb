@@ -35,20 +35,56 @@ package body Wiki.Parsers is
    use Wiki.Helpers;
 
    --  ------------------------------
+   --  Read the next wiki input line in the line buffer.
+   --  ------------------------------
+   procedure Read_Line (P : in out Parser'Class) is
+      procedure Read (Into : in out Wiki.Strings.WString;
+                      Last : out Natural);
+
+      procedure Read (Into : in out Wiki.Strings.WString;
+                      Last : out Natural) is
+      begin
+         P.Reader.Read (Into, Last, P.Is_Last_Line);
+      end Read;
+
+      procedure Fill is new Wiki.Strings.Wide_Wide_Builders.Inline_Append (Read);
+   begin
+      Wiki.Strings.Wide_Wide_Builders.Clear (P.Line);
+      Fill (P.Line);
+      P.Line_Length := Wiki.Strings.Wide_Wide_Builders.Length (P.Line);
+      P.Line_Pos := 0;
+   end Read_Line;
+
+   --  ------------------------------
    --  Peek the next character from the wiki text buffer.
    --  ------------------------------
    procedure Peek (P     : in out Parser'Class;
                    Token : out Wiki.Strings.WChar) is
    begin
       if not P.Has_Pending then
-         --  Get the next character.
-         P.Reader.Read (Token, P.Is_Eof);
-         if P.Is_Eof then
-            --  Return a \n on end of file (this simplifies the implementation).
-            Token := LF;
-            P.Pending := LF;
-            P.Has_Pending := True;
+         if P.Line_Pos = P.Line_Length then
+            if P.Is_Last_Line then
+               Token := LF;
+               P.Is_Eof := True;
+               return;
+            end if;
+
+            P.Read_Line;
+
+            if P.Is_Last_Line and then P.Line_Pos = P.Line_Length then
+               --  Return a \n on end of file (this simplifies the implementation).
+               Token := LF;
+               P.Is_Eof := True;
+               P.Pending := LF;
+               P.Has_Pending := True;
+               return;
+            end if;
          end if;
+
+         P.Line_Pos := P.Line_Pos + 1;
+         Token := Wiki.Strings.Wide_Wide_Builders.Element (P.Line, P.Line_Pos);
+         return;
+
       else
          --  Return the pending character.
          Token := P.Pending;
