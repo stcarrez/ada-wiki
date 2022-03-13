@@ -177,38 +177,61 @@ package body Wiki.Parsers.Textile is
       end;
    end Parse_Image;
 
+   --  ------------------------------
    --  Parse an external link:
    --  Example:
    --    "title":http-link
+   --  ------------------------------
    procedure Parse_Link (P     : in out Parser;
                          Token : in Wiki.Strings.WChar) is
-      Pos  : Natural := P.Line_Pos;
-      Next : Natural := Wiki.Strings.Index (P.Line, Token, Pos);
+      Http : constant Wiki.Strings.WString := ":http";
+      Pos  : Natural := P.Line_Pos + 1;
+      Last : Natural := Wiki.Strings.Index (P.Line, '"', Pos);
       C    : Wiki.Strings.WChar;
    begin
-      if Next = 0 or Next = P.Line_Length then
+      if Last = 0 or Last = P.Line_Length then
          Append (P.Text, Token);
          return;
       end if;
 
-      C := Wiki.Strings.Element(P.Line, Next + 1);
-      if C /= ':' then
-         Append (P.Text, Token);
-         return;
-      end if;
+      Pos := Last + 1;
+      for Expect of Http loop
+         C := Wiki.Strings.Element (P.Line, Pos);
+         if C /= Expect then
+            Append (P.Text, Token);
+            return;
+         end if;
+         Pos := Pos + 1;
+      end loop;
 
-      Flush_Text (P);
-      Wiki.Attributes.Clear (P.Attributes);
+      declare
+         Title : Wiki.Strings.UString;
+         Link  : Wiki.Strings.UString;
+      begin
+         Pos := P.Line_Pos + 1;
+         while Pos < Last loop
+            Wiki.Strings.Append (Title, Wiki.Strings.Element (P.Line, Pos));
+            Pos := Pos + 1;
+         end loop;
 
-      P.Empty_Line := False;
-      if not P.Context.Is_Hidden then
-         declare
-            Link : constant Strings.WString := Attributes.Get_Attribute (P.Attributes, HREF_ATTR);
-            Name : constant Strings.WString := Attributes.Get_Attribute (P.Attributes, NAME_ATTR);            
-         begin
-            P.Context.Filters.Add_Link (P.Document, Name, P.Attributes);
-         end;
-      end if;
+         Pos := Last + 2;
+         while Pos <= P.Line_Length loop
+            C := Wiki.Strings.Element (P.Line, Pos);
+            exit when Wiki.Helpers.Is_Space_Or_Newline (C);
+            Pos := Pos + 1;
+            Wiki.Strings.Append (Link, C);
+         end loop;
+         Flush_Text (P);
+         Wiki.Attributes.Clear (P.Attributes);
+
+         P.Line_Pos := Pos;
+         P.Empty_Line := False;
+         if not P.Context.Is_Hidden then
+            Wiki.Attributes.Append (P.Attributes, NAME_ATTR, Title);
+            Wiki.Attributes.Append (P.Attributes, HREF_ATTR, Link);
+            P.Context.Filters.Add_Link (P.Document, Wiki.Strings.To_WString (Title), P.Attributes);
+         end if;
+      end;
    end Parse_Link;
 
    --  ------------------------------
