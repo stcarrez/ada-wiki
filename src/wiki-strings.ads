@@ -85,4 +85,13 @@ package Wiki.Strings is
 
    subtype BString is Wide_Wide_Builders.Builder;
 
+   function Element (Source   : in BString;
+                     Position : in Positive) return WChar renames Wide_Wide_Builders.Element;
+
+   --  Search for the first occurrence of the character in the builder and
+   --  starting after the from index.  Returns the index of the first occurence or 0.
+   function Index (Source : in BString;
+                   Char   : in WChar;
+                   From   : in Positive := 1) return Natural;
+
 end Wiki.Strings;
