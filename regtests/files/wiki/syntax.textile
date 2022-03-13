@@ -1,0 +1,88 @@
+First paragraph.
+
+Second paragraph.
+
+h1. Section h1
+
+h2. Section h2
+
+h3. Section h3
+
+h4. Section h4
+
+h5. Section h5
+
+----
+
+* item 1
+** item 1.1
+** item 1.2
+* item 2
+* item 3
+*# item 3.1
+*# item 3.2
+
+# num 1
+# num 2
+
+Section bloc:
+
+ L1: line 1
+ L2: line 2
+ L3: line 3
+
+h3. Formatting
+
+I _believe_ every word.
+
+And then? She *fell*!
+
+I __know__.
+I **really** __know__.
+
+_italic_
+
+*strong*
+
+Line\\break
+
+As ??citation title?? said
+
+Code is @code@
+
+Item is -deleted- -strike-
+
+Item is +inserted+
+
+Superscript: a ^2^ + b ^2^ = c ^2^
+
+Subscript: log ~2~ x
+
+[[A link]]
+[[A link|title]]
+
+I searched "Google":http://google.com.
+
+h3. Images
+
+!http://redcloth.org/hobix.com/textile/sample.jpg!
+
+!openwindow1.gif(Bunny.)!
+
+!openwindow1.gif!:http://hobix.com/
+
+h3. Tables
+
+| name | age | sex |
+| joan | 24 | f |
+| archie | 29 | m |
+| bella | 45 | f |
+
+h3. Other
+
+<pre>
+* item 1
+''item''
+== dd ==
+</pre>
+
