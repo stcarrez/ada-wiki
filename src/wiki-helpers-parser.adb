@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-helpers-parser -- Generic procedure for the wiki parser
---  Copyright (C) 2016, 2018 Stephane Carrez
+--  Copyright (C) 2016, 2018, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,22 +26,37 @@ procedure Wiki.Helpers.Parser (Engine  : in out Engine_Type;
       Len : Natural;
    end record;
 
+   --  Read the input stream and fill the `Into` buffer until either it is full or
+   --  we reach the end of line.  Returns in `Last` the last valid position in the
+   --  `Into` buffer.  When there is no character to read, return True in
+   --  the `Eof` indicator.
    overriding
-   procedure Read (Buf    : in out Wide_Input;
-                   Token  : out Wiki.Strings.WChar;
-                   Is_Eof : out Boolean);
+   procedure Read (Input : in out Wide_Input;
+                   Into  : in out Wiki.Strings.WString;
+                   Last  : out Natural;
+                   Eof   : out Boolean);
 
-   procedure Read (Buf    : in out Wide_Input;
-                   Token  : out Wiki.Strings.WChar;
-                   Is_Eof : out Boolean) is
+   overriding
+   procedure Read (Input : in out Wide_Input;
+                   Into  : in out Wiki.Strings.WString;
+                   Last  : out Natural;
+                   Eof   : out Boolean) is
+      Pos  : Natural := Into'First;
+      Char : Wiki.Strings.WChar;
    begin
-      if Buf.Pos <= Buf.Len then
-         Element (Content, Buf.Pos, Token);
-         Is_Eof := False;
-      else
-         Is_Eof := True;
-         Token := Wiki.Helpers.CR;
-      end if;
+      Eof := False;
+      while Pos <= Into'Last loop
+         if Input.Pos <= Input.Len then
+            Element (Content, Input.Pos, Char);
+         else
+            Eof := True;
+            exit;
+         end if;
+         Into (Pos) := Char;
+         Pos := Pos + 1;
+         exit when Char = Helpers.CR or Char = Helpers.LF;
+      end loop;
+      Last := Pos - 1;
    end Read;
 
    Buffer : aliased Wide_Input;
