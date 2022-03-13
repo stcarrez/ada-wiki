@@ -113,8 +113,12 @@ private
       Table               : Parser_Table_Access;
       Document            : Wiki.Documents.Document;
       Format              : Wiki.Format_Map;
+      Line                : Wiki.Strings.BString (512);
       Text                : Wiki.Strings.BString (512);
+      Line_Length         : Natural := 0;
+      Line_Pos            : Natural := 0;
       Empty_Line          : Boolean := True;
+      Is_Last_Line        : Boolean := False;
       Is_Eof              : Boolean := False;
       In_Paragraph        : Boolean := False;
       In_List             : Boolean := False;
@@ -135,6 +139,9 @@ private
       Reader              : Wiki.Streams.Input_Stream_Access := null;
       Attributes          : Wiki.Attributes.Attribute_List;
    end record;
+
+   --  Read the next wiki input line in the line buffer.
+   procedure Read_Line (P : in out Parser'Class);
 
    --  Peek the next character from the wiki text buffer.
    procedure Peek (P     : in out Parser'Class;
