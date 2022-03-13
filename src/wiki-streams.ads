@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-streams -- Wiki input and output streams
---  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2020 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,10 +41,13 @@ package Wiki.Streams is
    type Input_Stream is limited interface;
    type Input_Stream_Access is access all Input_Stream'Class;
 
-   --  Read one character from the input stream and return False to the <tt>Eof</tt> indicator.
-   --  When there is no character to read, return True in the <tt>Eof</tt> indicator.
+   --  Read the input stream and fill the `Into` buffer until either it is full or
+   --  we reach the end of line.  Returns in `Last` the last valid position in the
+   --  `Into` buffer.  When there is no character to read, return True in
+   --  the `Eof` indicator.
    procedure Read (Input : in out Input_Stream;
-                   Char  : out Wiki.Strings.WChar;
+                   Into  : in out Wiki.Strings.WString;
+                   Last  : out Natural;
                    Eof   : out Boolean) is abstract;
 
    type Output_Stream is limited interface;
