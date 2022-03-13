@@ -22,6 +22,9 @@ for the implementation of the blog and wiki online plugins.
 
 You can play with the Wiki engine by using [Wi2wic](https://github.com/stcarrez/wi2wic) on https://wi2wic.vacs.fr/wi2wic/index.html
 
+## Version 1.4.0   - Under development
+- Add support for Textile markup language
+
 ## Version 1.3.2   - Jul 2021
 - Fix \<hr\> and \<br\> generation to follow HTML5 convention.
 - Add option -H to the render example
