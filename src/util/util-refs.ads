@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  util-refs -- Reference Counting
---  Copyright (C) 2010, 2011, 2015 Stephane Carrez
+--  Copyright (C) 2010, 2011, 2015, 2019 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,7 +34,7 @@ with Util.Concurrent.Counters;
 --  <pre>
 --     D  : Data_Ref.Ref := Data_Ref.Create;  --  Allocate and get a reference
 --     D2 : Data_Ref.Ref := D;                --  Share reference
---     D.Value.all.XXXX  := 0;               --  Set data member XXXX
+--     D.Value.XXXX  := 0;                    --  Set data member XXXX
 --  </pre>
 --
 --  When a reference is shared in a multi-threaded environment, the reference has to
@@ -61,18 +61,20 @@ package Util.Refs is
       type Element_Access is access all Element_Type;
    package Indefinite_References is
 
+      type Element_Accessor (Element : not null access Element_Type) is limited private
+        with Implicit_Dereference => Element;
+
       type Ref is new Ada.Finalization.Controlled with private;
 
       --  Create an element and return a reference to that element.
       function Create (Value : in Element_Access) return Ref;
 
-      --  Get the element access value.
-      function Value (Object : in Ref'Class) return Element_Access;
-      pragma Inline_Always (Value);
+      function Value (Object : in Ref'Class) return Element_Accessor with Inline;
 
       --  Returns true if the reference does not contain any element.
-      function Is_Null (Object : in Ref'Class) return Boolean;
-      pragma Inline_Always (Is_Null);
+      function Is_Null (Object : in Ref'Class) return Boolean with Inline_Always;
+
+      function "=" (Left, Right : in Ref'Class) return Boolean with Inline_Always;
 
       --  The <b>Atomic_Ref</b> protected type defines a reference to an
       --  element which can be obtained and changed atomically.  The default
@@ -84,17 +86,23 @@ package Util.Refs is
       --  of the reference counter (Adjust operation).  To replace shared reference
       --  by another one, the whole assignment and Adjust have to be protected.
       --  This is achieved by this protected type through the <b>Get</b> and <b>Set</b>
-      protected type Atomic_Ref is
-         --  Get the reference
-         function Get return Ref;
+      generic
+      package Atomic is
+         protected type Atomic_Ref is
+            --  Get the reference
+            function Get return Ref;
 
-         --  Change the reference
-         procedure Set (Object : in Ref);
-      private
-         Value : Ref;
-      end Atomic_Ref;
+            --  Change the reference
+            procedure Set (Object : in Ref);
+         private
+            Value : Ref;
+         end Atomic_Ref;
+      end Atomic;
 
    private
+
+      type Element_Accessor (Element : not null access Element_Type) is null record;
+
       type Ref is new Ada.Finalization.Controlled with record
          Target : Element_Access := null;
       end record;
@@ -117,6 +125,7 @@ package Util.Refs is
       package IR is new Indefinite_References (Element_Type, Element_Access);
 
       subtype Ref is IR.Ref;
+      subtype Element_Accessor is IR.Element_Accessor;
 
       --  Create an element and return a reference to that element.
       function Create return Ref;
@@ -131,9 +140,76 @@ package Util.Refs is
       --  of the reference counter (Adjust operation).  To replace shared reference
       --  by another one, the whole assignment and Adjust have to be protected.
       --  This is achieved by this protected type through the <b>Get</b> and <b>Set</b>
-      subtype Atomic_Ref is IR.Atomic_Ref;
 
    end References;
+
+   generic
+      type Element_Type is limited private;
+      with procedure Finalize (Object : in out Element_Type) is null;
+   package General_References is
+
+      type Element_Accessor (Element : not null access Element_Type) is limited private
+        with Implicit_Dereference => Element;
+
+      type Ref is new Ada.Finalization.Controlled with private;
+
+      --  Create an element and return a reference to that element.
+      function Create return Ref;
+
+      function Value (Object : in Ref'Class) return Element_Accessor with Inline;
+
+      --  Returns true if the reference does not contain any element.
+      function Is_Null (Object : in Ref'Class) return Boolean with Inline_Always;
+
+      function "=" (Left, Right : in Ref'Class) return Boolean with Inline_Always;
+
+      --  The <b>Atomic_Ref</b> protected type defines a reference to an
+      --  element which can be obtained and changed atomically.  The default
+      --  Ada construct:
+      --
+      --     Ref1 := Ref2;
+      --
+      --  does not guarantee atomicity of the copy (assignment) and the increment
+      --  of the reference counter (Adjust operation).  To replace shared reference
+      --  by another one, the whole assignment and Adjust have to be protected.
+      --  This is achieved by this protected type through the <b>Get</b> and <b>Set</b>
+      generic
+      package Atomic is
+         protected type Atomic_Ref is
+            --  Get the reference
+            function Get return Ref;
+
+            --  Change the reference
+            procedure Set (Object : in Ref);
+         private
+            Value : Ref;
+         end Atomic_Ref;
+      end Atomic;
+
+   private
+
+      type Element_Accessor (Element : not null access Element_Type) is null record;
+
+      type Ref_Data is limited record
+         Ref_Counter : Util.Concurrent.Counters.Counter;
+         Data        : aliased Element_Type;
+      end record;
+      type Ref_Data_Access is access all Ref_Data;
+
+      type Ref is new Ada.Finalization.Controlled with record
+         Target : Ref_Data_Access := null;
+      end record;
+
+      --  Release the reference.  Invoke <b>Finalize</b> and free the storage if it was
+      --  the last reference.
+      overriding
+      procedure Finalize (Obj : in out Ref);
+
+      --  Update the reference counter after an assignment.
+      overriding
+      procedure Adjust (Obj : in out Ref);
+
+   end General_References;
 
 private
 
