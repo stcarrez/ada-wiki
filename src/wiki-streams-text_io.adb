@@ -50,21 +50,32 @@ package body Wiki.Streams.Text_IO is
    end Finalize;
 
    --  ------------------------------
-   --  Read one character from the input stream and return False to the <tt>Eof</tt> indicator.
-   --  When there is no character to read, return True in the <tt>Eof</tt> indicator.
+   --  Read the input stream and fill the `Into` buffer until either it is full or
+   --  we reach the end of line.  Returns in `Last` the last valid position in the
+   --  `Into` buffer.  When there is no character to read, return True in
+   --  the `Eof` indicator.
    --  ------------------------------
    overriding
    procedure Read (Input : in out File_Input_Stream;
-                   Char  : out Wiki.Strings.WChar;
+                   Into  : in out Wiki.Strings.WString;
+                   Last  : out Natural;
                    Eof   : out Boolean) is
       Available : Boolean;
+      Pos       : Natural := Into'First;
+      Char      : Wiki.Strings.WChar;
    begin
       Eof := False;
-      Ada.Wide_Wide_Text_IO.Get_Immediate (Input.File, Char, Available);
+      while Pos <= Into'Last loop
+         Ada.Wide_Wide_Text_IO.Get_Immediate (Input.File, Char, Available);
+         Into (Pos) := Char;
+         Pos := Pos + 1;
+         exit when Char = Helpers.LF or Char = Helpers.CR;
+      end loop;
+      Last := Pos - 1;
 
    exception
       when Ada.IO_Exceptions.End_Error =>
-         Char := Wiki.Helpers.LF;
+         Last := Pos - 1;
          Eof  := True;
 
    end Read;
