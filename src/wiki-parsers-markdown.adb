@@ -257,8 +257,8 @@ package body Wiki.Parsers.Markdown is
    --  Parse a markdown table/column.
    --  Example:
    --    | col1 | col2 | ... | colN |
-   procedure Parse_Markdown_Table (P     : in out Parser;
-                                   Token : in Wiki.Strings.WChar) is
+   procedure Parse_Table (P     : in out Parser;
+                          Token : in Wiki.Strings.WChar) is
       C : Wiki.Strings.WChar;
    begin
       if not P.In_Table then
@@ -284,6 +284,6 @@ package body Wiki.Parsers.Markdown is
       end if;
       Wiki.Attributes.Clear (P.Attributes);
       P.Context.Filters.Add_Column (P.Document, P.Attributes);
-   end Parse_Markdown_Table;
+   end Parse_Table;
 
 end Wiki.Parsers.Markdown;

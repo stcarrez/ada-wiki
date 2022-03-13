@@ -51,8 +51,8 @@ private package Wiki.Parsers.Markdown is
    --  Parse a markdown table/column.
    --  Example:
    --    | col1 | col2 | ... | colN |
-   procedure Parse_Markdown_Table (P     : in out Parser;
-                                   Token : in Wiki.Strings.WChar);
+   procedure Parse_Table (P     : in out Parser;
+                          Token : in Wiki.Strings.WChar);
 
    procedure Parse_Markdown_Horizontal_Rule (P     : in out Parser;
                                              Token : in Wiki.Strings.WChar);
@@ -76,7 +76,7 @@ private package Wiki.Parsers.Markdown is
          Character'Pos ('>') => Parse_Blockquote'Access,
          Character'Pos ('<') => Parse_Maybe_Html'Access,
          Character'Pos ('`') => Common.Parse_Preformatted'Access,
-         Character'Pos ('|') => Parse_Markdown_Table'Access,
+         Character'Pos ('|') => Parse_Table'Access,
          others => Parse_Text'Access
         );
 
