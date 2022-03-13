@@ -32,7 +32,7 @@ private package Wiki.Parsers.Textile is
    --  Example:
    --    !image-link!
    --    !image-link(title)!
-   --    !image-path|:http-link
+   --    !image-path!:http-link
    procedure Parse_Image (P     : in out Parser;
                           Token : in Wiki.Strings.WChar);
 
@@ -42,10 +42,9 @@ private package Wiki.Parsers.Textile is
    procedure Parse_Link (P     : in out Parser;
                          Token : in Wiki.Strings.WChar);
 
-   --  Parse an italic or bold sequence or a list.
+   --  Parse a bold sequence or a list.
    --  Example:
-   --    *name*         (italic)
-   --    **name**       (bold)
+   --    *name*         (bold)
    --    * item         (list)
    procedure Parse_Bold_Or_List (P     : in out Parser;
                                  Token : in Wiki.Strings.WChar);
