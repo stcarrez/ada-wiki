@@ -254,15 +254,6 @@ package body Wiki.Parsers.Textile is
       Toggle_Format (P, BOLD);
    end Parse_Bold_Or_List;
 
-   --  Parse a markdown table/column.
-   --  Example:
-   --    | col1 | col2 | ... | colN |
-   procedure Parse_Table (P     : in out Parser;
-                          Token : in Wiki.Strings.WChar) is
-   begin
-      null;
-   end Parse_Table;
-
    procedure Parse_Deleted_Or_Horizontal_Rule (P     : in out Parser;
                                                Token : in Wiki.Strings.WChar) is
    begin

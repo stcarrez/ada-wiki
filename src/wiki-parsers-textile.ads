@@ -17,6 +17,7 @@
 -----------------------------------------------------------------------
 with Wiki.Parsers.Html;
 with Wiki.Parsers.Common;
+with Wiki.Parsers.Markdown;
 private package Wiki.Parsers.Textile is
 
    pragma Preelaborate;
@@ -49,12 +50,6 @@ private package Wiki.Parsers.Textile is
    procedure Parse_Bold_Or_List (P     : in out Parser;
                                  Token : in Wiki.Strings.WChar);
 
-   --  Parse a markdown table/column.
-   --  Example:
-   --    | col1 | col2 | ... | colN |
-   procedure Parse_Table (P     : in out Parser;
-                          Token : in Wiki.Strings.WChar);
-
    procedure Parse_Deleted_Or_Horizontal_Rule (P     : in out Parser;
                                                Token : in Wiki.Strings.WChar);
 
@@ -73,7 +68,7 @@ private package Wiki.Parsers.Textile is
          Character'Pos ('"') => Parse_Link'Access,
          Character'Pos ('@') => Common.Parse_Single_Code'Access,
          Character'Pos ('_') => Common.Parse_Single_Italic'Access,
-         Character'Pos ('|') => Parse_Table'Access,
+         Character'Pos ('|') => Markdown.Parse_Table'Access,
          Character'Pos ('h') => Parse_Header'Access,
          others => Parse_Text'Access
         );
