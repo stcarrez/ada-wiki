@@ -256,8 +256,28 @@ package body Wiki.Parsers.Textile is
 
    procedure Parse_Deleted_Or_Horizontal_Rule (P     : in out Parser;
                                                Token : in Wiki.Strings.WChar) is
+      C     : Wiki.Strings.WChar;
+      Count : Natural := 1;
+      Pos   : Natural := P.Line_Pos + 1;
    begin
-      null;
+      if P.Empty_Line then
+         while Pos <= P.Line_Length loop
+            C := Wiki.Strings.Element (P.Line, Pos);
+            Pos := Pos + 1;
+            exit when C /= Token;
+            Count := Count + 1;
+         end loop;
+         if Count >= 4 then
+            Flush_Text (P);
+            Flush_List (P);
+            P.Line_Pos := Pos - 1;
+            if not P.Context.Is_Hidden then
+               P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_HORIZONTAL_RULE);
+            end if;
+            return;
+         end if;
+      end if;
+      Toggle_Format (P, STRIKEOUT);
    end Parse_Deleted_Or_Horizontal_Rule;
 
 end Wiki.Parsers.Textile;
