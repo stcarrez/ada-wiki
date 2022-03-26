@@ -10,7 +10,7 @@ project Samples is
 
    case WikiAda.Use_Ada_Util is
       when "yes" =>
-         for Main use Mains & ("import.adb");
+         for Main use Mains & ("import.adb", "convert.adb");
 
       when "no" =>
          null;
