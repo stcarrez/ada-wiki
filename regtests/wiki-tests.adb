@@ -418,6 +418,10 @@ package body Wiki.Tests is
                            Tst := Create_Test (Name & ".markdown", Path & "/" & Simple,
                                                Syntax, "/wiki-convert/", "", True);
 
+                        when Wiki.SYNTAX_TEXTILE =>
+                           Tst := Create_Test (Name & ".textile", Path & "/" & Simple,
+                                               Syntax, "/wiki-convert/", "", True);
+
                         when others =>
                            Tst := null;
 
