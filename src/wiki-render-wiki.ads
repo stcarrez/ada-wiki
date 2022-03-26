@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-wiki -- Wiki to Wiki renderer
---  Copyright (C) 2015, 2016, 2020 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -158,6 +158,8 @@ private
       Allow_Link_Language : Boolean := False;
       Link_First          : Boolean := False;
       Html_Blockquote     : Boolean := False;
+      In_Table            : Boolean := False;
+      Col_Index           : Natural := 0;
       Line_Count          : Natural := 0;
       Current_Level       : Natural := 0;
       Quote_Level         : Natural := 0;
@@ -169,5 +171,25 @@ private
       Link_Title          : Unbounded_Wide_Wide_String;
       Link_Lang           : Unbounded_Wide_Wide_String;
    end record;
+
+   --  Render the table of content.
+   procedure Render_TOC (Engine : in out Wiki_Renderer;
+                         Doc    : in Documents.Document;
+                         Level  : in Natural);
+
+   --  Render a table component such as N_TABLE.
+   procedure Render_Table (Engine : in out Wiki_Renderer;
+                           Doc    : in Documents.Document;
+                           Node   : in Nodes.Node_Type);
+
+   --  Render a table row component such as N_ROW.
+   procedure Render_Row (Engine : in out Wiki_Renderer;
+                         Doc    : in Documents.Document;
+                         Node   : in Nodes.Node_Type);
+
+   --  Render a table row component such as N_COLUMN.
+   procedure Render_Column (Engine : in out Wiki_Renderer;
+                            Doc    : in Documents.Document;
+                            Node   : in Nodes.Node_Type);
 
 end Wiki.Render.Wiki;
