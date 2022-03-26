@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-wiki -- Wiki to Wiki renderer
---  Copyright (C) 2015, 2016, 2018, 2020 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2018, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@
 -----------------------------------------------------------------------
 
 with Wiki.Helpers;
+with Util.Strings;
 package body Wiki.Render.Wiki is
 
    use Helpers;
@@ -74,6 +75,28 @@ package body Wiki.Render.Wiki is
    LIST_ITEM_MARKDOWN        : aliased constant Strings.WString := "*";
    LIST_ORDERED_ITEM_MARKDOWN : aliased constant Strings.WString := "*";
    LINE_BREAK_MARKDOWN       : aliased constant Strings.WString := "\" & LF;
+
+   BOLD_TEXTILE              : aliased constant Strings.WString := "*";
+   ITALIC_TEXTILE            : aliased constant Strings.WString := "_";
+   CODE_TEXTILE              : aliased constant Strings.WString := "@";
+   SUPERSCRIPT_TEXTILE       : aliased constant Strings.WString := "^";
+   SUBSCRIPT_TEXTILE         : aliased constant Strings.WString := "~";
+   HEADER_START_TEXTILE      : aliased constant Strings.WString := "h";
+   HEADER_END_TEXTILE        : aliased constant Strings.WString := ".";
+   ESCAPE_TEXTILE            : aliased constant Strings.WString := "\";
+   QUOTE_TEXTILE             : aliased constant Strings.WString := "bq.";
+   PREFORMAT_START_TEXTILE   : aliased constant Strings.WString := "<pre>";
+   PREFORMAT_END_TEXTILE     : aliased constant Strings.WString := "</pre>" & LF;
+   HORIZONTAL_RULE_TEXTILE   : aliased constant Strings.WString := "----" & LF & LF;
+   IMG_START_TEXTILE         : aliased constant Strings.WString := "!";
+   IMG_END_TEXTILE           : aliased constant Strings.WString := "!";
+   IMG_SEPARATOR_TEXTILE     : aliased constant Strings.WString := "(";
+   LINK_START_TEXTILE        : aliased constant Strings.WString := "[[";
+   LINK_SEPARATOR_TEXTILE    : aliased constant Strings.WString := "|";
+   LINK_END_TEXTILE          : aliased constant Strings.WString := "]]";
+   LIST_ITEM_TEXTILE         : aliased constant Strings.WString := "*";
+   LIST_ORDERED_ITEM_TEXTILE : aliased constant Strings.WString := "#";
+   LINE_BREAK_TEXTILE        : aliased constant Strings.WString := "\" & LF;
 
    LINE_BREAK_MEDIAWIKI      : aliased constant Strings.WString := "<br />" & LF;
    BOLD_MEDIAWIKI            : aliased constant Strings.WString := "'''";
@@ -170,6 +193,36 @@ package body Wiki.Render.Wiki is
             Engine.Tags (Escape_Rule)        := ESCAPE_MARKDOWN'Access;
             Engine.Tags (Blockquote_Start)   := QUOTE_MARKDOWN'Access;
             Engine.Link_First := False;
+            Engine.Html_Blockquote := False;
+            Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("\`*_{}[]()#+-!");
+
+         when SYNTAX_TEXTILE =>
+            Engine.Style_Start_Tags (BOLD)   := BOLD_TEXTILE'Access;
+            Engine.Style_End_Tags (BOLD)     := BOLD_TEXTILE'Access;
+            Engine.Style_Start_Tags (ITALIC) := ITALIC_TEXTILE'Access;
+            Engine.Style_End_Tags (ITALIC)   := ITALIC_TEXTILE'Access;
+            Engine.Style_Start_Tags (CODE)   := CODE_TEXTILE'Access;
+            Engine.Style_End_Tags (CODE)     := CODE_TEXTILE'Access;
+            Engine.Style_Start_Tags (SUPERSCRIPT) := SUPERSCRIPT_TEXTILE'Access;
+            Engine.Style_End_Tags (SUPERSCRIPT)   := SUPERSCRIPT_TEXTILE'Access;
+            Engine.Style_Start_Tags (SUBSCRIPT) := SUBSCRIPT_TEXTILE'Access;
+            Engine.Style_End_Tags (SUBSCRIPT)   := SUBSCRIPT_TEXTILE'Access;
+            Engine.Tags (Header_Start)       := HEADER_START_TEXTILE'Access;
+            Engine.Tags (Header_End)         := HEADER_END_TEXTILE'Access;
+            Engine.Tags (Line_Break)         := LINE_BREAK_MARKDOWN'Access;
+            Engine.Tags (Img_Start)          := IMG_START_TEXTILE'Access;
+            Engine.Tags (Img_End)            := IMG_END_TEXTILE'Access;
+            Engine.Tags (Link_Start)         := LINK_START_TEXTILE'Access;
+            Engine.Tags (Link_End)           := LINK_END_TEXTILE'Access;
+            Engine.Tags (Link_Separator)     := LINK_SEPARATOR_TEXTILE'Access;
+            Engine.Tags (List_Item)          := LIST_ITEM_TEXTILE'Access;
+            Engine.Tags (List_Ordered_Item)  := LIST_ORDERED_ITEM_TEXTILE'Access;
+            Engine.Tags (Preformat_Start)    := PREFORMAT_START_TEXTILE'Access;
+            Engine.Tags (Preformat_End)      := PREFORMAT_END_TEXTILE'Access;
+            Engine.Tags (Horizontal_Rule)    := HORIZONTAL_RULE_TEXTILE'Access;
+            Engine.Tags (Escape_Rule)        := ESCAPE_MARKDOWN'Access;
+            Engine.Tags (Blockquote_Start)   := QUOTE_TEXTILE'Access;
+            Engine.Link_First := True;
             Engine.Html_Blockquote := False;
             Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("\`*_{}[]()#+-!");
 
@@ -299,6 +352,24 @@ package body Wiki.Render.Wiki is
          when Nodes.N_TAG_START =>
             Engine.Render_Tag (Doc, Node);
 
+         when Nodes.N_TOC =>
+            Engine.Render_TOC (Doc, Node.Level);
+
+         when Nodes.N_TOC_ENTRY =>
+            null;
+
+         when Nodes.N_TOC_DISPLAY =>
+            Engine.Render_TOC (Doc, 3);
+
+         when Nodes.N_TABLE =>
+            Engine.Render_Table (Doc, Node);
+
+         when Nodes.N_ROW =>
+            Engine.Render_Row (Doc, Node);
+
+         when Nodes.N_COLUMN =>
+            Engine.Render_Column (Doc, Node);
+
          when others =>
             null;
 
@@ -327,6 +398,18 @@ package body Wiki.Render.Wiki is
       elsif Count > 6 then
          Count := 6;
       end if;
+
+      --  Textile is using a special form: h<N>.
+      if Engine.Syntax = Syntax_Textile then
+         Engine.Output.Write (Engine.Tags (Header_Start).all);
+         Engine.Output.Write (Strings.To_Wstring (Util.Strings.Image (Count)));
+         Engine.Output.Write (Engine.Tags (Header_End).all);
+         Engine.Output.Write (' ');
+         Engine.Output.Write (Header);
+         Engine.New_Line;
+         return;
+      end if;
+
       for I in 1 .. Count loop
          Engine.Output.Write (Engine.Tags (Header_Start).all);
       end loop;
@@ -858,5 +941,64 @@ package body Wiki.Render.Wiki is
          Engine.New_Line;
       end if;
    end Close_Paragraph;
+
+   --  ------------------------------
+   --  Render the table of content.
+   --  ------------------------------
+   procedure Render_TOC (Engine : in out Wiki_Renderer;
+                         Doc    : in Documents.Document;
+                         Level  : in Natural) is
+   begin
+      if Engine.Syntax = Syntax_Media_Wiki then
+         Engine.Output.Write ("__TOC__");
+      end if;
+   end Render_Toc;
+
+   --  ------------------------------
+   --  Render a table component such as N_TABLE, N_ROW or N_COLUMN.
+   --  ------------------------------
+   procedure Render_Table (Engine : in out Wiki_Renderer;
+                           Doc    : in Documents.Document;
+                           Node   : in Nodes.Node_Type) is
+   begin
+      Engine.Close_Paragraph;
+      Engine.Need_Paragraph := False;
+      Engine.Has_Paragraph := False;
+      Engine.In_Table := True;
+
+      Engine.Render (Doc, Node.Children);
+
+      Engine.Close_Paragraph;
+      Engine.In_Table := False;
+      Engine.Has_Paragraph := False;
+      Engine.Need_Paragraph := True;
+   end Render_Table;
+
+   --  ------------------------------
+   --  Render a table row component such as N_ROW.
+   --  ------------------------------
+   procedure Render_Row (Engine : in out Wiki_Renderer;
+                         Doc    : in Documents.Document;
+                         Node   : in Nodes.Node_Type) is
+   begin
+      Engine.Output.Write ("| ");
+      Engine.Col_Index := 0;
+      Engine.Render (Doc, Node.Children);
+      Engine.Output.Write ("|" & LF);
+   end Render_Row;
+
+   --  ------------------------------
+   --  Render a table row component such as N_COLUMN.
+   --  ------------------------------
+   procedure Render_Column (Engine : in out Wiki_Renderer;
+                            Doc    : in Documents.Document;
+                            Node   : in Nodes.Node_Type) is
+   begin
+      if Engine.Col_Index > 0 then
+         Engine.Output.Write (" | ");
+      end if;
+      Engine.Col_Index := Engine.Col_Index + 1;
+      Engine.Render (Doc, Node.Children);
+   end Render_Column;
 
 end Wiki.Render.Wiki;
