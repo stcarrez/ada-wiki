@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-streams-html-stream -- Generic Wiki HTML output stream
---  Copyright (C) 2016, 2020 Stephane Carrez
+--  Copyright (C) 2016, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,12 +53,20 @@ package Wiki.Streams.Html.Stream is
    procedure Write_Wide_Text (Stream  : in out Html_Output_Stream;
                               Content : in Wiki.Strings.WString);
 
+   --  Write an optional newline or space.
+   overriding
+   procedure Newline (Writer : in out Html_Output_Stream);
+
 private
 
    type Html_Output_Stream is limited new Output_Stream
      and Html.Html_Output_Stream with record
       --  Whether an XML element must be closed (that is a '>' is necessary)
-      Close_Start : Boolean := False;
+      Close_Start  : Boolean := False;
+      Empty_Line   : Boolean := True;
+      Indent_Level : Natural := 1;
+      Indent_Pos   : Natural := 0;
+      Text_Length  : Natural := 0;
    end record;
 
 end Wiki.Streams.Html.Stream;
