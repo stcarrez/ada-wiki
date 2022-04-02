@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-streams-html -- Wiki HTML output stream
---  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2020 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -52,6 +52,9 @@ package Wiki.Streams.Html is
    --  Write a text escaping any character as necessary.
    procedure Write_Wide_Text (Writer  : in out Html_Output_Stream;
                               Content : in Wiki.Strings.WString) is abstract;
+
+   --  Write an optional newline or space.
+   procedure Newline (Writer : in out Html_Output_Stream) is abstract;
 
    --  Write a character on the response stream and escape that character as necessary.
    procedure Write_Escape (Stream : in out Html_Output_Stream'Class;
