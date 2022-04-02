@@ -26,6 +26,16 @@ package body Wiki.Streams.Html.Stream is
                            Content : in String);
 
    --  ------------------------------
+   --  Set the indentation level for HTML output stream.
+   --  ------------------------------
+   overriding
+   procedure Set_Indent_Level (Writer : in out Html_Output_Stream;
+                               Indent : in Natural) is
+   begin
+      Writer.Indent_Level := Indent;
+   end Set_Indent_Level;
+
+   --  ------------------------------
    --  Write an optional newline or space.
    --  ------------------------------
    overriding
@@ -133,7 +143,7 @@ package body Wiki.Streams.Html.Stream is
       else
          Close_Current (Stream);
          if Stream.Text_Length = 0 then
-            if not Stream.Empty_Line then
+            if not Stream.Empty_Line and Stream.Indent_Level > 0 then
                Stream.Write (Wiki.Helpers.LF);
             end if;
             if Stream.Indent_Pos > 1 then
@@ -166,6 +176,8 @@ package body Wiki.Streams.Html.Stream is
       if Content'Length > 0 then
          Stream.Text_Length := Stream.Text_Length + Content'Length;
          Stream.Empty_Line := False;
+      else
+         Stream.Write (' ');
       end if;
    end Write_Wide_Text;
 
