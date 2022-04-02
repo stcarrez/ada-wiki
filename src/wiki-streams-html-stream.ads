@@ -24,6 +24,11 @@ package Wiki.Streams.Html.Stream is
    type Html_Output_Stream is limited new Output_Stream
      and Html.Html_Output_Stream with private;
 
+   --  Set the indentation level for HTML output stream.
+   overriding
+   procedure Set_Indent_Level (Writer : in out Html_Output_Stream;
+                               Indent : in Natural);
+
    --  Write an XML attribute within an XML element.
    --  The attribute value is escaped according to the XML escape rules.
    overriding
@@ -64,7 +69,7 @@ private
       --  Whether an XML element must be closed (that is a '>' is necessary)
       Close_Start  : Boolean := False;
       Empty_Line   : Boolean := True;
-      Indent_Level : Natural := 1;
+      Indent_Level : Natural := 0;
       Indent_Pos   : Natural := 0;
       Text_Length  : Natural := 0;
    end record;
