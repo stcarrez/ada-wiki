@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-html -- Wiki HTML renderer
---  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2019, 2020 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2019, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -117,6 +117,7 @@ private
       Html_Level        : Natural := 0;
       Current_Section   : Toc_Number_Array := (others => 0);
       Section_Level     : Natural := 0;
+      Column            : Natural := 0;
    end record;
 
    procedure Render_Tag (Engine : in out Html_Renderer;
@@ -155,5 +156,7 @@ private
    --  Returns true if the HTML element being included is already contained in a paragraph.
    --  This include: a, em, strong, small, b, i, u, s, span, ins, del, sub, sup.
    function Has_Html_Paragraph (Engine : in Html_Renderer) return Boolean;
+
+   procedure Newline (Engine : in out Html_Renderer);
 
 end Wiki.Render.Html;
