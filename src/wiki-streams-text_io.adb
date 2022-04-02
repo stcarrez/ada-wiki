@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-streams-text_io -- Text_IO input output streams
---  Copyright (C) 2016 Stephane Carrez
+--  Copyright (C) 2016, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +28,7 @@ package body Wiki.Streams.Text_IO is
                    Form   : in String := "") is
    begin
       Ada.Wide_Wide_Text_IO.Open (Stream.File, Ada.Wide_Wide_Text_IO.In_File, Path, Form);
+      Stream.Stdin := False;
    end Open;
 
    --  ------------------------------
@@ -66,7 +67,11 @@ package body Wiki.Streams.Text_IO is
    begin
       Eof := False;
       while Pos <= Into'Last loop
-         Ada.Wide_Wide_Text_IO.Get_Immediate (Input.File, Char, Available);
+         if Input.Stdin then
+            Ada.Wide_Wide_Text_IO.Get_Immediate (Char, Available);
+         else
+            Ada.Wide_Wide_Text_IO.Get_Immediate (Input.File, Char, Available);
+         end if;
          Into (Pos) := Char;
          Pos := Pos + 1;
          exit when Char = Helpers.LF or Char = Helpers.CR;
