@@ -29,6 +29,10 @@ package Wiki.Streams.Html is
    type Html_Output_Stream is limited interface and Output_Stream;
    type Html_Output_Stream_Access is access all Html_Output_Stream'Class;
 
+   --  Set the indentation level for HTML output stream.
+   procedure Set_Indent_Level (Writer : in out Html_Output_Stream;
+                               Indent : in Natural) is abstract;
+
    --  Write an XML attribute within an XML element.
    --  The attribute value is escaped according to the XML escape rules.
    procedure Write_Wide_Attribute (Writer  : in out Html_Output_Stream;
