@@ -91,7 +91,8 @@ private
 
    type File_Input_Stream is limited new Ada.Finalization.Limited_Controlled
      and Wiki.Streams.Input_Stream with record
-      File : Ada.Wide_Wide_Text_IO.File_Type;
+      File  : Ada.Wide_Wide_Text_IO.File_Type;
+      Stdin : Boolean := True;
    end record;
 
    type File_Output_Stream is limited new Ada.Finalization.Limited_Controlled
