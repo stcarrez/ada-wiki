@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-nodes -- Wiki Document Internal representation
---  Copyright (C) 2016, 2019, 2020 Stephane Carrez
+--  Copyright (C) 2016, 2019, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -105,6 +105,22 @@ package body Wiki.Documents is
             Append (Into, new Node_Type '(Kind => N_PARAGRAPH, Len => 0,
                                           Parent => Into.Current));
 
+         when N_LIST_ITEM =>
+            Append (Into, new Node_Type '(Kind => N_LIST_ITEM, Len => 0,
+                                          Parent => Into.Current));
+
+         when N_LIST_END =>
+            Append (Into, new Node_Type '(Kind => N_LIST_END, Len => 0,
+                                          Parent => Into.Current));
+
+         when N_NUM_LIST_END =>
+            Append (Into, new Node_Type '(Kind => N_NUM_LIST_END, Len => 0,
+                                          Parent => Into.Current));
+
+         when N_LIST_ITEM_END =>
+            Append (Into, new Node_Type '(Kind => N_LIST_ITEM_END, Len => 0,
+                                          Parent => Into.Current));
+
          when N_NEWLINE =>
             Append (Into, new Node_Type '(Kind => N_NEWLINE, Len => 0,
                                           Parent => Into.Current));
@@ -113,6 +129,9 @@ package body Wiki.Documents is
             Append (Into, new Node_Type '(Kind => N_TOC_DISPLAY, Len => 0,
                                           Parent => Into.Current));
             Into.Using_TOC := True;
+
+         when N_NONE =>
+            null;
 
       end  case;
    end Append;
@@ -166,23 +185,22 @@ package body Wiki.Documents is
    end Add_Quote;
 
    --  ------------------------------
-   --  Add a list item (<li>).  Close the previous paragraph and list item if any.
-   --  The list item will be closed at the next list item, next paragraph or next header.
+   --  Add a list (<ul> or <ol>) starting at the given number.
    --  ------------------------------
-   procedure Add_List_Item (Into     : in out Document;
-                            Level    : in Positive;
-                            Ordered  : in Boolean) is
+   procedure Add_List (Into     : in out Document;
+                       Level    : in Positive;
+                       Ordered  : in Boolean) is
    begin
       if Ordered then
-         Append (Into, new Node_Type '(Kind => N_NUM_LIST, Len => 0,
+         Append (Into, new Node_Type '(Kind => N_NUM_LIST_START, Len => 0,
                                        Parent => Into.Current,
                                        Level => Level, others => <>));
       else
-         Append (Into, new Node_Type '(Kind => N_LIST, Len => 0,
+         Append (Into, new Node_Type '(Kind => N_LIST_START, Len => 0,
                                        Parent => Into.Current,
                                        Level => Level, others => <>));
       end if;
-   end Add_List_Item;
+   end Add_List;
 
    --  ------------------------------
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
