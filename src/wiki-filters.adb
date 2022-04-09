@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters -- Wiki filters
---  Copyright (C) 2015, 2016, 2020 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -107,20 +107,19 @@ package body Wiki.Filters is
    end Add_Blockquote;
 
    --  ------------------------------
-   --  Add a list item (<li>).  Close the previous paragraph and list item if any.
-   --  The list item will be closed at the next list item, next paragraph or next header.
+   --  Add a list (<ul> or <ol>) starting at the given number.
    --  ------------------------------
-   procedure Add_List_Item (Filter   : in out Filter_Type;
-                            Document : in out Wiki.Documents.Document;
-                            Level    : in Positive;
-                            Ordered  : in Boolean) is
+   procedure Add_List (Filter   : in out Filter_Type;
+                       Document : in out Wiki.Documents.Document;
+                       Level    : in Positive;
+                       Ordered  : in Boolean) is
    begin
       if Filter.Next /= null then
-         Filter.Next.Add_List_Item (Document, Level, Ordered);
+         Filter.Next.Add_List (Document, Level, Ordered);
       else
-         Document.Add_List_Item (Level, Ordered);
+         Document.Add_List (Level, Ordered);
       end if;
-   end Add_List_Item;
+   end Add_List;
 
    --  ------------------------------
    --  Add a link.
