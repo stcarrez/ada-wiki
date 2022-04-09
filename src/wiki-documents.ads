@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-documents -- Wiki document
---  Copyright (C) 2011, 2015, 2016, 2018, 2019, 2020 Stephane Carrez
+--  Copyright (C) 2011, 2015, 2016, 2018, 2019, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -88,11 +88,10 @@ package Wiki.Documents is
                         Name       : in Wiki.Strings.WString;
                         Attributes : in out Wiki.Attributes.Attribute_List);
 
-   --  Add a list item (<li>).  Close the previous paragraph and list item if any.
-   --  The list item will be closed at the next list item, next paragraph or next header.
-   procedure Add_List_Item (Into     : in out Document;
-                            Level    : in Positive;
-                            Ordered  : in Boolean);
+   --  Add a list (<ul> or <ol>) starting at the given number.
+   procedure Add_List (Into     : in out Document;
+                       Level    : in Positive;
+                       Ordered  : in Boolean);
 
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
