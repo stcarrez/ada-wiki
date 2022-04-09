@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-nodes -- Wiki Document Internal representation
---  Copyright (C) 2016, 2019, 2020 Stephane Carrez
+--  Copyright (C) 2016, 2019, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,10 +21,15 @@ package Wiki.Nodes is
 
    pragma Preelaborate;
 
-   type Node_Kind is (N_LINE_BREAK,
+   type Node_Kind is (N_NONE,
+                      N_LINE_BREAK,
                       N_HORIZONTAL_RULE,
                       N_TOC_DISPLAY,
                       N_PARAGRAPH,
+                      N_LIST_ITEM_END,
+                      N_LIST_END,
+                      N_NUM_LIST_END,
+                      N_LIST_ITEM,
                       N_NEWLINE,
                       N_HEADER,
                       N_TOC,
@@ -36,15 +41,15 @@ package Wiki.Nodes is
                       N_TABLE,
                       N_ROW,
                       N_COLUMN,
-                      N_LIST,
-                      N_NUM_LIST,
+                      N_LIST_START,
+                      N_NUM_LIST_START,
                       N_INDENT,
                       N_TEXT,
                       N_LINK,
                       N_IMAGE);
 
    --  Node kinds which are simple markers in the document.
-   subtype Simple_Node_Kind is Node_Kind range N_LINE_BREAK .. N_NEWLINE;
+   subtype Simple_Node_Kind is Node_Kind range N_NONE .. N_NEWLINE;
 
    type Node_List is limited private;
    type Node_List_Access is access all Node_List;
@@ -55,7 +60,8 @@ package Wiki.Nodes is
    type Node_Type (Kind : Node_Kind; Len : Natural) is limited record
       Parent     : Node_Type_Access;
       case Kind is
-         when N_HEADER | N_BLOCKQUOTE | N_INDENT | N_LIST | N_NUM_LIST | N_TOC_ENTRY =>
+         when N_HEADER | N_BLOCKQUOTE | N_INDENT | N_TOC_ENTRY
+            | N_NUM_LIST_START | N_LIST_START =>
             Level  : Natural := 0;
             Header : Wiki.Strings.WString (1 .. Len);
 
