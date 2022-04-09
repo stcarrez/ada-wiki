@@ -111,7 +111,6 @@ package body Wiki.Streams.Html.Stream is
                             Name   : in String) is
    begin
       Close_Current (Stream);
-      Stream.Indent_Pos := Stream.Indent_Pos + Stream.Indent_Level;
       if Stream.Indent_Pos > 1 then
          if not Stream.Empty_Line then
             Stream.Write (Helpers.LF);
@@ -125,6 +124,7 @@ package body Wiki.Streams.Html.Stream is
       Stream.Close_Start := True;
       Stream.Text_Length := 0;
       Stream.Empty_Line := False;
+      Stream.Indent_Pos := Stream.Indent_Pos + Stream.Indent_Level;
    end Start_Element;
 
    --  ------------------------------
@@ -134,7 +134,7 @@ package body Wiki.Streams.Html.Stream is
    procedure End_Element (Stream : in out Html_Output_Stream;
                           Name   : in String) is
    begin
-      if Stream.Indent_Pos > Stream.Indent_Level then
+      if Stream.Indent_Pos >= Stream.Indent_Level then
          Stream.Indent_Pos := Stream.Indent_Pos - Stream.Indent_Level;
       end if;
       if Stream.Close_Start then
