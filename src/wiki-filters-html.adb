@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-html -- Wiki HTML filters
---  Copyright (C) 2015, 2019, 2020 Stephane Carrez
+--  Copyright (C) 2015, 2019, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,10 +37,11 @@ package body Wiki.Filters.Html is
          when N_HORIZONTAL_RULE =>
             Tag := HR_TAG;
 
-         when N_TOC_DISPLAY =>
+         when N_TOC_DISPLAY | N_NONE =>
             return;
 
-         when N_NEWLINE =>
+         when N_NEWLINE | N_LIST_END | N_LIST_ITEM_END | N_NUM_LIST_END
+           | N_LIST_ITEM =>
             Filter_Type (Filter).Add_Node (Document, Kind);
             return;
 
