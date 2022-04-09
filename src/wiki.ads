@@ -94,7 +94,7 @@ package Wiki is
          SYNTAX_HTML);
 
    --  Defines the possible text formats.
-   type Format_Type is (BOLD, ITALIC, CODE, SUPERSCRIPT, SUBSCRIPT, STRIKEOUT, PREFORMAT);
+   type Format_Type is (BOLD, STRONG, ITALIC, EMPHASIS, CODE, SUPERSCRIPT, SUBSCRIPT, STRIKEOUT, PREFORMAT);
 
    type Format_Map is array (Format_Type) of Boolean;
 
