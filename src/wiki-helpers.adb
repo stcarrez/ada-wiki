@@ -178,4 +178,21 @@ package body Wiki.Helpers is
       return Pos;
    end Trim_Spaces;
 
+   --  ------------------------------
+   --  Find the position of the given character in the string starting at the given position.
+   --  ------------------------------
+   function Index (Text : in Wiki.Strings.Wstring;
+                   Item : in Wiki.Strings.Wchar;
+                   From : in Positive) return Natural is
+      Pos : Natural := From;
+   begin
+      while Pos <= Text'Last loop
+         if Text (Pos) = Item then
+            return Pos;
+         end if;
+         Pos := Pos + 1;
+      end loop;
+      return 0;
+   end Index;
+
 end Wiki.Helpers;
