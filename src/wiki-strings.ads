@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-strings -- Wiki string types and operations
---  Copyright (C) 2016, 2017, 2020 Stephane Carrez
+--  Copyright (C) 2016, 2017, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -85,13 +85,39 @@ package Wiki.Strings is
 
    subtype BString is Wide_Wide_Builders.Builder;
 
+   function Length (Source : in Bstring) return Natural renames Wide_Wide_Builders.Length;
+
    function Element (Source   : in BString;
                      Position : in Positive) return WChar renames Wide_Wide_Builders.Element;
+
+   procedure Append_String (Source   : in out BString;
+                            Content  : in WString) renames Wide_Wide_Builders.Append;
+
+   procedure Append (Source   : in out BString;
+                     Content  : in BString;
+                     From     : in Positive;
+                     To       : in Positive) renames Wide_Wide_Builders.Append;
 
    --  Search for the first occurrence of the character in the builder and
    --  starting after the from index.  Returns the index of the first occurence or 0.
    function Index (Source : in BString;
                    Char   : in WChar;
                    From   : in Positive := 1) return Natural;
+
+   --  Find the last position of the character in the string and starting
+   --  at the given position.  Stop at the first character different than `Char`.
+   function Last_Position (Source : in Bstring;
+                           Char   : in WChar;
+                           From   : in Positive := 1) return Natural;
+
+   --  Count the the number of consecutive occurence of the given character
+   --  and starting at the given position.
+   function Count_Occurence (Source : in Bstring;
+                             Char   : in Wchar;
+                             From   : in Positive := 1) return Natural;
+
+   function Skip_Spaces (Source : in Bstring;
+                         From   : in Positive;
+                         Last   : in Positive) return Positive;
 
 end Wiki.Strings;
