@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-helpers -- Helper operations for wiki parsers and renderer
---  Copyright (C) 2016, 2020 Stephane Carrez
+--  Copyright (C) 2016, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +31,9 @@ package Wiki.Helpers is
    --  Returns True if the character is a space, tab or a newline.
    function Is_Space_Or_Newline (C : in Wiki.Strings.WChar) return Boolean;
 
+   --  Returns True if the character is a punctuation character.
+   function Is_Punctuation (C : in Wiki.Strings.WChar) return Boolean;
+
    --  Returns True if the character is a line terminator.
    function Is_Newline (C : in Wiki.Strings.WChar) return Boolean;
 
@@ -59,5 +62,10 @@ package Wiki.Helpers is
    procedure Get_Sizes (Dimension : in Wiki.Strings.WString;
                         Width     : out Natural;
                         Height    : out Natural);
+
+   --  Find the position of the first non space character in the text starting at the
+   --  given position.  Returns Text'Last + 1 if the text only contains spaces.
+   function Skip_Spaces (Text : in Wiki.Strings.Wstring;
+                         From : in Positive) return Positive;
 
 end Wiki.Helpers;
