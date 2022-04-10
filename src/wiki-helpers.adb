@@ -164,4 +164,18 @@ package body Wiki.Helpers is
       return Pos;
    end Skip_Spaces;
 
+   --  ------------------------------
+   --  Find the position of the last non space character scanning the text backward
+   --  from the given position.  Returns Text'First - 1 if the text only contains spaces.
+   --  ------------------------------
+   function Trim_Spaces (Text : in Wiki.Strings.Wstring;
+                         From : in Positive) return Natural is
+      Pos : Natural := From;
+   begin
+      while Pos >= Text'First and then Is_Space (Text (Pos)) loop
+         Pos := Pos - 1;
+      end loop;
+      return Pos;
+   end Trim_Spaces;
+
 end Wiki.Helpers;
