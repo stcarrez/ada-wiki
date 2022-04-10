@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-helpers -- Helper operations for wiki parsers and renderer
---  Copyright (C) 2016, 2020 Stephane Carrez
+--  Copyright (C) 2016, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,7 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Ada.Wide_Wide_Characters.Handling;
+with Ada.Wide_Wide_Characters.Unicode;
 package body Wiki.Helpers is
 
    --  ------------------------------
@@ -33,6 +34,14 @@ package body Wiki.Helpers is
    begin
       return Is_Space (C) or Ada.Wide_Wide_Characters.Handling.Is_Line_Terminator (C);
    end Is_Space_Or_Newline;
+
+   --  ------------------------------
+   --  Returns True if the character is a punctuation character.
+   --  ------------------------------
+   function Is_Punctuation (C : in Wiki.Strings.WChar) return Boolean is
+   begin
+      return Ada.Wide_Wide_Characters.Unicode.Is_Punctuation (C);
+   end Is_Punctuation;
 
    --  ------------------------------
    --  Returns True if the character is a line terminator.
@@ -140,5 +149,19 @@ package body Wiki.Helpers is
          Width  := 0;
          Height := 0;
    end Get_Sizes;
+
+   --  ------------------------------
+   --  Find the position of the first non space character in the text starting at the
+   --  given position.  Returns Text'Last + 1 if the text only contains spaces.
+   --  ------------------------------
+   function Skip_Spaces (Text : in Wiki.Strings.Wstring;
+                         From : in Positive) return Positive is
+      Pos : Positive := From;
+   begin
+      while Pos <= Text'Last and then Is_Space (Text (Pos)) loop
+         Pos := Pos + 1;
+      end loop;
+      return Pos;
+   end Skip_Spaces;
 
 end Wiki.Helpers;
