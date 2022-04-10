@@ -68,4 +68,9 @@ package Wiki.Helpers is
    function Skip_Spaces (Text : in Wiki.Strings.Wstring;
                          From : in Positive) return Positive;
 
+   --  Find the position of the last non space character scanning the text backward
+   --  from the given position.  Returns Text'First - 1 if the text only contains spaces.
+   function Trim_Spaces (Text : in Wiki.Strings.Wstring;
+                         From : in Positive) return Natural;
+
 end Wiki.Helpers;
