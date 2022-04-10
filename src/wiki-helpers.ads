@@ -73,4 +73,9 @@ package Wiki.Helpers is
    function Trim_Spaces (Text : in Wiki.Strings.Wstring;
                          From : in Positive) return Natural;
 
+   --  Find the position of the given character in the string starting at the given position.
+   function Index (Text : in Wiki.Strings.Wstring;
+                   Item : in Wiki.Strings.Wchar;
+                   From : in Positive) return Natural;
+
 end Wiki.Helpers;
