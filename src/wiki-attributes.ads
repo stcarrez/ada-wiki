@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-attributes -- Wiki document attributes
---  Copyright (C) 2015, 2016, 2020 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -67,16 +67,15 @@ package Wiki.Attributes is
    procedure Append (List  : in out Attribute_List;
                      Name  : in Wiki.Strings.WString;
                      Value : in Wiki.Strings.WString);
-
-   --  Append the attribute to the attribute list.
    procedure Append (List  : in out Attribute_List;
                      Name  : in String;
                      Value : in Wiki.Strings.WString);
-
-   --  Append the attribute to the attribute list.
    procedure Append (List  : in out Attribute_List;
                      Name  : in String;
                      Value : in Wiki.Strings.UString);
+   procedure Append (List  : in out Attribute_List;
+                     Name  : in String;
+                     Value : in Wiki.Strings.BString);
 
    --  Get the cursor to get access to the first attribute.
    function First (List : in Attribute_List) return Cursor;
