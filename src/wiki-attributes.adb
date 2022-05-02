@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-attributes -- Wiki document attributes
---  Copyright (C) 2015, 2016 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -134,14 +134,23 @@ package body Wiki.Attributes is
                      Name  : in String;
                      Value : in Wiki.Strings.UString) is
       Val  : constant Wiki.Strings.WString := Wiki.Strings.To_WString (Value);
-      Attr : constant Attribute_Access
-        := new Attribute '(Util.Refs.Ref_Entity with
-                           Name_Length  => Name'Length,
-                           Value_Length => Val'Length,
-                           Name         => Name,
-                           Value        => Val);
    begin
-      List.List.Append (Attribute_Refs.Create (Attr));
+      Append (List, Name, Val);
+   end Append;
+
+   procedure Append (List  : in out Attribute_List;
+                     Name  : in String;
+                     Value : in Wiki.Strings.BString) is
+
+      procedure Append (Content : in Wiki.Strings.WString) is
+      begin
+         Append (List, Name, Content);
+      end Append;
+
+      procedure Append_Attribute is
+         new Wiki.Strings.Wide_Wide_Builders.Get (Append);
+   begin
+      Append_Attribute (Value);
    end Append;
 
    --  ------------------------------
