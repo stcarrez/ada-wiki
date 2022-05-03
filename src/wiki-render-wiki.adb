@@ -15,12 +15,19 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-
+with Ada.Strings.Wide_Wide_Maps;
 with Wiki.Helpers;
 with Util.Strings;
 package body Wiki.Render.Wiki is
 
+   pragma Wide_Character_Encoding (UTF8);
+
    use Helpers;
+
+   Regular_Map : constant Ada.Strings.Wide_Wide_Maps.Wide_Wide_Character_Mapping
+     := Ada.Strings.Wide_Wide_Maps.To_Mapping
+       (From => " ŠŽšžŸÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïðñòóôõöùúûüýÿ",
+        To   => "-SZszYAAAAAACEEEEIIIIDNOOOOOUUUUYaaaaaaceeeeiiiidnooooouuuuyy");
 
    HEADER_CREOLE             : aliased constant Strings.WString := "=";
    BOLD_CREOLE               : aliased constant Strings.WString := "**";
@@ -145,6 +152,7 @@ package body Wiki.Render.Wiki is
             Engine.Invert_Header_Level := True;
             Engine.Allow_Link_Language := True;
             Engine.Link_First := True;
+            Engine.Html_Table := False;
             Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("-+_*{}][/=\");
 
          when SYNTAX_MEDIA_WIKI =>
@@ -168,6 +176,7 @@ package body Wiki.Render.Wiki is
             Engine.Tags (Escape_Rule)     := ESCAPE_CREOLE'Access;
             Engine.Link_First := True;
             Engine.Html_Blockquote := True;
+            Engine.Html_Table := True;
             Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("'+_-*(){}][!");
 
          when SYNTAX_MARKDOWN =>
@@ -194,6 +203,7 @@ package body Wiki.Render.Wiki is
             Engine.Tags (Blockquote_Start)   := QUOTE_MARKDOWN'Access;
             Engine.Link_First := False;
             Engine.Html_Blockquote := False;
+            Engine.Html_Table := False;
             Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("\`*_{}[]()#+-!");
 
          when SYNTAX_TEXTILE =>
@@ -224,6 +234,7 @@ package body Wiki.Render.Wiki is
             Engine.Tags (Blockquote_Start)   := QUOTE_TEXTILE'Access;
             Engine.Link_First := True;
             Engine.Html_Blockquote := False;
+            Engine.Html_Table := False;
             Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("\`*_{}[]()#+-!");
 
          when others =>
@@ -256,6 +267,7 @@ package body Wiki.Render.Wiki is
             Engine.Tags (Escape_Rule)     := ESCAPE_CREOLE'Access;
             Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("'+_-*(){}][!");
             Engine.Link_First := True;
+            Engine.Html_Table := False;
 
       end case;
    end Set_Output_Stream;
@@ -269,6 +281,7 @@ package body Wiki.Render.Wiki is
       if Optional and then (Engine.Line_Count = 0 or else Engine.Empty_Line) then
          return;
       end if;
+      Engine.Set_Format (Empty_Formats);
       Engine.Output.Write (LF);
       Engine.Empty_Previous_Line := Engine.Empty_Line;
       Engine.Empty_Line := True;
@@ -288,6 +301,7 @@ package body Wiki.Render.Wiki is
    procedure Need_Separator_Line (Engine   : in out Wiki_Renderer) is
    begin
       if not Engine.Empty_Line then
+         Engine.Set_Format (Empty_Formats);
          Engine.Empty_Previous_Line := False;
          Engine.Output.Write (LF);
          Engine.Empty_Line := True;
@@ -324,11 +338,15 @@ package body Wiki.Render.Wiki is
             Engine.Render_Preformatted (Node.Preformatted,
                                         Strings.To_WString (Node.Language));
 
-         when Nodes.N_LIST =>
+         when Nodes.N_NUM_LIST_START =>
+            Engine.Add_List_Item (Node.Level, True);
+
+         when Nodes.N_LIST_START =>
             Engine.Add_List_Item (Node.Level, False);
 
-         when Nodes.N_NUM_LIST =>
-            Engine.Add_List_Item (Node.Level, True);
+         when Nodes.N_LIST_END =>
+            Engine.Need_Space := False;
+            Engine.Close_Paragraph;
 
          when Nodes.N_TEXT =>
             declare
@@ -468,14 +486,24 @@ package body Wiki.Render.Wiki is
       Engine.Output.Write (' ');
    end Add_List_Item;
 
+   procedure Write_Link (Engine : in out Wiki_Renderer;
+                         Link   : in Strings.WString) is
+   begin
+      for C of Link loop
+         Engine.Output.Write (Ada.Strings.Wide_Wide_Maps.Value (Regular_Map, C));
+      end loop;
+   end Write_Link;
+
    --  ------------------------------
    --  Render a link.
    --  ------------------------------
    procedure Render_Link (Engine   : in out Wiki_Renderer;
                           Name     : in Strings.WString;
                           Attrs    : in Attributes.Attribute_List) is
+
       Link : constant Strings.WString := Attributes.Get_Attribute (Attrs, "href");
       Lang : constant Strings.WString := Attributes.Get_Attribute (Attrs, "lang");
+
    begin
       if Engine.Empty_Line and Engine.In_List then
          if Engine.UL_List_Level + Engine.OL_List_Level > 0 then
@@ -490,7 +518,7 @@ package body Wiki.Render.Wiki is
       Engine.Write_Optional_Space;
       Engine.Output.Write (Engine.Tags (Link_Start).all);
       if Engine.Link_First then
-         Engine.Output.Write (Link);
+         Engine.Write_Link (Link);
          if Name'Length > 0 then
             Engine.Output.Write (Engine.Tags (Link_Separator).all);
             Engine.Output.Write (Name);
@@ -502,7 +530,7 @@ package body Wiki.Render.Wiki is
       else
          Engine.Output.Write (Name);
          Engine.Output.Write (Engine.Tags (Link_Separator).all);
-         Engine.Output.Write (Link);
+         Engine.Write_Link (Link);
       end if;
       Engine.Output.Write (Engine.Tags (Link_End).all);
       Engine.Empty_Line := False;
@@ -965,6 +993,10 @@ package body Wiki.Render.Wiki is
       Engine.Need_Paragraph := False;
       Engine.Has_Paragraph := False;
       Engine.In_Table := True;
+      if Engine.Html_Table then
+         Engine.Output.Write (LF & "<table>");
+         Engine.New_Line;
+      end if;
 
       Engine.Render (Doc, Node.Children);
 
@@ -972,6 +1004,11 @@ package body Wiki.Render.Wiki is
       Engine.In_Table := False;
       Engine.Has_Paragraph := False;
       Engine.Need_Paragraph := True;
+
+      if Engine.Html_Table then
+         Engine.Output.Write ("</table>");
+         Engine.New_Line;
+      end if;
    end Render_Table;
 
    --  ------------------------------
@@ -981,10 +1018,19 @@ package body Wiki.Render.Wiki is
                          Doc    : in Documents.Document;
                          Node   : in Nodes.Node_Type) is
    begin
-      Engine.Output.Write ("| ");
+      if Engine.Html_Table then
+         Engine.Output.Write ("<tr>");
+      else
+         Engine.Output.Write ("| ");
+      end if;
       Engine.Col_Index := 0;
       Engine.Render (Doc, Node.Children);
-      Engine.Output.Write ("|" & LF);
+      if Engine.Html_Table then
+         Engine.Output.Write ("</tr>");
+      else
+         Engine.Output.Write ("|");
+      end if;
+      Engine.New_Line;
    end Render_Row;
 
    --  ------------------------------
@@ -994,11 +1040,19 @@ package body Wiki.Render.Wiki is
                             Doc    : in Documents.Document;
                             Node   : in Nodes.Node_Type) is
    begin
-      if Engine.Col_Index > 0 then
-         Engine.Output.Write (" | ");
+      if Engine.Html_Table then
+         Engine.Output.Write ("<td>");
+      else
+         if Engine.Col_Index > 0 then
+            Engine.Output.Write (" | ");
+         end if;
       end if;
       Engine.Col_Index := Engine.Col_Index + 1;
       Engine.Render (Doc, Node.Children);
+
+      if Engine.Html_Table then
+         Engine.Output.Write ("</td>");
+      end if;
    end Render_Column;
 
 end Wiki.Render.Wiki;
