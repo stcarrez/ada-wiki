@@ -158,6 +158,7 @@ private
       Allow_Link_Language : Boolean := False;
       Link_First          : Boolean := False;
       Html_Blockquote     : Boolean := False;
+      Html_Table          : Boolean := False;
       In_Table            : Boolean := False;
       Col_Index           : Natural := 0;
       Line_Count          : Natural := 0;
@@ -171,6 +172,9 @@ private
       Link_Title          : Unbounded_Wide_Wide_String;
       Link_Lang           : Unbounded_Wide_Wide_String;
    end record;
+
+   procedure Write_Link (Engine : in out Wiki_Renderer;
+                         Link   : in Strings.WString);
 
    --  Render the table of content.
    procedure Render_TOC (Engine : in out Wiki_Renderer;
