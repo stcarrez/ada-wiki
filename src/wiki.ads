@@ -94,7 +94,7 @@ package Wiki is
          SYNTAX_HTML);
 
    --  Defines the possible text formats.
-   type Format_Type is (BOLD, STRONG, ITALIC, EMPHASIS, CODE, SUPERSCRIPT, SUBSCRIPT, STRIKEOUT, PREFORMAT);
+   type Format_Type is (BOLD, STRONG, ITALIC, EMPHASIS, CODE, SUPERSCRIPT, SUBSCRIPT, STRIKEOUT, PREFORMAT, INS);
 
    type Format_Map is array (Format_Type) of Boolean;
 
@@ -216,5 +216,40 @@ package Wiki is
       OPTION_TAG   => True,
 
       others    => False);
+
+   --  Tags before and after which we want to preserve spaces.
+   Tag_Text : constant Tag_Boolean_Array :=
+     (
+       A_TAG      => True,
+       EM_TAG     => True,
+       STRONG_TAG => True,
+       SMALL_TAG  => True,
+       S_TAG      => True,
+       CITE_TAG   => True,
+       Q_TAG      => True,
+       DFN_TAG    => True,
+       ABBR_TAG   => True,
+       TIME_TAG   => True,
+       CODE_TAG   => True,
+       VAR_TAG    => True,
+       SAMP_TAG   => True,
+       KBD_TAG    => True,
+       SUB_TAG    => True,
+       SUP_TAG    => True,
+       I_TAG      => True,
+       B_TAG      => True,
+       MARK_TAG   => True,
+       RUBY_TAG   => True,
+       RT_TAG     => True,
+       RP_TAG     => True,
+       BDI_TAG    => True,
+       BDO_TAG    => True,
+       SPAN_TAG   => True,
+       INS_TAG    => True,
+       DEL_TAG    => True,
+       TT_TAG     => True,
+       UNKNOWN_TAG => True,
+       others     => False
+     );
 
 end Wiki;
