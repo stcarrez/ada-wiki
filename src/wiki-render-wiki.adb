@@ -282,6 +282,11 @@ package body Wiki.Render.Wiki is
          return;
       end if;
       Engine.Set_Format (Empty_Formats);
+      if Engine.Empty_Line and then  Engine.Quote_Level > 0 then
+         for Level in 1 .. Engine.Quote_Level loop
+            Engine.Output.Write (Engine.Tags (Blockquote_Start).all);
+         end loop;
+      end if;
       Engine.Output.Write (LF);
       Engine.Empty_Previous_Line := Engine.Empty_Line;
       Engine.Empty_Line := True;
@@ -948,6 +953,8 @@ package body Wiki.Render.Wiki is
             if Engine.Html_Blockquote then
                --  Make sure there is an empty line after the HTML </blockquote>.
                Engine.Output.Write ("</blockquote>" & LF & LF);
+            elsif Engine.Quote_Level = 0 then
+               Engine.New_Line;
             end if;
 
          when others =>
