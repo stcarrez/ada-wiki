@@ -1,2 +1,1 @@
-
 <p>This is the visible section</p><h2>Visible header</h2>

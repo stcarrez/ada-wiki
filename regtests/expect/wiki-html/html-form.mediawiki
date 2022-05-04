@@ -1,10 +1,1 @@
-<form> <select id="" name="test">
- <option selected="">option 1
- </option><option>option 2
- </option></select>
- <select id="">
- <option selected="">option 1
- </option><option>option 2
- </option></select>
- <input name="" id="" selected="" />
-</form>
+<form> <select id="" name="test"> <option selected="">option 1 </option><option>option 2 </option></select> <select id=""> <option selected="">option 1 </option><option>option 2 </option></select> <input name="" id="" selected="" /></form>

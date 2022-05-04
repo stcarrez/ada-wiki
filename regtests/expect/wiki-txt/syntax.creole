@@ -36,9 +36,7 @@ superscript
 subscript
 __underline__
 A link
-
 title (A link)
-
 
 Alt textAlt text|center}}
 

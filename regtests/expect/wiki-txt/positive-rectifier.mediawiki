@@ -155,7 +155,6 @@ Schematics
 Positive Rectifier Board
 
 
-
 PCB
 Positive Rectifier Board Placement The circuit is made on a 124mm x 83mm PCB using 70um copper. The component placement is such that we can put the positive and negative rectifier board with their components in front of each other with a maximum height of 70mm.  This height is limited by the height of the 20000uF capacitors (50mm) and the height of the MOSFET heat sink (20mm).
 
@@ -184,7 +183,6 @@ Positive Rectifier Board PCB The board layout is made with the following constra
 
 The auto layout was made with a smaller clearance (0.3mm) and the routing grid of 0.635mm.  After a 100% complete auto route, the clearance was increased to 0.4mm and the PCB was fixed by hand.  The wire-to-wire clearance was put to 0.5mm and the number of clearance errors reduced to 6 (there are two wires which are at 0.45mm each).  The GND, VS1 and VS2 polygon were drawn at the end (otherwise the auto-router skips the routing of these signals!).
 Positive Rectifier Board PCB Picture
-
 
 
 Datasheets

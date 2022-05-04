@@ -1,7 +1,5 @@
-<p>This is a paragraph:
-</p><pre>A pre-formatted block line 1
+<p>This is a paragraph:</p><pre><code>A pre-formatted block line 1
 A pre-formatted block line 2
-</pre><p>Another paragraph:
-</p><pre>My block line 1
+</code></pre><p>Another paragraph:</p><pre><code>My block line 1
 My block line 2
-</pre><p>A last paragraph.</p>
+</code></pre><p>A last paragraph.</p>

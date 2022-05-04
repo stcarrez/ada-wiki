@@ -29,7 +29,6 @@ Facebook OAuth
 For the OAuth authorization process, we will use the Ada Security (http://code.google.com/p/ada-security) library and its Application type.
 We will extend that type to expose some EL variables and an EL method that will be used in the authorization process. The
 Ada Server Faces Application Example part 3: the action bean (http://blog.vacs.fr/index.php?post/2011/05/02/Ada-Server-Faces-Application-Example-part-3%3A-the-action-bean)
-
 explains how to do that and many details will no be covered by this article.
 
 type Facebook_Auth is new Security.OAuth.Clients.Application
@@ -197,5 +196,4 @@ References
 facebook.ads (http://code.google.com/p/ada-asf/source/browse/trunk/samples/beans/facebook.ads)
 facebook.adb (http://code.google.com/p/ada-asf/source/browse/trunk/samples/beans/facebook.adb)
 Facebook API (http://developers.facebook.com/docs/reference/api/)
-
 

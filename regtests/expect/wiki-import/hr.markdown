@@ -2,6 +2,5 @@ oblatrantibus turmis, bellicosus sane
 
 ----
 
-Caesarem blandius
-adiumenta paulatim illi
+Caesarem blandius adiumenta paulatim illi
 

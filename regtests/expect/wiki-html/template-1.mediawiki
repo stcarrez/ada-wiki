@@ -1,5 +1,4 @@
-<p>Include 1 (img):</p><p><div class="wiki-img-thumb wiki-img-left"><div class="wiki-img-inner"><img src="study_current_measure2.png" alt="Current Measurement" /></div><div class="wiki-img-caption">Current Measurement</div></div>
-</p><p>Include 2 (pre):</p><pre>
+<p>Include 1 (img):</p><p><div class="wiki-img-thumb wiki-img-left"><div class="wiki-img-inner"><img src="study_current_measure2.png" alt="Current Measurement" /></div><div class="wiki-img-caption">Current Measurement</div></div></p><p>Include 2 (pre):</p><pre>
 * item 1
 ''item''
 == dd ==

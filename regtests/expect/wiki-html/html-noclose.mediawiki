@@ -1,3 +1,1 @@
-<p> <img src="/link">
-</img> <b>Bold</b>
-</p>
+<p> <img src="/link" /> <b>Bold</b></p>

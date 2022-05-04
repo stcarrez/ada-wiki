@@ -1,12 +1,6 @@
-C~'D
-
+C~'D 
 <pre>
 {</pre>
 
 === Euro € ===
-Copyright: ©
-Trademark: ®
-Math: ⫆
-Emoticon: 😃
-No: &#12fr;
-
+Copyright: © Trademark: ®  Math: ⫆ Emoticon: 😃  No:

@@ -1,8 +1,11 @@
 
 Header 1
-This is my inline HTML:
 
-  My item
+This is my inline HTML: 
 
+<div class='error'>
+  <span class='item'>My item</span>
+</div>
 
 Last paragraph.
+

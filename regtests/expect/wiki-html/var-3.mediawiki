@@ -1,2 +1,1 @@
-<h2>Name: Joe Roger</h2><p>Expand: `Joe Roger`</p><h2>Alias: Buck Roger</h2><p>Expand: <a href="/path/url">Buck Roger</a>
-</p>
+<h2>Name: Joe Roger</h2><p>Expand: `Joe Roger`</p><h2>Alias: Buck Roger</h2><p>Expand: <a href="/path/url">Buck Roger</a></p>
