@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  Wiki testsuite - Ada Wiki Test suite
---  Copyright (C) 2015, 2016 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@
 with Wiki.Parsers.Tests;
 with Wiki.Tests;
 with Wiki.Filters.Html.Tests;
+with Wiki.Html_Parser.Tests;
 package body Wiki.Testsuite is
 
    Tests : aliased Util.Tests.Test_Suite;
@@ -28,6 +29,7 @@ package body Wiki.Testsuite is
       Wiki.Filters.Html.Tests.Add_Tests (Ret);
       Wiki.Parsers.Tests.Add_Tests (Ret);
       Wiki.Tests.Add_Tests (Ret);
+      Wiki.Html_Parser.Tests.Add_Tests (Ret);
       return Ret;
    end Suite;
 
