@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-tests -- Unit tests for wiki parsing
---  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2017, 2021 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2017, 2021, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -162,17 +162,17 @@ package body Wiki.Parsers.Tests is
    procedure Test_Wiki_List (T : in out Test) is
    begin
       Util.Tests.Assert_Equals (T, "<ol><li>item</li></ol>",
-                                Wiki.Utils.To_Html ("# item", SYNTAX_GOOGLE),
+                                Wiki.Utils.To_Html ("1. item", SYNTAX_MARKDOWN),
                                 "Ordered list rendering invalid");
       Util.Tests.Assert_Equals (T, "<ol><li>item item " & ASCII.LF &
                                 "</li><li>item2 item2" & ASCII.LF &
-                                "</li><li><ol>item3</li></ol></ol>",
-        Wiki.Utils.To_Html ("# item item " & LF & "# item2 item2" & LF & "## item3",
-         SYNTAX_GOOGLE),
+                                "</li><li>item3</li></ol>",
+        Wiki.Utils.To_Html ("1. item item " & LF & "2. item2 item2" & LF & "3. item3",
+         SYNTAX_MARKDOWN),
         "Ordered rendering invalid");
 
       Util.Tests.Assert_Equals (T, "<ul><li>item</li></ul>",
-                                Wiki.Utils.To_Html (" * item", SYNTAX_GOOGLE),
+                                Wiki.Utils.To_Html (" * item", SYNTAX_MARKDOWN),
                                 "Bullet list rendering invalid");
 
       Util.Tests.Assert_Equals (T, "<ul><li>item</li></ul>",
@@ -273,21 +273,21 @@ package body Wiki.Parsers.Tests is
    --  ------------------------------
    procedure Test_Wiki_Preformatted (T : in out Test) is
    begin
-      Util.Tests.Assert_Equals (T, "<p><tt>code</tt></p>",
+      Util.Tests.Assert_Equals (T, "<p><code>code</code></p>",
                                 Wiki.Utils.To_Html ("{{{code}}}", SYNTAX_GOOGLE),
                                 "Preformat rendering invalid");
-      Util.Tests.Assert_Equals (T, "<pre>* code *" & ASCII.LF & "</pre>",
+      Util.Tests.Assert_Equals (T, "<pre><code>* code *" & ASCII.LF & "</code></pre>",
                                 Wiki.Utils.To_Html ("///" & LF & "* code *" & LF & "///",
                                                  SYNTAX_DOTCLEAR),
                                 "Preformat rendering invalid");
-      Util.Tests.Assert_Equals (T, "<pre>item1 x" & ASCII.LF & "item2 x" & ASCII.LF & "item3 x"
-                                & ASCII.LF & "</pre>",
+      Util.Tests.Assert_Equals (T, "<pre><code>item1 x" & ASCII.LF & "item2 x" & ASCII.LF & "item3 x"
+                                & "</code></pre>",
                                 Wiki.Utils.To_Html (" item1 x" & LF & " item2 x" & LF & " item3 x",
                                                  SYNTAX_DOTCLEAR),
                                 "Preformat rendering invalid");
-      Util.Tests.Assert_Equals (T, "<pre>item1 x" & ASCII.LF & "item2 x"
+      Util.Tests.Assert_Equals (T, "<pre><code>item1 x" & ASCII.LF & "item2 x"
                                 & ASCII.LF & "item3 x"
-                                & ASCII.LF & "</pre>",
+                                & "</code></pre>",
                                 Wiki.Utils.To_Html (" item1 x" & CR & LF & " item2 x"
                                   & CR & LF & " item3 x",
                                                  SYNTAX_DOTCLEAR),
@@ -299,7 +299,7 @@ package body Wiki.Parsers.Tests is
    --  ------------------------------
    procedure Test_Wiki_Text_Renderer (T : in out Test) is
    begin
-      Util.Tests.Assert_Equals (T, ASCII.LF & "code",
+      Util.Tests.Assert_Equals (T, ASCII.LF & "code" & ASCII.LF,
                                 Wiki.Utils.To_Text ("{{{code}}}", SYNTAX_GOOGLE),
                                 "Preformat rendering invalid");
       Util.Tests.Assert_Equals (T, ASCII.LF & "bold item my_title" & ASCII.LF,
@@ -337,13 +337,14 @@ package body Wiki.Parsers.Tests is
          procedure Get (Value : in Wiki.Strings.WString) is
          begin
             --  Verify that we got the expected characters.
-            T.Assert (Wiki.Helpers.LF & Text = Value, "Invalid parsing for [" & Content & "]");
+            T.Assert (Wiki.Helpers.LF & Text & Wiki.Helpers.LF = Value, "Invalid parsing for [" & Content & "]");
          end Get;
 
       begin
          Engine.Set_Syntax (SYNTAX_MEDIA_WIKI);
          Engine.Parse (Content, Doc);
          Renderer.Set_Output_Stream (Stream'Unchecked_Access);
+         Renderer.Set_No_Newline (Enable => False);
          Renderer.Render (Doc);
          Stream.Iterate (Get'Access);
       end Check;
