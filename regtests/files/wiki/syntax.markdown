@@ -19,11 +19,17 @@ Second paragraph.
 ** item 1.2
 * item 2
 * item 3
-*# item 3.1
-*# item 3.2
+*- item 3.1
+*- item 3.2
 
-# num 1
-# num 2
+- item 1
+-* item 1.1
+-* item 1.2
+- item 2
+- item 3
+
+1. num 1
+2. num 2
 
 Section bloc:
 
