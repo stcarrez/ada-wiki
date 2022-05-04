@@ -661,7 +661,11 @@ package body Wiki.Render.Wiki is
                if Apply_Format then
                   Engine.Set_Format (Format);
                   Apply_Format := False;
-                  Engine.Write_Optional_Space;
+                  if Is_Space (Last_Char) then
+                     Engine.Need_Space := False;
+                  else
+                     Engine.Write_Optional_Space;
+                  end if;
                end if;
                if Ada.Strings.Wide_Wide_Maps.Is_In (Last_Char, Engine.Escape_Set) then
                   Engine.Output.Write (Engine.Tags (Escape_Rule).all);
@@ -712,6 +716,9 @@ package body Wiki.Render.Wiki is
 
    procedure Start_Keep_Content (Engine : in out Wiki_Renderer) is
    begin
+      if Engine.Need_Space then
+         Engine.Write_Optional_Space;
+      end if;
       Engine.Keep_Content := Engine.Keep_Content + 1;
       if Engine.Keep_Content = 1 then
          Engine.Content := Strings.To_UString ("");
@@ -776,6 +783,9 @@ package body Wiki.Render.Wiki is
             Engine.Set_Format (Empty_Formats);
             Engine.Close_Paragraph;
             Engine.Need_Separator_Line;
+            if Engine.Line_Count > 0 then
+               Engine.New_Line;
+            end if;
 
          when PRE_TAG =>
             Engine.Start_Keep_Content;
@@ -941,7 +951,7 @@ package body Wiki.Render.Wiki is
             end if;
 
          when others =>
-            null;
+            Engine.Need_Space := True;
 
       end case;
    end Render_Tag;
