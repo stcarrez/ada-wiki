@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-html -- Wiki HTML renderer
---  Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2018, 2019, 2020, 2021 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2018, 2019, 2020, 2021, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -117,6 +117,9 @@ package body Wiki.Render.Html is
                      Node   : in Wiki.Nodes.Node_Type) is
    begin
       case Node.Kind is
+         when Wiki.Nodes.N_NONE =>
+            null;
+
          when Wiki.Nodes.N_HEADER =>
             if Node.Level > 6 then
                Engine.Render_Header (Doc    => Doc,
@@ -130,10 +133,33 @@ package body Wiki.Render.Html is
 
          when Wiki.Nodes.N_LINE_BREAK =>
             Engine.Output.Write ("<br>");
+            Engine.Output.Newline;
 
          when Wiki.Nodes.N_NEWLINE =>
-            if not Engine.No_Newline then
-               Engine.Output.Write_Wide_Text (Wiki.Helpers.LF & "");
+            Engine.Newline;
+
+         when Wiki.Nodes.N_DEFINITION =>
+            if not Engine.In_Definition then
+               Engine.Close_Paragraph;
+               Engine.In_Definition := True;
+               Engine.Output.Start_Element ("dl");
+            else
+               Engine.Output.End_Element ("dd");
+            end if;
+            Engine.Output.Start_Element ("dt");
+            Engine.Output.Write_Wide_Text (Node.Header);
+            Engine.Output.End_Element ("dt");
+            Engine.Output.Start_Element ("dd");
+            Engine.Has_Paragraph := True;
+            Engine.Need_Paragraph := False;
+
+         when Wiki.Nodes.N_END_DEFINITION =>
+            if Engine.In_Definition then
+               Engine.In_Definition := False;
+               Engine.Output.End_Element ("dd");
+               Engine.Output.End_Element ("dl");
+               Engine.Has_Paragraph := False;
+               Engine.Need_Paragraph := True;
             end if;
 
          when Wiki.Nodes.N_HORIZONTAL_RULE =>
@@ -158,11 +184,23 @@ package body Wiki.Render.Html is
          when Wiki.Nodes.N_INDENT =>
             null;
 
-         when Wiki.Nodes.N_LIST =>
-            Engine.Render_List_Item (Node.Level, False);
+         when Wiki.Nodes.N_LIST_END =>
+            Engine.Render_List_End ("ul");
 
-         when Wiki.Nodes.N_NUM_LIST =>
-            Engine.Render_List_Item (Node.Level, True);
+         when Wiki.Nodes.N_NUM_LIST_END =>
+            Engine.Render_List_End ("ol");
+
+         when Wiki.Nodes.N_LIST_ITEM_END =>
+            Engine.Render_List_End ("li");
+
+         when Wiki.Nodes.N_LIST_START =>
+            Engine.Render_List_Start ("ul", Node.Level);
+
+         when Wiki.Nodes.N_NUM_LIST_START =>
+            Engine.Render_List_Start ("ol", Node.Level);
+
+         when Wiki.Nodes.N_LIST_ITEM =>
+            Engine.Render_List_Item;
 
          when Wiki.Nodes.N_TEXT =>
             Engine.Add_Text (Text   => Node.Text,
@@ -340,6 +378,7 @@ package body Wiki.Render.Html is
       end if;
       Engine.Output.Write_Wide_Text (Header);
       Engine.Output.End_Element (Tag.all);
+      Engine.Newline;
    end Render_Header;
 
    --  ------------------------------
@@ -440,33 +479,63 @@ package body Wiki.Render.Html is
    end Add_Blockquote;
 
    --  ------------------------------
-   --  Render a list item (<li>).  Close the previous paragraph and list item if any.
-   --  The list item will be closed at the next list item, next paragraph or next header.
+   --  Render a list item end (</ul> or </ol>).
+   --  Close the previous paragraph and list item if any.
    --  ------------------------------
-   procedure Render_List_Item (Engine   : in out Html_Renderer;
-                               Level    : in Positive;
-                               Ordered  : in Boolean) is
+   procedure Render_List_End (Engine : in out Html_Renderer;
+                              Tag    : in String) is
    begin
       if Engine.Has_Paragraph then
          Engine.Output.End_Element ("p");
          Engine.Has_Paragraph := False;
       end if;
-      if Engine.Has_Item then
-         Engine.Output.End_Element ("li");
-         Engine.Has_Item := False;
+      Engine.Has_Item := False;
+      Engine.Need_Paragraph := False;
+      Engine.Output.End_Element (Tag);
+      Engine.Has_Item := False;
+   end Render_List_End;
+
+   --  ------------------------------
+   --  Render a list item (<li>).  Close the previous paragraph and list item if any.
+   --  The list item will be closed at the next list item, next paragraph or next header.
+   --  ------------------------------
+   procedure Render_List_Start (Engine   : in out Html_Renderer;
+                                Tag      : in String;
+                                Level    : in Positive) is
+   begin
+      if Engine.Has_Paragraph then
+         Engine.Output.End_Element ("p");
+         Engine.Has_Paragraph := False;
       end if;
       Engine.Need_Paragraph := False;
-      Engine.Open_Paragraph;
-      while Engine.Current_Level < Level loop
-         if Ordered then
-            Engine.Output.Start_Element ("ol");
-         else
-            Engine.Output.Start_Element ("ul");
-         end if;
-         Engine.Current_Level := Engine.Current_Level + 1;
-         Engine.List_Styles (Engine.Current_Level) := Ordered;
-      end loop;
+      Engine.Output.Start_Element (Tag);
+      if Level > 1 then
+         Engine.Output.Write_Attribute ("start", Util.Strings.Image (Level));
+      end if;
+      Engine.Has_Item := False;
+   end Render_List_Start;
+
+   --  ------------------------------
+   --  Render a list item (<li>).  Close the previous paragraph and list item if any.
+   --  The list item will be closed at the next list item, next paragraph or next header.
+   --  ------------------------------
+   procedure Render_List_Item (Engine   : in out Html_Renderer) is
+   begin
+      if Engine.Has_Paragraph then
+         Engine.Output.End_Element ("p");
+         Engine.Has_Paragraph := False;
+      end if;
+      Engine.Output.Start_Element ("li");
+      Engine.Has_Item := False;
    end Render_List_Item;
+
+   procedure Newline (Engine : in out Html_Renderer) is
+   begin
+--      if not Engine.No_Newline then
+--         Engine.Output.Write_Wide_Text (Wiki.Helpers.LF & "");
+--      end if;
+      null;
+   end Newline;
 
    procedure Close_Paragraph (Engine : in out Html_Renderer) is
    begin
@@ -476,9 +545,13 @@ package body Wiki.Render.Html is
       end if;
       if Engine.Has_Paragraph then
          Engine.Output.End_Element ("p");
+         if not Engine.No_Newline then
+            Engine.Output.Newline;
+         end if;
       end if;
       if Engine.Has_Item then
          Engine.Output.End_Element ("li");
+         Engine.Newline;
       end if;
       while Engine.Current_Level > 0 loop
          if Engine.List_Styles (Engine.Current_Level) then
@@ -487,6 +560,7 @@ package body Wiki.Render.Html is
             Engine.Output.End_Element ("ul");
          end if;
          Engine.Current_Level := Engine.Current_Level - 1;
+         Engine.Newline;
       end loop;
       Engine.Has_Paragraph := False;
       Engine.Has_Item := False;
@@ -669,25 +743,32 @@ package body Wiki.Render.Html is
       Engine.Output.End_Element ("q");
    end Render_Quote;
 
+   HTML_STRONG      : aliased constant String := "strong";
    HTML_BOLD        : aliased constant String := "b";
    HTML_ITALIC      : aliased constant String := "i";
-   HTML_CODE        : aliased constant String := "tt";
+   HTML_EM          : aliased constant String := "em";
+   HTML_CODE        : aliased constant String := "code";
    HTML_SUPERSCRIPT : aliased constant String := "sup";
    HTML_SUBSCRIPT   : aliased constant String := "sub";
    HTML_STRIKEOUT   : aliased constant String := "del";
-   --  HTML_UNDERLINE   : aliased constant String := "ins";
+   HTML_INS         : aliased constant String := "ins";
    HTML_PREFORMAT   : aliased constant String := "pre";
+   HTML_UNDERLINE   : aliased constant String := "u";
 
    type String_Array_Access is array (Format_Type) of Wiki.String_Access;
 
    HTML_ELEMENT     : constant String_Array_Access :=
-     (BOLD        => HTML_BOLD'Access,
+     (STRONG      => HTML_STRONG'Access,
+      BOLD        => HTML_BOLD'Access,
       ITALIC      => HTML_ITALIC'Access,
+      EMPHASIS    => HTML_EM'Access,
       CODE        => HTML_CODE'Access,
       SUPERSCRIPT => HTML_SUPERSCRIPT'Access,
       SUBSCRIPT   => HTML_SUBSCRIPT'Access,
       STRIKEOUT   => HTML_STRIKEOUT'Access,
-      PREFORMAT   => HTML_PREFORMAT'Access);
+      PREFORMAT   => HTML_PREFORMAT'Access,
+      INS         => HTML_INS'Access,
+      UNDERLINE   => HTML_UNDERLINE'Access);
 
    --  ------------------------------
    --  Add a text block with the given format.
@@ -733,7 +814,9 @@ package body Wiki.Render.Html is
             Engine.Output.Write_Wide_Text (Text);
             Engine.Output.End_Element ("code");
          else
+            Engine.Output.Start_Element ("code");
             Engine.Output.Write_Wide_Text (Text);
+            Engine.Output.End_Element ("code");
          end if;
          Engine.Output.End_Element ("pre");
       end if;
