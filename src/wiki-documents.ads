@@ -73,6 +73,10 @@ package Wiki.Documents is
                      Header : in Wiki.Strings.WString;
                      Level  : in Positive);
 
+   --  Add a definition item at end of the document.
+   procedure Add_Definition (Into       : in out Document;
+                             Definition : in Wiki.Strings.WString);
+
    --  Add a link.
    procedure Add_Link (Into       : in out Document;
                        Name       : in Wiki.Strings.WString;
