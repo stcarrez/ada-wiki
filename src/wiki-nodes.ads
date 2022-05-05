@@ -30,8 +30,10 @@ package Wiki.Nodes is
                       N_LIST_END,
                       N_NUM_LIST_END,
                       N_LIST_ITEM,
+                      N_END_DEFINITION,
                       N_NEWLINE,
                       N_HEADER,
+                      N_DEFINITION,
                       N_TOC,
                       N_TOC_ENTRY,
                       N_BLOCKQUOTE,
@@ -61,7 +63,7 @@ package Wiki.Nodes is
       Parent     : Node_Type_Access;
       case Kind is
          when N_HEADER | N_BLOCKQUOTE | N_INDENT | N_TOC_ENTRY
-            | N_NUM_LIST_START | N_LIST_START =>
+            | N_NUM_LIST_START | N_LIST_START | N_DEFINITION =>
             Level  : Natural := 0;
             Header : Wiki.Strings.WString (1 .. Len);
 
