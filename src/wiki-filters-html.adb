@@ -41,7 +41,7 @@ package body Wiki.Filters.Html is
             return;
 
          when N_NEWLINE | N_LIST_END | N_LIST_ITEM_END | N_NUM_LIST_END
-           | N_LIST_ITEM =>
+           | N_LIST_ITEM | N_END_DEFINITION =>
             Filter_Type (Filter).Add_Node (Document, Kind);
             return;
 
