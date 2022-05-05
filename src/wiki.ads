@@ -87,14 +87,12 @@ package Wiki is
          --  https://www.redmine.org/projects/redmine/wiki/RedmineTextFormattingTextile
          SYNTAX_TEXTILE,
 
-         --  A mix of the above
-         SYNTAX_MIX,
-
          --  The input is plain possibly incorrect HTML.
          SYNTAX_HTML);
 
    --  Defines the possible text formats.
-   type Format_Type is (BOLD, STRONG, ITALIC, EMPHASIS, CODE, SUPERSCRIPT, SUBSCRIPT, STRIKEOUT, PREFORMAT, INS);
+   type Format_Type is (BOLD, STRONG, ITALIC, EMPHASIS, CODE, SUPERSCRIPT, SUBSCRIPT, STRIKEOUT,
+                        PREFORMAT, INS, UNDERLINE);
 
    type Format_Map is array (Format_Type) of Boolean;
 
