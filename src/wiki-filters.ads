@@ -70,6 +70,11 @@ package Wiki.Filters is
                          Header    : in Wiki.Strings.WString;
                          Level     : in Natural);
 
+   --  Add a definition item at end of the document.
+   procedure Add_Definition (Filter     : in out Filter_Type;
+                             Document   : in out Wiki.Documents.Document;
+                             Definition : in Wiki.Strings.WString);
+
    --  Push a HTML node with the given tag to the document.
    procedure Push_Node (Filter     : in out Filter_Type;
                         Document   : in out Wiki.Documents.Document;
