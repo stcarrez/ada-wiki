@@ -15,7 +15,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Ada.Strings.Wide_Wide_Maps;
 with Wiki.Helpers;
 with Util.Strings;
 package body Wiki.Render.Wiki is
@@ -423,9 +422,9 @@ package body Wiki.Render.Wiki is
       end if;
 
       --  Textile is using a special form: h<N>.
-      if Engine.Syntax = Syntax_Textile then
+      if Engine.Syntax = SYNTAX_TEXTILE then
          Engine.Output.Write (Engine.Tags (Header_Start).all);
-         Engine.Output.Write (Strings.To_Wstring (Util.Strings.Image (Count)));
+         Engine.Output.Write (Strings.To_WString (Util.Strings.Image (Count)));
          Engine.Output.Write (Engine.Tags (Header_End).all);
          Engine.Output.Write (' ');
          Engine.Output.Write (Header);
@@ -994,10 +993,10 @@ package body Wiki.Render.Wiki is
                          Doc    : in Documents.Document;
                          Level  : in Natural) is
    begin
-      if Engine.Syntax = Syntax_Media_Wiki then
+      if Engine.Syntax = SYNTAX_MEDIA_WIKI then
          Engine.Output.Write ("__TOC__");
       end if;
-   end Render_Toc;
+   end Render_TOC;
 
    --  ------------------------------
    --  Render a table component such as N_TABLE, N_ROW or N_COLUMN.
