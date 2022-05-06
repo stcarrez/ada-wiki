@@ -92,7 +92,7 @@ package Wiki is
 
    --  Defines the possible text formats.
    type Format_Type is (BOLD, STRONG, ITALIC, EMPHASIS, CODE, SUPERSCRIPT, SUBSCRIPT, STRIKEOUT,
-                        PREFORMAT, INS, UNDERLINE);
+                        PREFORMAT, INS, UNDERLINE, CITE);
 
    type Format_Map is array (Format_Type) of Boolean;
 
