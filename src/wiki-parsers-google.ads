@@ -15,30 +15,9 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Wiki.Parsers.Common;
-private package Wiki.Parsers.Google is
+private package Wiki.Parsers.Google with Preelaborate is
 
-   pragma Preelaborate;
-
-   Wiki_Table : aliased constant Parser_Table
-     := (
-         16#0A# => Parse_End_Line'Access,
-         16#0D# => Parse_End_Line'Access,
-         Character'Pos (' ') => Parse_Space'Access,
-         Character'Pos ('=') => Common.Parse_Header'Access,
-         Character'Pos ('*') => Common.Parse_Single_Bold'Access,
-         Character'Pos ('_') => Common.Parse_Single_Italic'Access,
-         Character'Pos ('`') => Common.Parse_Single_Code'Access,
-         Character'Pos ('^') => Common.Parse_Single_Superscript'Access,
-         Character'Pos ('~') => Common.Parse_Double_Strikeout'Access,
-         Character'Pos (',') => Common.Parse_Double_Subscript'Access,
-         Character'Pos ('[') => Common.Parse_Link'Access,
-         Character'Pos ('\') => Common.Parse_Line_Break'Access,
-         Character'Pos ('#') => Common.Parse_List'Access,
-         Character'Pos ('{') => Common.Parse_Preformatted'Access,
-         Character'Pos ('}') => Common.Parse_Preformatted'Access,
-         Character'Pos ('<') => Parse_Maybe_Html'Access,
-         others => Parse_Text'Access
-        );
+   procedure Parse_Line (Parser : in out Parser_Type;
+                         Text   : in Wiki.Buffers.Buffer_Access);
 
 end Wiki.Parsers.Google;
