@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-text -- Wiki Text renderer
---  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2019, 2020 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2019, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,11 +51,14 @@ package Wiki.Render.Text is
    procedure Render_Blockquote (Engine : in out Text_Renderer;
                                 Level  : in Natural);
 
-   --  Render a list item (<li>).  Close the previous paragraph and list item if any.
-   --  The list item will be closed at the next list item, next paragraph or next header.
-   procedure Render_List_Item (Engine   : in out Text_Renderer;
-                               Level    : in Positive;
-                               Ordered  : in Boolean);
+   procedure Render_List_Start (Engine   : in out Text_Renderer;
+                                Tag      : in String;
+                                Level    : in Natural);
+
+   procedure Render_List_End (Engine   : in out Text_Renderer;
+                              Tag      : in String);
+   procedure Render_List_Item_Start (Engine   : in out Text_Renderer);
+   procedure Render_List_Item_End (Engine   : in out Text_Renderer);
 
    --  Render a link.
    procedure Render_Link (Engine   : in out Text_Renderer;
@@ -79,11 +82,19 @@ package Wiki.Render.Text is
 
 private
 
+   type List_Index_Type is new Integer range 0 .. 32;
+
+   type List_Level_Array is array (List_Index_Type range 1 .. 32) of Natural;
+
    --  Emit a new line.
    procedure New_Line (Document : in out Text_Renderer);
 
    procedure Close_Paragraph (Document : in out Text_Renderer);
    procedure Open_Paragraph (Document : in out Text_Renderer);
+
+   --  Render a text block indenting the text if necessary.
+   procedure Render_Paragraph (Engine : in out Text_Renderer;
+                               Text   : in Wiki.Strings.WString);
 
    type Text_Renderer is new Wiki.Render.Renderer with record
       Output         : Streams.Output_Stream_Access := null;
@@ -92,7 +103,10 @@ private
       Need_Paragraph : Boolean := False;
       Empty_Line     : Boolean := True;
       No_Newline     : Boolean := False;
+      Current_Indent : Natural := 0;
       Indent_Level   : Natural := 0;
+      List_Index     : List_Index_Type := 0;
+      List_Levels    : List_Level_Array;
    end record;
 
 end Wiki.Render.Text;
