@@ -19,44 +19,100 @@ private package Wiki.Parsers.Common is
 
    pragma Preelaborate;
 
-   --  Escape a single character and append it to the wiki text buffer.
-   procedure Parse_Escape (P     : in out Parser;
-                           Token : in Wiki.Strings.WChar);
+   subtype Parser_Type is Parser;
+
+   --  Check if this is a list item composed of '*' and '#'
+   --  and terminated by a space.
+   function Is_List (Text : in Wiki.Buffers.Buffer_Access;
+                     From : in Positive) return Boolean;
+
+   procedure Skip_Spaces (Text : in out Wiki.Buffers.Buffer_Access;
+                          From : in out Positive);
+
+   procedure Append (Into : in out Wiki.Strings.BString;
+                     Text : in Wiki.Buffers.Buffer_Access;
+                     From : in Positive);
+
+   procedure Parse_Token (Text        : in out Wiki.Buffers.Buffer_Access;
+                          From        : in out Positive;
+                          Escape_Char : in Wiki.Strings.WChar;
+                          Marker1     : in Wiki.Strings.WChar;
+                          Marker2     : in Wiki.Strings.WChar;
+                          Into        : in out Wiki.Strings.BString);
+
+   --  Parse a single text character and add it to the text buffer.
+   procedure Parse_Text (Parser : in out Parser_Type;
+                         Text   : in out Wiki.Buffers.Buffer_Access;
+                         From   : in out Positive;
+                         Count  : in Positive := 1);
+
+   procedure Parse_Paragraph (Parser : in out Parser_Type;
+                              Text   : in out Wiki.Buffers.Buffer_Access;
+                              From   : in out Positive);
+
+   procedure Parse_Horizontal_Rule (Parser : in out Parser_Type;
+                                    Text   : in out Wiki.Buffers.Buffer_Access;
+                                    From   : in out Positive;
+                                    Marker : in Wiki.Strings.WChar);
+
+   --  Parse a preformatted header block.
+   --  Example:
+   --    ///
+   --    ///html
+   --    ///[Ada]
+   --    {{{
+   --    ```
+   procedure Parse_Preformatted (Parser : in out Parser_Type;
+                                 Text   : in out Wiki.Buffers.Buffer_Access;
+                                 From   : in out Positive;
+                                 Marker : in Wiki.Strings.WChar);
 
    --  Parse a wiki heading.  The heading could start with '=' or '!'.
    --  The trailing equals are ignored.
    --  Example:
-   --    == Level 2 ==
-   --    !!! Level 3
-   procedure Parse_Header (P     : in out Parser;
-                           Token : in Wiki.Strings.WChar);
+   --    ==== Level 4       Creole
+   --    == Level 2 ==      MediaWiki
+   --    !!! Level 3        Dotclear
+   procedure Parse_Header (Parser : in out Parser_Type;
+                           Text   : in out Wiki.Buffers.Buffer_Access;
+                           From   : in Positive;
+                           Marker : in Wiki.Strings.WChar);
 
-   --  Parse a line break.
+   --  Parse a template with parameters.
    --  Example:
-   --     \\    (Creole)
-   --     %%%   (Dotclear)
-   procedure Parse_Line_Break (P     : in out Parser;
-                               Token : in Wiki.Strings.WChar);
+   --    {{Name|param|...}}           MediaWiki
+   --    {{Name|param=value|...}}     MediaWiki
+   --    <<Name param=value ...>>     Creole
+   --    [{Name param=value ...}]     JSPWiki
+   procedure Parse_Template (Parser  : in out Parser_Type;
+                             Text    : in out Wiki.Buffers.Buffer_Access;
+                             From    : in out Positive;
+                             Token   : in Wiki.Strings.WChar);
 
-   procedure Parse_Preformatted (P     : in out Parser;
-                                 Token : in Wiki.Strings.WChar);
+   procedure Parse_Entity (Parser : in out Parser_Type;
+                           Text   : in out Wiki.Buffers.Buffer_Access;
+                           From   : in out Positive);
 
-   procedure Parse_Preformatted_Block (P     : in out Parser;
-                                       Token : in Wiki.Strings.WChar);
-
-   --  Parse a template parameter and expand it to the target buffer.
+   --  Parse a quote.
    --  Example:
-   --    {{{1}}}                      MediaWiki
-   --    <<<1>>>                      Creole extension
-   procedure Expand_Parameter (P     : in out Parser;
-                               Into  : in out Wiki.Strings.BString);
+   --    {{name}}
+   --    {{name|language}}
+   --    {{name|language|url}}
+   --    ??citation??
+   procedure Parse_Quote (Parser  : in out Parser_Type;
+                          Text    : in out Wiki.Buffers.Buffer_Access;
+                          From    : in out Positive;
+                          Marker  : in Wiki.Strings.WChar);
 
-   --  Extract a list of parameters separated by the given separator (ex: '|').
-   procedure Parse_Parameters (P          : in out Parser;
-                               Separator  : in Wiki.Strings.WChar;
-                               Terminator : in Wiki.Strings.WChar;
-                               Names      : in String_Array;
-                               Max        : in Positive := 200);
+   procedure Parse_Html_Element (Parser : in out Parser_Type;
+                                 Text   : in out Wiki.Buffers.Buffer_Access;
+                                 From   : in out Positive;
+                                 Start  : in Boolean);
+
+   procedure Parse_Html_Preformatted (Parser  : in out Parser_Type;
+                                      Text    : in out Wiki.Buffers.Buffer_Access;
+                                      From    : in out Positive);
+
 
    --  Parse a link.
    --  Example:
@@ -66,26 +122,19 @@ private package Wiki.Parsers.Common is
    --    [name|url|language|title]
    --    [[link]]
    --    [[link|name]]
-   --  ------------------------------
-   procedure Parse_Link (P     : in out Parser;
-                         Token : in Wiki.Strings.WChar);
+   procedure Parse_Link (Parser  : in out Parser_Type;
+                         Text    : in out Wiki.Buffers.Buffer_Access;
+                         From    : in out Positive);
 
-   procedure Parse_List (P     : in out Parser;
-                         Token : in Wiki.Strings.WChar);
+   procedure Parse_List (Parser  : in out Parser_Type;
+                         Text    : in out Wiki.Buffers.Buffer_Access;
+                         From    : in out Positive);
 
-   procedure Parse_Single_Italic is new Parse_Single_Format (ITALIC);
-   procedure Parse_Single_Bold is new Parse_Single_Format (BOLD);
-   procedure Parse_Single_Code is new Parse_Single_Format (CODE);
-   procedure Parse_Single_Superscript is new Parse_Single_Format (SUPERSCRIPT);
-   --  procedure Parse_Single_Subscript is new Parse_Single_Format (SUBSCRIPT);
-   --  procedure Parse_Single_Strikeout is new Parse_Single_Format (STRIKEOUT);
-
-   procedure Parse_Double_Italic is new Parse_Double_Format (ITALIC);
-   procedure Parse_Double_Bold is new Parse_Double_Format (BOLD);
-   procedure Parse_Double_Code is new Parse_Double_Format (CODE);
-   --  procedure Parse_Double_Superscript is new Parse_Double_Format (SUPERSCRIPT);
-   procedure Parse_Double_Subscript is new Parse_Double_Format (SUBSCRIPT);
-   procedure Parse_Double_Superscript is new Parse_Double_Format (SUPERSCRIPT);
-   procedure Parse_Double_Strikeout is new Parse_Double_Format (STRIKEOUT);
+   --  Parse a list definition that starts with ';':
+   --    ;item 1
+   --    : definition 1
+   procedure Parse_Definition (Parser  : in out Parser_Type;
+                               Text    : in out Wiki.Buffers.Buffer_Access;
+                               From    : in out Positive);
 
 end Wiki.Parsers.Common;
