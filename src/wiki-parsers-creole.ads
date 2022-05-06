@@ -15,48 +15,10 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Wiki.Parsers.MediaWiki;
-with Wiki.Parsers.Common;
-private package Wiki.Parsers.Creole is
 
-   pragma Preelaborate;
+private package Wiki.Parsers.Creole with Preelaborate is
 
-   --  Parse an image or a pre-formatted section.
-   --  Example:
-   --    {{url|alt text}}
-   --    {{{text}}}
-   --    {{{
-   --    pre-formatted
-   --    }}}
-   procedure Parse_Creole_Image_Or_Preformatted (P     : in out Parser;
-                                                 Token : in Wiki.Strings.WChar);
-
-   procedure Parse_List_Or_Bold (P     : in out Parser;
-                                 Token : in Wiki.Strings.WChar);
-
-   Wiki_Table : aliased constant Parser_Table
-     := (
-         16#0A# => Parse_End_Line'Access,
-         16#0D# => Parse_End_Line'Access,
-         Character'Pos (' ') => Parse_Space'Access,
-         Character'Pos ('=') => Common.Parse_Header'Access,
-         Character'Pos ('*') => Parse_List_Or_Bold'Access,
-         Character'Pos ('/') => Common.Parse_Double_Italic'Access,
-         Character'Pos ('@') => Common.Parse_Double_Code'Access,
-         Character'Pos ('^') => Common.Parse_Double_Superscript'Access,
-         Character'Pos ('-') => Common.Parse_Double_Strikeout'Access,
-         Character'Pos ('+') => Common.Parse_Double_Strikeout'Access,
-         Character'Pos (',') => Common.Parse_Double_Subscript'Access,
-         Character'Pos ('[') => Common.Parse_Link'Access,
-         Character'Pos ('\') => Common.Parse_Line_Break'Access,
-         Character'Pos ('#') => Common.Parse_List'Access,
-         Character'Pos ('{') => Parse_Creole_Image_Or_Preformatted'Access,
-         Character'Pos ('%') => Common.Parse_Line_Break'Access,
-         Character'Pos (';') => MediaWiki.Parse_Item'Access,
-         Character'Pos ('<') => MediaWiki.Parse_Template'Access,
-         Character'Pos (':') => MediaWiki.Parse_Definition'Access,
-         Character'Pos ('~') => Common.Parse_Escape'Access,
-         others => Parse_Text'Access
-        );
+   procedure Parse_Line (Parser : in out Parser_Type;
+                         Text   : in Wiki.Buffers.Buffer_Access);
 
 end Wiki.Parsers.Creole;
