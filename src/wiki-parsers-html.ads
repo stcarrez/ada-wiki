@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-html -- Wiki HTML parser
---  Copyright (C) 2015, 2016 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,16 +23,9 @@
 --
 --  When parsing HTML content, we call the <tt>Start_Element</tt> or <tt>End_Element</tt>
 --  operations.  The renderer is then able to handle the HTML tag according to its needs.
-private package Wiki.Parsers.Html is
+private package Wiki.Parsers.Html with Preelaborate is
 
-   pragma Preelaborate;
-
-   --  Parse a HTML element <XXX attributes>
-   --  or parse an end of HTML element </XXX>
-   procedure Parse_Element (P : in out Parser);
-
-   --  Parse an HTML entity such as &nbsp; and replace it with the corresponding code.
-   procedure Parse_Entity (P     : in out Parser;
-                           Token : in Wiki.Strings.WChar);
+   procedure Parse_Line (Parser : in out Parser_Type;
+                         Text   : in Wiki.Buffers.Buffer_Access);
 
 end Wiki.Parsers.Html;

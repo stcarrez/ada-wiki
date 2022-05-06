@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-html -- Wiki HTML parser
---  Copyright (C) 2015, 2016, 2018, 2020, 2021 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2018, 2020, 2021, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,351 +16,103 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 
-with Interfaces;
 with Wiki.Helpers;
-with Wiki.Parsers.Html.Entities;
+with Wiki.Html_Parser;
 package body Wiki.Parsers.Html is
 
-   --  Parse an HTML attribute
-   procedure Parse_Attribute_Name (P    : in out Parser;
-                                   Name : in out Wiki.Strings.BString);
+   use type Wiki.Html_Parser.State_Type;
+   use type Wiki.Html_Parser.Entity_State_Type;
+   use type Wiki.Buffers.Buffer_Access;
 
-   --  Parse a HTML/XML comment to strip it.
-   procedure Parse_Comment (P : in out Parser);
+   procedure Parse_Line_Fragment (Parser : in out Parser_Type;
+                                  Text   : in out Wiki.Strings.WString);
 
-   --  Parse a simple DOCTYPE declaration and ignore it.
-   procedure Parse_Doctype (P : in out Parser);
+   procedure Parse_Line_Fragment (Parser : in out Parser_Type;
+                                  Text   : in out Wiki.Strings.WString) is
+      procedure Process (Kind : in Wiki.Html_Parser.State_Type;
+                         Name : in Wiki.Strings.WString;
+                         Attributes : in out Wiki.Attributes.Attribute_List);
 
-   procedure Collect_Attributes (P     : in out Parser);
-   function Is_Letter (C : in Wiki.Strings.WChar) return Boolean;
-   function From_Hex (Value : in String) return Wiki.Strings.WChar;
-   procedure Collect_Attribute_Value (P     : in out Parser;
-                                      Value : in out Wiki.Strings.BString);
-
-   function Is_Letter (C : in Wiki.Strings.WChar) return Boolean is
-   begin
-      return C > ' ' and C /= ':' and C /= '>' and C /= ''' and C /= '"'
-        and C /= '/' and C /= '=' and C /= '<';
-   end Is_Letter;
-
-   --  ------------------------------
-   --  Parse an HTML attribute
-   --  ------------------------------
-   procedure Parse_Attribute_Name (P    : in out Parser;
-                                   Name : in out Wiki.Strings.BString) is
-      C : Wiki.Strings.WChar;
-   begin
-      Skip_Spaces (P);
-      while not P.Is_Eof loop
-         Peek (P, C);
-         if not Is_Letter (C) then
-            Put_Back (P, C);
-            return;
-         end if;
-         Wiki.Strings.Wide_Wide_Builders.Append (Name, C);
-      end loop;
-   end Parse_Attribute_Name;
-
-   procedure Collect_Attribute_Value (P     : in out Parser;
-                                      Value : in out Wiki.Strings.BString) is
-      C     : Wiki.Strings.WChar;
-      Token : Wiki.Strings.WChar;
-   begin
-      Peek (P, Token);
-      if Wiki.Helpers.Is_Space_Or_Newline (Token) then
-         Skip_Spaces (P);
-         Peek (P, Token);
-         if Token /= ''' and Token /= '"' then
-            Put_Back (P, Token);
-            return;
-         end if;
-      elsif Token = '>' then
-         Put_Back (P, Token);
-         return;
-      end if;
-      if Token /= ''' and Token /= '"' then
-         Wiki.Strings.Wide_Wide_Builders.Append (Value, Token);
-         while not P.Is_Eof loop
-            Peek (P, C);
-            if C = ''' or C = '"' or C = ' ' or C = '=' or C = '>' or C = '<' or C = '`' then
-               Put_Back (P, C);
-               return;
-            end if;
-            Wiki.Strings.Wide_Wide_Builders.Append (Value, C);
-         end loop;
-      else
-         while not P.Is_Eof loop
-            Peek (P, C);
-            if C = Token then
-               return;
-            end if;
-            Wiki.Strings.Wide_Wide_Builders.Append (Value, C);
-         end loop;
-      end if;
-   end Collect_Attribute_Value;
-
-   --  ------------------------------
-   --  Parse a list of HTML attributes up to the first '>'.
-   --  attr-name
-   --  attr-name=
-   --  attr-name=value
-   --  attr-name='value'
-   --  attr-name="value"
-   --  <name name='value' ...>
-   --  ------------------------------
-   procedure Collect_Attributes (P     : in out Parser) is
-      procedure Append_Attribute (Name : in Wiki.Strings.WString);
-
-      C     : Wiki.Strings.WChar;
-      Name  : Wiki.Strings.BString (64);
-      Value : Wiki.Strings.BString (256);
-
-      procedure Append_Attribute (Name : in Wiki.Strings.WString) is
-
-         procedure Attribute_Value (Value : in Wiki.Strings.WString);
-
-         procedure Attribute_Value (Value : in Wiki.Strings.WString) is
-         begin
-            Attributes.Append (P.Attributes, Name, Value);
-         end Attribute_Value;
-
-         procedure Attribute_Value is
-           new Wiki.Strings.Wide_Wide_Builders.Get (Attribute_Value);
-         pragma Inline (Attribute_Value);
-
+      procedure Process (Kind : in Wiki.Html_Parser.State_Type;
+                         Name : in Wiki.Strings.WString;
+                         Attributes : in out Wiki.Attributes.Attribute_List) is
+         Tag  : constant Wiki.Html_Tag := Wiki.Find_Tag (Name);
       begin
-         Attribute_Value (Value);
-      end Append_Attribute;
-      pragma Inline (Append_Attribute);
-
-      procedure Append_Attribute is
-        new Wiki.Strings.Wide_Wide_Builders.Get (Append_Attribute);
-
-   begin
-      Wiki.Attributes.Clear (P.Attributes);
-      while not P.Is_Eof loop
-         Parse_Attribute_Name (P, Name);
-         Skip_Spaces (P);
-         Peek (P, C);
-         if C = '>' or C = '<' or C = '/' then
-            Put_Back (P, C);
-            exit;
+         if Kind = Wiki.Html_Parser.HTML_START then
+            Start_Element (Parser, Tag, Attributes);
+         elsif Kind = Wiki.Html_Parser.HTML_END then
+            End_Element (Parser, Tag);
+         elsif Kind = Wiki.Html_Parser.HTML_START_END then
+            Start_Element (Parser, Tag, Attributes);
+            End_Element (Parser, Tag);
          end if;
-         if C = '=' then
-            Collect_Attribute_Value (P, Value);
-            Append_Attribute (Name);
-            Wiki.Strings.Wide_Wide_Builders.Clear (Name);
-            Wiki.Strings.Wide_Wide_Builders.Clear (Value);
-         elsif Wiki.Strings.Wide_Wide_Builders.Length (Name) > 0 then
-            Put_Back (P, C);
-            Append_Attribute (Name);
-            Wiki.Strings.Wide_Wide_Builders.Clear (Name);
-         end if;
-      end loop;
+      end Process;
 
-      --  Add any pending attribute.
-      if Wiki.Strings.Wide_Wide_Builders.Length (Name) > 0 then
-         Append_Attribute (Name);
-      end if;
-   end Collect_Attributes;
-
-   --  ------------------------------
-   --  Parse a HTML/XML comment to strip it.
-   --  ------------------------------
-   procedure Parse_Comment (P : in out Parser) is
+      Pos   : Natural := Text'First;
+      Last  : constant Natural := Text'Last;
+      First : Natural := Text'First;
       C     : Wiki.Strings.WChar;
    begin
-      Peek (P, C);
-      while not P.Is_Eof loop
-         Peek (P, C);
-         if C = '-' then
-            declare
-               Count : Natural := 1;
-            begin
-               Peek (P, C);
-               while not P.Is_Eof and C = '-' loop
-                  Peek (P, C);
-                  Count := Count + 1;
-               end loop;
-               exit when C = '>' and Count >= 2;
-            end;
-         end if;
-      end loop;
-   end Parse_Comment;
-
-   --  ------------------------------
-   --  Parse a simple DOCTYPE declaration and ignore it.
-   --  ------------------------------
-   procedure Parse_Doctype (P : in out Parser) is
-      C : Wiki.Strings.WChar;
-   begin
-      while not P.Is_Eof loop
-         Peek (P, C);
-         exit when C = '>';
-      end loop;
-   end Parse_Doctype;
-
-   --  ------------------------------
-   --  Parse a HTML element <XXX attributes>
-   --  or parse an end of HTML element </XXX>
-   --  ------------------------------
-   procedure Parse_Element (P : in out Parser) is
-      C    : Wiki.Strings.WChar;
-
-      procedure Add_Element (Token : in Wiki.Strings.WString);
-
-      procedure Add_Element (Token : in Wiki.Strings.WString) is
-         Tag  : Wiki.Html_Tag;
-      begin
-         Tag := Wiki.Find_Tag (Token);
-         if C = '/' then
-            Skip_Spaces (P);
-            Peek (P, C);
-            if C /= '>' then
-               Put_Back (P, C);
-            end if;
-            Flush_Text (P);
-            if Tag = Wiki.UNKNOWN_TAG then
-               if Token = "noinclude" then
-                  P.Context.Is_Hidden := not P.Context.Is_Included;
-               elsif Token = "includeonly" then
-                  P.Context.Is_Hidden := P.Context.Is_Included;
+      if not Wiki.Html_Parser.Is_Empty (Parser.Html) then
+         Wiki.Html_Parser.Parse_Element (Parser.Html, Text, Pos, Process'Access, Pos);
+      end if;
+      First := Pos;
+      while Pos <= Last loop
+         C := Text (Pos);
+         case C is
+            when '<' =>
+               if First < Pos then
+                  Append (Parser.Text, Text (First .. Pos - 1));
                end if;
-            else
-               End_Element (P, Tag);
-            end if;
-         else
-            Collect_Attributes (P);
-            Peek (P, C);
-            if C = '/' then
-               Peek (P, C);
-               if C = '>' then
-                  Start_Element (P, Tag, P.Attributes);
-                  End_Element (P, Tag);
-                  return;
+               Wiki.Html_Parser.Parse_Element (Parser.Html, Text, Pos + 1, Process'Access, Pos);
+               First := Pos;
+
+            when '&' =>
+               declare
+                  Status : Wiki.Html_Parser.Entity_State_Type := Wiki.Html_Parser.ENTITY_NONE;
+                  Next   : Positive;
+               begin
+                  Wiki.Html_Parser.Parse_Entity (Parser.Html, Text, Pos + 1, Status, C, Next);
+                  if Status = Wiki.Html_Parser.ENTITY_VALID then
+                     if First < Pos then
+                        Append (Parser.Text, Text (First .. Pos - 1));
+                     end if;
+                     Append (Parser.Text, C);
+                     First := Next;
+                     Pos := Next;
+                  else
+                     Pos := Pos + 1;
+                  end if;
+               end;
+
+            when Wiki.Helpers.CR =>
+               Text (Pos) := ' ';
+               Pos := Pos + 1;
+
+            when Wiki.Helpers.LF =>
+               if Parser.Pre_Tag_Counter = 0 then
+                  Text (Pos) := ' ';
                end if;
-            elsif C /= '>' then
-               Put_Back (P, C);
-            end if;
-            if Tag = UNKNOWN_TAG then
-               if Token = "noinclude" then
-                  P.Context.Is_Hidden := P.Context.Is_Included;
-               elsif Token = "includeonly" then
-                  P.Context.Is_Hidden := not P.Context.Is_Included;
-               end if;
-            else
-               Start_Element (P, Tag, P.Attributes);
-            end if;
-         end if;
-      end Add_Element;
-      pragma Inline (Add_Element);
+               Pos := Pos + 1;
 
-      procedure Add_Element is
-        new Wiki.Strings.Wide_Wide_Builders.Get (Add_Element);
-      pragma Inline (Add_Element);
+            when others =>
+               Pos := Pos + 1;
 
-      Name : Wiki.Strings.BString (64);
+         end case;
+      end loop;
+      if First < Pos then
+         Append (Parser.Text, Text (First .. Last));
+      end if;
+   end Parse_Line_Fragment;
+
+   procedure Parse_Line (Parser : in out Parser_Type;
+                         Text   : in Wiki.Buffers.Buffer_Access) is
+      Buffer : Wiki.Buffers.Buffer_Access := Text;
    begin
-      Peek (P, C);
-      if C = '!' then
-         Peek (P, C);
-         if C = '-' then
-            Parse_Comment (P);
-         else
-            Parse_Doctype (P);
-         end if;
-         return;
-      end if;
-      if C /= '/' then
-         Put_Back (P, C);
-      end if;
-      Parse_Attribute_Name (P, Name);
-      Add_Element (Name);
-   end Parse_Element;
-
-   use Interfaces;
-
-   function From_Hex (C : in Character) return Interfaces.Unsigned_8 is
-      (if C >= '0' and C <= '9' then Character'Pos (C) - Character'Pos ('0')
-      elsif C >= 'A' and C <= 'F' then Character'Pos (C) - Character'Pos ('A') + 10
-      elsif C >= 'a' and C <= 'f' then Character'Pos (C) - Character'Pos ('a') + 10
-      else raise Constraint_Error);
-
-   function From_Hex (Value : in String) return Wiki.Strings.WChar is
-      Result : Interfaces.Unsigned_32 := 0;
-   begin
-      for C of Value loop
-         Result := Interfaces.Shift_Left (Result, 4);
-         Result := Result + Interfaces.Unsigned_32 (From_Hex (C));
+      while Buffer /= null loop
+         Parse_Line_Fragment (Parser, Buffer.Content (1 .. Buffer.Last));
+         Buffer := Buffer.Next_Block;
       end loop;
-      return Wiki.Strings.WChar'Val (Result);
-   end From_Hex;
-
-   --  ------------------------------
-   --  Parse an HTML entity such as &nbsp; and replace it with the corresponding code.
-   --  ------------------------------
-   procedure Parse_Entity (P     : in out Parser;
-                           Token : in Wiki.Strings.WChar) is
-      pragma Unreferenced (Token);
-
-      Name : String (1 .. 10);
-      Len  : Natural := 0;
-      High : Natural := Wiki.Parsers.Html.Entities.Keywords'Last;
-      Low  : Natural := Wiki.Parsers.Html.Entities.Keywords'First;
-      Pos  : Natural;
-      C    : Wiki.Strings.WChar;
-   begin
-      while Len < Name'Last loop
-         Peek (P, C);
-         exit when C = ';' or else P.Is_Eof;
-         Len := Len + 1;
-         Name (Len) := Wiki.Strings.To_Char (C);
-      end loop;
-      while Low <= High loop
-         Pos := (Low + High) / 2;
-         if Wiki.Parsers.Html.Entities.Keywords (Pos).all = Name (1 .. Len) then
-            Parse_Text (P, Entities.Mapping (Pos));
-            return;
-         elsif Entities.Keywords (Pos).all < Name (1 .. Len) then
-            Low := Pos + 1;
-         else
-            High := Pos - 1;
-         end if;
-      end loop;
-
-      if Len > 0 and then Name (Name'First) = '#' then
-         if Name (Name'First + 1) >= '0' and then Name (Name'First + 1) <= '9' then
-            begin
-               C := Wiki.Strings.WChar'Val (Natural'Value (Name (Name'First + 1 .. Len)));
-               Parse_Text (P, C);
-               return;
-
-            exception
-               when Constraint_Error =>
-                  null;
-            end;
-         elsif Name (Name'First + 1) = 'x' then
-            begin
-               C := From_Hex (Name (Name'First + 2 .. Len));
-               Parse_Text (P, C);
-               return;
-
-            exception
-               when Constraint_Error =>
-                  null;
-            end;
-
-         end if;
-      end if;
-
-      --  The HTML entity is not recognized: we must treat it as plain wiki text.
-      Parse_Text (P, '&');
-      for I in 1 .. Len loop
-         Parse_Text (P, Wiki.Strings.To_WChar (Name (I)));
-      end loop;
-      if Len > 0 and then Len < Name'Last and then C = ';' then
-         Parse_Text (P, ';');
-      end if;
-   end Parse_Entity;
+   end Parse_Line;
 
 end Wiki.Parsers.Html;
