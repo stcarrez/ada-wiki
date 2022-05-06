@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-text -- Wiki Text renderer
---  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2018, 2019 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2018, 2019, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,7 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Wiki.Helpers;
+with Util.Strings;
 package body Wiki.Render.Text is
 
    --  ------------------------------
@@ -56,6 +57,7 @@ package body Wiki.Render.Text is
          Document.Output.Write (Wiki.Helpers.LF);
       end if;
       Document.Empty_Line := True;
+      Document.Current_Indent := 0;
    end Add_Line_Break;
 
    --  ------------------------------
@@ -71,21 +73,71 @@ package body Wiki.Render.Text is
       end loop;
    end Render_Blockquote;
 
-   --  ------------------------------
-   --  Render a list item (<li>).  Close the previous paragraph and list item if any.
-   --  The list item will be closed at the next list item, next paragraph or next header.
-   --  ------------------------------
-   procedure Render_List_Item (Engine   : in out Text_Renderer;
-                               Level    : in Positive;
-                               Ordered  : in Boolean) is
-      pragma Unreferenced (Level, Ordered);
+   procedure Render_List_Start (Engine   : in out Text_Renderer;
+                                Tag      : in String;
+                                Level    : in Natural) is
    begin
       if not Engine.Empty_Line then
          Engine.Add_Line_Break;
       end if;
       Engine.Need_Paragraph := False;
       Engine.Open_Paragraph;
-   end Render_List_Item;
+      if not Engine.No_Newline then
+         Engine.Output.Write (Wiki.Helpers.LF);
+      end if;
+      Engine.List_Index := Engine.List_Index + 1;
+      Engine.List_Levels (Engine.List_Index) := Level;
+      Engine.Indent_Level := Engine.Indent_Level + 2;
+   end Render_List_Start;
+
+   procedure Render_List_End (Engine   : in out Text_Renderer;
+                              Tag      : in String) is
+   begin
+      if not Engine.Empty_Line then
+         Engine.Add_Line_Break;
+      end if;
+      Engine.Need_Paragraph := False;
+      Engine.Open_Paragraph;
+      Engine.List_Index := Engine.List_Index - 1;
+      Engine.Indent_Level := Engine.Indent_Level - 2;
+   end Render_List_End;
+
+   --  ------------------------------
+   --  Render a list item (<li>).  Close the previous paragraph and list item if any.
+   --  The list item will be closed at the next list item, next paragraph or next header.
+   --  ------------------------------
+   procedure Render_List_Item_Start (Engine   : in out Text_Renderer) is
+   begin
+      if not Engine.Empty_Line then
+         Engine.Add_Line_Break;
+      end if;
+      Engine.Need_Paragraph := False;
+      Engine.Open_Paragraph;
+
+      if Engine.List_Levels (Engine.List_Index) > 0 then
+         Engine.Render_Paragraph (Strings.To_Wstring (Util.Strings.Image (Engine.List_Levels (Engine.List_Index))));
+         Engine.List_Levels (Engine.List_Index) := Engine.List_Levels (Engine.List_index) + 1;
+         Engine.Render_Paragraph (") ");
+         Engine.Indent_Level := Engine.Indent_Level + 4;
+      else
+         Engine.Render_Paragraph ("- ");
+         Engine.Indent_Level := Engine.Indent_Level + 2;
+      end if;
+   end Render_List_Item_Start;
+
+   procedure Render_List_Item_End (Engine   : in out Text_Renderer) is
+   begin
+      if not Engine.Empty_Line then
+         Engine.Add_Line_Break;
+      end if;
+      Engine.Need_Paragraph := False;
+      Engine.Open_Paragraph;
+      if Engine.List_Levels (Engine.List_Index) > 0 then
+         Engine.Indent_Level := Engine.Indent_Level - 4;
+      else
+         Engine.Indent_Level := Engine.Indent_Level - 2;
+      end if;
+   end Render_List_Item_End;
 
    procedure Close_Paragraph (Document : in out Text_Renderer) is
    begin
@@ -161,6 +213,31 @@ package body Wiki.Render.Text is
       Engine.Empty_Line := False;
    end Render_Preformatted;
 
+   --  ------------------------------
+   --  Render a text block indenting the text if necessary.
+   --  ------------------------------
+   procedure Render_Paragraph (Engine : in out Text_Renderer;
+                               Text   : in Wiki.Strings.WString) is
+   begin
+      for C of Text loop
+         if C = Helpers.LF then
+            Engine.Empty_Line := True;
+            Engine.Current_Indent := 0;
+            Engine.Output.Write (C);
+         else
+            while Engine.Current_Indent < Engine.Indent_Level loop
+               Engine.Output.Write (' ');
+               Engine.Current_Indent := Engine.Current_Indent + 1;
+            end loop;
+
+            Engine.Output.Write (C);
+            Engine.Empty_Line := False;
+            Engine.Current_Indent := Engine.Current_Indent + 1;
+            Engine.Has_Paragraph := True;
+         end if;
+      end loop;
+   end Render_Paragraph;
+
    --  Render the node instance from the document.
    overriding
    procedure Render (Engine : in out Text_Renderer;
@@ -203,20 +280,26 @@ package body Wiki.Render.Text is
          when Wiki.Nodes.N_BLOCKQUOTE =>
             Engine.Render_Blockquote (Node.Level);
 
-         when Wiki.Nodes.N_LIST =>
-            Engine.Render_List_Item (Node.Level, False);
+         when Wiki.Nodes.N_LIST_START =>
+            Engine.Render_List_Start ("o", 0);
 
-         when Wiki.Nodes.N_NUM_LIST =>
-            Engine.Render_List_Item (Node.Level, True);
+         when Wiki.Nodes.N_NUM_LIST_START =>
+            Engine.Render_List_Start (".", Node.Level);
+
+         when Wiki.Nodes.N_LIST_END =>
+            Engine.Render_List_End ("");
+
+         when Wiki.Nodes.N_NUM_LIST_END =>
+            Engine.Render_List_End ("");
+
+         when Wiki.Nodes.N_LIST_ITEM =>
+            Engine.Render_List_Item_Start;
+
+         when Wiki.Nodes.N_LIST_ITEM_END =>
+            Engine.Render_List_Item_End;
 
          when Wiki.Nodes.N_TEXT =>
-            if Engine.Empty_Line and Engine.Indent_Level /= 0 then
-               for I in 1 .. Engine.Indent_Level loop
-                  Engine.Output.Write (' ');
-               end loop;
-            end if;
-            Engine.Output.Write (Node.Text);
-            Engine.Empty_Line := False;
+            Engine.Render_Paragraph (Node.Text);
 
          when Wiki.Nodes.N_QUOTE =>
             Engine.Open_Paragraph;
