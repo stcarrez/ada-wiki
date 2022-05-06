@@ -62,11 +62,18 @@ package Wiki.Render.Html is
    procedure Add_Blockquote (Engine : in out Html_Renderer;
                              Level    : in Natural);
 
+   procedure Render_List_Start (Engine   : in out Html_Renderer;
+                                Tag      : in String;
+                                Level    : in Positive);
+
    --  Render a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
-   procedure Render_List_Item (Engine   : in out Html_Renderer;
-                               Level    : in Positive;
-                               Ordered  : in Boolean);
+   procedure Render_List_Item (Engine   : in out Html_Renderer);
+
+   --  Render a list item end (</ul> or </ol>).
+   --  Close the previous paragraph and list item if any.
+   procedure Render_List_End (Engine : in out Html_Renderer;
+                              Tag    : in String);
 
    --  Add a text block with the given format.
    procedure Add_Text (Engine   : in out Html_Renderer;
@@ -118,6 +125,7 @@ private
       Current_Section   : Toc_Number_Array := (others => 0);
       Section_Level     : Natural := 0;
       Column            : Natural := 0;
+      In_Definition     : Boolean := False;
    end record;
 
    procedure Render_Tag (Engine : in out Html_Renderer;
