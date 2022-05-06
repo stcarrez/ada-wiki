@@ -754,6 +754,7 @@ package body Wiki.Render.Html is
    HTML_INS         : aliased constant String := "ins";
    HTML_PREFORMAT   : aliased constant String := "pre";
    HTML_UNDERLINE   : aliased constant String := "u";
+   HTML_CITE        : aliased constant String := "cite";
 
    type String_Array_Access is array (Format_Type) of Wiki.String_Access;
 
@@ -768,6 +769,7 @@ package body Wiki.Render.Html is
       STRIKEOUT   => HTML_STRIKEOUT'Access,
       PREFORMAT   => HTML_PREFORMAT'Access,
       INS         => HTML_INS'Access,
+      CITE        => HTML_CITE'Access,
       UNDERLINE   => HTML_UNDERLINE'Access);
 
    --  ------------------------------
