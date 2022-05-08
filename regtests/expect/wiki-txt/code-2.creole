@@ -1,0 +1,3 @@
+
+The double }}  and }} is kept.
+

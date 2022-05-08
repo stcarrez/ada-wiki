@@ -1,0 +1,1 @@
+<p>The HTML <code>&lt;textarea&gt;</code> }} is provided by the JSF component <code>&lt;h:inputTextArea&gt;</code>.</p>
