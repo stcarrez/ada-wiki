@@ -21,8 +21,6 @@ with Interfaces;
 with Wiki.Parsers.Html;
 with Wiki.Helpers;
 with Wiki.Helpers.Parser;
-with Wiki.Nodes;
-with Wiki.Parsers.Common;
 with Wiki.Parsers.Creole;
 with Wiki.Parsers.Dotclear;
 with Wiki.Parsers.Markdown;
@@ -31,28 +29,285 @@ with Wiki.Parsers.Google;
 with Wiki.Parsers.MediaWiki;
 package body Wiki.Parsers is
 
-   use Wiki.Nodes;
+   --  use Wiki.Nodes;
    use Wiki.Helpers;
+   use Wiki.Buffers;
+   use type Wiki.Nodes.Node_Kind;
+
+   procedure Next (Content : in out Content_Access;
+                   Pos     : in out Positive) is
+   begin
+      if Pos + 1 > Content.Last then
+         Content := Content.Next_Block;
+         Pos := 1;
+      else
+         Pos := Pos + 1;
+      end if;
+   end Next;
+
+   procedure Append_Preformatted (P      : in out Parser;
+                                  Format : in Wiki.Strings.WString) is
+      procedure Add_Preformatted (Content : in Wiki.Strings.WString);
+
+      procedure Add_Preformatted (Content : in Wiki.Strings.WString) is
+      begin
+         P.Context.Filters.Add_Preformatted (P.Document, Content, Format);
+      end Add_Preformatted;
+
+      procedure Add_Preformatted is
+         new Wiki.Strings.Wide_Wide_Builders.Get (Add_Preformatted);
+      pragma Inline (Add_Preformatted);
+
+   begin
+      Add_Preformatted (P.Text);
+   end Append_Preformatted;
+
+   procedure Append_Text (P    : in out Parser;
+                          Text : in Wiki.Strings.BString;
+                          From : in Positive;
+                          To   : in Positive) is
+      procedure Add_Text (Content : in Wiki.Strings.WString);
+
+      procedure Add_Text (Content : in Wiki.Strings.WString) is
+      begin
+         P.Context.Filters.Add_Text (P.Document, Content (From .. To), P.Format);
+      end Add_Text;
+
+      procedure Add_Text is
+         new Wiki.Strings.Wide_Wide_Builders.Get (Add_Text);
+      pragma Inline (Add_Text);
+
+   begin
+      Add_Text (P.Text);
+   end Append_Text;
+
+   function Is_List_Item (P     : in Parser;
+                          Level : in Natural) return Boolean is
+   begin
+      if P.Current_Node not in Nodes.N_LIST_ITEM | Nodes.N_LIST_START then
+         return False;
+      end if;
+      declare
+         Top : constant Block_Access := Block_Stack.Current (P.Blocks);
+      begin
+         return Top.Level = Level;
+      end;
+   end Is_List_Item;
+
+   procedure Pop_List (P      : in out Parser;
+                       Level  : in Natural;
+                       Marker : in Wiki.Strings.WChar) is
+   begin
+      while not Block_Stack.Is_Empty (P.Blocks) loop
+         declare
+            Top : constant Block_Access := Block_Stack.Current (P.Blocks);
+         begin
+            exit when Top.Kind in Nodes.N_LIST_START | Nodes.N_NUM_LIST_START | Nodes.N_LIST_ITEM
+              and then Top.Level <= Level and then Top.Marker = Marker;
+            exit when Top.Kind not in Nodes.N_LIST_ITEM
+              | Nodes.N_LIST_START | Nodes.N_NUM_LIST_START;
+            Pop_Block (P);
+         end;
+      end loop;
+   end Pop_List;
+
+   procedure Pop_List (P      : in out Parser) is
+   begin
+      while not Block_Stack.Is_Empty (P.Blocks) loop
+         declare
+            Top : constant Block_Access := Block_Stack.Current (P.Blocks);
+         begin
+            exit when Top.Kind not in Nodes.N_LIST_ITEM
+              | Nodes.N_LIST_START | Nodes.N_NUM_LIST_START | Nodes.N_DEFINITION;
+            Pop_Block (P);
+         end;
+      end loop;
+   end Pop_List;
+
+   procedure Add_Header (P : in out Parser;
+                         Level : in Natural) is
+      procedure Add_Header (Content : in Wiki.Strings.WString);
+
+      procedure Add_Header (Content : in Wiki.Strings.WString) is
+         Last         : Natural := Wiki.Helpers.Trim_Spaces (Content, Content'Last);
+         Ignore_Token : Boolean := True;
+         Seen_Token   : Boolean := False;
+      begin
+         --  Remove the spaces and '=' at end of header string.
+         while Last > Content'First loop
+            if Content (Last) = '=' then
+               exit when not Ignore_Token;
+               Seen_Token := True;
+            elsif Content (Last) = ' ' or Content (Last) = HT then
+               Ignore_Token := not Seen_Token;
+            else
+               exit;
+            end if;
+            Last := Last - 1;
+         end loop;
+         P.Context.Filters.Add_Header (P.Document, Content (Content'First .. Last), Level);
+      end Add_Header;
+
+      procedure Add_Header is
+         new Wiki.Strings.Wide_Wide_Builders.Get (Add_Header);
+
+   begin
+      if not P.Context.Is_Hidden then
+         Add_Header (P.Text);
+      end if;
+   end Add_Header;
+
+   --  ------------------------------
+   --  Push a new block kind on the block stack.
+   --  ------------------------------
+   procedure Flush_Block (P     : in out Parser) is
+      Top : constant Block_Access := Block_Stack.Current (P.Blocks);
+   begin
+      if Top /= null then
+         if Top.Kind = Nodes.N_PREFORMAT then
+            Append_Preformatted (P, Strings.To_WString (P.Preformat_Format));
+         elsif Top.Kind = Nodes.N_PARAGRAPH then
+            if P.Parse_Inline /= null then
+               P.Parse_Inline (P, P.Text_Buffer.First'Unchecked_Access);
+            end if;
+         elsif Top.Kind = Nodes.N_LIST_ITEM then
+            if P.Parse_Inline /= null then
+               P.Parse_Inline (P, P.Text_Buffer.First'Unchecked_Access);
+            end if;
+            Clear (P.Text);
+         elsif Top.Kind = Nodes.N_HEADER then
+            Add_Header (P, P.Header_Level);
+         else
+            Flush_Text (P);
+         end if;
+      else
+         if P.Parse_Inline /= null then
+            P.Parse_Inline (P, P.Text_Buffer.First'Unchecked_Access);
+         end if;
+         Clear (P.Text);
+      end if;
+   end Flush_Block;
+
+   --  ------------------------------
+   --  Push a new block kind on the block stack.
+   --  ------------------------------
+   procedure Push_Block (P      : in out Parser;
+                         Kind   : in Wiki.Nodes.Node_Kind;
+                         Level  : in Integer := 0;
+                         Marker : in Wiki.Strings.WChar := ' ';
+                         Number : in Integer := 0) is
+      Empty : constant Boolean := Block_Stack.Is_Empty (P.Blocks);
+   begin
+      Flush_Block (P);
+      Block_Stack.Push (P.Blocks);
+      declare
+         Top : constant Block_Access := Block_Stack.Current (P.Blocks);
+      begin
+         Top.Kind  := Kind;
+         Top.Level := Level;
+         Top.Marker := Marker;
+         Top.Number := Number;
+         P.Current_Node := Kind;
+         if Kind = Nodes.N_LIST_START then
+            P.Context.Filters.Add_List (P.Document, 1, False);
+         elsif Kind = Nodes.N_NUM_LIST_START then
+            P.Context.Filters.Add_List (P.Document, Number, True);
+         elsif Kind = Nodes.N_LIST_ITEM then
+            P.Context.Filters.Add_Node (P.Document, Kind);
+         elsif Empty and Kind = Nodes.N_PARAGRAPH then
+            P.Context.Filters.Add_Node (P.Document, Kind);
+            P.Is_Empty_Paragraph := True;
+         end if;
+      end;
+   end Push_Block;
+
+   procedure Pop_Block_Until (P     : in out Parser;
+                              Kind  : in Wiki.Nodes.Node_Kind;
+                              Level : in Integer) is
+   begin
+      null;
+   end Pop_Block_Until;
+
+   procedure Pop_All (P : in out Parser) is
+   begin
+      while not Block_Stack.Is_Empty (P.Blocks) loop
+         Pop_Block (P);
+      end loop;
+   end Pop_All;
+
+   --  ------------------------------
+   --  Pop the current block stack.
+   --  ------------------------------
+   procedure Pop_Block (P    : in out Parser) is
+   begin
+      Flush_Block (P);
+      if not Block_Stack.Is_Empty (P.Blocks) then
+         declare
+            Top : Block_Access := Block_Stack.Current (P.Blocks);
+         begin
+            case Top.Kind is
+               when Nodes.N_LIST_START =>
+                  P.Context.Filters.Add_Node (P.Document, Nodes.N_LIST_END);
+
+               when Nodes.N_NUM_LIST_START =>
+                  P.Context.Filters.Add_Node (P.Document, Nodes.N_NUM_LIST_END);
+
+               when Nodes.N_LIST_ITEM =>
+                  P.Context.Filters.Add_Node (P.Document, Nodes.N_LIST_ITEM_END);
+
+               when Nodes.N_BLOCKQUOTE =>
+                  P.Context.Filters.Add_Blockquote (P.Document, 0);
+
+               when Nodes.N_DEFINITION =>
+                  P.Context.Filters.Add_Node (P.Document, Nodes.N_END_DEFINITION);
+
+               when others =>
+                  null;
+
+            end case;
+            Block_Stack.Pop (P.Blocks);
+            if not Block_Stack.Is_Empty (P.Blocks) then
+               Top := Block_Stack.Current (P.Blocks);
+               P.Current_Node := Top.Kind;
+            else
+               P.Current_Node := Nodes.N_NONE;
+            end if;
+         end;
+      else
+         P.Current_Node := Nodes.N_NONE;
+      end if;
+      Clear (P.Text);
+   end Pop_Block;
 
    --  ------------------------------
    --  Read the next wiki input line in the line buffer.
    --  ------------------------------
-   procedure Read_Line (P : in out Parser'Class) is
+   procedure Read_Line (Parser : in out Parser_Type'Class;
+                        Buffer : out Wiki.Buffers.Buffer_Access) is
       procedure Read (Into : in out Wiki.Strings.WString;
                       Last : out Natural);
 
       procedure Read (Into : in out Wiki.Strings.WString;
                       Last : out Natural) is
       begin
-         P.Reader.Read (Into, Last, P.Is_Last_Line);
+         Parser.Reader.Read (Into, Last, Parser.Is_Last_Line);
+         if Last > 0 then
+            Parser.Line_Buffer.Append (Into (Into'First .. Last));
+         end if;
       end Read;
 
       procedure Fill is new Wiki.Strings.Wide_Wide_Builders.Inline_Append (Read);
    begin
-      Wiki.Strings.Wide_Wide_Builders.Clear (P.Line);
-      Fill (P.Line);
-      P.Line_Length := Wiki.Strings.Wide_Wide_Builders.Length (P.Line);
-      P.Line_Pos := 0;
+      Parser.Line_Buffer.Clear;
+      Wiki.Strings.Wide_Wide_Builders.Clear (Parser.Line);
+      Fill (Parser.Line);
+      Parser.Line_Length := Wiki.Strings.Wide_Wide_Builders.Length (Parser.Line);
+      Parser.Line_Pos := 0;
+      if Parser.Is_Last_Line and Parser.Line_Length = 0 then
+         Buffer := null;
+      else
+         Buffer := Parser.Line_Buffer.First'Unchecked_Access;
+      end if;
    end Read_Line;
 
    --  ------------------------------
@@ -69,7 +324,7 @@ package body Wiki.Parsers is
                return;
             end if;
 
-            P.Read_Line;
+            --  P.Read_Line;
 
             if P.Is_Last_Line and then P.Line_Pos = P.Line_Length then
                --  Return a \n on end of file (this simplifies the implementation).
@@ -107,13 +362,41 @@ package body Wiki.Parsers is
    --  ------------------------------
    --  Flush the wiki text that was collected in the text buffer.
    --  ------------------------------
-   procedure Flush_Text (P : in out Parser) is
+   procedure Flush_Text (P : in out Parser;
+                         Trim : in Trim_End := None) is
 
       procedure Add_Text (Content : in Wiki.Strings.WString);
 
       procedure Add_Text (Content : in Wiki.Strings.WString) is
+         First : Natural;
+         Last  : Natural;
       begin
-         P.Context.Filters.Add_Text (P.Document, Content, P.Format);
+         if P.Pre_Tag_Counter = 0 then
+            case Trim is
+               when Left =>
+                  First := Wiki.Helpers.Skip_Spaces (Content, Content'First);
+                  Last  := Content'Last;
+
+               when Right =>
+                  First := Content'First;
+                  Last  := Wiki.Helpers.Trim_Spaces (Content, Content'Last);
+
+               when Both =>
+                  First := Wiki.Helpers.Skip_Spaces (Content, Content'First);
+                  Last  := Wiki.Helpers.Trim_Spaces (Content, Content'Last);
+
+               when None =>
+                  First := Content'First;
+                  Last := Content'Last;
+            end case;
+         else
+            First := Content'First;
+            Last  := Content'Last;
+         end if;
+         if First <= Last then
+            P.Context.Filters.Add_Text (P.Document, Content (First .. Last), P.Format);
+            P.Is_Empty_Paragraph := False;
+         end if;
       end Add_Text;
       pragma Inline (Add_Text);
 
@@ -122,6 +405,10 @@ package body Wiki.Parsers is
       pragma Inline (Add_Text);
 
    begin
+      if P.Pending_Paragraph then
+         P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
+         P.Pending_Paragraph := False;
+      end if;
       if Length (P.Text) > 0 then
          if P.Previous_Tag /= UNKNOWN_TAG and then No_End_Tag (P.Previous_Tag) then
             if not P.Context.Is_Hidden then
@@ -148,56 +435,6 @@ package body Wiki.Parsers is
          P.In_List := False;
       end if;
    end Flush_List;
-
-   --  ------------------------------
-   --  Skip white spaces and tabs.
-   --  ------------------------------
-   procedure Skip_Spaces (P : in out Parser) is
-      C : Wiki.Strings.WChar;
-   begin
-      while not P.Is_Eof loop
-         Peek (P, C);
-         if not Wiki.Helpers.Is_Space_Or_Newline (C) then
-            Put_Back (P, C);
-            return;
-         end if;
-      end loop;
-   end Skip_Spaces;
-
-   --  ------------------------------
-   --  Append a character to the wiki text buffer.
-   --  ------------------------------
-   procedure Parse_Text (P     : in out Parser;
-                         Token : in Wiki.Strings.WChar) is
-   begin
-      if Token /= CR then
-         Append (P.Text, Token);
-      end if;
-      P.Empty_Line := False;
-   end Parse_Text;
-
-   --  ------------------------------
-   --  Skip all the spaces and tabs as well as end of the current line (CR+LF).
-   --  ------------------------------
-   procedure Skip_End_Of_Line (P : in out Parser) is
-      C : Wiki.Strings.WChar;
-   begin
-      loop
-         Peek (P, C);
-         exit when C /= ' ' and C /= HT;
-      end loop;
-      if C = CR then
-         Peek (P, C);
-         if C /= LF then
-            Put_Back (P, C);
-         end if;
-      elsif C = LF then
-         Peek (P, C);
-         if C /= CR then
-            Put_Back (P, C);
-         end if;
-      end if;
-   end Skip_End_Of_Line;
 
    --  ------------------------------
    --  Check if the link refers to an image and must be rendered as an image.
@@ -269,201 +506,163 @@ package body Wiki.Parsers is
    end Toggle_Format;
 
    --  ------------------------------
-   --  Parse the beginning or the end of a single character sequence.  This procedure
-   --  is instantiated for several format types (bold, italic, superscript, subscript, code).
+   --  Parse the beginning or the end of a single character sequence.
    --  Example:
    --    _name_    *bold*   `code`
    --  ------------------------------
-   procedure Parse_Single_Format (P     : in out Parser;
-                                  Token : in Wiki.Strings.WChar) is
-      pragma Unreferenced (Token);
+   procedure Parse_Format (P      : in out Parser;
+                           Text   : in out Wiki.Buffers.Buffer_Access;
+                           From   : in out Positive;
+                           Expect : in Wiki.Strings.WChar;
+                           Format : in Format_Type) is
+      Block : Wiki.Buffers.Buffer_Access := Text;
+      Pos   : Positive := From;
    begin
-      Toggle_Format (P, Format);
-   end Parse_Single_Format;
-
-   --  ------------------------------
-   --  Parse the beginning or the end of a double character sequence.  This procedure
-   --  is instantiated for several format types (bold, italic, superscript, subscript, code).
-   --  Example:
-   --    --name--  **bold** ~~strike~~
-   --  ------------------------------
-   procedure Parse_Double_Format (P     : in out Parser;
-                                  Token : in Wiki.Strings.WChar) is
-      C : Wiki.Strings.WChar;
-   begin
-      Peek (P, C);
-      if C = Token then
+      if P.Format (Format) then
          Toggle_Format (P, Format);
-      else
-         Parse_Text (P, Token);
-         Put_Back (P, C);
+         Next (Text, From);
+         return;
       end if;
-   end Parse_Double_Format;
 
-   --  ------------------------------
-   --  Parse a space and take necessary formatting actions.
-   --  Example:
-   --    item1 item2   => add space in text buffer
-   --    ' * item'     => start a bullet list (Google)
-   --    ' # item'     => start an ordered list (Google)
-   --    ' item'       => preformatted text (Google, Creole)
-   --  ------------------------------
-   procedure Parse_Space (P     : in out Parser;
-                          Token : in Wiki.Strings.WChar) is
-      C     : Wiki.Strings.WChar;
-   begin
-      if P.Empty_Line then
-         --  Skip spaces for multi-space preformatted blocks or when we are within HTML elements.
-         if P.Preformat_Column > 1 or not P.Document.Is_Root_Node then
-            loop
-               Peek (P, C);
-               exit when C /= ' ' and C /= HT;
+      Next (Block, Pos);
+      while Block /= null loop
+         declare
+            Last : constant Natural := Block.Last;
+         begin
+            while Pos <= Last loop
+               if Block.Content (Pos) = Expect then
+                  Toggle_Format (P, Format);
+                  Next (Text, From);
+                  return;
+               end if;
+               Pos := Pos + 1;
             end loop;
-         else
-            Peek (P, C);
-         end if;
-         if C = '*' or C = '#' then
-            Common.Parse_List (P, C);
-         elsif C = '-' then
-            Put_Back (P, C);
-         elsif C = CR or C = LF then
-            Parse_End_Line (P, C);
-         else
-            Put_Back (P, C);
-            Common.Parse_Preformatted (P, Token);
-         end if;
-      else
-         Append (P.Text, Token);
-      end if;
-   end Parse_Space;
-
-   procedure Parse_End_Line (P     : in out Parser;
-                             Token : in Wiki.Strings.WChar) is
-      C     : Wiki.Strings.WChar := Token;
-      Count : Positive := 1;
-   begin
-      if P.Is_Eof then
-         return;
-      end if;
-      loop
-         Peek (P, C);
-         exit when P.Is_Eof;
-         if C = Token then
-            Count := Count + 1;
-         elsif C /= CR and C /= LF then
-            Put_Back (P, C);
-            exit;
-         end if;
+         end;
+         Next (Block, Pos);
       end loop;
-      if Count >= 2 then
-         Flush_Text (P);
-         Flush_List (P);
+      Append (P.Text, Text.Content (From));
+      Next (Text, From);
+   end Parse_Format;
 
-         --  Finish the active table.
-         if P.In_Table then
-            P.Context.Filters.Finish_Table (P.Document);
-            P.In_Table := False;
-         end if;
-
-         --  Finish the active blockquotes if a new paragraph is started on an empty line.
-         if P.Quote_Level > 0 then
-            if not P.Context.Is_Hidden then
-               P.Context.Filters.Add_Blockquote (P.Document, 0);
-            end if;
-            P.Quote_Level := 0;
-         end if;
-         if not P.Context.Is_Hidden then
-            P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
-         end if;
-         P.In_Paragraph := True;
-      elsif (Length (P.Text) > 0 or not P.Empty_Line) and then not P.Is_Eof then
-         Flush_Text (P);
-         if not P.Context.Is_Hidden then
-            P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_NEWLINE);
-         end if;
-      end if;
-
-      --  Finish the active blockquotes if a new paragraph is started immediately after
-      --  the blockquote.
-      if P.Quote_Level > 0 and C /= '>' then
-         Flush_Text (P);
-         if not P.Context.Is_Hidden then
-            P.Context.Filters.Add_Blockquote (P.Document, 0);
-         end if;
-         P.Quote_Level := 0;
-      end if;
-      P.Empty_Line := True;
-   end Parse_End_Line;
-
-   --  ------------------------------
-   --  Parse a HTML component.
-   --  Example:
-   --     <b> or </b>
-   --  ------------------------------
-   procedure Parse_Maybe_Html (P     : in out Parser;
-                               Token : in Wiki.Strings.WChar) is
+   function Is_Single_Token (Text : in Wiki.Buffers.Buffer_Access;
+                             From : in Positive;
+                             Token : in Wiki.Strings.WChar) return Boolean is
+      Block : Wiki.Buffers.Buffer_Access := Text;
+      Pos   : Positive := From;
    begin
-      --  Don't parse HTML if a formatting text mode is setup.
-      if (for some Mode of P.Format => Mode) then
-         Parse_Text (P, Token);
-         return;
+      if Block = null then
+         return False;
       end if;
-      Wiki.Parsers.Html.Parse_Element (P);
-   end Parse_Maybe_Html;
+      if Block.Content (Pos) /= Token then
+         return False;
+      end if;
+      Next (Block, Pos);
+      return Block = null or else Block.Content (Pos) /= Token;
+   end Is_Single_Token;
 
-   Misc_Wiki_Table : aliased constant Parser_Table
-     := (
-         16#0A# => Parse_End_Line'Access,
-         16#0D# => Parse_End_Line'Access,
-         Character'Pos (' ') => Parse_Space'Access,
-         Character'Pos ('=') => Common.Parse_Header'Access,
-         Character'Pos ('*') => Common.Parse_Single_Bold'Access,
-         Character'Pos ('_') => Common.Parse_Single_Italic'Access,
-         Character'Pos ('`') => Common.Parse_Single_Code'Access,
-         Character'Pos ('^') => Common.Parse_Single_Superscript'Access,
-         Character'Pos ('~') => Common.Parse_Double_Strikeout'Access,
-         Character'Pos (',') => Common.Parse_Double_Subscript'Access,
-         Character'Pos ('[') => Common.Parse_Link'Access,
-         Character'Pos ('\') => Common.Parse_Line_Break'Access,
-         Character'Pos ('#') => Common.Parse_List'Access,
-         Character'Pos ('@') => Common.Parse_Double_Code'Access,
-         Character'Pos ('<') => Parse_Maybe_Html'Access,
-         others => Parse_Text'Access
-        );
+   --  ------------------------------
+   --  Parse the beginning or the end of a single character sequence.
+   --  Example:
+   --    _name_    *bold*   `code`
+   --  ------------------------------
+   procedure Parse_Format_Double (P      : in out Parser;
+                           Text   : in out Wiki.Buffers.Buffer_Access;
+                           From   : in out Positive;
+                           Expect : in Wiki.Strings.WChar;
+                           Format : in Format_Type) is
+      Block : Wiki.Buffers.Buffer_Access := Text;
+      Pos   : Positive := From;
+   begin
+      Next (Block, Pos);
+      if Is_Single_Token (Block, Pos, Expect) then
+         if P.Format (Format) then
+            Toggle_Format (P, Format);
+            Next (Block, Pos);
+            Text := Block;
+            From := Pos;
+            return;
+         end if;
 
-   Html_Table : aliased constant Parser_Table
-     := (
-         Character'Pos ('<') => Parse_Maybe_Html'Access,
-         Character'Pos ('&') => Html.Parse_Entity'Access,
-         others => Parse_Text'Access
-        );
+         while Block /= null loop
+            declare
+               Last : constant Natural := Block.Last;
+            begin
+               while Pos <= Last loop
+                  if Block.Content (Pos) = Expect then
+                     Pos := Pos + 1;
+                     if Pos > Last then
+                        Block := Block.Next_Block;
+                        if Block = null then
+                           Append (P.Text, Text.Content (From));
+                           Next (Text, From);
+                           return;
+                        end if;
+                        Pos := 1;
+                     end if;
+                     if Block.Content (Pos) = Expect then
+                        Toggle_Format (P, Format);
+                        Next (Text, From);
+                        Next (Text, From);
+                        return;
+                     end if;
+                  end if;
+                  Pos := Pos + 1;
+               end loop;
+            end;
+            Next (Block, Pos);
+         end loop;
+      end if;
+      Append (P.Text, Text.Content (From));
+      Next (Text, From);
+   end Parse_Format_Double;
 
-   type Syntax_Parser_Tables is array (Wiki_Syntax) of Parser_Table_Access;
+   procedure Process_Html (P          : in out Parser;
+                           Kind       : in Wiki.Html_Parser.State_Type;
+                           Name       : in Wiki.Strings.WString;
+                           Attributes : in out Wiki.Attributes.Attribute_List) is
+      use type Wiki.Html_Parser.State_Type;
 
-   Syntax_Tables : constant Syntax_Parser_Tables
-     := (
-         SYNTAX_GOOGLE     => Google.Wiki_Table'Access,
-         SYNTAX_CREOLE     => Creole.Wiki_Table'Access,
-         SYNTAX_DOTCLEAR   => Dotclear.Wiki_Table'Access,
-         SYNTAX_PHPBB      => MediaWiki.Wiki_Table'Access,
-         SYNTAX_MEDIA_WIKI => MediaWiki.Wiki_Table'Access,
-         SYNTAX_MARKDOWN   => Markdown.Wiki_Table'Access,
-         SYNTAX_TEXTILE    => Textile.Wiki_Table'Access,
-         SYNTAX_MIX        => Misc_Wiki_Table'Access,
-         SYNTAX_HTML       => Html_Table'Access
-        );
+      Tag  : constant Wiki.Html_Tag := Wiki.Find_Tag (Name);
+   begin
+      if Tag = Wiki.UNKNOWN_TAG then
+         if Name = "noinclude" then
+            Flush_Text (P, Trim => None);
+            P.Context.Is_Hidden := Kind = Wiki.Html_Parser.HTML_START and P.Context.Is_Included;
+         elsif Name = "includeonly" then
+            Flush_Text (P, Trim => None);
+            P.Context.Is_Hidden := not (kind = Wiki.Html_Parser.HTML_START and P.Context.Is_Included);
+         end if;
+      elsif Kind = Wiki.Html_Parser.HTML_START then
+         Start_Element (P, Tag, Attributes);
+      elsif Kind = Wiki.Html_Parser.HTML_END then
+         End_Element (P, Tag);
+      elsif Kind = Wiki.Html_Parser.HTML_START_END then
+         Start_Element (P, Tag, Attributes);
+         End_Element (P, Tag);
+      end if;
+   end Process_Html;
 
    procedure Start_Element (P          : in out Parser;
                             Tag        : in Wiki.Html_Tag;
                             Attributes : in out Wiki.Attributes.Attribute_List) is
    begin
+      if Tag_Text (Tag) then
+         if Tag_Text (P.Previous_Tag) then
+            Flush_Text (P, Trim => None);
+         else
+            Flush_Text (P, Trim => Left);
+         end if;
+      elsif Tag_Text (P.Previous_Tag) then
+         Flush_Text (P, Trim => Right);
+      else
+         Flush_Text (P, Trim => Both);
+      end if;
       if P.Previous_Tag /= UNKNOWN_TAG and then No_End_Tag (P.Previous_Tag) then
          if not P.Context.Is_Hidden then
             P.Context.Filters.Pop_Node (P.Document, P.Previous_Tag);
          end if;
          P.Previous_Tag := UNKNOWN_TAG;
       end if;
-      Flush_Text (P);
       if not P.Context.Is_Hidden then
          P.Context.Filters.Push_Node (P.Document, Tag, Attributes);
       end if;
@@ -474,23 +673,37 @@ package body Wiki.Parsers is
          P.Set_Syntax (SYNTAX_HTML);
       end if;
       P.Previous_Tag := Tag;
+      if Tag = PRE_TAG then
+         P.Pre_Tag_Counter := P.Pre_Tag_Counter + 1;
+      end if;
    end Start_Element;
 
    procedure End_Element (P    : in out Parser;
                           Tag  : in Wiki.Html_Tag) is
       Previous_Tag : constant Wiki.Html_Tag := P.Previous_Tag;
    begin
+      P.Pending_Paragraph := False;
       P.Previous_Tag := UNKNOWN_TAG;
       if Previous_Tag /= UNKNOWN_TAG
         and then Previous_Tag /= Tag
         and then No_End_Tag (Previous_Tag)
       then
-         End_Element (P, Previous_Tag);
+         if not P.Context.Is_Hidden then
+            P.Context.Filters.Pop_Node (P.Document, Previous_Tag);
+         end if;
       end if;
 
-      Flush_Text (P);
+      if Tag_Text (Tag) then
+         Flush_Text (P, Trim => None);
+      else
+         Flush_Text (P, Trim => Right);
+      end if;
       if not P.Context.Is_Hidden then
          P.Context.Filters.Pop_Node (P.Document, Tag);
+      end if;
+
+      if Tag = PRE_TAG and P.Pre_Tag_Counter > 0 then
+         P.Pre_Tag_Counter := P.Pre_Tag_Counter - 1;
       end if;
 
       --  Switch back to the previous syntax when we reached the </pre> HTML element.
@@ -512,10 +725,9 @@ package body Wiki.Parsers is
    --  Set the wiki syntax that the wiki engine must use.
    --  ------------------------------
    procedure Set_Syntax (Engine : in out Parser;
-                         Syntax : in Wiki_Syntax := SYNTAX_MIX) is
+                         Syntax : in Wiki_Syntax := SYNTAX_MARKDOWN) is
    begin
       Engine.Context.Syntax := Syntax;
-      Engine.Table  := Syntax_Tables (Syntax);
    end Set_Syntax;
 
    --  ------------------------------
@@ -673,6 +885,25 @@ package body Wiki.Parsers is
       Parse_Text (Engine, Text, Doc);
    end Parse;
 
+   procedure Parse (Engine     : in out Parser;
+                    Parse_Line : not null access
+                       procedure (Engine : in out Parser;
+                                  Text   : in Wiki.Buffers.Buffer_Access)) is
+      Buffer : Wiki.Buffers.Buffer_Access;
+   begin
+      loop
+         Read_Line (Engine, Buffer);
+         exit when Buffer = null;
+         Parse_Line (Engine, Buffer);
+      end loop;
+      while not Block_Stack.Is_Empty (Engine.Blocks) loop
+         if Engine.Current_Node in Nodes.N_PARAGRAPH | Nodes.N_LIST_ITEM then
+            Flush_Text (Engine, Trim => Right);
+         end if;
+         Pop_Block (Engine);
+      end loop;
+   end Parse;
+
    --  ------------------------------
    --  Parse the wiki stream managed by <tt>Stream</tt> according to the wiki syntax configured
    --  on the wiki engine.
@@ -694,7 +925,8 @@ package body Wiki.Parsers is
       Engine.Escape_Char := '~';
       Engine.Param_Char := Wiki.Strings.WChar'Last;
       if Main then
-         Engine.Context.Filters.Add_Node (Engine.Document, Wiki.Nodes.N_PARAGRAPH);
+         Push_Block (Engine, Wiki.Nodes.N_PARAGRAPH);
+         --  Engine.Context.Filters.Add_Node (Engine.Document, Wiki.Nodes.N_PARAGRAPH);
       end if;
       case Engine.Context.Syntax is
          when SYNTAX_DOTCLEAR =>
@@ -702,55 +934,62 @@ package body Wiki.Parsers is
             Engine.Escape_Char := '\';
             Engine.Header_Offset := -6;
             Engine.Link_Title_First := True;
+            Engine.Parse_Block := Wiki.Parsers.Dotclear.Parse_Line'Access;
 
          when SYNTAX_CREOLE =>
             Engine.Link_Double_Bracket := True;
             Engine.Param_Char := '<';
+            Engine.Parse_Block := Wiki.Parsers.Creole.Parse_Line'Access;
 
          when SYNTAX_MEDIA_WIKI =>
             Engine.Link_Double_Bracket := True;
             Engine.Check_Image_Link := True;
             Engine.Param_Char := '{';
+            Engine.Parse_Block := Wiki.Parsers.MediaWiki.Parse_Line'Access;
 
          when SYNTAX_TEXTILE =>
             Engine.Link_Double_Bracket := True;
             Engine.Check_Image_Link := True;
             Engine.Param_Char := '{';
-
-         when SYNTAX_MIX =>
-            Engine.Is_Dotclear := True;
+            Engine.Parse_Block := Wiki.Parsers.Textile.Parse_Line'Access;
 
          when SYNTAX_GOOGLE =>
             Engine.Link_No_Space := True;
+            Engine.Parse_Block := Wiki.Parsers.Google.Parse_Line'Access;
 
          when SYNTAX_MARKDOWN =>
             Engine.Preformat_Column := 4;
             Engine.Escape_Char := '\';
+            Engine.Parse_Block := Wiki.Parsers.Markdown.Parse_Line'Access;
+            Engine.Parse_Inline := Wiki.Parsers.Markdown.Parse_Inline_Text'Access;
 
-         when others =>
-            null;
+         when SYNTAX_HTML | SYNTAX_PHPBB =>
+            Engine.Parse_Block := Wiki.Parsers.Html.Parse_Line'Access;
 
       end case;
-      Parse_Token (Engine);
-      Flush_Text (Engine);
+      declare
+         Buffer : Wiki.Buffers.Buffer_Access;
+      begin
+         loop
+            Read_Line (Engine, Buffer);
+            exit when Buffer = null;
+            Engine.Parse_Block (Engine, Buffer);
+         end loop;
+         while not Block_Stack.Is_Empty (Engine.Blocks) loop
+            if Engine.Current_Node in Nodes.N_PARAGRAPH | Nodes.N_LIST_ITEM then
+               Flush_Text (Engine, Trim => Right);
+            end if;
+            Pop_Block (Engine);
+         end loop;
+         if Engine.Parse_Inline /= null then
+            Engine.Parse_Inline (Engine, Engine.Text_Buffer.First'Unchecked_Access);
+         end if;
+      end;
+
       if Main then
          Engine.Context.Filters.Finish (Engine.Document);
       end if;
       Doc := Engine.Document;
    end Parse;
-
-   procedure Parse_Token (P : in out Parser) is
-      C : Wiki.Strings.WChar;
-   begin
-      loop
-         Peek (P, C);
-         exit when P.Is_Eof;
-         if C > '~' then
-            Parse_Text (P, C);
-         else
-            P.Table (Wiki.Strings.WChar'Pos (C)).all (P, C);
-         end if;
-      end loop;
-   end Parse_Token;
 
 end Wiki.Parsers;

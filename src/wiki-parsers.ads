@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers -- Wiki parser
---  Copyright (C) 2011, 2015, 2016, 2018, 2020 Stephane Carrez
+--  Copyright (C) 2011, 2015, 2016, 2018, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,13 +15,16 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-
 with Wiki.Attributes;
 with Wiki.Plugins;
 with Wiki.Filters;
 with Wiki.Strings;
 with Wiki.Documents;
 with Wiki.Streams;
+private with Wiki.Buffers;
+private with Util.Stacks;
+private with Wiki.Nodes;
+private with Wiki.Html_Parser;
 
 --  == Wiki Parsers {#wiki-parsers} ==
 --  The `Wikis.Parsers` package implements a parser for several well known wiki formats
@@ -54,6 +57,7 @@ package Wiki.Parsers is
    pragma Preelaborate;
 
    type Parser is tagged limited private;
+   subtype Parser_Type is Parser;
 
    --  Set the plugin factory to find and use plugins.
    procedure Set_Plugin_Factory (Engine  : in out Parser;
@@ -61,7 +65,7 @@ package Wiki.Parsers is
 
    --  Set the wiki syntax that the wiki engine must use.
    procedure Set_Syntax (Engine : in out Parser;
-                         Syntax : in Wiki_Syntax := SYNTAX_MIX);
+                         Syntax : in Wiki_Syntax := SYNTAX_MARKDOWN);
 
    --  Add a filter in the wiki engine.
    procedure Add_Filter (Engine : in out Parser;
@@ -97,24 +101,55 @@ package Wiki.Parsers is
 
 private
 
+   type Trim_End is (None, Left, Right, Both);
+
+   type Block;
+   type Content_Access is access all Block;
+
+   type Block (Len : Positive) is limited record
+      Next_Block : Content_Access;
+      Last       : Natural := 0;
+      Content    : Wiki.Strings.WString (1 .. Len);
+   end record;
+
+   procedure Next (Content : in out Content_Access;
+                   Pos     : in out Positive) with Inline_Always;
+
    use Wiki.Strings.Wide_Wide_Builders;
 
-   type Parser_Handler is access procedure (P     : in out Parser;
-                                            Token : in Wiki.Strings.WChar);
+   type Block_Type is record
+      Kind   : Wiki.Nodes.Node_Kind := Wiki.Nodes.N_PARAGRAPH;
+      Level  : Natural := 0;
+      Marker : Wiki.Strings.WChar := ' ';
+      Number : Integer := 0;
+   end record;
 
-   type Parser_Table is array (0 .. 127) of Parser_Handler;
-   type Parser_Table_Access is access constant Parser_Table;
+   type Parser_State_Type is (State_Html_Doctype,
+                              State_Html_Comment,
+                              State_Html_Attribute,
+                              State_Html_Element);
+
+   type Block_Access is access all Block_Type;
+
+   package Block_Stack is new Util.Stacks (Element_Type        => Block_Type,
+                                           Element_Type_Access => Block_Access);
+
+   type Parser_Handler is access procedure (Parser : in out Parser_Type;
+                                            Text   : in Wiki.Buffers.Buffer_Access);
 
    type Parser is tagged limited record
       Context             : aliased Wiki.Plugins.Plugin_Context;
       Pending             : Wiki.Strings.WChar;
       Has_Pending         : Boolean;
       Previous_Syntax     : Wiki_Syntax;
-      Table               : Parser_Table_Access;
       Document            : Wiki.Documents.Document;
+      Parse_Block         : Parser_Handler;
+      Parse_Inline        : Parser_Handler;
       Format              : Wiki.Format_Map;
       Line                : Wiki.Strings.BString (512);
       Text                : Wiki.Strings.BString (512);
+      Line_Buffer         : Wiki.Buffers.Builder (512);
+      Text_Buffer         : Wiki.Buffers.Builder (512);
       Line_Length         : Natural := 0;
       Line_Pos            : Natural := 0;
       Empty_Line          : Boolean := True;
@@ -124,6 +159,7 @@ private
       In_List             : Boolean := False;
       In_Table            : Boolean := False;
       Need_Paragraph      : Boolean := True;
+      Pending_Paragraph   : Boolean := False;
       Link_Double_Bracket : Boolean := False;
       Link_No_Space       : Boolean := False;
       Is_Dotclear         : Boolean := False;
@@ -138,35 +174,48 @@ private
       Previous_Tag        : Html_Tag := UNKNOWN_TAG;
       Reader              : Wiki.Streams.Input_Stream_Access := null;
       Attributes          : Wiki.Attributes.Attribute_List;
+      Current_Node        : Wiki.Nodes.Node_Kind := Wiki.Nodes.N_NONE;
+      Blocks              : Block_Stack.Stack;
+      Previous_Line_Empty : Boolean := False;
+      Header_Level        : Natural := 0;
+      Is_Empty_Paragraph  : Boolean := True;
+      Pre_Tag_Counter     : Natural := 0;
+
+      --  Pre-format code block
+      Preformat_Fence     : Wiki.Strings.WChar;
+      Preformat_Indent    : Natural := 0;
+      Preformat_Fcount    : Natural := 0;
+      Preformat_Format    : Wiki.Strings.BString (32);
+
+      Html                : Wiki.Html_Parser.Parser_Type;
    end record;
 
    --  Read the next wiki input line in the line buffer.
-   procedure Read_Line (P : in out Parser'Class);
+   procedure Read_Line (Parser : in out Parser_Type'Class;
+                        Buffer : out Wiki.Buffers.Buffer_Access);
 
    --  Peek the next character from the wiki text buffer.
    procedure Peek (P     : in out Parser'Class;
                    Token : out Wiki.Strings.WChar);
    pragma Inline (Peek);
 
+   function Is_List_Item (P     : in Parser;
+                          Level : in Natural) return Boolean;
+
    --  Put back the character so that it will be returned by the next call to Peek.
    procedure Put_Back (P     : in out Parser;
                        Token : in Wiki.Strings.WChar);
 
-   --  Skip all the spaces and tabs as well as end of the current line (CR+LF).
-   procedure Skip_End_Of_Line (P : in out Parser);
-
-   --  Skip white spaces and tabs.
-   procedure Skip_Spaces (P : in out Parser);
-
    --  Flush the wiki text that was collected in the text buffer.
-   procedure Flush_Text (P : in out Parser);
+   procedure Flush_Text (P    : in out Parser;
+                         Trim : in Trim_End := None);
 
    --  Flush the wiki dl/dt/dd definition list.
    procedure Flush_List (P : in out Parser);
-
-   --  Append a character to the wiki text buffer.
-   procedure Parse_Text (P     : in out Parser;
-                         Token : in Wiki.Strings.WChar);
+   procedure Pop_List (P      : in out Parser;
+                       Level  : in Natural;
+                       Marker : in Wiki.Strings.WChar);
+   procedure Pop_List (P      : in out Parser);
 
    --  Check if the link refers to an image and must be rendered as an image.
    --  Returns a positive index of the start the the image link.
@@ -183,6 +232,11 @@ private
 
    type String_Array is array (Positive range <>) of Wiki.String_Access;
 
+   procedure Process_Html (P          : in out Parser;
+                           Kind       : in Wiki.Html_Parser.State_Type;
+                           Name       : in Wiki.Strings.WString;
+                           Attributes : in out Wiki.Attributes.Attribute_List);
+
    procedure Start_Element (P          : in out Parser;
                             Tag        : in Wiki.Html_Tag;
                             Attributes : in out Wiki.Attributes.Attribute_List);
@@ -190,46 +244,46 @@ private
    procedure End_Element (P    : in out Parser;
                           Tag  : in Wiki.Html_Tag);
 
-   procedure Parse_Token (P     : in out Parser);
-
    procedure Toggle_Format (P      : in out Parser;
                             Format : in Format_Type);
 
-   --  Parse the beginning or the end of a double character sequence.  This procedure
-   --  is instantiated for several format types (bold, italic, superscript, subscript, code).
-   --  Example:
-   --    --name--  **bold** ~~strike~~
-   generic
-      Format : Format_Type;
-   procedure Parse_Double_Format (P     : in out Parser;
-                                  Token : in Wiki.Strings.WChar);
-
-   --  Parse the beginning or the end of a single character sequence.  This procedure
-   --  is instantiated for several format types (bold, italic, superscript, subscript, code).
+   --  Parse the beginning or the end of a single character sequence.
    --  Example:
    --    _name_    *bold*   `code`
-   generic
-      Format : Format_Type;
-   procedure Parse_Single_Format (P     : in out Parser;
-                                  Token : in Wiki.Strings.WChar);
+   procedure Parse_Format (P      : in out Parser;
+                           Text   : in out Wiki.Buffers.Buffer_Access;
+                           From   : in out Positive;
+                           Expect : in Wiki.Strings.WChar;
+                           Format : in Format_Type);
 
-   --  Parse a space and take necessary formatting actions.
+   --  Parse the beginning or the end of a double character sequence.
    --  Example:
-   --    item1 item2   => add space in text buffer
-   --    ' * item'     => start a bullet list (Google)
-   --    ' # item'     => start an ordered list (Google)
-   --    ' item'       => preformatted text (Google, Creole)
-   procedure Parse_Space (P     : in out Parser;
-                          Token : in Wiki.Strings.WChar);
+   --    --name--  **bold** ~~strike~~
+   procedure Parse_Format_Double (P      : in out Parser;
+                                  Text   : in out Wiki.Buffers.Buffer_Access;
+                                  From   : in out Positive;
+                                  Expect : in Wiki.Strings.WChar;
+                                  Format : in Format_Type);
 
-   --  Parse a HTML component.
-   --  Example:
-   --     <b> or </b>
-   procedure Parse_Maybe_Html (P     : in out Parser;
-                               Token : in Wiki.Strings.WChar);
+   --  Push a new block kind on the block stack.
+   procedure Push_Block (P      : in out Parser;
+                         Kind   : in Wiki.Nodes.Node_Kind;
+                         Level  : in Integer := 0;
+                         Marker : in Wiki.Strings.WChar := ' ';
+                         Number : in Integer := 0);
 
-   procedure Parse_End_Line (P     : in out Parser;
-                             Token : in Wiki.Strings.WChar);
+   --  Pop the current block stack.
+   procedure Pop_Block (P    : in out Parser);
+   procedure Pop_All (P : in out Parser);
+
+   procedure Pop_Block_Until (P     : in out Parser;
+                              Kind  : in Wiki.Nodes.Node_Kind;
+                              Level : in Integer);
+
+   procedure Append_Text (P    : in out Parser;
+                          Text : in Wiki.Strings.BString;
+                          From : in Positive;
+                          To   : in Positive);
 
    NAME_ATTR  : aliased constant String := "name";
    HREF_ATTR  : aliased constant String := "href";
