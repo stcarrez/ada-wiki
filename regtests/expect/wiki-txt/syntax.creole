@@ -1,46 +1,99 @@
 
 First paragraph.
+
 Second paragraph.
-Section h1
+
+Section h1 (largest)
+
 Section h2
+
 Section h3
+
 Section h4
+
 Section h5
 
-item 1
+Section h5 (second)
 
-item 1.1
+**not** //parsed//
 
-item 1.2
+---------------------------------------------------------
 
-item 2
 
-item 3
+  - item 1
 
-item 3.1
+      - item 1.1
+      - item 1.2
+  - 
 
-item 3.2
-num 1
+      - item 2
+  - 
 
-num 2
+      - item 3
+  - 
+
+      1)  item 3.1
+      2)  item 3.2
+
+
+
+  1)  num 1
+  2)  num 2
+
+
 Section bloc:
- L1: line 1
- L2: line 2
- L3: line 3
+
+ L1: line 1  L2: line 2  L3: line 3
+
 Formatting
+
 emphasis
+
 strong
+
+bold italics also bold italics
+
 Line
 break
-superscript
-subscript
-__underline__
-A link
-title (A link)
 
-Alt textAlt text|center}}
+A link title (A link)
+
+ Alt text
 
 //A// **pre**-formatted section 
 == [[Nowiki]]
 
+|=Heading Col 1 |=Heading Col 2         | |Cell 1.1       |Two lines
+in Cell 1.2 | |Cell 2.1       |Cell 2.2               |
+
+Some examples of markup are:  <i>this</i>  
+
+#1
+
+Escape **not bold**
+
+
+  - bold item
+  - italic item
+  - 
+
+      1)  item about a certain page
+  - 
+
+      1)   this is not processed 
+
+
+Creole Additions
+
+
+
+
+
+This is monospace text.
+
+This is superscripted text.
+
+This is subscripted text.    This is __underlined__ text.
+
+; First title of definition list : Definition of first item. ; Second title: Second definition beginning on the same line.
 

@@ -1,4 +1,3 @@
 
-Image: My image
-Not image: !Test
+Image: My image Not image: !Test
 

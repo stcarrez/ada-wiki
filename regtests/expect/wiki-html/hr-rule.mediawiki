@@ -1,1 +1,1 @@
-<p>Line 1</p><hr>Line 2
+<p>Line 1</p><hr><p>Line 2</p>

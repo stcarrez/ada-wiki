@@ -1,25 +1,6 @@
-Alii summum decus in carruchis solito altioribus et ambitioso vestium
-cultu ponentes sudant sub ponderibus lacernarum, quas in collis
-insertas cingulis ipsis adnectunt nimia subtegminum tenuitate
-perflabiles, expandentes eas crebris agitationibus maximeque sinistra,
-ut longiores fimbriae tunicaeque perspicue luceant varietate liciorum
-effigiatae in species animalium multiformes.
+Alii summum decus in carruchis solito altioribus et ambitioso vestium cultu ponentes sudant sub ponderibus lacernarum, quas in collis insertas cingulis ipsis adnectunt nimia subtegminum tenuitate perflabiles, expandentes eas crebris agitationibus maximeque sinistra, ut longiores fimbriae tunicaeque perspicue luceant varietate liciorum effigiatae in species animalium multiformes.
 
-Inter has ruinarum varietates a Nisibi quam tuebatur accitus
-Vrsicinus, cui nos obsecuturos iunxerat imperiale praeceptum,
-dispicere litis exitialis certamina cogebatur abnuens et reclamans,
-adulatorum oblatrantibus turmis, bellicosus sane milesque semper et
-militum ductor sed forensibus iurgiis longe discretus, qui metu sui
-discriminis anxius cum accusatores quaesitoresque subditivos sibi
-consociatos ex isdem foveis cerneret emergentes, quae clam palamve
-agitabantur, occultis Constantium litteris edocebat inplorans
-subsidia, quorum metu tumor notissimus Caesaris exhalaret.
+Inter has ruinarum varietates a Nisibi quam tuebatur accitus Vrsicinus, cui nos obsecuturos iunxerat imperiale praeceptum, dispicere litis exitialis certamina cogebatur abnuens et reclamans, adulatorum oblatrantibus turmis, bellicosus sane milesque semper et militum ductor sed forensibus iurgiis longe discretus, qui metu sui discriminis anxius cum accusatores quaesitoresque subditivos sibi consociatos ex isdem foveis cerneret emergentes, quae clam palamve agitabantur, occultis Constantium litteris edocebat inplorans subsidia, quorum metu tumor notissimus Caesaris exhalaret.
 
-Alii summum decus in carruchis solito altioribus et ambitioso vestium
-cultu ponentes sudant sub ponderibus lacernarum, quas in collis
-insertas cingulis ipsis adnectunt nimia subtegminum tenuitate
-perflabiles, expandentes eas crebris agitationibus maximeque sinistra,
-ut longiores fimbriae tunicaeque perspicue luceant varietate liciorum
-effigiatae in species animalium multiformes.
-
+Alii summum decus in carruchis solito altioribus et ambitioso vestium cultu ponentes sudant sub ponderibus lacernarum, quas in collis insertas cingulis ipsis adnectunt nimia subtegminum tenuitate perflabiles, expandentes eas crebris agitationibus maximeque sinistra, ut longiores fimbriae tunicaeque perspicue luceant varietate liciorum effigiatae in species animalium multiformes.
 

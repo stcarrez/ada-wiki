@@ -1,4 +1,4 @@
 <pre><code>* item 1
 ''item''
 == dd ==
-</code></pre><ul>item 2
+</code></pre><ul><li>item 2</li></ul>

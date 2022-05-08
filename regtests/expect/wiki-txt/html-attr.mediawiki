@@ -1,7 +1,3 @@
 
-Main Page
- 
- Article
-	Discussion
- 
+Main PageArticleDiscussion
 

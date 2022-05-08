@@ -1,7 +1,7 @@
 
-C{
-Preformat
-Item 1
-Item 2
+~C~{
 
+Preformat
+
+ Item 1  Item 2
 

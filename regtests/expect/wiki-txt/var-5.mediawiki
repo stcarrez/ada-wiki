@@ -1,5 +1,8 @@
 
 
 Joe Roger is captain.
+
 $(admin) is unkown
+
 $(buck) and Joe Roger is ok.
+

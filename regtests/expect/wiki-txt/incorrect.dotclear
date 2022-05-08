@@ -1,17 +1,17 @@
 
-Test hr rule not followed by n. ----XXX End of hr rule. 
+Test hr rule not followed by n. ----XXX End of hr rule.
 
 
   - |
   - ||
-  - ((link-3||| 
+  - ((link-3|||
 
 
-Last section !!!!!!!! Big header 
+Last section !!!!!!!! Big header
 
 
   - quote-name|pipe
-  - {{quote-name|pipe|url 
+  - {{quote-name|pipe|url
 
 
 

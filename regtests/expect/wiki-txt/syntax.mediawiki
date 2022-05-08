@@ -1,59 +1,69 @@
 
 First paragraph.
+
 Second paragraph.
+
 Section h1
+
 Section h2
+
 Section h3
+
 Section h4
+
 Section h5
+
 ---------------------------------------------------------
-item 1
 
-item 1.1
 
-item 1.2
+  - item 1
 
-item 2
+      - item 1.1
+      - item 1.2
+  - 
 
-item 3
+      - item 2
+  - 
 
-item 3.1
+      - item 3
+  - 
 
-item 3.2
-num 1
+      1)  item 3.1
+      2)  item 3.2
 
-num 2
+
+
+  1)  num 1
+  2)  num 2
+
+
 Section bloc:
-L1: line 1
-L2: line 2
-L3: line 3
+
+ L1: line 1  L2: line 2  L3: line 3
 
 Formatting
+
 emphasis
+
 strong
+
 strong and emphasis
+
 Strike text
 
-Linebreak
-Insert
-Underline
-Strike
-Delete
-A link
-title (A link)
-rectifier (http://en.wikipedia.org/wiki/Rectifier)
-Sun Microsystems (http://www.sun.com)
 
-item 1
-     definition item 1
-item 2
-     definition item 2
-item 3
-     definition item 3
+Linebreak
+
+InsertUnderline Strike Delete
+
+A link title (A link) rectifier (http://en.wikipedia.org/wiki/Rectifier) Sun Microsystems (http://www.sun.com)
+
+definition item 1definition item 2definition item 3
 
 
 * item 1
 ''item''
 == dd ==
+
 
 

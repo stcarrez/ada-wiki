@@ -1,7 +1,7 @@
 
 Header 1
 
-This is my inline HTML: 
+This is my inline HTML:
 
 <div class='error'>
   <span class='item'>My item</span>

@@ -1,8 +1,1 @@
-<p>Test hr rule not followed by \n.
-XXX
-End of hr rule.</p><ul><li>[mylink|\||\|))
-</li><li>[{link-2|\|\|))
-</li><li>{[link-3|\|\|</li></ul><p>Last section
-</p><h6>======== Big header</h6><ul><li><img src="quote-name\" alt="pipe" />|url}}
-</li><li><img src="quote-name\" alt="pipe" />|url</li></ul><p><img src="[" />This is not a pre-section
-}}}</p>
+<p>Test hr rule not followed by \n. ----XXX End of hr rule.</p><ul><li>[mylink|\||\|))</li><li>[{link-2|\|\|))</li><li>{[link-3|\|\|</li></ul><p>Last section ============== Big header</p><ul><li><img src="quote-name\" alt="pipe|url" /></li><li>{{quote-name\|pipe|url</li></ul><p>{{[ This is not a pre-section }}}</p><p>Note a preformatted:</p><p> <code> </code><strong><code>bold</code></strong><code> </code></p>

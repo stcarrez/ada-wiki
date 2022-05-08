@@ -1,4 +1,1 @@
-<div class="adafr-block"> <h3 />
-<p> <p>
- 
- </p></div>
+<div class="adafr-block"><h3 /><p /></div>

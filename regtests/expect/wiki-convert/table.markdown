@@ -1,2 +1,1 @@
-| git diff      | `git status`        | **git clone**      |
-
+| git diff     | `git status`       | git clone      |

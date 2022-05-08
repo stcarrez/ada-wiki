@@ -2,13 +2,10 @@ The quote:
 
 
 <blockquote>
-Line a
-Line b
 
-Line c
-Line d
+Line a     Line b
 
+Line c     Line d
 </blockquote>
 
 and this is the end.
-

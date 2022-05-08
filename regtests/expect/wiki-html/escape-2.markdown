@@ -1,1 +1,1 @@
-<p>Escape: <tt>&lt;tt&gt;</tt></p>
+<p>Escape: <code>&lt;tt&gt;</code></p>

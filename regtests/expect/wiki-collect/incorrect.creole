@@ -2,19 +2,24 @@
 Big 1
 End 1
 Last 1
+Note 1
 Test 1
 This 1
 XXX 1
+bold 1
 followed 1
 header 1
 link 2
 mylink 1
+name 1
 not 2
+pipe 1
 pre 1
+preformatted 1
+quote 1
 rule 2
 section 2
-url 2
+url 1
 == Links ==
 == Images ==
-[ 1
-quote-name\ 2
+quote-name\ 1

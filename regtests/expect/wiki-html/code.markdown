@@ -1,2 +1,1 @@
-<p>The HTML <tt>textarea</tt>
-is provided by the JSF component <tt>h:inputTextArea</tt>.</p>
+<p>The HTML <code>textarea</code> is provided by the JSF component <code>h:inputTextArea</code>.</p>

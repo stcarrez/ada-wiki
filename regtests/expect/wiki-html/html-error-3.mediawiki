@@ -1,1 +1,1 @@
-<p><b class=""> <span class="css-class-test"><i>Italic</i></span></b></p>
+<p><b class="">         <i>Italic</i></b></p>
