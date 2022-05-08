@@ -529,6 +529,7 @@ package body Wiki.Html_Parser is
                if Wiki.Html_Parser.Entities.Keywords (I).all = Parser.Entity_Name (1 .. Len) then
                   Entity := Entities.Mapping (I);
                   Last := Pos;
+                  Status := ENTITY_VALID;
                   return;
                elsif Entities.Keywords (I).all < Parser.Entity_Name (1 .. Len) then
                   Low := I + 1;
