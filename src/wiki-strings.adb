@@ -48,7 +48,7 @@ package body Wiki.Strings is
    --  Find the last position of the character in the string and starting
    --  at the given position.  Stop at the first character different than `Char`.
    --  ------------------------------
-   function Last_Position (Source : in Bstring;
+   function Last_Position (Source : in BString;
                            Char   : in WChar;
                            From   : in Positive := 1) return Natural is
 
@@ -75,7 +75,7 @@ package body Wiki.Strings is
    --  Count the the number of consecutive occurence of the given character
    --  and starting at the given position.
    --  ------------------------------
-   function Count_Occurence (Source : in Bstring;
+   function Count_Occurence (Source : in BString;
                              Char   : in WChar;
                              From   : in Positive := 1) return Natural is
       Pos : constant Natural := Last_Position (Source, Char, From);
@@ -87,7 +87,18 @@ package body Wiki.Strings is
       end if;
    end Count_Occurence;
 
-   function Skip_Spaces (Source : in Bstring;
+   function Count_Occurence (Source : in WString;
+                             Char   : in WChar;
+                             From   : in Positive := 1) return Natural is
+      Pos : Positive := From;
+   begin
+      while Pos <= Source'Last and then Source (Pos) = Char loop
+         Pos := Pos + 1;
+      end loop;
+      return Pos - From;
+   end Count_Occurence;
+
+   function Skip_Spaces (Source : in BString;
                          From   : in Positive;
                          Last   : in Positive) return Positive is
       Pos : Positive := From;
@@ -97,5 +108,26 @@ package body Wiki.Strings is
       end loop;
       return Pos;
    end Skip_Spaces;
+
+   procedure Scan_Line_Fragment (Source : in BString;
+                                 Process : not null
+                                    access procedure (Text   : in WString;
+                                                      Offset : in Natural)) is
+
+      Offset : Natural := 0;
+
+      procedure Parse_Line_Fragment (Content : in Wiki.Strings.WString) is
+      begin
+         Process (Content, Offset);
+         Offset := Offset + Content'Length;
+      end Parse_Line_Fragment;
+
+      procedure Parse_Line_Fragment is
+         new Wiki.Strings.Wide_Wide_Builders.Get (Parse_Line_Fragment);
+      pragma Inline (Parse_Line_Fragment);
+
+   begin
+      Parse_Line_Fragment (Source);
+   end Scan_Line_Fragment;
 
 end Wiki.Strings;
