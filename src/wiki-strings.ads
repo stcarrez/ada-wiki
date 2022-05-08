@@ -85,10 +85,14 @@ package Wiki.Strings is
 
    subtype BString is Wide_Wide_Builders.Builder;
 
-   function Length (Source : in Bstring) return Natural renames Wide_Wide_Builders.Length;
+   function Length (Source : in BString) return Natural renames Wide_Wide_Builders.Length;
 
    function Element (Source   : in BString;
                      Position : in Positive) return WChar renames Wide_Wide_Builders.Element;
+
+   function To_WString (Source : in BString) return WString renames Wide_Wide_Builders.To_Array;
+
+   procedure Clear (Source   : in out BString) renames Wide_Wide_Builders.Clear;
 
    procedure Append_String (Source   : in out BString;
                             Content  : in WString) renames Wide_Wide_Builders.Append;
@@ -98,6 +102,9 @@ package Wiki.Strings is
                      From     : in Positive;
                      To       : in Positive) renames Wide_Wide_Builders.Append;
 
+   procedure Append_Char (Source   : in out BString;
+                          Item     : in WChar) renames Wide_Wide_Builders.Append;
+
    --  Search for the first occurrence of the character in the builder and
    --  starting after the from index.  Returns the index of the first occurence or 0.
    function Index (Source : in BString;
@@ -106,18 +113,26 @@ package Wiki.Strings is
 
    --  Find the last position of the character in the string and starting
    --  at the given position.  Stop at the first character different than `Char`.
-   function Last_Position (Source : in Bstring;
+   function Last_Position (Source : in BString;
                            Char   : in WChar;
                            From   : in Positive := 1) return Natural;
 
    --  Count the the number of consecutive occurence of the given character
    --  and starting at the given position.
-   function Count_Occurence (Source : in Bstring;
-                             Char   : in Wchar;
+   function Count_Occurence (Source : in BString;
+                             Char   : in WChar;
+                             From   : in Positive := 1) return Natural;
+   function Count_Occurence (Source : in WString;
+                             Char   : in WChar;
                              From   : in Positive := 1) return Natural;
 
-   function Skip_Spaces (Source : in Bstring;
+   function Skip_Spaces (Source : in BString;
                          From   : in Positive;
                          Last   : in Positive) return Positive;
+
+   procedure Scan_Line_Fragment (Source  : in BString;
+                                 Process : not null
+                                    access procedure (Text   : in WString;
+                                                      Offset : in Natural));
 
 end Wiki.Strings;
