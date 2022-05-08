@@ -314,16 +314,26 @@ package body Wiki.Parsers.Textile is
                C := Buffer.Content (Pos);
                case C is
                   when '*' =>
-                     Parse_Format (Parser, Buffer, Pos, '*', Wiki.BOLD);
-                     exit Main when Buffer = null;
+                     if Parser.Format (CODE) then
+                        Append (Parser.Text, C);
+                        Pos := Pos + 1;
+                     else
+                        Parse_Format (Parser, Buffer, Pos, '*', Wiki.BOLD);
+                        exit Main when Buffer = null;
+                     end if;
 
                   when '@' =>
                      Parse_Format (Parser, Buffer, Pos, '@', Wiki.CODE);
                      exit Main when Buffer = null;
 
                   when '_' =>
-                     Parse_Format (Parser, Buffer, Pos, '_', Wiki.EMPHASIS);
-                     exit Main when Buffer = null;
+                     if Parser.Format (CODE) then
+                        Append (Parser.Text, C);
+                        Pos := Pos + 1;
+                     else
+                        Parse_Format (Parser, Buffer, Pos, '_', Wiki.EMPHASIS);
+                        exit Main when Buffer = null;
+                     end if;
 
                   when '^' =>
                      Parse_Format (Parser, Buffer, Pos, '^', Wiki.SUPERSCRIPT);
