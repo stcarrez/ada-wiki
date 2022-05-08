@@ -17,4 +17,9 @@ Last section
 This is not a pre-section
 }}}
 
+Note a preformatted:
+
+ {{{
+**bold**
+}}}
 

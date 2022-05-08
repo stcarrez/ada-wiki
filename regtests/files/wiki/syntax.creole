@@ -2,7 +2,7 @@ First paragraph.
 
 Second paragraph.
 
-= Section h1
+= Section h1 (largest)
 
 == Section h2
 
@@ -11,6 +11,10 @@ Second paragraph.
 ==== Section h4
 
 ===== Section h5
+
+===== Section h5 (second) ==
+
+=== **not** //parsed// ===
 
 ----
 
@@ -37,22 +41,59 @@ Formatting
 
 **strong**
 
+
+**//bold italics**//
+//**also bold italics//**
+
 Line\\break
-
-^^superscript^^
-
-,,subscript,,
-
-__underline__
 
 [[A link]]
 [[A link|title]]
 
+{{myimage.png}}
 {{link|Alt text}}
-{{link|Alt text|center}}
 
 {{{
 //A// **pre**-formatted section 
 == [[Nowiki]]
 }}}
 
+
+|=Heading Col 1 |=Heading Col 2         |
+|Cell 1.1       |Two lines\\in Cell 1.2 |
+|Cell 2.1       |Cell 2.2               |
+
+Some examples of markup are: {{{** <i>this</i> ** }}}
+
+~#1
+
+Escape ~**not bold**
+
+* **bold** item
+* //italic// item
+# item about a [[certain page]]
+# {{{ //this// is **not** [[processed]] }}}
+
+
+== Creole Additions
+
+<<plugin-name param1 param2 param\ 3>>
+
+<<plugin-name name1=param1 name2=param2 name3=param\ 3>>
+
+<<<name1>>>
+
+<<set myname Joe\ Roger>>
+
+This is ##monospace## text. 
+
+This is ^^superscripted^^ text. 
+
+This is ,,subscripted,, text. 
+ 
+This is __underlined__ text.
+
+; First title of definition list
+: Definition of first item.
+; Second title: Second definition
+beginning on the same line.
