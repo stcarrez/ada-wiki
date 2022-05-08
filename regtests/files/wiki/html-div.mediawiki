@@ -1,0 +1,8 @@
+<div>
+  <p>Hello block</p>
+  <table>
+    <tr>
+      <td>A</td>
+    </tr>
+  </table>
+</div>
