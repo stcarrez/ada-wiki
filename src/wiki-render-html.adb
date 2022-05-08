@@ -633,6 +633,7 @@ package body Wiki.Render.Html is
       Src        : constant Strings.WString := Attributes.Get_Attribute (Attr, "src");
       Alt        : constant Strings.WString := Attributes.Get_Attribute (Attr, "alt");
       Desc       : constant Strings.WString := Attributes.Get_Attribute (Attr, "longdesc");
+      Title_Attr : constant Strings.WString := Attributes.Get_Attribute (Attr, "title");
       Class      : constant Strings.WString := Attributes.Get_Attribute (Attr, "class");
       Style      : constant Strings.WString := Attributes.Get_Attribute (Attr, "style");
       Size       : constant Strings.WString := Attributes.Get_Attribute (Attr, "size");
@@ -695,6 +696,9 @@ package body Wiki.Render.Html is
          Engine.Output.Write_Wide_Attribute ("alt", Title);
       elsif Alt'Length > 0 then
          Engine.Output.Write_Wide_Attribute ("alt", Alt);
+      end if;
+      if Title_Attr'Length > 0 then
+         Engine.Output.Write_Wide_Attribute ("title", Title_Attr);
       end if;
 
       Engine.Output.End_Element ("img");
