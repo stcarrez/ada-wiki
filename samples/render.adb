@@ -23,6 +23,7 @@ with Ada.Command_Line;
 
 with Wiki.Documents;
 with Wiki.Parsers;
+with Wiki.Strings;
 with Wiki.Filters.TOC;
 with Wiki.Filters.Html;
 with Wiki.Filters.Autolink;
@@ -31,6 +32,7 @@ with Wiki.Render.Html;
 with Wiki.Render.Text;
 with Wiki.Streams.Text_IO;
 with Wiki.Streams.Html.Text_IO;
+with Wiki.Nodes.Dump;
 
 procedure Render is
 
@@ -48,6 +50,7 @@ procedure Render is
    Syntax    : Wiki.Wiki_Syntax := Wiki.SYNTAX_MARKDOWN;
    Style     : Unbounded_String;
    Indent    : Natural := 3;
+   Dump_Tree : Boolean := False;
 
    procedure Usage is
    begin
@@ -99,6 +102,21 @@ procedure Render is
       Renderer.Render (Doc);
    end Render_Text;
 
+   procedure Dump (Doc : in Wiki.Documents.Document) is
+      procedure Write (Indent : in Positive;
+                       Line   : in Wiki.Strings.WString) is
+         S : constant String := Wiki.Strings.To_String (Line);
+      begin
+         Ada.Text_IO.Set_Col (Ada.Text_Io.Count (Indent));
+         Ada.Text_IO.Put_Line (S);
+      end Write;
+
+      procedure Dump is
+         new Wiki.Nodes.Dump (Write);
+   begin
+      Doc.Iterate (Dump'Access);
+   end Dump;
+
    procedure Render_File (Name : in String) is
       Input    : aliased Wiki.Streams.Text_IO.File_Input_Stream;
       Filter   : aliased Wiki.Filters.Html.Html_Filter_Type;
@@ -124,7 +142,9 @@ procedure Render is
       Engine.Parse (Input'Unchecked_Access, Doc);
 
       --  Render the document in text or HTML.
-      if Html_Mode then
+      if Dump_Tree then
+         Dump (Doc);
+      elsif Html_Mode then
          Render_Html (Doc, Style);
       else
          Render_Text (Doc);
@@ -170,6 +190,8 @@ begin
             Indent := 1;
          elsif Param = "-2" then
             Indent := 2;
+         elsif Param = "-dump" then
+            Dump_Tree := True;
          elsif Param (Param'First) = '-' then
             Usage;
             return;
