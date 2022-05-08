@@ -91,6 +91,12 @@ private package Wiki.Parsers.Common is
 
    procedure Parse_Entity (Parser : in out Parser_Type;
                            Text   : in out Wiki.Buffers.Buffer_Access;
+                           From   : in out Positive;
+                           Status : out Wiki.Html_Parser.Entity_State_Type;
+                           Entity : out Wiki.Strings.WChar);
+
+   procedure Parse_Entity (Parser : in out Parser_Type;
+                           Text   : in out Wiki.Buffers.Buffer_Access;
                            From   : in out Positive);
 
    --  Parse a quote.
