@@ -123,24 +123,28 @@ package body Wiki.Parsers.Common is
    --    {{{1}}}                      MediaWiki
    --    <<<1>>>                      Creole extension
    --  ------------------------------
-   procedure Expand_Parameter (P     : in out Parser;
-                               Into  : in out Wiki.Strings.BString) is
+   procedure Expand_Parameter (Parser  : in out Parser_Type;
+                               Text    : in out Wiki.Buffers.Buffer_Access;
+                               From    : in out Positive;
+                               Into    : in out Wiki.Strings.BString) is
       procedure Expand (Content : in Wiki.Strings.WString);
 
+      Block  : Wiki.Buffers.Buffer_Access := Text;
+      Pos    : Positive := From;
       C      : Wiki.Strings.WChar;
       Expect : Wiki.Strings.WChar;
       Param  : Wiki.Strings.BString (256);
 
       procedure Expand (Content : in Wiki.Strings.WString) is
          Name : constant String := Wiki.Strings.To_String (Content);
-         Pos  : constant Attributes.Cursor := Wiki.Attributes.Find (P.Context.Variables, Name);
+         Pos  : constant Attributes.Cursor := Wiki.Attributes.Find (Parser.Context.Variables, Name);
       begin
          if Wiki.Attributes.Has_Element (Pos) then
             Append (Into, Wiki.Attributes.Get_Wide_Value (Pos));
          else
-            Append (Into, P.Param_Char);
-            Append (Into, P.Param_Char);
-            Append (Into, P.Param_Char);
+            Append (Into, Parser.Param_Char);
+            Append (Into, Parser.Param_Char);
+            Append (Into, Parser.Param_Char);
             Append (Into, Content);
             Append (Into, Expect);
             Append (Into, Expect);
@@ -151,45 +155,58 @@ package body Wiki.Parsers.Common is
       procedure Expand is
          new Wiki.Strings.Wide_Wide_Builders.Get (Expand);
 
+      Count : Natural;
    begin
-      Peek (P, C);
-      if C /= P.Param_Char then
-         Append (Into, P.Param_Char);
-         Put_Back (P, C);
+      Next (Block, Pos);
+      if Block = null or else Block.Content (Pos) /= Parser.Param_Char then
+         Append (Into, Parser.Param_Char);
+         Text := Block;
+         From := Pos;
          return;
       end if;
-      Peek (P, C);
-      if C /= P.Param_Char then
-         Append (Into, P.Param_Char);
-         Append (Into, P.Param_Char);
-         Put_Back (P, C);
+
+      Next (Block, Pos);
+      if Block = null or else Block.Content (Pos) /= Parser.Param_Char then
+         Append (Into, Parser.Param_Char);
+         Append (Into, Parser.Param_Char);
+         Text := Block;
+         From := Pos;
          return;
       end if;
-      if P.Param_Char = '{' then
+      Next (Block, Pos);
+
+      if Parser.Param_Char = '{' then
          Expect := '}';
       else
          Expect := '>';
       end if;
 
       --  Collect the parameter name or index until we find the end marker.
-      loop
-         Peek (P, C);
-         exit when P.Is_Eof;
+      while Block /= null loop
+         C := Block.Content (Pos);
          if C = Expect then
-            Peek (P, C);
-            if C = Expect then
-               Peek (P, C);
-               exit when C = Expect;
-               Append (Param, Expect);
+            Count := Count_Occurence (Block, Pos, Expect);
+            if Count >= 3 then
+               --  Expand the result.
+               Expand (Param);
+               for I in 1 .. 3 loop
+                  Next (Block, Pos);
+               end loop;
+               Text := Block;
+               From := Pos;
+               return;
             end if;
             Append (Param, C);
          else
             Append (Param, C);
          end if;
+         Next (Block, Pos);
       end loop;
 
-      --  Expand the result.
-      Expand (Param);
+      Append (Into, Parser.Param_Char);
+      Append (Into, Parser.Param_Char);
+      Text := Block;
+      From := Pos;
    end Expand_Parameter;
 
    --  ------------------------------
@@ -237,7 +254,7 @@ package body Wiki.Parsers.Common is
       Wiki.Attributes.Clear (Parser.Attributes);
       while Block /= null loop
          declare
-            Last : constant Natural := Block.Last;
+            Last : Natural := Block.Last;
          begin
             while Pos <= Last loop
                C := Block.Content (Pos);
@@ -247,18 +264,33 @@ package body Wiki.Parsers.Common is
                      Block := Block.Next_Block;
                      Pos := 1;
                      if Block = null then
+                        Parser.Read_Line (Block);
+                        if Block = null then
+                           Text := null;
+                           From := 1;
+                           return;
+                        end if;
+                     end if;
+                     Last := Block.Last;
+                  end if;
+                  C := Block.Content (Pos);
+                  Append (Value, C);
+                  Pos := Pos + 1;
+               elsif C = Separator and Index <= Max then
+                  Add_Attribute (Value);
+                  Clear (Value);
+                  Pos := Pos + 1;
+               elsif C = Parser.Param_Char then
+                  Expand_Parameter (Parser, Block, Pos, Value);
+                  if Block = null then
+                     Parser.Read_Line (Block);
+                     if Block = null then
                         Text := null;
                         From := 1;
                         return;
                      end if;
                   end if;
-                  C := Block.Content (Pos);
-                  Append (Value, C);
-               elsif C = Separator and Index <= Max then
-                  Add_Attribute (Value);
-                  Clear (Value);
-               elsif C = Parser.Param_Char then
-                  Expand_Parameter (Parser, Value);
+                  Last := Block.Last;
                elsif C = Terminator then
                   Add_Attribute (Value);
                   Text := Block;
@@ -266,12 +298,17 @@ package body Wiki.Parsers.Common is
                   return;
                elsif Length (Value) > 0 or not Wiki.Helpers.Is_Space (C) then
                   Append (Value, C);
+                  Pos := Pos + 1;
+               else
+                  Pos := Pos + 1;
                end if;
-               Pos := Pos + 1;
             end loop;
          end;
          Block := Block.Next_Block;
          Pos := 1;
+         if Block = null then
+            Parser.Read_Line (Block);
+         end if;
       end loop;
       Text := null;
       From := Pos;
@@ -825,7 +862,7 @@ package body Wiki.Parsers.Common is
                                     Marker : in Wiki.Strings.WChar) is
       Count : constant Natural := Count_Occurence (Text, From, Marker);
    begin
-      if Count /= 3 then
+      if Count /= 4 then
          return;
       end if;
       if not Wiki.Helpers.Is_Newline (Text.Content (From + Count)) then
@@ -1040,6 +1077,44 @@ package body Wiki.Parsers.Common is
 
    procedure Parse_Entity (Parser : in out Parser_Type;
                            Text   : in out Wiki.Buffers.Buffer_Access;
+                           From   : in out Positive;
+                           Status : out Wiki.Html_Parser.Entity_State_Type;
+                           Entity : out Wiki.Strings.WChar) is
+      Block  : Wiki.Buffers.Buffer_Access := Text;
+      Pos    : Positive := From;
+   begin
+      Status := Wiki.Html_Parser.ENTITY_NONE;
+      Entity := Wiki.Html_Parser.NUL;
+      Buffers.Next (Block, Pos);
+      if Block = null then
+         return;
+      end if;
+      loop
+         Wiki.Html_Parser.Parse_Entity (Parser.Html, Block.Content (1 .. Block.Last),
+                                        Pos, Status, Entity, Pos);
+         case Status is
+            when Wiki.Html_Parser.ENTITY_VALID =>
+               Text := Block;
+               From := Pos;
+               return;
+
+            when Wiki.Html_Parser.ENTITY_NONE =>
+               return;
+
+            when Wiki.Html_Parser.ENTITY_MIDDLE =>
+               Block := Block.Next_Block;
+               if Block = null then
+                  Status := Wiki.Html_Parser.ENTITY_NONE;
+                  return;
+               end if;
+               Pos := 1;
+
+         end case;
+      end loop;
+   end Parse_Entity;
+
+   procedure Parse_Entity (Parser : in out Parser_Type;
+                           Text   : in out Wiki.Buffers.Buffer_Access;
                            From   : in out Positive) is
       Block  : Wiki.Buffers.Buffer_Access := Text;
       Pos    : Positive := From;
@@ -1047,6 +1122,10 @@ package body Wiki.Parsers.Common is
       C      : Wiki.Strings.WChar;
    begin
       Buffers.Next (Block, Pos);
+      if Block = null then
+         Parse_Text (Parser, Text, From);
+         return;
+      end if;
       loop
          Wiki.Html_Parser.Parse_Entity (Parser.Html, Block.Content (1 .. Block.Last),
                                         Pos, Status, C, Pos);
