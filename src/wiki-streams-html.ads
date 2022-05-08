@@ -31,7 +31,7 @@ package Wiki.Streams.Html is
 
    --  Set the indentation level for HTML output stream.
    procedure Set_Indent_Level (Writer : in out Html_Output_Stream;
-                               Indent : in Natural) is abstract;
+                               Indent : in Natural) is null;
 
    --  Write an XML attribute within an XML element.
    --  The attribute value is escaped according to the XML escape rules.
@@ -58,7 +58,7 @@ package Wiki.Streams.Html is
                               Content : in Wiki.Strings.WString) is abstract;
 
    --  Write an optional newline or space.
-   procedure Newline (Writer : in out Html_Output_Stream) is abstract;
+   procedure Newline (Writer : in out Html_Output_Stream) is null;
 
    --  Write a character on the response stream and escape that character as necessary.
    procedure Write_Escape (Stream : in out Html_Output_Stream'Class;
