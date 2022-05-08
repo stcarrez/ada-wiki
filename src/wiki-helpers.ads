@@ -65,17 +65,17 @@ package Wiki.Helpers is
 
    --  Find the position of the first non space character in the text starting at the
    --  given position.  Returns Text'Last + 1 if the text only contains spaces.
-   function Skip_Spaces (Text : in Wiki.Strings.Wstring;
+   function Skip_Spaces (Text : in Wiki.Strings.WString;
                          From : in Positive) return Positive;
 
    --  Find the position of the last non space character scanning the text backward
    --  from the given position.  Returns Text'First - 1 if the text only contains spaces.
-   function Trim_Spaces (Text : in Wiki.Strings.Wstring;
+   function Trim_Spaces (Text : in Wiki.Strings.WString;
                          From : in Positive) return Natural;
 
    --  Find the position of the given character in the string starting at the given position.
-   function Index (Text : in Wiki.Strings.Wstring;
-                   Item : in Wiki.Strings.Wchar;
+   function Index (Text : in Wiki.Strings.WString;
+                   Item : in Wiki.Strings.WChar;
                    From : in Positive) return Natural;
 
 end Wiki.Helpers;
