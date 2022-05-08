@@ -127,14 +127,18 @@ package body Wiki.Parsers.MediaWiki is
             end if;
 
          when ' ' =>
-            Parser.Preformat_Indent := 1;
-            Parser.Preformat_Fence := ' ';
-            Parser.Preformat_Fcount := 1;
-            Flush_Text (Parser, Trim => Right);
-            Pop_Block (Parser);
-            Push_Block (Parser, Nodes.N_PREFORMAT);
-            Common.Append (Parser.Text, Buffer, Pos + 1);
-            return;
+            if Common.Is_List (Buffer, Pos + 1) then
+               Pos := Pos + 1;
+               Common.Parse_List (Parser, Buffer, Pos);
+            end if;
+         --   Parser.Preformat_Indent := 1;
+         --   Parser.Preformat_Fence := ' ';
+         --   Parser.Preformat_Fcount := 1;
+         --   Flush_Text (Parser, Trim => Right);
+         --   Pop_Block (Parser);
+         --   Push_Block (Parser, Nodes.N_PREFORMAT);
+         --   Common.Append (Parser.Text, Buffer, Pos + 1);
+         --   return;
 
          when ';' =>
             Common.Parse_Definition (Parser, Buffer, Pos);
@@ -159,7 +163,7 @@ package body Wiki.Parsers.MediaWiki is
          declare
             Last : Natural := Buffer.Last;
          begin
-            while Pos <= Last loop
+            while Pos <= Buffer.Last loop
                C := Buffer.Content (Pos);
                case C is
                   when ''' =>
