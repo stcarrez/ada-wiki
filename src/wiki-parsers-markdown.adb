@@ -40,6 +40,12 @@ package body Wiki.Parsers.Markdown is
                              From   : in out Positive;
                              Level  : out Natural);
 
+   function Is_Escapable (C : in Wiki.Strings.WChar) return Boolean is
+     ((C >= '!' and C <= '/')
+       or (C >= ':' and C <= '@')
+       or (C >= '{' and C <= '~')
+       or (C >= '[' and C <= '`'));
+
    function Get_Header_Level (Text   : in Wiki.Buffers.Buffer_Access;
                               From   : in Positive) return Natural is
       Count : constant Natural := Buffers.Count_Occurence (Text, From, '#');
@@ -277,7 +283,7 @@ package body Wiki.Parsers.Markdown is
          if Count > Parser.Preformat_Indent then
             Pos := (if Parser.Preformat_Indent > 0 then Parser.Preformat_Indent else 1);
          end if;
-         Buffers.Append (Parser.Text_Buffer, Block, Pos);
+         Common.Append (Parser.Text, Block, Pos);
          return;
       end if;
 
@@ -380,12 +386,13 @@ package body Wiki.Parsers.Markdown is
 
          when '~' | '`' =>
             if Count <= 3 then
-               Level := Get_Preformat_Level (Block, Pos, C);
-               if Level > 0 then
-                  Parser.Preformat_Indent := Count;
-                  Parser.Preformat_Fence := C;
-                  Parser.Preformat_Fcount := Level;
-                  Push_Block (Parser, N_PREFORMAT);
+               Common.Parse_Preformatted (Parser, Block, Pos, C);
+               --  Level := Get_Preformat_Level (Block, Pos, C);
+               if Parser.Current_Node = Nodes.N_PREFORMAT then
+                  --  Parser.Preformat_Indent := Count;
+                  --  Parser.Preformat_Fence := C;
+                  --  Parser.Preformat_Fcount := Level;
+                  --  Push_Block (Parser, N_PREFORMAT);
                   return;
                end if;
             end if;
@@ -797,11 +804,24 @@ package body Wiki.Parsers.Markdown is
     Scan_Alt :
       while Block /= null loop
          declare
-            Last : constant Natural := Block.Last;
+            Last : Natural := Block.Last;
          begin
             while Pos <= Last loop
                C := Block.Content (Pos);
                exit Scan_Alt when C = ']';
+               if C = '\' then
+                  Pos := Pos + 1;
+                  if Pos > Last then
+                     Block := Block.Next_Block;
+                     exit Scan_Alt when Block = null;
+                     Last := Block.Last;
+                     Pos := 1;
+                  end if;
+                  C := Block.Content (Pos);
+                  if not Is_Escapable (C) then
+                     Append (Alt, '\');
+                  end if;
+               end if;
                Append (Alt, C);
                Pos := Pos + 1;
             end loop;
@@ -858,6 +878,9 @@ package body Wiki.Parsers.Markdown is
                      return;
                   end if;
                   C := Block.Content (Pos);
+                  if Parser.Format (CODE) or not Is_Escapable (C) then
+                     Append (Parser.Text, '\');
+                  end if;
                end if;
                Append (Parser.Text, C);
                Pos := Pos + 1;
