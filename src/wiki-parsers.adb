@@ -434,6 +434,9 @@ package body Wiki.Parsers is
          end if;
          P.In_List := False;
       end if;
+      while P.Current_Node in Nodes.N_LIST_ITEM | Nodes.N_LIST_START | Nodes.N_NUM_LIST_START loop
+         Pop_Block (P);
+      end loop;
    end Flush_List;
 
    --  ------------------------------
