@@ -1,1 +1,1 @@
-<ul><li>* item1 item1 item1</li><li>* item2 item2 item2</li></ul><ul><li>- sub-item3 sub-item 3</li><li>- sub-item4 sub-item 4</li></ul><ul><li>+ item 5 item 5 item 5 item 5</li><li>+ item 6 item 6</li></ul><ul><li>- sub item 5</li><li>- sub item 5</li></ul><ul><li>* item 3</li></ul>
+<ul><li>item1 item1 item1</li><li>item2 item2 item2</li></ul><ul><li>sub-item3 sub-item 3</li><li>sub-item4 sub-item 4</li></ul><ul><li>item 5 item 5 item 5 item 5</li><li>item 6 item 6</li></ul><ul><li>sub item 5</li><li>sub item 5</li></ul><ul><li>item 3</li></ul>
