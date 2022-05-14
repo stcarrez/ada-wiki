@@ -361,6 +361,8 @@ package body Wiki.Parsers.Markdown is
                if not Is_List_Item (Parser, Level) then
                   Push_Block (Parser, Nodes.N_LIST_START, Level, C);
                end if;
+               Buffers.Next (Block, Pos);
+               Buffers.Next (Block, Pos);
                Push_Block (Parser, Nodes.N_LIST_ITEM, Level, C);
                Buffers.Append (Parser.Text_Buffer, Block, Pos);
                Parser.Previous_Line_Empty := False;
