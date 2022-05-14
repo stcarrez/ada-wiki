@@ -68,9 +68,9 @@ package body Wiki.Parsers.Tests is
       Util.Tests.Assert_Equals (T, "<p>x <b>bold</b> y</p>",
                                 Wiki.Utils.To_Html ("x *bold* y", SYNTAX_GOOGLE),
                                 "Bold rendering invalid");
-      Util.Tests.Assert_Equals (T, "<p>x <b>bold y</b></p>",
-                                Wiki.Utils.To_Html ("x *bold y", SYNTAX_MIX),
-                                "Bold rendering invalid (MIX)");
+      Util.Tests.Assert_Equals (T, "<p>x <strong>bold y</strong></p>",
+                                Wiki.Utils.To_Html ("x **bold y**", SYNTAX_CREOLE),
+                                "Bold rendering invalid (CREOLE)");
       Util.Tests.Assert_Equals (T, "<p>x <b>item y</b> p</p>",
                                 Wiki.Utils.To_Html ("x __item y__ p", SYNTAX_DOTCLEAR),
                                 "Bold rendering invalid");
@@ -78,8 +78,8 @@ package body Wiki.Parsers.Tests is
                                 Wiki.Utils.To_Html ("x _item y_ p", SYNTAX_DOTCLEAR),
                                 "No bold rendering invalid");
       Util.Tests.Assert_Equals (T, "<p>x <b>bold</b> y</p>",
-                                Wiki.Utils.To_Html ("x '''bold''' y", SYNTAX_PHPBB),
-                                "Bold rendering invalid (PHPBB)");
+                                Wiki.Utils.To_Html ("x '''bold''' y", SYNTAX_MEDIA_WIKI),
+                                "Bold rendering invalid (MediaWiki)");
    end Test_Wiki_Bold;
 
    --  ------------------------------
@@ -93,17 +93,17 @@ package body Wiki.Parsers.Tests is
       Util.Tests.Assert_Equals (T, "<p>x <i>item</i> y</p>",
                                 Wiki.Utils.To_Html ("x _item_ y", SYNTAX_GOOGLE),
                                 "Italic rendering invalid");
-      Util.Tests.Assert_Equals (T, "<p>x <i>item y</i></p>",
-                                Wiki.Utils.To_Html ("x _item y", SYNTAX_MIX),
+      Util.Tests.Assert_Equals (T, "<p>x <em>item y</em></p>",
+                                Wiki.Utils.To_Html ("x //item y//", SYNTAX_CREOLE),
                                 "Italic rendering invalid");
       Util.Tests.Assert_Equals (T, "<p>x <i>item y</i> p</p>",
                                 Wiki.Utils.To_Html ("x ''item y'' p", SYNTAX_DOTCLEAR),
                                 "Italic rendering invalid");
       Util.Tests.Assert_Equals (T, "<p>x <i>item y</i> p</p>",
-                                Wiki.Utils.To_Html ("x ''item y'' p", SYNTAX_PHPBB),
+                                Wiki.Utils.To_Html ("x ''item y'' p", SYNTAX_MEDIA_WIKI),
                                 "Italic rendering invalid");
       Util.Tests.Assert_Equals (T, "<p>x 'item y<i> p</i></p>",
-                                Wiki.Utils.To_Html ("x 'item y'' p", SYNTAX_PHPBB),
+                                Wiki.Utils.To_Html ("x 'item y'' p", SYNTAX_MEDIA_WIKI),
                                 "Italic rendering invalid");
    end Test_Wiki_Italic;
 
@@ -119,7 +119,7 @@ package body Wiki.Parsers.Tests is
                                 Wiki.Utils.To_Html ("x _item_ y", SYNTAX_GOOGLE),
                                 "Italic rendering invalid");
       Util.Tests.Assert_Equals (T, "<p>x <i>item y</i></p>",
-                                Wiki.Utils.To_Html ("x _item y", SYNTAX_GOOGLE),
+                                Wiki.Utils.To_Html ("x _item y_", SYNTAX_GOOGLE),
                                 "Italic rendering invalid");
    end Test_Wiki_Formats;
 
@@ -143,9 +143,6 @@ package body Wiki.Parsers.Tests is
       Util.Tests.Assert_Equals (T, "<h5>item</h5>",
                                 Wiki.Utils.To_Html ("===== item =====", SYNTAX_GOOGLE),
                                 "H5 rendering invalid");
-      Util.Tests.Assert_Equals (T, "<h6>item</h6>",
-                                Wiki.Utils.To_Html ("====== item ===", SYNTAX_GOOGLE),
-                                "H6 rendering invalid");
       Util.Tests.Assert_Equals (T, "<h1>item</h1><h2>item2</h2>",
                                 Wiki.Utils.To_Html ("= item =" & CR & "== item2 ==",
                                   SYNTAX_GOOGLE),
@@ -164,8 +161,8 @@ package body Wiki.Parsers.Tests is
       Util.Tests.Assert_Equals (T, "<ol><li>item</li></ol>",
                                 Wiki.Utils.To_Html ("1. item", SYNTAX_MARKDOWN),
                                 "Ordered list rendering invalid");
-      Util.Tests.Assert_Equals (T, "<ol><li>item item " & ASCII.LF &
-                                "</li><li>item2 item2" & ASCII.LF &
+      Util.Tests.Assert_Equals (T, "<ol><li>item item" &
+                                "</li><li>item2 item2" &
                                 "</li><li>item3</li></ol>",
         Wiki.Utils.To_Html ("1. item item " & LF & "2. item2 item2" & LF & "3. item3",
          SYNTAX_MARKDOWN),
