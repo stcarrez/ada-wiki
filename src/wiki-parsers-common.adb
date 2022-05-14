@@ -892,7 +892,10 @@ package body Wiki.Parsers.Common is
                                  Marker : in Wiki.Strings.WChar) is
       Count : constant Natural := Count_Occurence (Text, From, Marker);
    begin
-      if Count /= 3 then
+      if Count < 3 then
+         return;
+      end if;
+      if Parser.Context.Syntax /= SYNTAX_MARKDOWN and Count /= 3 then
          return;
       end if;
 
@@ -922,8 +925,8 @@ package body Wiki.Parsers.Common is
       end;
 
       Parser.Preformat_Indent := 0;
-      Parser.Preformat_Fence := ' ';
-      Parser.Preformat_Fcount := 0;
+      Parser.Preformat_Fence := Marker;
+      Parser.Preformat_Fcount := Count;
       Flush_Text (Parser, Trim => Right);
       Pop_Block (Parser);
       Push_Block (Parser, N_PREFORMAT);
