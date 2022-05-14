@@ -18,13 +18,9 @@
 
 with Util.Test_Caller;
 with Util.Assertions;
-with Util.Strings;
-with Util.Log.Loggers;
 with GNAT.Source_Info;
 
 package body Wiki.Html_Parser.Tests is
-
-   Log : constant Util.Log.Loggers.Logger := Util.Log.Loggers.Create ("Wiki.Html_Parser");
 
    package Caller is new Util.Test_Caller (Test, "Wikis.Html_Parser");
 
@@ -35,7 +31,27 @@ package body Wiki.Html_Parser.Tests is
       new Util.Assertions.Assert_Equals_T (Html_Parser_State);
 
    procedure Assert_Equals is
+      new Util.Assertions.Assert_Equals_T (Entity_State_Type);
+
+   procedure Assert_Equals is
       new Util.Assertions.Assert_Equals_T (Wiki.Strings.WChar);
+
+   procedure Check_Parser (T           : in out Test;
+                           Expect      : in Wiki.Strings.WString;
+                           Expect_Kind : in State_Type;
+                           Content     : in Wiki.Strings.WString;
+                           Source      : in String := GNAT.Source_Info.File;
+                           Line        : in Natural := GNAT.Source_Info.Line);
+
+   procedure Check_Error (T           : in out Test;
+                          Last_Pos    : in Natural;
+                          Content     : in Wiki.Strings.WString;
+                          Source      : in String := GNAT.Source_Info.File;
+                          Line        : in Natural := GNAT.Source_Info.Line);
+
+   procedure Check_Attribute (T     : in out Test;
+                              Name  : in String;
+                              Value : in Wiki.Strings.WString);
 
    procedure Add_Tests (Suite : in Util.Tests.Access_Test_Suite) is
    begin
@@ -57,6 +73,10 @@ package body Wiki.Html_Parser.Tests is
                            Content     : in Wiki.Strings.WString;
                            Source      : in String := GNAT.Source_Info.File;
                            Line        : in Natural := GNAT.Source_Info.Line) is
+      procedure Process (Kind       : in State_Type;
+                         Name       : in Wiki.Strings.WString;
+                         Attributes : in out Wiki.Attributes.Attribute_List);
+
       P    : Parser_Type;
       Last : Natural;
 
@@ -107,12 +127,17 @@ package body Wiki.Html_Parser.Tests is
                           Content     : in Wiki.Strings.WString;
                           Source      : in String := GNAT.Source_Info.File;
                           Line        : in Natural := GNAT.Source_Info.Line) is
+      procedure Process (Kind       : in State_Type;
+                         Name       : in Wiki.Strings.WString;
+                         Attributes : in out Wiki.Attributes.Attribute_List);
+
       P    : Parser_Type;
       Last : Natural;
 
       procedure Process (Kind       : in State_Type;
                          Name       : in Wiki.Strings.WString;
                          Attributes : in out Wiki.Attributes.Attribute_List) is
+         pragma Unreferenced (Name, Attributes);
       begin
          Assert_Equals (T, HTML_ERROR, Kind, "Invalid state type", Source, Line);
       end Process;
@@ -188,12 +213,17 @@ package body Wiki.Html_Parser.Tests is
    --  Test Parse_Doctype
    --  ------------------------------
    procedure Test_Parse_Doctype (T : in out Test) is
+      procedure Process (Kind       : in State_Type;
+                         Name       : in Wiki.Strings.WString;
+                         Attributes : in out Wiki.Attributes.Attribute_List);
+
       P    : Parser_Type;
       Last : Natural;
 
       procedure Process (Kind       : in State_Type;
                          Name       : in Wiki.Strings.WString;
                          Attributes : in out Wiki.Attributes.Attribute_List) is
+         pragma Unreferenced (Kind, Name, Attributes);
       begin
          T.Fail ("Should not be called");
       end Process;
@@ -232,53 +262,59 @@ package body Wiki.Html_Parser.Tests is
       P      : Parser_Type;
       Last   : Natural;
       Entity : Wiki.Strings.WChar;
+      Status : Entity_State_Type := ENTITY_NONE;
    begin
-      Parse_Entity (P, "amp; ", 1, Entity, Last);
+      Parse_Entity (P, "amp; ", 1, Status, Entity, Last);
       Util.Tests.Assert_Equals (T, 5, Last, "Invalid last index");
       Assert_Equals (T, '&', Entity, "Invalid parsed entity");
 
-      Parse_Entity (P, "dagger;", 1, Entity, Last);
+      Parse_Entity (P, "dagger;", 1, Status, Entity, Last);
       Util.Tests.Assert_Equals (T, 8, Last, "Invalid last index");
       Assert_Equals (T, Wiki.Strings.WChar'Val (8224), Entity, "Invalid parsed entity");
 
-      Parse_Entity (P, "Dagger;", 1, Entity, Last);
+      Parse_Entity (P, "Dagger;", 1, Status, Entity, Last);
       Util.Tests.Assert_Equals (T, 8, Last, "Invalid last index");
       Assert_Equals (T, Wiki.Strings.WChar'Val (8225), Entity, "Invalid parsed entity");
 
-      Parse_Entity (P, "#1234;", 1, Entity, Last);
+      Parse_Entity (P, "#1234;", 1, Status, Entity, Last);
       Util.Tests.Assert_Equals (T, 7, Last, "Invalid last index");
       Assert_Equals (T, Wiki.Strings.WChar'Val (1234), Entity, "Invalid parsed entity");
 
-      Parse_Entity (P, "#x1234;", 1, Entity, Last);
+      Parse_Entity (P, "#x1234;", 1, Status, Entity, Last);
       Util.Tests.Assert_Equals (T, 8, Last, "Invalid last index");
       Assert_Equals (T, Wiki.Strings.WChar'Val (16#1234#), Entity, "Invalid parsed entity");
 
-      Parse_Entity (P, "#xabCD;", 1, Entity, Last);
+      Parse_Entity (P, "#xabCD;", 1, Status, Entity, Last);
       Util.Tests.Assert_Equals (T, 8, Last, "Invalid last index");
       Assert_Equals (T, Wiki.Strings.WChar'Val (16#abcd#), Entity, "Invalid parsed entity");
+      Assert_Equals (T, ENTITY_VALID, Status, "Invalid status");
 
-      Parse_Entity (P, "dagobert;", 1, Entity, Last);
-      Util.Tests.Assert_Equals (T, 10, Last, "Invalid last index");
+      Parse_Entity (P, "dagobert;", 1, Status, Entity, Last);
+      Util.Tests.Assert_Equals (T, 1, Last, "Invalid last index");
       Assert_Equals (T, NUL, Entity, "Invalid parsed entity");
+      Assert_Equals (T, ENTITY_NONE, Status, "Invalid status");
 
-      Parse_Entity (P, "#x000000;", 1, Entity, Last);
+      Parse_Entity (P, "#x000000;", 1, Status, Entity, Last);
       Util.Tests.Assert_Equals (T, 10, Last, "Invalid last index");
       Assert_Equals (T, Wiki.Strings.WChar'Val (16#0FFFD#), Entity, "Invalid parsed entity");
 
-      Parse_Entity (P, "#000000;", 1, Entity, Last);
+      Parse_Entity (P, "#000000;", 1, Status, Entity, Last);
       Util.Tests.Assert_Equals (T, 9, Last, "Invalid last index");
       Assert_Equals (T, Wiki.Strings.WChar'Val (16#0FFFD#), Entity, "Invalid parsed entity");
 
-      Parse_Entity (P, "#00000b;", 1, Entity, Last);
-      Util.Tests.Assert_Equals (T, 9, Last, "Invalid last index");
+      Parse_Entity (P, "#00000b;", 1, Status, Entity, Last);
+      Assert_Equals (T, ENTITY_NONE, Status, "Invalid status");
+      Util.Tests.Assert_Equals (T, 1, Last, "Invalid last index");
       Assert_Equals (T, NUL, Entity, "Invalid parsed entity");
 
-      Parse_Entity (P, "#x0000g0;", 1, Entity, Last);
-      Util.Tests.Assert_Equals (T, 10, Last, "Invalid last index");
+      Parse_Entity (P, "#x0000g0;", 1, Status, Entity, Last);
+      Assert_Equals (T, ENTITY_NONE, Status, "Invalid status");
+      Util.Tests.Assert_Equals (T, 1, Last, "Invalid last index");
       Assert_Equals (T, NUL, Entity, "Invalid parsed entity");
 
-      Parse_Entity (P, "bla bla bla bla bla ;", 1, Entity, Last);
-      Util.Tests.Assert_Equals (T, 11, Last, "Invalid last index");
+      Parse_Entity (P, "bla bla bla bla bla ;", 1, Status, Entity, Last);
+      Assert_Equals (T, ENTITY_NONE, Status, "Invalid status");
+      Util.Tests.Assert_Equals (T, 1, Last, "Invalid last index");
       Assert_Equals (T, NUL, Entity, "Invalid parsed entity");
 
    end Test_Parse_Entity;
