@@ -406,6 +406,9 @@ package body Wiki.Html_Parser is
             when State_Check_Attribute_Value | State_No_Attribute_Value =>
                C := Text (Pos);
                if C = '>' then
+                  if Length (Parser.Attr_Name) > 0 then
+                     Append_Attribute (Parser.Attr_Name);
+                  end if;
                   Process (HTML_START, To_WString (Parser.Elt_Name), Parser.Attributes);
                   Last := Pos + 1;
                   Parser.State := State_None;
