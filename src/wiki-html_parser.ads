@@ -78,7 +78,7 @@ private
                               State_Expect_End_Element,
                               State_End_Element);
 
-   MAX_ENTITY_LENGTH : constant := 10;
+   MAX_ENTITY_LENGTH : constant := 32;
 
    type Parser_Type is limited record
       State       : Html_Parser_State := State_None;
