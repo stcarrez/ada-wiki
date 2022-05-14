@@ -1,0 +1,16 @@
+with "samples";
+project Support is
+
+   Mains := ("genentities.adb");
+   for Main use Mains;
+
+   for Source_Dirs use ("support");
+   for Object_Dir use Samples'Object_Dir;
+   for Exec_Dir use Samples'Exec_Dir;
+
+   package Binder renames Samples.Binder;
+   package Builder renames Samples.Builder;
+   package Compiler renames Samples.Compiler;
+   package Linker renames Samples.Linker;
+
+end Support;
