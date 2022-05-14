@@ -871,18 +871,28 @@ package body Wiki.Parsers.Markdown is
                end if;
                C := Block.Content (Pos);
                if C = Wiki.Helpers.CR or C = Wiki.Helpers.LF then
-                  C := ' ';
+                  Append (Parser.Text, ' ');
                elsif C = '\' then
                   Buffers.Next (Block, Pos);
                   if Block = Limit and Pos = Last_Pos then
                      return;
                   end if;
                   C := Block.Content (Pos);
-                  if Parser.Format (CODE) or not Is_Escapable (C) then
+                  if Wiki.Helpers.Is_Newline (C) then
+                     Flush_Text (Parser);
+                     if not Parser.Context.Is_Hidden then
+                        Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_LINE_BREAK);
+                     end if;
+
+                  elsif Parser.Format (CODE) or not Is_Escapable (C) then
                      Append (Parser.Text, '\');
+                     Append (Parser.Text, C);
+                  else
+                     Append (Parser.Text, C);
                   end if;
+               else
+                  Append (Parser.Text, C);
                end if;
-               Append (Parser.Text, C);
                Pos := Pos + 1;
             end loop;
          end;
