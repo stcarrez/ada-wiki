@@ -559,7 +559,7 @@ package body Wiki.Html_Parser is
                when Constraint_Error =>
                   null;
             end;
-         elsif Parser.Entity_Name (2) = 'x' then
+         elsif Parser.Entity_Name (2) in 'x' | 'X' then
             begin
                C := From_Hex (Parser.Entity_Name (3 .. Len));
                if C = NUL then
