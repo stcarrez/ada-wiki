@@ -134,6 +134,7 @@ package body Wiki.Tests is
             begin
                Renderer.Set_Output_Stream (Output'Unchecked_Access);
                Renderer.Set_Render_TOC (True);
+               Renderer.Set_No_Newline (False);
                Renderer.Render (Doc);
                Output.Close;
                Util.Measures.Report (Time, "Render HTML " & To_String (T.Name));
@@ -297,7 +298,7 @@ package body Wiki.Tests is
                   elsif Ext = "textile" then
                      Format := Wiki.SYNTAX_TEXTILE;
                   else
-                     Format := Wiki.SYNTAX_MIX;
+                     Format := Wiki.SYNTAX_MARKDOWN;
                   end if;
 
                   Tst := Create_Test (Simple, Path & "/" & Simple, Format, "/wiki-html/",
@@ -397,7 +398,7 @@ package body Wiki.Tests is
                   elsif Ext = "markdown" then
                      Format := Wiki.SYNTAX_MARKDOWN;
                   else
-                     Format := Wiki.SYNTAX_MIX;
+                     Format := Wiki.SYNTAX_MARKDOWN;
                   end if;
 
                   for Syntax in Wiki.Wiki_Syntax'Range loop
