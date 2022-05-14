@@ -407,7 +407,10 @@ package body Wiki.Parsers.Markdown is
             --  Parse_Blockquote (Parser, C);
 
          when others =>
-            null;
+            if Parser.Previous_Line_Empty and Parser.Current_Node /= N_PARAGRAPH then
+               Pop_List (Parser);
+               Push_Block (Parser, N_PARAGRAPH);
+            end if;
 
       end case;
 
