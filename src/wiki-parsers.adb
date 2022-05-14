@@ -926,7 +926,8 @@ package body Wiki.Parsers is
       Engine.Param_Char := Wiki.Strings.WChar'Last;
       if Main then
          Push_Block (Engine, Wiki.Nodes.N_PARAGRAPH);
-         --  Engine.Context.Filters.Add_Node (Engine.Document, Wiki.Nodes.N_PARAGRAPH);
+      else
+         Engine.Current_Node := Wiki.Nodes.N_PARAGRAPH;
       end if;
       case Engine.Context.Syntax is
          when SYNTAX_DOTCLEAR =>
