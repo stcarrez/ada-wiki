@@ -3,14 +3,8 @@ Call Template with parameter:
 
 
   - No param: 
-
-    1@@ 2@@ 3@@
   - One param: 
-
-    1@This~@ 2@is~@ 3@first~@
   - Two params: 
-
-    1@First@ 2@This~@ 3@is~@
 
 
 End

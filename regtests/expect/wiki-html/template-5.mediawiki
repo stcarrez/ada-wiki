@@ -1,2 +1,2 @@
 <div class="adafr-block"><h3>Title</h3><p>   
- Description</p><ul><li><a href="Link1">Link1</a></li><li><a href="Link2">Link2</a> </li></ul></div>
+ Description</p><ul><li><a href="Link1">Link1</a></li><li><a href="Link2">Link2</a></li></ul></div>
