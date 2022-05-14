@@ -51,4 +51,9 @@ samples:
 $(eval $(call ada_library,$(NAME)))
 $(eval $(call pandoc_build,wikiada-book,$(WIKI_DOC)))
 
-.PHONY: samples
+genentities:
+	$(GNATMAKE) $(GPRFLAGS) -p -Psupport $(MAKE_ARGS)
+	cd support && ../bin/genentities > ../src/wiki-html_parser-entities.ads
+
+.PHONY: samples genentities
+
