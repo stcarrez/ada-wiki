@@ -163,31 +163,34 @@ package body Wiki.Parsers is
    --  ------------------------------
    --  Push a new block kind on the block stack.
    --  ------------------------------
-   procedure Flush_Block (P     : in out Parser) is
-      Top : constant Block_Access := Block_Stack.Current (P.Blocks);
+   procedure Flush_Block (Parser  : in out Parser_Type) is
+      Top : constant Block_Access := Block_Stack.Current (Parser.Blocks);
    begin
       if Top /= null then
          if Top.Kind = Nodes.N_PREFORMAT then
-            Append_Preformatted (P, Strings.To_WString (P.Preformat_Format));
+            Append_Preformatted (Parser, Strings.To_WString (Parser.Preformat_Format));
          elsif Top.Kind = Nodes.N_PARAGRAPH then
-            if P.Parse_Inline /= null then
-               P.Parse_Inline (P, P.Text_Buffer.First'Unchecked_Access);
+            if Parser.Parse_Inline /= null then
+               Parser.Parse_Inline (Parser, Parser.Text_Buffer.First'Unchecked_Access);
+               Parser.Text_Buffer.Clear;
             end if;
-         elsif Top.Kind = Nodes.N_LIST_ITEM then
-            if P.Parse_Inline /= null then
-               P.Parse_Inline (P, P.Text_Buffer.First'Unchecked_Access);
+         elsif Top.Kind = Nodes.N_LIST_ITEM or Top.Kind = Nodes.N_TABLE then
+            if Parser.Parse_Inline /= null then
+               Parser.Parse_Inline (Parser, Parser.Text_Buffer.First'Unchecked_Access);
+               Parser.Text_Buffer.Clear;
             end if;
-            Clear (P.Text);
+            Clear (Parser.Text);
          elsif Top.Kind = Nodes.N_HEADER then
-            Add_Header (P, P.Header_Level);
+            Add_Header (Parser, Parser.Header_Level);
          else
-            Flush_Text (P);
+            Flush_Text (Parser);
          end if;
       else
-         if P.Parse_Inline /= null then
-            P.Parse_Inline (P, P.Text_Buffer.First'Unchecked_Access);
+         if Parser.Parse_Inline /= null then
+            Parser.Parse_Inline (Parser, Parser.Text_Buffer.First'Unchecked_Access);
+            Parser.Text_Buffer.Clear;
          end if;
-         Clear (P.Text);
+         Clear (Parser.Text);
       end if;
    end Flush_Block;
 
@@ -263,6 +266,9 @@ package body Wiki.Parsers is
 
                when Nodes.N_DEFINITION =>
                   P.Context.Filters.Add_Node (P.Document, Nodes.N_END_DEFINITION);
+
+               when Nodes.N_TABLE =>
+                  P.Context.Filters.Finish_Table (P.Document);
 
                when others =>
                   null;
@@ -384,6 +390,7 @@ package body Wiki.Parsers is
    --  ------------------------------
    procedure Flush_List (P : in out Parser) is
    begin
+      Flush_Block (P);
       if P.In_List then
          if not P.Context.Is_Hidden then
             P.Context.Filters.Pop_Node (P.Document, Wiki.DL_TAG);
