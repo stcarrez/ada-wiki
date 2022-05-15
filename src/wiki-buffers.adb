@@ -415,6 +415,34 @@ package body Wiki.Buffers is
       return Count;
    end Count_Occurence;
 
+   procedure Count_Occurence (Buffer : in out Buffer_Access;
+                              From   : in out Positive;
+                              Item   : in Wiki.Strings.WChar;
+                              Count  : out Natural) is
+      Current : Buffer_Access := Buffer;
+      Pos     : Positive := From;
+   begin
+      Count := 0;
+      while Current /= null loop
+         declare
+            First : Positive := From;
+            Last  : Natural := Current.Last;
+         begin
+            while Pos <= Last and then Current.Content (Pos) = Item loop
+               Pos := Pos + 1;
+            end loop;
+            if Pos > First then
+               Count := Count + Pos - First;
+            end if;
+            exit when Pos <= Last;
+         end;
+         Current := Current.Next_Block;
+         Pos := 1;
+      end loop;
+      Buffer := Current;
+      From := Pos;
+   end Count_Occurence;
+
    procedure Find (Buffer : in out Buffer_Access;
                    From   : in out Positive;
                    Item   : in Wiki.Strings.WChar) is
