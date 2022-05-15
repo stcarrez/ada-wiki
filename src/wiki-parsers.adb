@@ -29,10 +29,12 @@ with Wiki.Parsers.Google;
 with Wiki.Parsers.MediaWiki;
 package body Wiki.Parsers is
 
-   --  use Wiki.Nodes;
    use Wiki.Helpers;
    use Wiki.Buffers;
    use type Wiki.Nodes.Node_Kind;
+
+   procedure Append_Preformatted (P      : in out Parser;
+                                  Format : in Wiki.Strings.WString);
 
    procedure Next (Content : in out Content_Access;
                    Pos     : in out Positive) is
@@ -119,6 +121,7 @@ package body Wiki.Parsers is
          begin
             exit when Top.Kind not in Nodes.N_LIST_ITEM
               | Nodes.N_LIST_START | Nodes.N_NUM_LIST_START | Nodes.N_DEFINITION;
+            Flush_Text (P, Trim => Right);
             Pop_Block (P);
          end;
       end loop;
@@ -291,73 +294,26 @@ package body Wiki.Parsers is
                       Last : out Natural) is
       begin
          Parser.Reader.Read (Into, Last, Parser.Is_Last_Line);
-         if Last > 0 then
-            Parser.Line_Buffer.Append (Into (Into'First .. Last));
+         if Last < Into'Last then
+            while Last > Into'First
+              and then Into (Last) in Wiki.Helpers.CR | Wiki.Helpers.LF
+              and then Into (Last - 1) in Wiki.Helpers.CR | Wiki.Helpers.LF
+            loop
+              Last := Last - 1;
+            end loop;
          end if;
       end Read;
 
-      procedure Fill is new Wiki.Strings.Wide_Wide_Builders.Inline_Append (Read);
+      procedure Fill is new Wiki.Buffers.Inline_Append (Read);
    begin
       Parser.Line_Buffer.Clear;
-      Wiki.Strings.Wide_Wide_Builders.Clear (Parser.Line);
-      Fill (Parser.Line);
-      Parser.Line_Length := Wiki.Strings.Wide_Wide_Builders.Length (Parser.Line);
-      Parser.Line_Pos := 0;
-      if Parser.Is_Last_Line and Parser.Line_Length = 0 then
+      Fill (Parser.Line_Buffer);
+      if Parser.Is_Last_Line and Parser.Line_Buffer.First.Last = 0 then
          Buffer := null;
       else
          Buffer := Parser.Line_Buffer.First'Unchecked_Access;
       end if;
    end Read_Line;
-
-   --  ------------------------------
-   --  Peek the next character from the wiki text buffer.
-   --  ------------------------------
-   procedure Peek (P     : in out Parser'Class;
-                   Token : out Wiki.Strings.WChar) is
-   begin
-      if not P.Has_Pending then
-         if P.Line_Pos = P.Line_Length then
-            if P.Is_Last_Line then
-               Token := LF;
-               P.Is_Eof := True;
-               return;
-            end if;
-
-            --  P.Read_Line;
-
-            if P.Is_Last_Line and then P.Line_Pos = P.Line_Length then
-               --  Return a \n on end of file (this simplifies the implementation).
-               Token := LF;
-               P.Is_Eof := True;
-               P.Pending := LF;
-               P.Has_Pending := True;
-               return;
-            end if;
-         end if;
-
-         P.Line_Pos := P.Line_Pos + 1;
-         Token := Wiki.Strings.Wide_Wide_Builders.Element (P.Line, P.Line_Pos);
-         return;
-
-      else
-         --  Return the pending character.
-         Token := P.Pending;
-         if not P.Is_Eof then
-            P.Has_Pending := False;
-         end if;
-      end if;
-   end Peek;
-
-   --  ------------------------------
-   --  Put back the character so that it will be returned by the next call to Peek.
-   --  ------------------------------
-   procedure Put_Back (P     : in out Parser;
-                       Token : in Wiki.Strings.WChar) is
-   begin
-      P.Pending     := Token;
-      P.Has_Pending := True;
-   end Put_Back;
 
    --  ------------------------------
    --  Flush the wiki text that was collected in the text buffer.
@@ -630,10 +586,10 @@ package body Wiki.Parsers is
       if Tag = Wiki.UNKNOWN_TAG then
          if Name = "noinclude" then
             Flush_Text (P, Trim => None);
-            P.Context.Is_Hidden := Kind = Wiki.Html_Parser.HTML_START and P.Context.Is_Included;
+            P.Context.Is_Hidden := Kind = Html_Parser.HTML_START and P.Context.Is_Included;
          elsif Name = "includeonly" then
             Flush_Text (P, Trim => None);
-            P.Context.Is_Hidden := not (kind = Wiki.Html_Parser.HTML_START and P.Context.Is_Included);
+            P.Context.Is_Hidden := not (kind = Html_Parser.HTML_START and P.Context.Is_Included);
          end if;
       elsif Kind = Wiki.Html_Parser.HTML_START then
          Start_Element (P, Tag, Attributes);
@@ -888,25 +844,6 @@ package body Wiki.Parsers is
       Parse_Text (Engine, Text, Doc);
    end Parse;
 
-   procedure Parse (Engine     : in out Parser;
-                    Parse_Line : not null access
-                       procedure (Engine : in out Parser;
-                                  Text   : in Wiki.Buffers.Buffer_Access)) is
-      Buffer : Wiki.Buffers.Buffer_Access;
-   begin
-      loop
-         Read_Line (Engine, Buffer);
-         exit when Buffer = null;
-         Parse_Line (Engine, Buffer);
-      end loop;
-      while not Block_Stack.Is_Empty (Engine.Blocks) loop
-         if Engine.Current_Node in Nodes.N_PARAGRAPH | Nodes.N_LIST_ITEM then
-            Flush_Text (Engine, Trim => Right);
-         end if;
-         Pop_Block (Engine);
-      end loop;
-   end Parse;
-
    --  ------------------------------
    --  Parse the wiki stream managed by <tt>Stream</tt> according to the wiki syntax configured
    --  on the wiki engine.
@@ -922,7 +859,6 @@ package body Wiki.Parsers is
       Engine.Format     := (others => False);
       Engine.Is_Eof     := False;
       Engine.In_Paragraph := True;
-      Engine.Has_Pending := False;
       Engine.Reader      := Stream;
       Engine.Link_Double_Bracket := False;
       Engine.Escape_Char := '~';
