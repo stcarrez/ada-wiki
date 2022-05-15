@@ -214,7 +214,6 @@ package body Wiki.Parsers.Textile is
          Flush_Text (Parser);
          Wiki.Attributes.Clear (Parser.Attributes);
 
-         Parser.Line_Pos := Pos;
          Parser.Empty_Line := False;
          if not Parser.Context.Is_Hidden then
             Wiki.Attributes.Append (Parser.Attributes, NAME_ATTR, Title);
