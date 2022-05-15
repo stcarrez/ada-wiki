@@ -145,60 +145,63 @@ package body Wiki.Parsers.Markdown is
       Level := 0;
    end Get_List_Level;
 
-   procedure Add_Header (P     : in out Parser;
-                         Level : in Positive;
-                         Pos   : in Positive) is
+   procedure Add_Header (Parser : in out Parser_Type;
+                         Text   : in Wiki.Buffers.Buffer_Access;
+                         From   : in Positive;
+                         Level  : in Positive) is
       procedure Add_Header (Content : in Wiki.Strings.WString);
 
       procedure Add_Header (Content : in Wiki.Strings.WString) is
+         Last : Natural := Content'Last;
       begin
-         P.Context.Filters.Add_Header (P.Document, Content, Level);
+         --  Remove trailing spaces.
+         while Last > Content'First and then Is_Space (Content (Last)) loop
+            Last := Last - 1;
+         end loop;
+
+         --  If there are ending '#', remove all of them and remove trailing spaces again.
+         if Last > Content'First and then Content (Last) = '#' then
+            while Last > Content'First and then Content (Last) = '#' loop
+               Last := Last - 1;
+            end loop;
+            while Last > Content'First and then Is_Space (Content (Last)) loop
+               Last := Last - 1;
+            end loop;
+         end if;
+         Parser.Context.Filters.Add_Header (Parser.Document,
+                                            Content (Content'First .. Last), Level);
       end Add_Header;
 
       procedure Add_Header is
         new Wiki.Strings.Wide_Wide_Builders.Get (Add_Header);
 
-      First   : Positive := Pos;
-      Last    : Positive := P.Line_Length;
-      End_Pos : Positive;
+      Block   : Wiki.Buffers.Buffer_Access := Text;
+      Pos     : Positive := From;
       C       : Wiki.Strings.WChar;
    begin
-      Flush_Text (P);
-      Flush_List (P);
-      if not P.Context.Is_Hidden then
-         C := Strings.Element (P.Line, First);
-         while Is_Space (C) and then First + 1 <= P.Line_Length loop
-            First := First + 1;
-            C := Strings.Element (P.Line, First);
+      Flush_Text (Parser);
+      Flush_List (Parser);
+      if not Parser.Context.Is_Hidden then
+         Common.Skip_Spaces (Block, Pos);
+         while Block /= null loop
+            declare
+               Last : Natural := Block.Last;
+            begin
+               while Pos <= Last loop
+                  C := Block.Content (Pos);
+                  exit when Is_Newline (C);
+                  Append (Parser.Text, C);
+                  Pos := Pos + 1;
+               end loop;
+            end;
+            Block := Block.Next_Block;
          end loop;
-         C := Strings.Element (P.Line, Last);
-         while Last >= First and then Is_Space_Or_Newline (C) loop
-            Last := Last - 1;
-            C := Strings.Element (P.Line, Last);
-         end loop;
-         End_Pos := Last;
-         while Last > First and then C = '#' loop
-            Last := Last - 1;
-            C := Strings.Element (P.Line, Last);
-         end loop;
-         if Is_Space (C) then
-            while Last >= First and then Is_Space_Or_Newline (C) loop
-               Last := Last - 1;
-               C := Strings.Element (P.Line, Last);
-            end loop;
-            End_Pos := Last;
-         end if;
-         while First <= End_Pos loop
-            Append (P.Text, Strings.Element (P.Line, First));
-            First := First + 1;
-         end loop;
-         Add_Header (P.Text);
-         Wiki.Strings.Clear (P.Text);
-         P.Format := (others => False);
+         Add_Header (Parser.Text);
+         Wiki.Strings.Clear (Parser.Text);
+         Parser.Format := (others => False);
       end if;
-      P.Empty_Line   := True;
-      P.Line_Pos     := P.Line_Length;
-      P.In_Paragraph := False;
+      Parser.Empty_Line   := True;
+      Parser.In_Paragraph := False;
    end Add_Header;
 
    function Is_End_Preformat (Parser : in Parser_Type;
@@ -327,7 +330,8 @@ package body Wiki.Parsers.Markdown is
                Level := Get_Header_Level (Block, Pos);
                if Level > 0 then
                   Pop_Block (Parser);
-                  Add_Header (Parser, Level, Pos + Level + 1);
+                  Pos := Pos + Level + 1;
+                  Add_Header (Parser, Block, Pos, Level);
                   Parser.Previous_Line_Empty := False;
                   return;
                end if;
@@ -444,9 +448,9 @@ package body Wiki.Parsers.Markdown is
       end if;
       Flush_Text (P);
       Flush_List (P);
-      Peek (P, C);
+      -- Peek (P, C);
       if C = CR or C = LF then
-         Put_Back (P, C);
+         -- Put_Back (P, C);
          return;
       end if;
       if P.Empty_Line then
@@ -454,7 +458,7 @@ package body Wiki.Parsers.Markdown is
       end if;
       Wiki.Attributes.Clear (P.Attributes);
       P.Context.Filters.Add_Column (P.Document, P.Attributes);
-      Put_Back (P, C);
+      --  Put_Back (P, C);
    end Parse_Table;
 
    type Marker_Kind is (M_CODE, M_STAR, M_UNDERSCORE, M_LINK, M_LINK_DEFINITION, M_IMAGE, M_END, M_ENTITY, M_TEXT);
