@@ -168,6 +168,11 @@ private package Wiki.Buffers is
                              From   : in Positive;
                              Item   : in Wiki.Strings.WChar) return Natural;
 
+   procedure Count_Occurence (Buffer : in out Buffer_Access;
+                              From   : in out Positive;
+                              Item   : in Wiki.Strings.WChar;
+                              Count  : out Natural);
+
    procedure Find (Buffer : in out Buffer_Access;
                    From   : in out Positive;
                    Item   : in Wiki.Strings.WChar);
