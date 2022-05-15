@@ -1060,6 +1060,9 @@ package body Wiki.Render.Wiki is
          Engine.Output.Write ("<td>");
       else
          if Engine.Col_Index > 0 then
+            if Engine.Format /= Empty_Formats then
+               Engine.Set_Format (Empty_Formats);
+            end if;
             Engine.Output.Write (" | ");
          end if;
       end if;
