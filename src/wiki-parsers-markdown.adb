@@ -398,7 +398,7 @@ package body Wiki.Parsers.Markdown is
          Parser.Preformat_Fence := ' ';
          Parser.Preformat_Fcount := 0;
          Push_Block (Parser, N_PREFORMAT);
-         Buffers.Append (Parser.Text_Buffer, Block, Pos);
+         Common.Append (Parser.Text, Block, Pos);
          return;
       end if;
 
