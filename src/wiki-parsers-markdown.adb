@@ -870,6 +870,55 @@ package body Wiki.Parsers.Markdown is
       From := Pos;
    end Add_Text;
 
+   procedure Scan_Backtick (Parser   : in out Parser_Type;
+                            Text     : in out Wiki.Buffers.Buffer_Access;
+                            From     : in out Positive;
+                            Start    : in out Delimiter_Type;
+                            Stop     : in out Delimiter_Type) is
+      Block  : Wiki.Buffers.Buffer_Access := Text;
+      Pos    : Positive := From;
+      Count  : Natural;
+      C      : Wiki.Strings.WChar;
+   begin
+      Start.Pos := Pos;
+      Start.Block := Block;
+      Buffers.Count_Occurence (Block, Pos, '`', Count);
+      Start.Count := Count;
+      while Block /= null loop
+         while Pos <= Block.Last loop
+            C := Block.Content (Pos);
+            if C = '`' then
+               Stop.Block := Block;
+               Stop.Pos := Pos;
+               Buffers.Count_Occurence (Block, Pos, '`', Count);
+
+               --  Found a matching occurence, we are done.
+               if Count = Start.Count then
+                  Start.Marker := M_CODE;
+                  Start.Can_Open := True;
+                  Start.Can_Close := False;
+                  Stop.Can_Open := False;
+                  Stop.Can_Close := True;
+                  Stop.Count := Count;
+                  Stop.Marker := M_CODE;
+                  Text := Block;
+                  From := Pos;
+                  return;
+               end if;
+            elsif C = '\' then
+               Buffers.Next (Block, Pos);
+            end if;
+            Pos := Pos + 1;
+         end loop;
+         Block := Block.Next_Block;
+         Pos := 1;
+      end loop;
+
+      --  End of buffer reached: we have not found the end marker.
+      Start.Count := 0;
+      From := From + 1;
+   end Scan_Backtick;
+
    procedure Parse_Inline_Text (Parser : in out Parser_Type;
                                 Text   : in Wiki.Buffers.Buffer_Access) is
       use Delimiter_Vectors;
@@ -909,14 +958,21 @@ package body Wiki.Parsers.Markdown is
             case C is
                when '\' =>
                   Pos := Pos + 1;
+                  Buffers.Next (Block, Pos);
+                  exit Main when Block = null;
                   Prev := C;
 
                when '`' =>
-                  Get_Delimiter (Block, Pos, Prev, C, Delim);
-                  if Delim.Can_Open or Delim.Can_Close then
-                     Delim.Marker := M_CODE;
-                     Delimiters.Append (Delim);
-                  end if;
+                  declare
+                     End_Marker : Delimiter_Type;
+                  begin
+                     Scan_Backtick (Parser, Block, Pos, Delim, End_Marker);
+                     if Delim.Count > 0 then
+                        Delimiters.Append (Delim);
+                        Delimiters.Append (End_Marker);
+                     end if;
+                     exit Main when Block = null;
+                  end;
                   Prev := C;
 
                when '*' =>
@@ -926,6 +982,7 @@ package body Wiki.Parsers.Markdown is
                      Delimiters.Append (Delim);
                   end if;
                   Prev := C;
+                  exit Main when Block = null;
 
                when '_' =>
                   Get_Delimiter (Block, Pos, Prev, C, Delim);
@@ -934,6 +991,7 @@ package body Wiki.Parsers.Markdown is
                      Delimiters.Append (Delim);
                   end if;
                   Prev := C;
+                  exit Main when Block = null;
 
                when '[' =>
                   Get_Delimiter (Block, Pos, Prev, C, Delim);
@@ -942,6 +1000,7 @@ package body Wiki.Parsers.Markdown is
                      Delimiters.Append (Delim);
                   end if;
                   Prev := C;
+                  exit Main when Block = null;
 
                when ']' =>
                   for Iter in reverse Delimiters.Iterate loop
@@ -963,7 +1022,8 @@ package body Wiki.Parsers.Markdown is
                   Delim.Pos := Pos;
                   Buffers.Next (Block, Pos);
                   Prev := C;
-                  if Block /= null and then Block.Content (Pos) = '[' then
+                  exit Main when Block = null;
+                  if Block.Content (Pos) = '[' then
                      Delim.Marker := M_IMAGE;
                      Delim.Count := 1;
                      Delim.Can_Close := False;
@@ -982,7 +1042,7 @@ package body Wiki.Parsers.Markdown is
                      Common.Parse_Entity (Parser, Block, Pos, Status, C);
 
                      if Status = Wiki.Html_Parser.ENTITY_VALID then
-                        Block.Content (Delim.Pos) := C;
+                        Delim.Block.Content (Delim.Pos) := C;
                         Buffers.Next (Delim.Block, Delim.Pos);
                         Delim.Marker := M_ENTITY;
                         Delim.Count := 1;
@@ -992,6 +1052,7 @@ package body Wiki.Parsers.Markdown is
                      else
                         Pos := Pos + 1;
                      end if;
+                     exit Main when Block = null;
                   end;
 
                when others =>
