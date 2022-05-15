@@ -200,6 +200,8 @@ private
    procedure Flush_Text (P    : in out Parser;
                          Trim : in Trim_End := None);
 
+   procedure Flush_Block (Parser : in out Parser_Type);
+
    --  Flush the wiki dl/dt/dd definition list.
    procedure Flush_List (P : in out Parser);
    procedure Pop_List (P      : in out Parser;
