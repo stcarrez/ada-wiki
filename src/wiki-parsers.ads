@@ -139,19 +139,14 @@ private
 
    type Parser is tagged limited record
       Context             : aliased Wiki.Plugins.Plugin_Context;
-      Pending             : Wiki.Strings.WChar;
-      Has_Pending         : Boolean;
       Previous_Syntax     : Wiki_Syntax;
       Document            : Wiki.Documents.Document;
       Parse_Block         : Parser_Handler;
       Parse_Inline        : Parser_Handler;
       Format              : Wiki.Format_Map;
-      Line                : Wiki.Strings.BString (512);
       Text                : Wiki.Strings.BString (512);
       Line_Buffer         : Wiki.Buffers.Builder (512);
       Text_Buffer         : Wiki.Buffers.Builder (512);
-      Line_Length         : Natural := 0;
-      Line_Pos            : Natural := 0;
       Empty_Line          : Boolean := True;
       Is_Last_Line        : Boolean := False;
       Is_Eof              : Boolean := False;
@@ -194,17 +189,12 @@ private
    procedure Read_Line (Parser : in out Parser_Type'Class;
                         Buffer : out Wiki.Buffers.Buffer_Access);
 
-   --  Peek the next character from the wiki text buffer.
-   procedure Peek (P     : in out Parser'Class;
-                   Token : out Wiki.Strings.WChar);
-   pragma Inline (Peek);
-
    function Is_List_Item (P     : in Parser;
                           Level : in Natural) return Boolean;
 
-   --  Put back the character so that it will be returned by the next call to Peek.
-   procedure Put_Back (P     : in out Parser;
-                       Token : in Wiki.Strings.WChar);
+   function Is_Single_Token (Text : in Wiki.Buffers.Buffer_Access;
+                             From : in Positive;
+                             Token : in Wiki.Strings.WChar) return Boolean;
 
    --  Flush the wiki text that was collected in the text buffer.
    procedure Flush_Text (P    : in out Parser;
