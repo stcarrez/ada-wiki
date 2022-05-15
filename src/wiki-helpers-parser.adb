@@ -54,7 +54,21 @@ procedure Wiki.Helpers.Parser (Engine  : in out Engine_Type;
          end if;
          Into (Pos) := Char;
          Pos := Pos + 1;
-         exit when Char = Helpers.CR or Char = Helpers.LF;
+         exit when Char = Helpers.LF;
+         if Char = Helpers.CR then
+            exit when Input.Pos > Input.Len;
+
+            --  Look for a possible LF and drop it.
+            declare
+               Read_Pos : constant Natural := Input.Pos;
+            begin
+               Element (Content, Input.Pos, Char);
+               if Char /= Helpers.LF then
+                  Input.Pos := Read_Pos;
+               end if;
+               exit;
+            end;
+         end if;
       end loop;
       Last := Pos - 1;
    end Read;
