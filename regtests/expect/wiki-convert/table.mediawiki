@@ -1,1 +1,5 @@
-| git diff     | git status       | git clone      |
+
+<table>
+<tr><td>git diff</td><td>git status</td><td>git clone</td></tr>
+</table>
+
