@@ -21,12 +21,6 @@ private package Wiki.Parsers.Markdown is
    pragma Preelaborate;
    subtype Parser_Type is Parser;
 
-   --  Parse a markdown table/column.
-   --  Example:
-   --    | col1 | col2 | ... | colN |
-   procedure Parse_Table (P     : in out Parser;
-                          Token : in Wiki.Strings.WChar);
-
    procedure Parse_Line (Parser : in out Parser_Type;
                          Text   : in Wiki.Buffers.Buffer_Access);
 
