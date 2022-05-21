@@ -639,6 +639,7 @@ package body Wiki.Parsers is
          P.Set_Syntax (SYNTAX_HTML);
       end if;
       P.Previous_Tag := Tag;
+      P.In_Html := True;
       if Tag = PRE_TAG then
          P.Pre_Tag_Counter := P.Pre_Tag_Counter + 1;
       end if;
