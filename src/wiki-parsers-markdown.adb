@@ -345,6 +345,18 @@ package body Wiki.Parsers.Markdown is
       Count  : Natural := 0;
       Level  : Natural;
    begin
+      --  Feed the HTML parser if there are some pending state.
+      if not Wiki.Html_Parser.Is_Empty (Parser.Html) then
+         Common.Parse_Html_Element (Parser, Block, Pos, Start => False);
+         if Block = null then
+            return;
+         end if;
+      end if;
+      if Parser.In_Html and then not Wiki.Helpers.Is_Newline (Block.Content (1)) then
+         Common.Parse_Html_Preformatted (Parser, Block, Pos);
+         return;
+      end if;
+
       Spaces :
       while Block /= null loop
          declare
@@ -404,6 +416,7 @@ package body Wiki.Parsers.Markdown is
 
       case C is
          when Wiki.Helpers.LF | Wiki.Helpers.CR =>
+            Parser.In_Html := False;
             if Parser.Current_Node = Nodes.N_PARAGRAPH then
                Pop_Block (Parser);
                return;
@@ -508,6 +521,18 @@ package body Wiki.Parsers.Markdown is
             if Count = 0 then
                Parse_Table (Parser, Block, Pos);
                if Block = null then
+                  return;
+               end if;
+            end if;
+
+         when '<' =>
+            if Count <= 3 then
+               Common.Parse_Html_Element (Parser, Block, Pos, True);
+               if Block = null then
+                  return;
+               end if;
+               if Parser.In_Html then
+                  Common.Parse_Html_Preformatted (Parser, Block, Pos);
                   return;
                end if;
             end if;
