@@ -382,19 +382,19 @@ package body Wiki.Parsers.Markdown is
       if Parser.Current_Node = N_PREFORMAT then
          if Parser.Preformat_Fence = ' ' and Count <= 3 then
             Pop_Block (Parser);
+         else
+            if C = Parser.Preformat_Fence and Count <= 3 then
+               if Is_End_Preformat (Block, Pos, C, Parser.Preformat_Fcount) then
+                  Pop_Block (Parser);
+                  return;
+               end if;
+            end if;
+            if Count > Parser.Preformat_Indent then
+               Pos := (if Parser.Preformat_Indent > 0 then Parser.Preformat_Indent else 1);
+            end if;
+            Common.Append (Parser.Text, Block, Pos);
             return;
          end if;
-         if C = Parser.Preformat_Fence and Count <= 3 then
-            if Is_End_Preformat (Block, Pos, C, Parser.Preformat_Fcount) then
-               Pop_Block (Parser);
-               return;
-            end if;
-         end if;
-         if Count > Parser.Preformat_Indent then
-            Pos := (if Parser.Preformat_Indent > 0 then Parser.Preformat_Indent else 1);
-         end if;
-         Common.Append (Parser.Text, Block, Pos);
-         return;
       end if;
 
       if Parser.Current_Node = N_BLOCKQUOTE then
