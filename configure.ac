@@ -16,7 +16,8 @@ dnl  limitations under the License.
 dnl 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(src/wiki.ads)
+AC_INIT
+AC_CONFIG_SRCDIR([src/wiki.ads])
 
 # Current release settings
 WIKI_MAJOR_VERSION=1
@@ -73,6 +74,6 @@ AC_SUBST(WITH_ADA_UTIL)
 AC_SUBST(WITH_ADA_UTIL_SYS)
 AC_SUBST(WIKI_USE_ADA_UTIL)
 
-AC_OUTPUT(
-Makefile.conf wikiada.gpr wikiada_tests.gpr samples.gpr
-)
+AC_CONFIG_FILES([Makefile.conf wikiada.gpr wikiada_tests.gpr samples.gpr
+])
+AC_OUTPUT
