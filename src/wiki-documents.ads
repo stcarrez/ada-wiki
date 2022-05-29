@@ -142,6 +142,15 @@ package Wiki.Documents is
    --  Get the table of content node associated with the document.
    function Get_TOC (Doc : in Document) return Wiki.Nodes.Lists.Node_List_Ref;
 
+   --  Set a link definition.
+   procedure Set_Link (Doc  : in out Document;
+                       Name : in Wiki.Strings.WString;
+                       Link : in Wiki.Strings.WString);
+
+   --  Get a link definition.
+   function Get_Link (Doc  : in out Document;
+                      Name : in Wiki.Strings.WString) return Wiki.Strings.WString;
+
 private
 
    --  Append a node to the document.
@@ -151,6 +160,7 @@ private
    type Document is tagged record
       Nodes       : Wiki.Nodes.Lists.Node_List_Ref;
       TOC         : Wiki.Nodes.Lists.Node_List_Ref;
+      Links       : Wiki.Strings.Maps.Map;
       Current     : Wiki.Nodes.Node_Type_Access;
       Using_TOC   : Boolean := False;
       Visible_TOC : Boolean := True;
