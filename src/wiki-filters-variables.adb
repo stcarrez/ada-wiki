@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-variables -- Expand variables in text and links
---  Copyright (C) 2020 Stephane Carrez
+--  Copyright (C) 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -164,8 +164,8 @@ package body Wiki.Filters.Variables is
             Name_End := Name_End - 1;
          end if;
          Item := Filter.Variables.Find (Text (Name_Start .. Name_End));
-         if Variable_Maps.Has_Element (Item) then
-            Strings.Wide_Wide_Builders.Append (Result, Variable_Maps.Element (Item));
+         if Strings.Maps.Has_Element (Item) then
+            Strings.Wide_Wide_Builders.Append (Result, Strings.Maps.Element (Item));
             First := Last;
          elsif Last > Text'Last then
             exit;
@@ -188,9 +188,9 @@ package body Wiki.Filters.Variables is
                         access procedure (Name, Value : in Strings.WString)) is
       Iter : Variable_Cursor := Filter.Variables.First;
    begin
-      while Variable_Maps.Has_Element (Iter) loop
-         Variable_Maps.Query_Element (Iter, Process);
-         Variable_Maps.Next (Iter);
+      while Strings.Maps.Has_Element (Iter) loop
+         Strings.Maps.Query_Element (Iter, Process);
+         Strings.Maps.Next (Iter);
       end loop;
    end Iterate;
 
