@@ -23,6 +23,7 @@ with Ada.Characters.Conversions;
 with Ada.Wide_Wide_Characters.Handling;
 with Ada.Strings.Wide_Wide_Fixed;
 with Ada.Strings.UTF_Encoding.Wide_Wide_Strings;
+with Ada.Containers.Indefinite_Ordered_Maps;
 with Util.Texts.Builders;
 
 package Wiki.Strings is
@@ -104,6 +105,10 @@ package Wiki.Strings is
 
    procedure Append_Char (Source   : in out BString;
                           Item     : in WChar) renames Wide_Wide_Builders.Append;
+
+  package Maps is
+      new Ada.Containers.Indefinite_Ordered_Maps (Key_Type     => WString,
+                                                  Element_Type => WString);
 
    --  Search for the first occurrence of the character in the builder and
    --  starting after the from index.  Returns the index of the first occurence or 0.
