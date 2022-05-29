@@ -385,4 +385,28 @@ package body Wiki.Documents is
       return Doc.TOC;
    end Get_TOC;
 
+   --  ------------------------------
+   --  Set a link definition.
+   --  ------------------------------
+   procedure Set_Link (Doc  : in out Document;
+                       Name : in Wiki.Strings.WString;
+                       Link : in Wiki.Strings.WString) is
+   begin
+      Doc.Links.Include (Name, Link);
+   end Set_Link;
+
+   --  ------------------------------
+   --  Get a link definition.
+   --  ------------------------------
+   function Get_Link (Doc  : in out Document;
+                      Name : in Wiki.Strings.WString) return Wiki.Strings.WString is
+      Pos : constant Wiki.Strings.Maps.Cursor := Doc.Links.Find (Name);
+   begin
+      if Wiki.Strings.Maps.Has_Element (Pos) then
+         return Wiki.Strings.Maps.Element (Pos);
+      else
+         return "";
+      end if;
+   end Get_Link;
+
 end Wiki.Documents;
