@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-variables -- Expand variables in text and links
---  Copyright (C) 2020 Stephane Carrez
+--  Copyright (C) 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,8 +15,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-
-private with Ada.Containers.Indefinite_Ordered_Maps;
 
 --  === Variables Filters ===
 --  The `Wiki.Filters.Variables` package defines a filter that replaces variables
@@ -37,8 +35,6 @@ private with Ada.Containers.Indefinite_Ordered_Maps;
 --    F.Add_Variable ("username", "gandalf");
 --
 package Wiki.Filters.Variables is
-
-   pragma Preelaborate;
 
    type Variable_Filter is new Filter_Type with private;
    type Variable_Filter_Access is access all Variable_Filter'Class;
@@ -100,12 +96,8 @@ package Wiki.Filters.Variables is
 
 private
 
-   package Variable_Maps is
-     new Ada.Containers.Indefinite_Ordered_Maps (Key_Type        => Strings.WString,
-                                                 Element_Type    => Strings.WString);
-
-   subtype Variable_Map is Variable_Maps.Map;
-   subtype Variable_Cursor is Variable_Maps.Cursor;
+   subtype Variable_Map is Wiki.Strings.Maps.Map;
+   subtype Variable_Cursor is Wiki.Strings.Maps.Cursor;
 
    type Variable_Filter is new Filter_Type with record
       Variables : Variable_Map;
