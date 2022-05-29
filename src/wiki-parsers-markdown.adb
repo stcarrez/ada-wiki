@@ -63,10 +63,11 @@ package body Wiki.Parsers.Markdown is
                               From   : in Positive;
                               Expect : in WChar;
                               Length : in Positive) return Boolean;
-   procedure Scan_Link_Title (Text  : in out Wiki.Buffers.Buffer_Access;
-                              From  : in out Positive;
-                              Link  : in out Wiki.Strings.BString;
-                              Title : in out Wiki.Strings.BString);
+   procedure Scan_Link_Title (Text   : in out Wiki.Buffers.Buffer_Access;
+                              From   : in out Positive;
+                              Expect : in Wiki.Strings.WChar;
+                              Link   : in out Wiki.Strings.BString;
+                              Title  : in out Wiki.Strings.BString);
    procedure Add_Header (Parser : in out Parser_Type;
                          Text   : in Wiki.Buffers.Buffer_Access;
                          From   : in Positive;
@@ -331,6 +332,89 @@ package body Wiki.Parsers.Markdown is
       From := Pos;
    end Parse_Table;
 
+   --  Parse a markdown link definition.
+   --  Example:
+   --    [label]: url
+   --    [label]: url "title"
+   procedure Parse_Link_Label (Parser : in out Parser_Type;
+                               Text   : in out Wiki.Buffers.Buffer_Access;
+                               From   : in out Positive;
+                               Label  : in out Wiki.Strings.BString) is
+      Block : Wiki.Buffers.Buffer_Access := Text;
+      Pos   : Positive := From;
+      C     : Wiki.Strings.WChar;
+   begin
+      Main :
+      while Block /= null loop
+         while Pos <= Block.Last loop
+            C := Block.Content (Pos);
+            if C = '\' then
+               Buffers.Next (Block, Pos);
+               exit Main when Block = null;
+               C := Block.Content (Pos);
+               if Is_Escapable (C) then
+                  Buffers.Next (Block, Pos);
+                  exit Main when Block = null;
+                  Append (Label, C);
+               else
+                  Append (Label, '\');
+                  Append (Label, C);
+               end if;
+            elsif C = ']' then
+               Text := Block;
+               From := Pos;
+               return;
+            else
+               Append (Label, C);
+               Pos := Pos + 1;
+            end if;
+         end loop;
+         Block := Block.Next_Block;
+         Pos := 1;
+      end loop Main;
+      Text := null;
+   end Parse_Link_Label;
+
+   --  Parse a markdown link definition.
+   --  Example:
+   --    [label]: url
+   --    [label]: url "title"
+   procedure Parse_Link_Definition (Parser : in out Parser_Type;
+                                    Text   : in out Wiki.Buffers.Buffer_Access;
+                                    From   : in out Positive) is
+      Block       : Wiki.Buffers.Buffer_Access := Text;
+      Pos         : Positive := From + 1;
+      C           : Wiki.Strings.WChar;
+      Skip_Spaces : Boolean := True;
+      Label       : Wiki.Strings.BString (128);
+      Link        : Wiki.Strings.BString (128);
+      Title       : Wiki.Strings.BString (128);
+   begin
+      Parse_Link_Label (Parser, Block, Pos, Label);
+      if Block = null or else Block.Content (Pos) /= ']' then
+         return;
+      end if;
+      Buffers.Next (Block, Pos);
+      if Block = null then
+         return;
+      end if;
+      if Block.Content (Pos) /= ':' then
+         return;
+      end if;
+      Buffers.Next (Block, Pos);
+      Common.Skip_Spaces (Block, Pos);
+      Scan_Link_Title (Block, Pos, ' ', Link, Title);
+      if Block = null then
+         if Wiki.Strings.Length (Link) = 0 then
+            return;
+         end if;
+         Parser.Document.Set_Link (Strings.To_WString (Label),
+                                   Strings.To_WString (Link));
+         Text := null;
+         return;
+      end if;
+   end Parse_Link_Definition;
+
    --  Current paragraph
    --  N_BLOCKQUOTE
    --  N_LIST
@@ -537,6 +621,16 @@ package body Wiki.Parsers.Markdown is
                end if;
             end if;
 
+         when '[' =>
+            Parse_Link_Definition (Parser, Block, Pos);
+            if Block = null then
+               return;
+            end if;
+            if Parser.Previous_Line_Empty and Parser.Current_Node /= N_PARAGRAPH then
+               Pop_List (Parser);
+               Push_Block (Parser, N_PARAGRAPH);
+            end if;
+
          when others =>
             if Parser.Previous_Line_Empty and Parser.Current_Node /= N_PARAGRAPH then
                Pop_List (Parser);
@@ -555,10 +649,11 @@ package body Wiki.Parsers.Markdown is
       Buffers.Append (Parser.Text_Buffer, Block, Pos);
    end Parse_Line;
 
-   procedure Scan_Link_Title (Text  : in out Wiki.Buffers.Buffer_Access;
-                              From  : in out Positive;
-                              Link  : in out Wiki.Strings.BString;
-                              Title : in out Wiki.Strings.BString) is
+   procedure Scan_Link_Title (Text   : in out Wiki.Buffers.Buffer_Access;
+                              From   : in out Positive;
+                              Expect : in Wiki.Strings.WChar;
+                              Link   : in out Wiki.Strings.BString;
+                              Title  : in out Wiki.Strings.BString) is
       Block  : Wiki.Buffers.Buffer_Access := Text;
       Pos    : Positive := From;
       C      : Wiki.Strings.WChar;
@@ -593,7 +688,7 @@ package body Wiki.Parsers.Markdown is
             begin
                while Pos <= Last loop
                   C := Block.Content (Pos);
-                  exit Scan_Link when C = ')' or Wiki.Helpers.Is_Space (C);
+                  exit Scan_Link when C = Expect or Wiki.Helpers.Is_Space (C);
                   Pos := Pos + 1;
                   Append (Link, C);
                end loop;
@@ -715,7 +810,7 @@ package body Wiki.Parsers.Markdown is
             Link  : Wiki.Strings.BString (128);
             Title : Wiki.Strings.BString (128);
          begin
-            Scan_Link_Title (Block, Pos, Link, Title);
+            Scan_Link_Title (Block, Pos, ')', Link, Title);
          end;
          if Block /= null and then Block.Content (Pos) = ')' then
             Buffers.Next (Block, Pos);
@@ -765,7 +860,7 @@ package body Wiki.Parsers.Markdown is
       end if;
       if Block /= null and then Block.Content (Pos) = '(' then
          Buffers.Next (Block, Pos);
-         Scan_Link_Title (Block, Pos, Link, Title);
+         Scan_Link_Title (Block, Pos, ')', Link, Title);
          if Block /= null and then Block.Content (Pos) = ')' then
             Buffers.Next (Block, Pos);
          end if;
@@ -826,7 +921,7 @@ package body Wiki.Parsers.Markdown is
       end if;
       if Block /= null and then Block.Content (Pos) = '(' then
          Buffers.Next (Block, Pos);
-         Scan_Link_Title (Block, Pos, Link, Title);
+         Scan_Link_Title (Block, Pos, ')', Link, Title);
          if Block /= null and then Block.Content (Pos) = ')' then
             Buffers.Next (Block, Pos);
          end if;
