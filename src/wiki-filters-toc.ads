@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-toc -- Filter for the creation of Table Of Contents
---  Copyright (C) 2016, 2020 Stephane Carrez
+--  Copyright (C) 2016, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,7 +36,7 @@ package Wiki.Filters.TOC is
    --  ------------------------------
    --  TOC Filter
    --  ------------------------------
-   type TOC_Filter is new Filter_Type with null record;
+   type TOC_Filter is new Filter_Type with private;
 
    --  Add a text content with the given format to the document.
    overriding
@@ -45,11 +45,22 @@ package Wiki.Filters.TOC is
                        Text      : in Wiki.Strings.WString;
                        Format    : in Wiki.Format_Map);
 
-   --  Add a section header with the given level in the document.
    overriding
-   procedure Add_Header (Filter    : in out TOC_Filter;
-                         Document  : in out Wiki.Documents.Document;
-                         Header    : in Wiki.Strings.WString;
-                         Level     : in Natural);
+   procedure Start_Block (Filter   : in out TOC_Filter;
+                          Document : in out Wiki.Documents.Document;
+                          Kind     : in Wiki.Nodes.Node_Kind;
+                          Level    : in Natural);
+
+   overriding
+   procedure End_Block (Filter   : in out TOC_Filter;
+                        Document : in out Wiki.Documents.Document;
+                        Kind     : in Wiki.Nodes.Node_Kind);
+
+private
+
+   type TOC_Filter is new Filter_Type with record
+      Header_Level : Integer := -1;
+      Header       : Wiki.Strings.UString;
+   end record;
 
 end Wiki.Filters.TOC;

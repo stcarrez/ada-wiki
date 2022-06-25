@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-toc -- Filter for the creation of Table Of Contents
---  Copyright (C) 2016, 2018, 2020 Stephane Carrez
+--  Copyright (C) 2016, 2018, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,8 @@ with Ada.Strings.Wide_Wide_Fixed;
 with Wiki.Nodes.Lists;
 package body Wiki.Filters.TOC is
 
+   use type Wiki.Nodes.Node_Kind;
+
    --  ------------------------------
    --  Add a text content with the given format to the document.
    --  ------------------------------
@@ -32,6 +34,12 @@ package body Wiki.Filters.TOC is
       First : Natural := Text'First;
       Pos   : Natural;
    begin
+      if Filter.Header_Level >= 0 then
+         Wiki.Strings.Append (Filter.Header, Text);
+         Filter_Type (Filter).Add_Text (Document, Text, Format);
+         return;
+      end if;
+
       while First <= Text'Last loop
          Pos := Index (Text (First .. Text'Last), "__TOC__");
          if Pos > 0 then
@@ -57,19 +65,43 @@ package body Wiki.Filters.TOC is
    --  Add a section header with the given level in the document.
    --  ------------------------------
    overriding
-   procedure Add_Header (Filter    : in out TOC_Filter;
-                         Document  : in out Wiki.Documents.Document;
-                         Header    : in Wiki.Strings.WString;
-                         Level     : in Natural) is
-      T : Wiki.Nodes.Lists.Node_List_Ref;
+   procedure Start_Block (Filter   : in out TOC_Filter;
+                          Document : in out Wiki.Documents.Document;
+                          Kind     : in Wiki.Nodes.Node_Kind;
+                          Level    : in Natural) is
    begin
-      Document.Get_TOC (T);
-      Wiki.Nodes.Lists.Append (T, new Wiki.Nodes.Node_Type '(Kind   => Wiki.Nodes.N_TOC_ENTRY,
-                                                             Len    => Header'Length,
-                                                             Header => Header,
-                                                             Parent => null,
-                                                             Level  => Level));
-      Filter_Type (Filter).Add_Header (Document, Header, Level);
-   end Add_Header;
+      if Kind = Nodes.N_HEADER then
+         Filter.Header_Level := Level;
+      end if;
+      Filter.Header_Level := Level;
+
+      Filter_Type (Filter).Start_Block (Document, Kind, Level);
+   end Start_Block;
+
+   overriding
+   procedure End_Block (Filter   : in out TOC_Filter;
+                        Document : in out Wiki.Documents.Document;
+                        Kind     : in Wiki.Nodes.Node_Kind) is
+   begin
+      if Kind = Nodes.N_HEADER then
+         declare
+            T : Wiki.Nodes.Lists.Node_List_Ref;
+            Header : constant Wiki.Strings.WString
+              := Wiki.Strings.To_WString (Filter.Header);
+         begin
+            Document.Get_TOC (T);
+            Wiki.Nodes.Lists.Append (T,
+                                     new Wiki.Nodes.Node_Type
+                                       '(Kind   => Wiki.Nodes.N_TOC_ENTRY,
+                                         Len    => Header'Length,
+                                         Header => Header,
+                                         Parent => null,
+                                         Toc_Level  => Filter.Header_Level));
+            Filter.Header_Level := -1;
+            Filter.Header := Wiki.Strings.To_UString ("");
+         end;
+      end if;
+      Filter_Type (Filter).End_Block (Document, Kind);
+   end End_Block;
 
 end Wiki.Filters.TOC;
