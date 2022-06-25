@@ -277,7 +277,8 @@ package body Wiki.Parsers.Tests is
                                 Wiki.Utils.To_Html ("///" & LF & "* code *" & LF & "///",
                                                  SYNTAX_DOTCLEAR),
                                 "Preformat rendering invalid");
-      Util.Tests.Assert_Equals (T, "<pre><code>item1 x" & ASCII.LF & "item2 x" & ASCII.LF & "item3 x"
+      Util.Tests.Assert_Equals (T, "<pre><code>item1 x" & ASCII.LF & "item2 x"
+                                & ASCII.LF & "item3 x"
                                 & "</code></pre>",
                                 Wiki.Utils.To_Html (" item1 x" & LF & " item2 x" & LF & " item3 x",
                                                  SYNTAX_DOTCLEAR),
@@ -334,7 +335,8 @@ package body Wiki.Parsers.Tests is
          procedure Get (Value : in Wiki.Strings.WString) is
          begin
             --  Verify that we got the expected characters.
-            T.Assert (Wiki.Helpers.LF & Text & Wiki.Helpers.LF = Value, "Invalid parsing for [" & Content & "]");
+            T.Assert (Wiki.Helpers.LF & Text & Wiki.Helpers.LF = Value,
+                      "Invalid parsing for [" & Content & "]");
          end Get;
 
       begin
