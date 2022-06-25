@@ -32,22 +32,29 @@ package Wiki.Nodes is
                       N_LIST_ITEM,
                       N_END_DEFINITION,
                       N_NEWLINE,
-                      N_HEADER,
-                      N_DEFINITION,
-                      N_TOC,
                       N_TOC_ENTRY,
+
+                      --  Nodes with level and content.
+                      N_HEADER,
                       N_BLOCKQUOTE,
-                      N_QUOTE,
+                      N_INDENT,
+                      N_NUM_LIST_START,
+                      N_LIST_START,
+                      N_DEFINITION,
+
+                      --  Nodes with children and attributes.
                       N_TAG_START,
-                      N_PREFORMAT,
                       N_TABLE,
                       N_ROW,
                       N_COLUMN,
-                      N_LIST_START,
-                      N_NUM_LIST_START,
-                      N_INDENT,
+
+                      N_TOC,
+                      N_QUOTE,
+                      N_PREFORMAT,
                       N_TEXT,
                       N_LINK,
+                      N_LINK_REF,
+                      N_LINK_REF_END,
                       N_IMAGE);
 
    --  Node kinds which are simple markers in the document.
@@ -62,16 +69,16 @@ package Wiki.Nodes is
    type Node_Type (Kind : Node_Kind; Len : Natural) is limited record
       Parent     : Node_Type_Access;
       case Kind is
-         when N_HEADER | N_BLOCKQUOTE | N_INDENT | N_TOC_ENTRY
+         when N_HEADER | N_BLOCKQUOTE | N_INDENT
             | N_NUM_LIST_START | N_LIST_START | N_DEFINITION =>
             Level  : Natural := 0;
-            Header : Wiki.Strings.WString (1 .. Len);
+            Content   : Node_List_Access;
 
          when N_TEXT =>
             Format : Format_Map;
             Text   : Wiki.Strings.WString (1 .. Len);
 
-         when N_LINK | N_IMAGE | N_QUOTE =>
+         when N_LINK | N_IMAGE | N_QUOTE | N_LINK_REF =>
             Link_Attr  : Wiki.Attributes.Attribute_List;
             Title      : Wiki.Strings.WString (1 .. Len);
 
@@ -83,6 +90,10 @@ package Wiki.Nodes is
          when N_PREFORMAT =>
             Language     : Wiki.Strings.UString;
             Preformatted : Wiki.Strings.WString (1 .. Len);
+
+         when N_TOC_ENTRY =>
+            Header    : Wiki.Strings.WString (1 .. Len);
+            Toc_Level : Natural := 0;
 
          when N_TOC =>
             Entries    : Node_List_Access;
