@@ -24,6 +24,14 @@ package body Wiki.Parsers.Textile is
    use Wiki.Buffers;
    use type Wiki.Nodes.Node_Kind;
 
+   procedure Parse_Image (Parser  : in out Parser_Type;
+                          Text    : in out Wiki.Buffers.Buffer_Access;
+                          From    : in out Positive);
+
+   procedure Parse_Link (Parser  : in out Parser_Type;
+                         Text    : in out Wiki.Buffers.Buffer_Access;
+                         From    : in out Positive);
+
    function Get_Header_Level (Text : in Wiki.Strings.WString) return Natural is
    begin
       if Text'Length <= 4 or else Text (Text'First) /= 'h' then
@@ -34,13 +42,13 @@ package body Wiki.Parsers.Textile is
       end if;
       case Text (Text'First + 1) is
          when '1' =>
-           return 1;
+            return 1;
 
          when '2' =>
-           return 2;
+            return 2;
 
          when '3' =>
-           return 3;
+            return 3;
 
          when '4' =>
             return 4;
@@ -293,7 +301,7 @@ package body Wiki.Parsers.Textile is
          when ':' =>
             if Parser.Current_Node = Nodes.N_DEFINITION then
                Next (Buffer, Pos);
-               Common.Skip_Spaces (Buffer, Pos);
+               Common.Skip_Spaces (Buffer, Pos, Level);
             end if;
 
          when others =>
