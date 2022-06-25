@@ -905,7 +905,6 @@ package body Wiki.Parsers is
       end if;
       case Engine.Context.Syntax is
          when SYNTAX_DOTCLEAR =>
-            Engine.Is_Dotclear := True;
             Engine.Escape_Char := '\';
             Engine.Header_Offset := -6;
             Engine.Link_Title_First := True;
