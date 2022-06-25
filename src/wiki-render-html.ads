@@ -64,7 +64,7 @@ package Wiki.Render.Html is
 
    procedure Render_List_Start (Engine   : in out Html_Renderer;
                                 Tag      : in String;
-                                Level    : in Positive);
+                                Level    : in Natural);
 
    --  Render a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
@@ -135,8 +135,7 @@ private
    --  Render a section header in the document.
    procedure Render_Header (Engine : in out Html_Renderer;
                             Doc    : in Wiki.Documents.Document;
-                            Header : in Wiki.Strings.WString;
-                            Level  : in Positive);
+                            Node   : in Wiki.Nodes.Node_Type);
 
    --  Render the table of content.
    procedure Render_TOC (Engine : in out Html_Renderer;
@@ -148,6 +147,10 @@ private
                           Doc    : in Wiki.Documents.Document;
                           Title  : in Wiki.Strings.WString;
                           Attr   : in Wiki.Attributes.Attribute_List);
+
+   procedure Render_Link_Ref (Engine : in out Html_Renderer;
+                              Doc    : in Wiki.Documents.Document;
+                              Label  : in Wiki.Strings.WString);
 
    --  Render an image.
    procedure Render_Image (Engine : in out Html_Renderer;
