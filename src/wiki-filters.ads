@@ -75,6 +75,15 @@ package Wiki.Filters is
                              Document   : in out Wiki.Documents.Document;
                              Definition : in Wiki.Strings.WString);
 
+   procedure Start_Block (Filter   : in out Filter_Type;
+                          Document : in out Wiki.Documents.Document;
+                          Kind     : in Wiki.Nodes.Node_Kind;
+                          Level    : in Natural);
+
+   procedure End_Block (Filter   : in out Filter_Type;
+                        Document : in out Wiki.Documents.Document;
+                        Kind     : in Wiki.Nodes.Node_Kind);
+
    --  Push a HTML node with the given tag to the document.
    procedure Push_Node (Filter     : in out Filter_Type;
                         Document   : in out Wiki.Documents.Document;
@@ -95,7 +104,7 @@ package Wiki.Filters is
    --  Add a list (<ul> or <ol>) starting at the given number.
    procedure Add_List (Filter   : in out Filter_Type;
                        Document : in out Wiki.Documents.Document;
-                       Level    : in Positive;
+                       Level    : in Natural;
                        Ordered  : in Boolean);
 
    --  Add a link.
@@ -103,6 +112,11 @@ package Wiki.Filters is
                        Document   : in out Wiki.Documents.Document;
                        Name       : in Wiki.Strings.WString;
                        Attributes : in out Wiki.Attributes.Attribute_List);
+
+   --  Add a link reference with the given label.
+   procedure Add_Link_Ref (Filter     : in out Filter_Type;
+                           Document   : in out Wiki.Documents.Document;
+                           Label      : in Wiki.Strings.WString);
 
    --  Add an image.
    procedure Add_Image (Filter     : in out Filter_Type;
