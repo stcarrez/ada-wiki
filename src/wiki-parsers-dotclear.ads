@@ -15,7 +15,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Wiki.Buffers;
 private package Wiki.Parsers.Dotclear with Preelaborate is
 
    procedure Parse_Line (Parser : in out Parser_Type;

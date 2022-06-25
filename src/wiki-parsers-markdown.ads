@@ -15,11 +15,7 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-
-private package Wiki.Parsers.Markdown is
-
-   pragma Preelaborate;
-   subtype Parser_Type is Parser;
+private package Wiki.Parsers.Markdown with Preelaborate is
 
    procedure Parse_Line (Parser : in out Parser_Type;
                          Text   : in Wiki.Buffers.Buffer_Access);
