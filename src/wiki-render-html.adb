@@ -121,15 +121,8 @@ package body Wiki.Render.Html is
             null;
 
          when Wiki.Nodes.N_HEADER =>
-            if Node.Level > 6 then
-               Engine.Render_Header (Doc    => Doc,
-                                     Header => Node.Header,
-                                     Level  => 6);
-            else
-               Engine.Render_Header (Doc    => Doc,
-                                     Header => Node.Header,
-                                     Level  => Node.Level);
-            end if;
+            Engine.Render_Header (Doc   => Doc,
+                                  Node  => Node);
 
          when Wiki.Nodes.N_LINE_BREAK =>
             Engine.Output.Write ("<br>");
@@ -147,7 +140,8 @@ package body Wiki.Render.Html is
                Engine.Output.End_Element ("dd");
             end if;
             Engine.Output.Start_Element ("dt");
-            Engine.Output.Write_Wide_Text (Node.Header);
+            Engine.Render (Doc, Node.Content);
+            --  Engine.Output.Write_Wide_Text (Node.Header);
             Engine.Output.End_Element ("dt");
             Engine.Output.Start_Element ("dd");
             Engine.Has_Paragraph := True;
@@ -211,6 +205,12 @@ package body Wiki.Render.Html is
 
          when Wiki.Nodes.N_LINK =>
             Engine.Render_Link (Doc, Node.Title, Node.Link_Attr);
+
+         when Wiki.Nodes.N_LINK_REF =>
+            Engine.Render_Link_Ref (Doc, Node.Title);
+
+         when Wiki.Nodes.N_LINK_REF_END =>
+            Engine.Output.End_Element ("a");
 
          when Wiki.Nodes.N_IMAGE =>
             Engine.Render_Image (Doc, Node.Title, Node.Link_Attr);
@@ -336,8 +336,8 @@ package body Wiki.Render.Html is
    --  ------------------------------
    procedure Render_Header (Engine : in out Html_Renderer;
                             Doc    : in Wiki.Documents.Document;
-                            Header : in Wiki.Strings.WString;
-                            Level  : in Positive) is
+                            Node   : in Wiki.Nodes.Node_Type) is
+      Level : constant Natural := Node.Level;
       Tag   : String_Access;
    begin
       if Engine.Enable_Render_TOC and not Engine.TOC_Rendered and not Doc.Is_Using_TOC
@@ -376,7 +376,8 @@ package body Wiki.Render.Html is
       if Engine.Enable_Render_TOC then
          Engine.Output.Write_Wide_Attribute ("id", Engine.Get_Section_Number ("section_", '_'));
       end if;
-      Engine.Output.Write_Wide_Text (Header);
+      Engine.Need_Paragraph := False;
+      Engine.Render (Doc, Node.Content);
       Engine.Output.End_Element (Tag.all);
       Engine.Newline;
    end Render_Header;
@@ -419,10 +420,10 @@ package body Wiki.Render.Html is
 
       procedure Render_Entry (Node : in Wiki.Nodes.Node_Type) is
       begin
-         if Node.Kind /= Wiki.Nodes.N_TOC_ENTRY or else Node.Level > Level then
+         if Node.Kind /= Wiki.Nodes.N_TOC_ENTRY or else Node.Toc_Level > Level then
             return;
          end if;
-         Set_Current_Level (Node.Level);
+         Set_Current_Level (Node.Toc_Level);
          Engine.Current_Section (Engine.Section_Level)
            := Engine.Current_Section (Engine.Section_Level) + 1;
          Engine.Output.Start_Element ("a");
@@ -501,7 +502,7 @@ package body Wiki.Render.Html is
    --  ------------------------------
    procedure Render_List_Start (Engine   : in out Html_Renderer;
                                 Tag      : in String;
-                                Level    : in Positive) is
+                                Level    : in Natural) is
    begin
       if Engine.Has_Paragraph then
          Engine.Output.End_Element ("p");
@@ -509,7 +510,7 @@ package body Wiki.Render.Html is
       end if;
       Engine.Need_Paragraph := False;
       Engine.Output.Start_Element (Tag);
-      if Level > 1 then
+      if Tag = "ol" and Level /= 1 then
          Engine.Output.Write_Attribute ("start", Util.Strings.Image (Level));
       end if;
       Engine.Has_Item := False;
@@ -586,7 +587,6 @@ package body Wiki.Render.Html is
                           Doc    : in Wiki.Documents.Document;
                           Title  : in Wiki.Strings.WString;
                           Attr   : in Wiki.Attributes.Attribute_List) is
-      pragma Unreferenced (Doc);
 
       procedure Render_Attribute (Name  : in String;
                                   Value : in Wiki.Strings.WString);
@@ -603,6 +603,9 @@ package body Wiki.Render.Html is
                Engine.Output.Write_Wide_Attribute ("href", URI);
             end;
 
+         elsif Name = "label" then
+            return;
+
          elsif Value'Length = 0 then
             return;
 
@@ -613,13 +616,74 @@ package body Wiki.Render.Html is
          end if;
       end Render_Attribute;
 
+      Label : constant Wiki.Strings.WString :=
+           Wiki.Attributes.Get_Attribute (Attr, "label");
    begin
       Engine.Open_Paragraph;
-      Engine.Output.Start_Element ("a");
-      Wiki.Attributes.Iterate (Attr, Render_Attribute'Access);
-      Engine.Output.Write_Wide_Text (Title);
-      Engine.Output.End_Element ("a");
+      if Label'Length = 0 then
+         Engine.Output.Start_Element ("a");
+         Wiki.Attributes.Iterate (Attr, Render_Attribute'Access);
+         Engine.Output.Write_Wide_Text (Title);
+         Engine.Output.End_Element ("a");
+      else
+         declare
+            Link : constant Wiki.Strings.WString
+              := Doc.Get_Link (Label);
+         begin
+            if Link'Length = 0 then
+               Engine.Output.Write_Wide_Text ("[");
+               Engine.Output.Write_Wide_Text (Label);
+               Engine.Output.Write_Wide_Text ("]");
+            else
+               Engine.Output.Start_Element ("a");
+               declare
+                  URI    : Wiki.Strings.UString;
+                  Exists : Boolean;
+                  Title  : constant Wiki.Strings.WString := Doc.Get_Link_Title (Label);
+               begin
+                  Engine.Links.Make_Page_Link (Link, URI, Exists);
+                  Engine.Output.Write_Wide_Attribute ("href", URI);
+                  if Title'Length > 0 then
+                     Engine.Output.Write_Wide_Attribute ("title", Title);
+                  end if;
+               end;
+               Engine.Output.Write_Wide_Text (Title);
+               Engine.Output.End_Element ("a");
+            end if;
+         end;
+      end if;
    end Render_Link;
+
+   --  ------------------------------
+   --  Render a link.
+   --  ------------------------------
+   procedure Render_Link_Ref (Engine : in out Html_Renderer;
+                              Doc    : in Wiki.Documents.Document;
+                              Label  : in Wiki.Strings.WString) is
+      Link : constant Wiki.Strings.WString := Doc.Get_Link (Label);
+   begin
+      Engine.Open_Paragraph;
+      if Link'Length = 0 then
+         Engine.Output.Write_Wide_Text ("[");
+         Engine.Output.Write_Wide_Text (Label);
+         Engine.Output.Write_Wide_Text ("]");
+      else
+         Engine.Output.Start_Element ("a");
+         declare
+            URI    : Wiki.Strings.UString;
+            Exists : Boolean;
+            Title  : constant Wiki.Strings.WString := Doc.Get_Link_Title (Label);
+         begin
+            Engine.Links.Make_Page_Link (Link, URI, Exists);
+            Engine.Output.Write_Wide_Attribute ("href", URI);
+            if Title'Length > 0 then
+               Engine.Output.Write_Wide_Attribute ("title", Title);
+            end if;
+         end;
+         Engine.Output.Write_Wide_Text (Label);
+         Engine.Output.End_Element ("a");
+      end if;
+   end Render_Link_Ref;
 
    --  ------------------------------
    --  Render an image.
