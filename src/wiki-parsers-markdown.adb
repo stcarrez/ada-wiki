@@ -1282,7 +1282,7 @@ package body Wiki.Parsers.Markdown is
                         Delim : constant Delimiter_Vectors.Reference_Type
                          := Delimiters.Reference (Iter);
                      begin
-                        if Delim.Marker = M_LINK or Delim.Marker = M_IMAGE then
+                        if Delim.Marker in M_LINK | M_IMAGE and Delim.Link_Pos = 0 then
                            Parse_Link (Block, Pos, Delim);
                            exit;
                         end if;
