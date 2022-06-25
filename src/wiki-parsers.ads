@@ -207,8 +207,11 @@ private
    procedure Flush_List (P : in out Parser);
    procedure Pop_List (P      : in out Parser;
                        Level  : in Natural;
-                       Marker : in Wiki.Strings.WChar);
+                       Marker : in Wiki.Strings.WChar;
+                       Number : in Natural);
    procedure Pop_List (P      : in out Parser);
+
+   function Get_Current_Level (Parser : in Parser_Type) return Natural;
 
    --  Check if the link refers to an image and must be rendered as an image.
    --  Returns a positive index of the start the the image link.
