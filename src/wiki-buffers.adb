@@ -203,13 +203,11 @@ package body Wiki.Buffers is
                      Buffer   : in Buffer_Access;
                      From     : in Positive) is
       Block : Buffer_Access := Buffer;
-      Pos   : Positive := From;
       First : Positive := From;
    begin
       while Block /= null loop
          Append (Into, Block.Content (First .. Block.Last));
          Block := Block.Next_Block;
-         Pos := 1;
          First := 1;
       end loop;
    end Append;
@@ -418,8 +416,8 @@ package body Wiki.Buffers is
    begin
       while Current /= null loop
          declare
-            First : Positive := Pos;
-            Last  : Natural := Current.Last;
+            First : constant Positive := Pos;
+            Last  : constant Natural := Current.Last;
          begin
             while Pos <= Last and then Current.Content (Pos) = Item loop
                Pos := Pos + 1;
@@ -445,8 +443,8 @@ package body Wiki.Buffers is
       Count := 0;
       while Current /= null loop
          declare
-            First : Positive := From;
-            Last  : Natural := Current.Last;
+            First : constant Positive := From;
+            Last  : constant Natural := Current.Last;
          begin
             while Pos <= Last and then Current.Content (Pos) = Item loop
                Pos := Pos + 1;
