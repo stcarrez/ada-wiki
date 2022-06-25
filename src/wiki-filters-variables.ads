@@ -52,13 +52,6 @@ package Wiki.Filters.Variables is
                            Name  : in Wiki.Strings.WString;
                            Value : in Wiki.Strings.WString);
 
-   --  Add a section header with the given level in the document.
-   overriding
-   procedure Add_Header (Filter    : in out Variable_Filter;
-                         Document  : in out Wiki.Documents.Document;
-                         Header    : in Wiki.Strings.WString;
-                         Level     : in Natural);
-
    --  Add a text content with the given format to the document.  Replace variables
    --  that are contained in the text.
    overriding

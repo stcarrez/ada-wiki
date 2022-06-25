@@ -64,12 +64,6 @@ package Wiki.Filters is
                        Text      : in Wiki.Strings.WString;
                        Format    : in Wiki.Format_Map);
 
-   --  Add a section header with the given level in the document.
-   procedure Add_Header (Filter    : in out Filter_Type;
-                         Document  : in out Wiki.Documents.Document;
-                         Header    : in Wiki.Strings.WString;
-                         Level     : in Natural);
-
    --  Add a definition item at end of the document.
    procedure Add_Definition (Filter     : in out Filter_Type;
                              Document   : in out Wiki.Documents.Document;

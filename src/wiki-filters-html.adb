@@ -67,19 +67,6 @@ package body Wiki.Filters.Html is
    end Add_Text;
 
    --  ------------------------------
-   --  Add a section header with the given level in the document.
-   --  ------------------------------
-   overriding
-   procedure Add_Header (Filter    : in out Html_Filter_Type;
-                         Document  : in out Wiki.Documents.Document;
-                         Header    : in Wiki.Strings.WString;
-                         Level     : in Natural) is
-   begin
-      Filter.Flush_Stack (Document);
-      Filter_Type (Filter).Add_Header (Document, Header, Level);
-   end Add_Header;
-
-   --  ------------------------------
    --  Push a HTML node with the given tag to the document.
    --  ------------------------------
    overriding

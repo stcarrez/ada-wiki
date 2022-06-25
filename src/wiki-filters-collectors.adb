@@ -110,18 +110,6 @@ package body Wiki.Filters.Collectors is
    end Add_Text;
 
    --  ------------------------------
-   --  Add a section header with the given level in the document.
-   --  ------------------------------
-   procedure Add_Header (Filter    : in out Word_Collector_Type;
-                         Document  : in out Wiki.Documents.Document;
-                         Header    : in Wiki.Strings.WString;
-                         Level     : in Natural) is
-   begin
-      Filter.Collect_Words (Header);
-      Filter_Type (Filter).Add_Header (Document, Header, Level);
-   end Add_Header;
-
-   --  ------------------------------
    --  Add a link.
    --  ------------------------------
    procedure Add_Link (Filter     : in out Word_Collector_Type;

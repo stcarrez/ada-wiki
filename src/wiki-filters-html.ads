@@ -70,13 +70,6 @@ package Wiki.Filters.Html is
                        Text      : in Wiki.Strings.WString;
                        Format    : in Wiki.Format_Map);
 
-   --  Add a section header with the given level in the document.
-   overriding
-   procedure Add_Header (Filter    : in out Html_Filter_Type;
-                         Document  : in out Wiki.Documents.Document;
-                         Header    : in Wiki.Strings.WString;
-                         Level     : in Natural);
-
    --  Push a HTML node with the given tag to the document.
    overriding
    procedure Push_Node (Filter     : in out Html_Filter_Type;
