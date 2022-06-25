@@ -55,11 +55,12 @@ package body Wiki.Filters is
                          Header    : in Wiki.Strings.WString;
                          Level     : in Natural) is
    begin
-      if Filter.Next /= null then
-         Filter.Next.Add_Header (Document, Header, Level);
-      else
-         Wiki.Documents.Append (Document, Header, Level);
-      end if;
+   --   if Filter.Next /= null then
+   --      Filter.Next.Add_Header (Document, Header, Level);
+   --   else
+   --      Wiki.Documents.Append (Document, Header, Level);
+   --   end if;
+      null;
    end Add_Header;
 
    --  ------------------------------
@@ -75,6 +76,29 @@ package body Wiki.Filters is
          Wiki.Documents.Add_Definition (Document, Definition);
       end if;
    end Add_Definition;
+
+   procedure Start_Block (Filter   : in out Filter_Type;
+                          Document : in out Wiki.Documents.Document;
+                          Kind     : in Wiki.Nodes.Node_Kind;
+                          Level    : in Natural) is
+   begin
+      if Filter.Next /= null then
+         Filter.Next.Start_Block (Document, Kind, Level);
+      else
+         Document.Start_Block (Kind, Level);
+      end if;
+   end Start_Block;
+
+   procedure End_Block (Filter   : in out Filter_Type;
+                        Document : in out Wiki.Documents.Document;
+                        Kind     : in Wiki.Nodes.Node_Kind) is
+   begin
+      if Filter.Next /= null then
+         Filter.Next.End_Block (Document, Kind);
+      else
+         Document.End_Block (Kind);
+      end if;
+   end End_Block;
 
    --  ------------------------------
    --  Push a HTML node with the given tag to the document.
@@ -125,7 +149,7 @@ package body Wiki.Filters is
    --  ------------------------------
    procedure Add_List (Filter   : in out Filter_Type;
                        Document : in out Wiki.Documents.Document;
-                       Level    : in Positive;
+                       Level    : in Natural;
                        Ordered  : in Boolean) is
    begin
       if Filter.Next /= null then
@@ -149,6 +173,20 @@ package body Wiki.Filters is
          Document.Add_Link (Name, Attributes);
       end if;
    end Add_Link;
+
+   --  ------------------------------
+   --  Add a link reference with the given label.
+   --  ------------------------------
+   procedure Add_Link_Ref (Filter     : in out Filter_Type;
+                           Document   : in out Wiki.Documents.Document;
+                           Label      : in Wiki.Strings.WString) is
+   begin
+      if Filter.Next /= null then
+         Filter.Next.Add_Link_Ref (Document, Label);
+      else
+         Document.Add_Link_Ref (Label);
+      end if;
+   end Add_Link_Ref;
 
    --  ------------------------------
    --  Add an image.
