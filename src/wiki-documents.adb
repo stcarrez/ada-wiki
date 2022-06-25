@@ -15,11 +15,43 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-
+with Ada.Wide_Wide_Characters.Handling;
 package body Wiki.Documents is
 
    use Wiki.Nodes;
    use Wiki.Nodes.Lists;
+
+   --  ------------------------------
+   --  Append a HTML tag start node to the document.
+   --  ------------------------------
+   procedure Start_Block (Into  : in out Document;
+                          Kind  : in Wiki.Nodes.Node_Kind;
+                          Level : in Natural) is
+      Node : Node_Type_Access;
+   begin
+      case Kind is
+         when N_HEADER =>
+            Node := new Node_Type '(Kind       => N_HEADER,
+                                    Len        => 0,
+                                    Level      => Level,
+                                    Content    => null,
+                                    Parent     => Into.Current);
+
+         when others =>
+            return;
+
+      end case;
+      Append (Into, Node);
+      Into.Current := Node;
+   end Start_Block;
+
+   procedure End_Block (From : in out Document;
+                        Kind  : in Wiki.Nodes.Node_Kind) is
+   begin
+      if From.Current /= null then
+         From.Current := From.Current.Parent;
+      end if;
+   end End_Block;
 
    --  ------------------------------
    --  Append a HTML tag start node to the document.
@@ -58,20 +90,6 @@ package body Wiki.Documents is
    begin
       return Doc.Current = null;
    end Is_Root_Node;
-
-   --  ------------------------------
-   --  Append a section header at end of the document.
-   --  ------------------------------
-   procedure Append (Into   : in out Document;
-                     Header : in Wiki.Strings.WString;
-                     Level  : in Positive) is
-   begin
-      Append (Into, new Node_Type '(Kind   => N_HEADER,
-                                    Len    => Header'Length,
-                                    Parent => Into.Current,
-                                    Header => Header,
-                                    Level  => Level));
-   end Append;
 
    --  ------------------------------
    --  Append a node to the document.
@@ -158,11 +176,12 @@ package body Wiki.Documents is
    procedure Add_Definition (Into       : in out Document;
                              Definition : in Wiki.Strings.WString) is
    begin
-      Append (Into, new Node_Type '(Kind   => N_DEFINITION,
-                                    Len    => Definition'Length,
-                                    Parent => Into.Current,
-                                    Header => Definition,
-                                    Level  => 0));
+   --   Append (Into, new Node_Type '(Kind   => N_DEFINITION,
+   --                                 Len    => Definition'Length,
+   --                                 Parent => Into.Current,
+   --                                 Header => Definition,
+   --                                 Level  => 0));
+      null;
    end Add_Definition;
 
    --  ------------------------------
@@ -176,6 +195,17 @@ package body Wiki.Documents is
                                     Parent => Into.Current,
                                     Title => Name, Link_Attr => Attributes));
    end Add_Link;
+
+   --  ------------------------------
+   --  Add a link reference with the given label.
+   --  ------------------------------
+   procedure Add_Link_Ref (Into   : in out Document;
+                           Label  : in Wiki.Strings.WString) is
+   begin
+      Append (Into, new Node_Type '(Kind => N_LINK_REF, Len => Label'Length,
+                                    Parent => Into.Current,
+                                    Title => Label, others => <>));
+   end Add_Link_Ref;
 
    --  ------------------------------
    --  Add an image.
@@ -205,7 +235,7 @@ package body Wiki.Documents is
    --  Add a list (<ul> or <ol>) starting at the given number.
    --  ------------------------------
    procedure Add_List (Into     : in out Document;
-                       Level    : in Positive;
+                       Level    : in Natural;
                        Ordered  : in Boolean) is
    begin
       if Ordered then
@@ -388,19 +418,29 @@ package body Wiki.Documents is
    --  ------------------------------
    --  Set a link definition.
    --  ------------------------------
-   procedure Set_Link (Doc  : in out Document;
-                       Name : in Wiki.Strings.WString;
-                       Link : in Wiki.Strings.WString) is
+   procedure Set_Link (Doc   : in out Document;
+                       Name  : in Wiki.Strings.WString;
+                       Link  : in Wiki.Strings.WString;
+                       Title : in Wiki.Strings.WString) is
+      Upper : constant Wiki.Strings.WString
+           := Ada.Wide_Wide_Characters.Handling.To_Upper (Name);
    begin
-      Doc.Links.Include (Name, Link);
+      if not Doc.Links.Contains (Upper) then
+         Doc.Links.Include (Upper, Link);
+         if Title'Length > 0 then
+            Doc.Titles.Include (Upper, Title);
+         end if;
+      end if;
    end Set_Link;
 
    --  ------------------------------
    --  Get a link definition.
    --  ------------------------------
-   function Get_Link (Doc  : in out Document;
-                      Name : in Wiki.Strings.WString) return Wiki.Strings.WString is
-      Pos : constant Wiki.Strings.Maps.Cursor := Doc.Links.Find (Name);
+   function Get_Link (Doc   : in Document;
+                      Label : in Wiki.Strings.WString) return Wiki.Strings.WString is
+      Upper : constant Wiki.Strings.WString
+           := Ada.Wide_Wide_Characters.Handling.To_Upper (Label);
+      Pos : constant Wiki.Strings.Maps.Cursor := Doc.Links.Find (Upper);
    begin
       if Wiki.Strings.Maps.Has_Element (Pos) then
          return Wiki.Strings.Maps.Element (Pos);
@@ -408,5 +448,21 @@ package body Wiki.Documents is
          return "";
       end if;
    end Get_Link;
+
+   --  ------------------------------
+   --  Get a link definition.
+   --  ------------------------------
+   function Get_Link_Title (Doc   : in Document;
+                            Label : in Wiki.Strings.WString) return Wiki.Strings.WString is
+      Upper : constant Wiki.Strings.WString
+           := Ada.Wide_Wide_Characters.Handling.To_Upper (Label);
+      Pos : constant Wiki.Strings.Maps.Cursor := Doc.Titles.Find (Upper);
+   begin
+      if Wiki.Strings.Maps.Has_Element (Pos) then
+         return Wiki.Strings.Maps.Element (Pos);
+      else
+         return "";
+      end if;
+   end Get_Link_Title;
 
 end Wiki.Documents;
