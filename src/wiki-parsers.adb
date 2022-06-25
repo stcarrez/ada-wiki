@@ -86,7 +86,7 @@ package body Wiki.Parsers is
    function Is_List_Item (P     : in Parser;
                           Level : in Natural) return Boolean is
    begin
-      if P.Current_Node not in Nodes.N_LIST_ITEM | Nodes.N_LIST_START then
+      if P.Current_Node not in Nodes.N_LIST_ITEM | Nodes.N_LIST_START | Nodes.N_NUM_LIST_START then
          return False;
       end if;
       declare
@@ -98,14 +98,20 @@ package body Wiki.Parsers is
 
    procedure Pop_List (P      : in out Parser;
                        Level  : in Natural;
-                       Marker : in Wiki.Strings.WChar) is
+                       Marker : in Wiki.Strings.WChar;
+                       Number : in Natural) is
    begin
       while not Block_Stack.Is_Empty (P.Blocks) loop
          declare
             Top : constant Block_Access := Block_Stack.Current (P.Blocks);
          begin
-            exit when Top.Kind in Nodes.N_LIST_START | Nodes.N_NUM_LIST_START | Nodes.N_LIST_ITEM
+            exit when Top.Kind in Nodes.N_LIST_START | Nodes.N_NUM_LIST_START
               and then Top.Level <= Level and then Top.Marker = Marker;
+            exit when Top.Kind = Nodes.N_NUM_LIST_START and Top.Number + 1 = Number;
+            if Top.Kind = Nodes.N_List_Item and Top.Level <= Level and Top.Marker = Marker then
+               Pop_Block (P);
+               exit;
+            end if;
             exit when Top.Kind not in Nodes.N_LIST_ITEM
               | Nodes.N_LIST_START | Nodes.N_NUM_LIST_START;
             Pop_Block (P);
@@ -127,8 +133,8 @@ package body Wiki.Parsers is
       end loop;
    end Pop_List;
 
-   procedure Add_Header (P : in out Parser;
-                         Level : in Natural) is
+   procedure Add_Header (Parser : in out Parser_Type;
+                         Level  : in Natural) is
       procedure Add_Header (Content : in Wiki.Strings.WString);
 
       procedure Add_Header (Content : in Wiki.Strings.WString) is
@@ -148,15 +154,26 @@ package body Wiki.Parsers is
             end if;
             Last := Last - 1;
          end loop;
-         P.Context.Filters.Add_Header (P.Document, Content (Content'First .. Last), Level);
+         Parser.Context.Filters.Start_Block (Parser.Document, Nodes.N_HEADER, Level);
+         Strings.Clear (Parser.Text);
+         if Parser.Parse_Inline /= null then
+            Buffers.Append (Parser.Text_Buffer, Content (Content'First .. Last));
+            Parser.Parse_Inline (Parser, Parser.Text_Buffer.First'Unchecked_Access);
+            Buffers.Clear (Parser.Text_Buffer);
+         else
+            Parser.Context.Filters.Add_Text (Parser.Document,
+                                             Content (Content'First .. Last),
+                                             Format => (others => False));
+         end if;
+         Parser.Context.Filters.End_Block (Parser.Document, Nodes.N_HEADER);
       end Add_Header;
 
       procedure Add_Header is
          new Wiki.Strings.Wide_Wide_Builders.Get (Add_Header);
 
    begin
-      if not P.Context.Is_Hidden then
-         Add_Header (P.Text);
+      if not Parser.Context.Is_Hidden then
+         Add_Header (Parser.Text);
       end if;
    end Add_Header;
 
@@ -193,6 +210,12 @@ package body Wiki.Parsers is
          Clear (Parser.Text);
       end if;
    end Flush_Block;
+
+   function Get_Current_Level (Parser : in Parser_Type) return Natural is
+      Top : constant Block_Access := Block_Stack.Current (Parser.Blocks);
+   begin
+      return Top.Level;
+   end Get_Current_Level;
 
    --  ------------------------------
    --  Push a new block kind on the block stack.
