@@ -113,6 +113,7 @@ package body Wiki.Strings is
                                  Process : not null
                                     access procedure (Text   : in WString;
                                                       Offset : in Natural)) is
+      procedure Parse_Line_Fragment (Content : in Wiki.Strings.WString);
 
       Offset : Natural := 0;
 

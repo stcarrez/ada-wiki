@@ -141,6 +141,7 @@ package body Wiki.Attributes is
    procedure Append (List  : in out Attribute_List;
                      Name  : in String;
                      Value : in Wiki.Strings.BString) is
+      procedure Append (Content : in Wiki.Strings.WString);
 
       procedure Append (Content : in Wiki.Strings.WString) is
       begin

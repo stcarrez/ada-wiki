@@ -106,7 +106,7 @@ package Wiki.Strings is
    procedure Append_Char (Source   : in out BString;
                           Item     : in WChar) renames Wide_Wide_Builders.Append;
 
-  package Maps is
+   package Maps is
       new Ada.Containers.Indefinite_Ordered_Maps (Key_Type     => WString,
                                                   Element_Type => WString);
 
