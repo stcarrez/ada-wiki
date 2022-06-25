@@ -131,14 +131,16 @@ package body Wiki.Parsers.MediaWiki is
                Pos := Pos + 1;
                Common.Parse_List (Parser, Buffer, Pos);
             end if;
-         --   Parser.Preformat_Indent := 1;
-         --   Parser.Preformat_Fence := ' ';
-         --   Parser.Preformat_Fcount := 1;
-         --   Flush_Text (Parser, Trim => Right);
-         --   Pop_Block (Parser);
-         --   Push_Block (Parser, Nodes.N_PREFORMAT);
-         --   Common.Append (Parser.Text, Buffer, Pos + 1);
-         --   return;
+            if not Parser.In_Html then
+               Parser.Preformat_Indent := 1;
+               Parser.Preformat_Fence := ' ';
+               Parser.Preformat_Fcount := 1;
+               Flush_Text (Parser, Trim => Right);
+               Pop_Block (Parser);
+               Push_Block (Parser, Nodes.N_PREFORMAT);
+               Common.Append (Parser.Text, Buffer, Pos + 1);
+               return;
+            end if;
 
          when ';' =>
             Common.Parse_Definition (Parser, Buffer, Pos);
@@ -147,7 +149,11 @@ package body Wiki.Parsers.MediaWiki is
          when ':' =>
             if Parser.Current_Node = Nodes.N_DEFINITION then
                Next (Buffer, Pos);
-               Common.Skip_Spaces (Buffer, Pos);
+               declare
+                  Count : Natural;
+               begin
+                  Common.Skip_Spaces (Buffer, Pos, Count);
+               end;
             end if;
 
          when others =>
