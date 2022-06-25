@@ -48,8 +48,10 @@ package Wiki.Render.Wiki is
 
    --  Add a section header in the document.
    procedure Render_Header (Engine : in out Wiki_Renderer;
-                            Header : in Wide_Wide_String;
-                            Level  : in Positive);
+                            Doc    : in Documents.Document;
+                            Node   : in Nodes.Node_Type;
+                            Level  : in Natural;
+                            List   : in Nodes.Node_List_Access);
 
    --  Add a paragraph (<p>).  Close the previous paragraph if any.
    --  The paragraph must be closed at the next paragraph or next header.
@@ -65,6 +67,15 @@ package Wiki.Render.Wiki is
    procedure Add_List_Item (Engine : in out Wiki_Renderer;
                             Level    : in Positive;
                             Ordered  : in Boolean);
+
+   procedure Render_List_Start (Engine   : in out Wiki_Renderer;
+                                Numbered : in Boolean;
+                                Level    : in Natural);
+
+   procedure Render_List_End (Engine   : in out Wiki_Renderer;
+                              Tag      : in String);
+   procedure Render_List_Item_Start (Engine   : in out Wiki_Renderer);
+   procedure Render_List_Item_End (Engine   : in out Wiki_Renderer);
 
    --  Render a link.
    procedure Render_Link (Engine : in out Wiki_Renderer;
@@ -133,7 +144,9 @@ private
    procedure Close_Paragraph (Engine : in out Wiki_Renderer);
    procedure Start_Keep_Content (Engine : in out Wiki_Renderer);
 
-   type List_Style_Array is array (1 .. 32) of Boolean;
+   type List_Index_Type is new Integer range 0 .. 32;
+
+   type List_Level_Array is array (List_Index_Type range 1 .. 32) of Natural;
 
    EMPTY_TAG : aliased constant Wide_Wide_String := "";
 
@@ -145,6 +158,8 @@ private
       Style_Start_Tags    : Wiki_Format_Array := (others => EMPTY_TAG'Access);
       Style_End_Tags      : Wiki_Format_Array := (others => EMPTY_TAG'Access);
       Escape_Set          : Ada.Strings.Wide_Wide_Maps.Wide_Wide_Character_Set;
+      List_Index          : List_Index_Type := 0;
+      List_Levels         : List_Level_Array;
       Has_Paragraph       : Boolean := False;
       Has_Item            : Boolean := False;
       Need_Paragraph      : Boolean := False;
@@ -160,6 +175,7 @@ private
       Html_Blockquote     : Boolean := False;
       Html_Table          : Boolean := False;
       In_Table            : Boolean := False;
+      In_Header           : Boolean := False;
       Col_Index           : Natural := 0;
       Line_Count          : Natural := 0;
       Current_Level       : Natural := 0;
@@ -171,6 +187,7 @@ private
       Link_Href           : Unbounded_Wide_Wide_String;
       Link_Title          : Unbounded_Wide_Wide_String;
       Link_Lang           : Unbounded_Wide_Wide_String;
+      Indent_Level        : Natural := 0;
    end record;
 
    procedure Write_Link (Engine : in out Wiki_Renderer;
