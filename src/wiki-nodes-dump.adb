@@ -24,6 +24,10 @@ procedure Wiki.Nodes.Dump (Node : in Wiki.Nodes.Node_Type) is
    Level : Positive := 1;
 
    procedure Dump_Node (Node : in Wiki.Nodes.Node_Type) is
+      procedure Print_Length (Len : Natural);
+      procedure Print (Name  : in String;
+                       Value : in Wiki.Strings.WString);
+
       Kind   : constant Wiki.Strings.WString := Node_Kind'Wide_Wide_Image (Node.Kind);
       Result : Wiki.Strings.BString (256);
 
@@ -56,7 +60,12 @@ procedure Wiki.Nodes.Dump (Node : in Wiki.Nodes.Node_Type) is
           | N_LIST_START | N_DEFINITION =>
             Strings.Append_String (Result, Natural'Wide_Wide_Image (Node.Level));
             Strings.Append_String (Result, " ");
-            Strings.Append_String (Result, Node.Header);
+            --  Strings.Append_String (Result, Node.Header);
+            if Node.Content /= null then
+               Level := Level + 1;
+               Lists.Iterate (Node.Content, Dump_Node'Access);
+               Level := Level - 1;
+            end if;
 
          when N_TEXT =>
             for Format in Format_Type'Range loop
