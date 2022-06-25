@@ -62,12 +62,13 @@ procedure Wiki.Nodes.Dump (Node : in Wiki.Nodes.Node_Type) is
           | N_LIST_START | N_DEFINITION =>
             Strings.Append_String (Result, Natural'Wide_Wide_Image (Node.Level));
             Strings.Append_String (Result, " ");
-            --  Strings.Append_String (Result, Node.Header);
+            Write (Level, Wiki.Strings.To_WString (Result));
             if Node.Content /= null then
                Level := Level + 1;
                Lists.Iterate (Node.Content, Dump_Node'Access);
                Level := Level - 1;
             end if;
+            return;
 
          when N_TEXT =>
             for Format in Format_Type'Range loop
