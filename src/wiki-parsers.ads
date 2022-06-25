@@ -103,15 +103,6 @@ private
 
    type Trim_End is (None, Left, Right, Both);
 
-   type Block;
-   type Content_Access is access all Block;
-
-   type Block (Len : Positive) is limited record
-      Next_Block : Content_Access;
-      Last       : Natural := 0;
-      Content    : Wiki.Strings.WString (1 .. Len);
-   end record;
-
    use Wiki.Strings.Wide_Wide_Builders;
 
    type Block_Type is record
