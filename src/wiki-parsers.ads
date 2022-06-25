@@ -151,7 +151,6 @@ private
       Is_Last_Line        : Boolean := False;
       Is_Eof              : Boolean := False;
       In_Paragraph        : Boolean := False;
-      In_List             : Boolean := False;
       In_Table            : Boolean := False;
       In_Html             : Boolean := False;
       Need_Paragraph      : Boolean := True;

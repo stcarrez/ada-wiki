@@ -418,12 +418,6 @@ package body Wiki.Parsers is
    procedure Flush_List (P : in out Parser) is
    begin
       Flush_Block (P);
-      if P.In_List then
-         if not P.Context.Is_Hidden then
-            P.Context.Filters.Pop_Node (P.Document, Wiki.DL_TAG);
-         end if;
-         P.In_List := False;
-      end if;
       while P.Current_Node in Nodes.N_LIST_ITEM | Nodes.N_LIST_START | Nodes.N_NUM_LIST_START loop
          Pop_Block (P);
       end loop;
