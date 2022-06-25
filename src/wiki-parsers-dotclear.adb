@@ -36,6 +36,10 @@ package body Wiki.Parsers.Dotclear is
 
    procedure Parse_Preformatted (Parser : in out Parser_Type;
                                  Text   : in out Wiki.Buffers.Buffer_Access;
+                                 From   : in out Positive);
+
+   procedure Parse_Preformatted (Parser : in out Parser_Type;
+                                 Text   : in out Wiki.Buffers.Buffer_Access;
                                  From   : in out Positive) is
       Count : constant Natural := Count_Occurence (Text, From, '/');
    begin

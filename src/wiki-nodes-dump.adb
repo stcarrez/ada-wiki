@@ -21,6 +21,8 @@ with Wiki.Strings;
 with Wiki.Attributes;
 procedure Wiki.Nodes.Dump (Node : in Wiki.Nodes.Node_Type) is
 
+   procedure Dump_Node (Node : in Wiki.Nodes.Node_Type);
+
    Level : Positive := 1;
 
    procedure Dump_Node (Node : in Wiki.Nodes.Node_Type) is

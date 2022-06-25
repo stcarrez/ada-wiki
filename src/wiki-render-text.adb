@@ -115,8 +115,9 @@ package body Wiki.Render.Text is
       Engine.Open_Paragraph;
 
       if Engine.List_Levels (Engine.List_Index) > 0 then
-         Engine.Render_Paragraph (Strings.To_Wstring (Util.Strings.Image (Engine.List_Levels (Engine.List_Index))));
-         Engine.List_Levels (Engine.List_Index) := Engine.List_Levels (Engine.List_index) + 1;
+         Engine.Render_Paragraph
+           (Strings.To_WString (Util.Strings.Image (Engine.List_Levels (Engine.List_Index))));
+         Engine.List_Levels (Engine.List_Index) := Engine.List_Levels (Engine.List_Index) + 1;
          Engine.Render_Paragraph (") ");
          Engine.Indent_Level := Engine.Indent_Level + 4;
       else
