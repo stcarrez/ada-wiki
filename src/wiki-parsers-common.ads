@@ -15,11 +15,7 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-private package Wiki.Parsers.Common is
-
-   pragma Preelaborate;
-
-   subtype Parser_Type is Parser;
+private package Wiki.Parsers.Common with Preelaborate is
 
    --  Check if this is a list item composed of '*' and '#'
    --  and terminated by a space.
