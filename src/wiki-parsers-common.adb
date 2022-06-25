@@ -50,31 +50,6 @@ package body Wiki.Parsers.Common is
                               From    : in out Positive;
                               Expect  : in Wiki.Strings.WChar);
 
-   procedure Skip_Spaces (Text  : in out Wiki.Buffers.Buffer_Access;
-                          From  : in out Positive;
-                          Count : out Natural) is
-      Block : Wiki.Buffers.Buffer_Access := Text;
-      Pos   : Positive := From;
-   begin
-      Count := 0;
-      Main_Loop :
-      while Block /= null loop
-         declare
-            Last : constant Natural := Block.Last;
-         begin
-            while Pos <= Last and then Helpers.Is_Space_Or_Newline (Block.Content (Pos)) loop
-               Pos := Pos + 1;
-               Count := Count + 1;
-            end loop;
-            exit Main_Loop when Pos <= Last;
-         end;
-         Block := Block.Next_Block;
-         Pos := 1;
-      end loop Main_Loop;
-      Text := Block;
-      From := Pos;
-   end Skip_Spaces;
-
    procedure Append (Into : in out Wiki.Strings.BString;
                      Text : in Wiki.Buffers.Buffer_Access;
                      From : in Positive) is
@@ -938,7 +913,7 @@ package body Wiki.Parsers.Common is
             Buffers.Next (Block, Pos);
          end loop;
          Wiki.Strings.Clear (Parser.Preformat_Format);
-         Common.Skip_Spaces (Block, Pos, Space_Count);
+         Buffers.Skip_Spaces (Block, Pos, Space_Count);
          if Block /= null and then Pos <= Block.Last and then Block.Content (Pos) = '[' then
             Next (Block, Pos);
             Common.Parse_Token (Block, Pos, Parser.Escape_Char, ']', ']',
@@ -951,7 +926,7 @@ package body Wiki.Parsers.Common is
                                 Parser.Preformat_Format);
          end if;
          if Block /= null then
-            Common.Skip_Spaces (Block, Pos, Space_Count);
+            Buffers.Skip_Spaces (Block, Pos, Space_Count);
          end if;
          Text := Block;
          From := Pos;

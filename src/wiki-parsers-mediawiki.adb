@@ -152,7 +152,7 @@ package body Wiki.Parsers.MediaWiki is
                declare
                   Count : Natural;
                begin
-                  Common.Skip_Spaces (Buffer, Pos, Count);
+                  Buffers.Skip_Spaces (Buffer, Pos, Count);
                end;
             end if;
 

@@ -17,6 +17,7 @@
 -----------------------------------------------------------------------
 with Ada.Unchecked_Deallocation;
 
+with Wiki.Helpers;
 package body Wiki.Buffers is
 
    subtype Input is Wiki.Strings.WString;
@@ -460,6 +461,35 @@ package body Wiki.Buffers is
       Buffer := Current;
       From := Pos;
    end Count_Occurence;
+
+   --  ------------------------------
+   --  Skip spaces and tabs starting at the given position in the buffer
+   --  and return the number of spaces skipped.
+   --  ------------------------------
+   procedure Skip_Spaces (Buffer : in out Buffer_Access;
+                          From   : in out Positive;
+                          Count  : out Natural) is
+      Block : Wiki.Buffers.Buffer_Access := Buffer;
+      Pos   : Positive := From;
+   begin
+      Count := 0;
+      Main_Loop :
+      while Block /= null loop
+         declare
+            Last : constant Natural := Block.Last;
+         begin
+            while Pos <= Last and then Helpers.Is_Space_Or_Newline (Block.Content (Pos)) loop
+               Pos := Pos + 1;
+               Count := Count + 1;
+            end loop;
+            exit Main_Loop when Pos <= Last;
+         end;
+         Block := Block.Next_Block;
+         Pos := 1;
+      end loop Main_Loop;
+      Buffer := Block;
+      From := Pos;
+   end Skip_Spaces;
 
    procedure Find (Buffer : in out Buffer_Access;
                    From   : in out Positive;

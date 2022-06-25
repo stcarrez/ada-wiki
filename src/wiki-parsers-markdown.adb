@@ -190,7 +190,7 @@ package body Wiki.Parsers.Markdown is
                   Indent := Indent + 1;
                   Buffers.Next (Block, Pos);
                   exit Main when Block = null;
-                  Common.Skip_Spaces (Block, Pos, Count);
+                  Buffers.Skip_Spaces (Block, Pos, Count);
                   exit Main when Count = 0;
                   Indent := Indent + Count;
                   Text := Block;
@@ -252,7 +252,7 @@ package body Wiki.Parsers.Markdown is
       Flush_Text (Parser);
       Flush_List (Parser);
       if not Parser.Context.Is_Hidden then
-         Common.Skip_Spaces (Block, Pos, Space_Count);
+         Buffers.Skip_Spaces (Block, Pos, Space_Count);
          while Block /= null loop
             declare
                Last : constant Natural := Block.Last;
@@ -436,7 +436,7 @@ package body Wiki.Parsers.Markdown is
          return;
       end if;
       Buffers.Next (Block, Pos);
-      Common.Skip_Spaces (Block, Pos, Space_Count);
+      Buffers.Skip_Spaces (Block, Pos, Space_Count);
       Scan_Link_Title (Block, Pos, ' ', Link, Title);
       if Block = null then
          if Wiki.Strings.Length (Link) = 0 then
@@ -638,7 +638,7 @@ package body Wiki.Parsers.Markdown is
             if Pos + 1 <= Block.Last and then Helpers.Is_Space (Block.Content (Pos + 1)) then
                Level := Count + 1;
                Buffers.Next (Block, Pos);
-               Common.Skip_Spaces (Block, Pos, Count);
+               Buffers.Skip_Spaces (Block, Pos, Count);
                Level := Level + Count;
                Pop_List (Parser, Level, C, 0);
                if not Is_List_Item (Parser, Level) then
@@ -799,7 +799,7 @@ package body Wiki.Parsers.Markdown is
             Pos := 1;
          end loop Scan_Link;
       end if;
-      Common.Skip_Spaces (Block, Pos, Space_Count);
+      Buffers.Skip_Spaces (Block, Pos, Space_Count);
       if Block /= null and then Block.Content (Pos) in '"' | ''' then
          Buffers.Next (Block, Pos);
          Scan_Title :
@@ -820,7 +820,7 @@ package body Wiki.Parsers.Markdown is
          if Block /= null then
             Buffers.Next (Block, Pos);
          end if;
-         Common.Skip_Spaces (Block, Pos, Space_Count);
+         Buffers.Skip_Spaces (Block, Pos, Space_Count);
       end if;
       Text := Block;
       From := Pos;

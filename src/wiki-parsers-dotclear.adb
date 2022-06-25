@@ -54,7 +54,7 @@ package body Wiki.Parsers.Dotclear is
          Space_Count : Natural;
       begin
          Wiki.Strings.Clear (Parser.Preformat_Format);
-         Common.Skip_Spaces (Buffer, Pos, Space_Count);
+         Buffers.Skip_Spaces (Buffer, Pos, Space_Count);
          if Buffer /= null and then Pos <= Buffer.Last and then Buffer.Content (Pos) = '[' then
             Next (Buffer, Pos);
             Common.Parse_Token (Buffer, Pos, Parser.Escape_Char, ']', ']',
@@ -67,7 +67,7 @@ package body Wiki.Parsers.Dotclear is
                                 Parser.Preformat_Format);
          end if;
          if Buffer /= null then
-            Common.Skip_Spaces (Buffer, Pos, Space_Count);
+            Buffers.Skip_Spaces (Buffer, Pos, Space_Count);
          end if;
          Text := Buffer;
          From := Pos;

@@ -22,10 +22,6 @@ private package Wiki.Parsers.Common with Preelaborate is
    function Is_List (Text : in Wiki.Buffers.Buffer_Access;
                      From : in Positive) return Boolean;
 
-   procedure Skip_Spaces (Text  : in out Wiki.Buffers.Buffer_Access;
-                          From  : in out Positive;
-                          Count : out Natural);
-
    procedure Append (Into : in out Wiki.Strings.BString;
                      Text : in Wiki.Buffers.Buffer_Access;
                      From : in Positive);

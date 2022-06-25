@@ -53,9 +53,7 @@ with Ada.Finalization;
 --
 --    String_Builder.Iterate (Builder, Collect'Access);
 --
-private package Wiki.Buffers is
-
-   pragma Preelaborate;
+private package Wiki.Buffers with Preelaborate is
 
    Chunk_Size : constant := 256;
 
@@ -134,7 +132,8 @@ private package Wiki.Buffers is
    --  Iterate over the buffer content calling the <tt>Process</tt> procedure with each
    --  chunk.
    procedure Iterate (Source  : in Builder;
-                      Process : not null access procedure (Chunk : in Wiki.Strings.WString));
+                      Process : not null
+                        access procedure (Chunk : in Wiki.Strings.WString)) with Inline;
 
    generic
       with procedure Process (Content : in Wiki.Strings.WString);
@@ -155,15 +154,6 @@ private package Wiki.Buffers is
    function Element (Source   : in Builder;
                      Position : in Positive) return Wiki.Strings.WChar;
 
-   --  Find the position of some content by running the `Index` function.
-   --  The `Index` function is called with chunks starting at the given position and
-   --  until it returns a positive value or we reach the last chunk.  It must return
-   --  the found position in the chunk.
---   generic
---      with function Index (Content : in Wiki.Strings.WString) return Natural;
---   function Find (Source   : in Builder;
---                  Position : in Positive) return Natural;
-
    --  Call the <tt>Process</tt> procedure with the full buffer content, trying to avoid
    --  secondary stack copies as much as possible.
    generic
@@ -179,11 +169,14 @@ private package Wiki.Buffers is
                               Item   : in Wiki.Strings.WChar;
                               Count  : out Natural);
 
+   --  Skip spaces and tabs starting at the given position in the buffer
+   --  and return the number of spaces skipped.
+   procedure Skip_Spaces (Buffer : in out Buffer_Access;
+                          From   : in out Positive;
+                          Count  : out Natural);
+
    procedure Find (Buffer : in out Buffer_Access;
                    From   : in out Positive;
                    Item   : in Wiki.Strings.WChar);
-
-   pragma Inline (Length);
-   pragma Inline (Iterate);
 
 end Wiki.Buffers;

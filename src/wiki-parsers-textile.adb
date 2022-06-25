@@ -309,7 +309,7 @@ package body Wiki.Parsers.Textile is
          when ':' =>
             if Parser.Current_Node = Nodes.N_DEFINITION then
                Next (Buffer, Pos);
-               Common.Skip_Spaces (Buffer, Pos, Level);
+               Buffers.Skip_Spaces (Buffer, Pos, Level);
             end if;
 
          when others =>
