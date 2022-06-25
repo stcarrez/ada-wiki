@@ -332,6 +332,7 @@ package body Wiki.Parsers is
               and then Into (Last - 1) in Wiki.Helpers.CR | Wiki.Helpers.LF
             loop
                Last := Last - 1;
+               Into (Last) := Wiki.Helpers.LF;
             end loop;
          end if;
       end Read;
