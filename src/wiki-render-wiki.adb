@@ -90,20 +90,20 @@ package body Wiki.Render.Wiki is
    SUBSCRIPT_TEXTILE         : aliased constant Strings.WString := "~";
    HEADER_START_TEXTILE      : aliased constant Strings.WString := "h";
    HEADER_END_TEXTILE        : aliased constant Strings.WString := ".";
-   ESCAPE_TEXTILE            : aliased constant Strings.WString := "\";
+   --  ESCAPE_TEXTILE            : aliased constant Strings.WString := "\";
    QUOTE_TEXTILE             : aliased constant Strings.WString := "bq.";
    PREFORMAT_START_TEXTILE   : aliased constant Strings.WString := "<pre>";
    PREFORMAT_END_TEXTILE     : aliased constant Strings.WString := "</pre>" & LF;
    HORIZONTAL_RULE_TEXTILE   : aliased constant Strings.WString := "----" & LF & LF;
    IMG_START_TEXTILE         : aliased constant Strings.WString := "!";
    IMG_END_TEXTILE           : aliased constant Strings.WString := "!";
-   IMG_SEPARATOR_TEXTILE     : aliased constant Strings.WString := "(";
+   --  IMG_SEPARATOR_TEXTILE     : aliased constant Strings.WString := "(";
    LINK_START_TEXTILE        : aliased constant Strings.WString := "[[";
    LINK_SEPARATOR_TEXTILE    : aliased constant Strings.WString := "|";
    LINK_END_TEXTILE          : aliased constant Strings.WString := "]]";
    LIST_ITEM_TEXTILE         : aliased constant Strings.WString := "*";
    LIST_ORDERED_ITEM_TEXTILE : aliased constant Strings.WString := "#";
-   LINE_BREAK_TEXTILE        : aliased constant Strings.WString := "\" & LF;
+   --  LINE_BREAK_TEXTILE        : aliased constant Strings.WString := "\" & LF;
 
    LINE_BREAK_MEDIAWIKI      : aliased constant Strings.WString := "<br />" & LF;
    BOLD_MEDIAWIKI            : aliased constant Strings.WString := "'''";
@@ -545,8 +545,9 @@ package body Wiki.Render.Wiki is
       Engine.Close_Paragraph;
 
       if Engine.List_Levels (Engine.List_Index) > 0 then
-         Engine.Output.Write (Strings.To_Wstring (Util.Strings.Image (Engine.List_Levels (Engine.List_Index))));
-         Engine.List_Levels (Engine.List_Index) := Engine.List_Levels (Engine.List_index) + 1;
+         Engine.Output.Write
+           (Strings.To_WString (Util.Strings.Image (Engine.List_Levels (Engine.List_Index))));
+         Engine.List_Levels (Engine.List_Index) := Engine.List_Levels (Engine.List_Index) + 1;
          Engine.Output.Write (") ");
          Engine.Indent_Level := Engine.Indent_Level + 4;
       else
