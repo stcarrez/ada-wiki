@@ -22,6 +22,7 @@ package body Wiki.Render.Wiki is
    pragma Wide_Character_Encoding (UTF8);
 
    use Helpers;
+   use type Nodes.Node_List_Access;
 
    Regular_Map : constant Ada.Strings.Wide_Wide_Maps.Wide_Wide_Character_Mapping
      := Ada.Strings.Wide_Wide_Maps.To_Mapping
@@ -324,7 +325,7 @@ package body Wiki.Render.Wiki is
    begin
       case Node.Kind is
          when Nodes.N_HEADER =>
-            Engine.Render_Header (Node.Header, Node.Level);
+            Engine.Render_Header (Doc, Node, Node.Level, Node.Content);
 
          when Nodes.N_LINE_BREAK =>
             Engine.Output.Write (Engine.Tags (Line_Break).all);
@@ -342,15 +343,23 @@ package body Wiki.Render.Wiki is
             Engine.Render_Preformatted (Node.Preformatted,
                                         Strings.To_WString (Node.Language));
 
-         when Nodes.N_NUM_LIST_START =>
-            Engine.Add_List_Item (Node.Level, True);
-
          when Nodes.N_LIST_START =>
-            Engine.Add_List_Item (Node.Level, False);
+            Engine.Render_List_Start (False, 0);
+
+         when Nodes.N_NUM_LIST_START =>
+            Engine.Render_List_Start (True, Node.Level);
 
          when Nodes.N_LIST_END =>
-            Engine.Need_Space := False;
-            Engine.Close_Paragraph;
+            Engine.Render_List_End ("");
+
+         when Nodes.N_NUM_LIST_END =>
+            Engine.Render_List_End ("");
+
+         when Nodes.N_LIST_ITEM =>
+            Engine.Render_List_Item_Start;
+
+         when Nodes.N_LIST_ITEM_END =>
+            Engine.Render_List_Item_End;
 
          when Nodes.N_TEXT =>
             declare
@@ -402,8 +411,10 @@ package body Wiki.Render.Wiki is
    --  Add a section header in the document.
    --  ------------------------------
    procedure Render_Header (Engine : in out Wiki_Renderer;
-                            Header : in Strings.WString;
-                            Level  : in Positive) is
+                            Doc    : in Documents.Document;
+                            Node   : in Nodes.Node_Type;
+                            Level  : in Natural;
+                            List   : in Nodes.Node_List_Access) is
       Count : Natural := Level;
    begin
       Engine.Set_Format (Empty_Formats);
@@ -427,7 +438,7 @@ package body Wiki.Render.Wiki is
          Engine.Output.Write (Strings.To_WString (Util.Strings.Image (Count)));
          Engine.Output.Write (Engine.Tags (Header_End).all);
          Engine.Output.Write (' ');
-         Engine.Output.Write (Header);
+         Engine.Render (Doc, Node.Content);
          Engine.New_Line;
          return;
       end if;
@@ -436,7 +447,11 @@ package body Wiki.Render.Wiki is
          Engine.Output.Write (Engine.Tags (Header_Start).all);
       end loop;
       Engine.Output.Write (' ');
-      Engine.Output.Write (Header);
+      if List /= null then
+         Engine.In_Header := True;
+         Engine.Render (Doc, List);
+         Engine.In_Header := False;
+      end if;
       if Engine.Tags (Header_End)'Length > 0 then
          Engine.Output.Write (' ');
          for I in 1 .. Level loop
@@ -490,6 +505,73 @@ package body Wiki.Render.Wiki is
       Engine.Output.Write (' ');
    end Add_List_Item;
 
+   procedure Render_List_Start (Engine   : in out Wiki_Renderer;
+                                Numbered : in Boolean;
+                                Level    : in Natural) is
+   begin
+      --if not Engine.Empty_Line then
+      --   Engine.Add_Line_Break;
+      --end if;
+      Engine.Need_Paragraph := False;
+      Engine.Close_Paragraph;
+      Engine.Output.Write (Helpers.LF);
+      Engine.List_Index := Engine.List_Index + 1;
+      Engine.List_Levels (Engine.List_Index) := Level;
+      Engine.Indent_Level := Engine.Indent_Level + 2;
+   end Render_List_Start;
+
+   procedure Render_List_End (Engine   : in out Wiki_Renderer;
+                              Tag      : in String) is
+   begin
+      --if not Engine.Empty_Line then
+      --   Engine.Add_Line_Break;
+      --end if;
+      Engine.Need_Paragraph := False;
+      Engine.Close_Paragraph;
+      Engine.List_Index := Engine.List_Index - 1;
+      Engine.Indent_Level := Engine.Indent_Level - 2;
+   end Render_List_End;
+
+   --  ------------------------------
+   --  Render a list item (<li>).  Close the previous paragraph and list item if any.
+   --  The list item will be closed at the next list item, next paragraph or next header.
+   --  ------------------------------
+   procedure Render_List_Item_Start (Engine   : in out Wiki_Renderer) is
+   begin
+      --if not Engine.Empty_Line then
+      --  Engine.Add_Line_Break;
+      --end if;
+      Engine.Need_Paragraph := False;
+      Engine.Close_Paragraph;
+
+      if Engine.List_Levels (Engine.List_Index) > 0 then
+         Engine.Output.Write (Strings.To_Wstring (Util.Strings.Image (Engine.List_Levels (Engine.List_Index))));
+         Engine.List_Levels (Engine.List_Index) := Engine.List_Levels (Engine.List_index) + 1;
+         Engine.Output.Write (") ");
+         Engine.Indent_Level := Engine.Indent_Level + 4;
+      else
+         Engine.Output.Write (Engine.Tags (List_Item).all);
+         Engine.Output.Write (" ");
+         Engine.Indent_Level := Engine.Indent_Level + 2;
+      end if;
+   end Render_List_Item_Start;
+
+   procedure Render_List_Item_End (Engine   : in out Wiki_Renderer) is
+   begin
+      Engine.Need_Space := False;
+      Engine.Close_Paragraph;
+--      if not Engine.Empty_Line then
+--         Engine.Add_Line_Break;
+--      end if;
+      Engine.Need_Paragraph := False;
+--      Engine.Open_Paragraph;
+      if Engine.List_Levels (Engine.List_Index) > 0 then
+         Engine.Indent_Level := Engine.Indent_Level - 4;
+      else
+         Engine.Indent_Level := Engine.Indent_Level - 2;
+      end if;
+   end Render_List_Item_End;
+
    procedure Write_Link (Engine : in out Wiki_Renderer;
                          Link   : in Strings.WString) is
    begin
@@ -520,6 +602,10 @@ package body Wiki.Render.Wiki is
          Engine.In_List := False;
       end if;
       Engine.Write_Optional_Space;
+      if Engine.Syntax = SYNTAX_DOTCLEAR and Engine.In_Header then
+         Engine.Output.Write (Name);
+         return;
+      end if;
       Engine.Output.Write (Engine.Tags (Link_Start).all);
       if Engine.Link_First then
          Engine.Write_Link (Link);
@@ -735,6 +821,36 @@ package body Wiki.Render.Wiki is
                          Node   : in Nodes.Node_Type) is
    begin
       case Node.Tag_Start is
+         when H1_TAG =>
+            Engine.Need_Space := False;
+            Engine.Render_Header (Doc, Node, 1, Node.Children);
+            return;
+
+         when H2_TAG =>
+            Engine.Need_Space := False;
+            Engine.Render_Header (Doc, Node, 2, Node.Children);
+            return;
+
+         when H3_TAG =>
+            Engine.Need_Space := False;
+            Engine.Render_Header (Doc, Node, 3, Node.Children);
+            return;
+
+         when H4_TAG =>
+            Engine.Need_Space := False;
+            Engine.Render_Header (Doc, Node, 4, Node.Children);
+            return;
+
+         when H5_TAG =>
+            Engine.Need_Space := False;
+            Engine.Render_Header (Doc, Node, 5, Node.Children);
+            return;
+
+         when H6_TAG =>
+            Engine.Need_Space := False;
+            Engine.Render_Header (Doc, Node, 6, Node.Children);
+            return;
+
          when BR_TAG =>
             Engine.Output.Write (Engine.Tags (Line_Break).all);
             Engine.Empty_Line := False;
@@ -745,11 +861,6 @@ package body Wiki.Render.Wiki is
             Engine.Close_Paragraph;
             Engine.Output.Write (Engine.Tags (Horizontal_Rule).all);
             return;
-
-         when H1_TAG | H2_TAG
-            | H3_TAG | H4_TAG
-            | H5_TAG | H6_TAG =>
-            Engine.Start_Keep_Content;
 
          when IMG_TAG =>
             Engine.Render_Image (Title => Get_Attribute (Node.Attributes, "alt"),
@@ -832,47 +943,6 @@ package body Wiki.Render.Wiki is
       Engine.Render (Doc, Node.Children);
 
       case Node.Tag_Start is
-         when H1_TAG =>
-            if Engine.Keep_Content = 1 then
-               Engine.Need_Space := False;
-               Engine.Render_Header (Strings.To_WString (Engine.Content), 1);
-            end if;
-            Engine.Keep_Content := Engine.Keep_Content - 1;
-
-         when H2_TAG =>
-            if Engine.Keep_Content = 1 then
-               Engine.Need_Space := False;
-               Engine.Render_Header (Strings.To_WString (Engine.Content), 2);
-            end if;
-            Engine.Keep_Content := Engine.Keep_Content - 1;
-
-         when H3_TAG =>
-            if Engine.Keep_Content = 1 then
-               Engine.Need_Space := False;
-               Engine.Render_Header (Strings.To_WString (Engine.Content), 3);
-            end if;
-            Engine.Keep_Content := Engine.Keep_Content - 1;
-
-         when H4_TAG =>
-            if Engine.Keep_Content = 1 then
-               Engine.Need_Space := False;
-               Engine.Render_Header (Strings.To_WString (Engine.Content), 4);
-            end if;
-            Engine.Keep_Content := Engine.Keep_Content - 1;
-
-         when H5_TAG =>
-            if Engine.Keep_Content = 1 then
-               Engine.Need_Space := False;
-               Engine.Render_Header (Strings.To_WString (Engine.Content), 5);
-            end if;
-            Engine.Keep_Content := Engine.Keep_Content - 1;
-
-         when H6_TAG =>
-            if Engine.Keep_Content = 1 then
-               Engine.Need_Space := False;
-               Engine.Render_Header (Strings.To_WString (Engine.Content), 6);
-            end if;
-            Engine.Keep_Content := Engine.Keep_Content - 1;
 
          when A_TAG =>
             if Engine.Keep_Content = 1 then
