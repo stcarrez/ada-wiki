@@ -61,15 +61,12 @@ package body Wiki.Streams.Text_IO is
                    Into  : in out Wiki.Strings.WString;
                    Last  : out Natural;
                    Eof   : out Boolean) is
-      Available : Boolean;
-      Pos       : Natural := Into'First;
-      Char      : Wiki.Strings.WChar;
    begin
       if Input.Stdin then
-         if not Ada.Wide_Wide_Text_Io.End_Of_File then
+         if not Ada.Wide_Wide_Text_IO.End_Of_File then
             Ada.Wide_Wide_Text_IO.Get_Line (Into, Last);
             if Last < Into'Last then
-               Into (Last + 1) := Helpers.Lf;
+               Into (Last + 1) := Helpers.LF;
                Last := Last + 1;
             end if;
             Eof := False;
@@ -78,10 +75,10 @@ package body Wiki.Streams.Text_IO is
             Eof := True;
          end if;
       else
-         if not Ada.Wide_Wide_Text_Io.End_Of_File (Input.File) then
+         if not Ada.Wide_Wide_Text_IO.End_Of_File (Input.File) then
             Ada.Wide_Wide_Text_IO.Get_Line (Input.File, Into, Last);
             if Last < Into'Last then
-               Into (Last + 1) := Helpers.Lf;
+               Into (Last + 1) := Helpers.LF;
                Last := Last + 1;
             end if;
             Eof := False;
@@ -90,22 +87,10 @@ package body Wiki.Streams.Text_IO is
             Eof := True;
          end if;
       end if;
---      Eof := False;
---      while Pos <= Into'Last loop
---         if Input.Stdin then
---            Ada.Wide_Wide_Text_IO.Get_Immediate (Char, Available);
---         else
---            Ada.Wide_Wide_Text_IO.Get_Immediate (Input.File, Char, Available);
---         end if;
---         Into (Pos) := Char;
---         Pos := Pos + 1;
---         exit when Char = Helpers.LF or Char = Helpers.CR;
---      end loop;
---      Last := Pos - 1;
 
    exception
       when Ada.IO_Exceptions.End_Error =>
-         Last := Pos - 1;
+         Last := Into'First - 1;
          Eof  := True;
 
    end Read;
