@@ -32,11 +32,13 @@ package body Wiki.Parsers.Common is
    Attr_Name              : constant String_Array (1 .. 1)
      := (1 => NAME_ATTR'Access);
 
-   procedure Skip_Spaces (Text : in out Wiki.Buffers.Buffer_Access;
-                          From : in out Positive) is
+   procedure Skip_Spaces (Text  : in out Wiki.Buffers.Buffer_Access;
+                          From  : in out Positive;
+                          Count : out Natural) is
       Block : Wiki.Buffers.Buffer_Access := Text;
       Pos   : Positive := From;
    begin
+      Count := 0;
     Main_Loop :
       while Block /= null loop
          declare
@@ -44,6 +46,7 @@ package body Wiki.Parsers.Common is
          begin
             while Pos <= Last and then Helpers.Is_Space_Or_Newline (Block.Content (Pos)) loop
                Pos := Pos + 1;
+               Count := Count + 1;
             end loop;
             exit Main_Loop when Pos <= Last;
          end;
@@ -889,7 +892,8 @@ package body Wiki.Parsers.Common is
    procedure Parse_Preformatted (Parser : in out Parser_Type;
                                  Text   : in out Wiki.Buffers.Buffer_Access;
                                  From   : in out Positive;
-                                 Marker : in Wiki.Strings.WChar) is
+                                 Marker : in Wiki.Strings.WChar;
+                                 Keep_Block : in Boolean := False) is
       Count : constant Natural := Count_Occurence (Text, From, Marker);
    begin
       if Count < 3 then
@@ -901,26 +905,30 @@ package body Wiki.Parsers.Common is
 
       --  Extract the format either 'Ada' or '[Ada]'
       declare
-         Pos    : Natural := Count + 1;
-         Buffer : Wiki.Buffers.Buffer_Access := Text;
+         Pos   : Natural := From;
+         Block : Wiki.Buffers.Buffer_Access := Text;
+         Space_Count : Natural;
       begin
+         for I in 1 .. Count loop
+            Buffers.Next (Block, Pos);
+         end loop;
          Wiki.Strings.Clear (Parser.Preformat_Format);
-         Common.Skip_Spaces (Buffer, Pos);
-         if Buffer /= null and then Pos <= Buffer.Last and then Buffer.Content (Pos) = '[' then
-            Next (Buffer, Pos);
-            Common.Parse_Token (Buffer, Pos, Parser.Escape_Char, ']', ']',
+         Common.Skip_Spaces (Block, Pos, Space_Count);
+         if Block /= null and then Pos <= Block.Last and then Block.Content (Pos) = '[' then
+            Next (Block, Pos);
+            Common.Parse_Token (Block, Pos, Parser.Escape_Char, ']', ']',
                                 Parser.Preformat_Format);
-            if Buffer /= null then
-               Next (Buffer, Pos);
+            if Block /= null then
+               Next (Block, Pos);
             end if;
          else
-            Common.Parse_Token (Buffer, Pos, Parser.Escape_Char, CR, LF,
+            Common.Parse_Token (Block, Pos, Parser.Escape_Char, CR, LF,
                                 Parser.Preformat_Format);
          end if;
-         if Buffer /= null then
-            Common.Skip_Spaces (Buffer, Pos);
+         if Block /= null then
+            Common.Skip_Spaces (Block, Pos, Space_Count);
          end if;
-         Text := Buffer;
+         Text := Block;
          From := Pos;
       end;
 
@@ -928,7 +936,9 @@ package body Wiki.Parsers.Common is
       Parser.Preformat_Fence := Marker;
       Parser.Preformat_Fcount := Count;
       Flush_Text (Parser, Trim => Right);
-      Pop_Block (Parser);
+      if not Keep_Block then
+         Pop_Block (Parser);
+      end if;
       Push_Block (Parser, N_PREFORMAT);
    end Parse_Preformatted;
 
