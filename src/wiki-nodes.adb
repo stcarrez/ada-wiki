@@ -24,11 +24,19 @@ package body Wiki.Nodes is
    procedure Append (Into : in Node_Type_Access;
                      Node : in Node_Type_Access) is
    begin
-      if Into.Children = null then
-         Into.Children := new Node_List;
-         Into.Children.Current := Into.Children.First'Access;
+      if Into.Kind in N_HEADER .. N_DEFINITION then
+         if Into.Content = null then
+            Into.Content := new Node_List;
+            Into.Content.Current := Into.Content.First'Access;
+         end if;
+         Append (Into.Content.all, Node);
+      else
+         if Into.Children = null then
+            Into.Children := new Node_List;
+            Into.Children.Current := Into.Children.First'Access;
+         end if;
+         Append (Into.Children.all, Node);
       end if;
-      Append (Into.Children.all, Node);
    end Append;
 
    --  ------------------------------
