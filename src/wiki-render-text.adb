@@ -254,6 +254,7 @@ package body Wiki.Render.Text is
             end if;
             Engine.Render (Doc, Node.Content);
             Engine.Add_Line_Break;
+            Engine.Has_Paragraph := False;
 
          when Wiki.Nodes.N_LINE_BREAK =>
             Engine.Add_Line_Break;
