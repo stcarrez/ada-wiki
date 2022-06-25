@@ -233,8 +233,6 @@ package body Wiki.Parsers.Markdown is
             end loop;
          end if;
          Parser.Context.Filters.Start_Block (Parser.Document, Nodes.N_HEADER, Level);
-         Parser.Context.Filters.Add_Header (Parser.Document,
-                                            Content (Content'First .. Last), Level);
          Strings.Clear (Parser.Text);
          Buffers.Append (Parser.Text_Buffer, Content (Content'First .. Last));
 
