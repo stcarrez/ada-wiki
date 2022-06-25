@@ -29,7 +29,7 @@ package body Wiki.Parsers.Markdown is
    use type Wiki.Html_Parser.Entity_State_Type;
 
    type Marker_Kind is (M_CODE, M_STAR, M_UNDERSCORE, M_LINK,
-                        M_LINK_DEFINITION, M_IMAGE, M_END,
+                        M_LINK_REF, M_IMAGE, M_END,
                         M_ENTITY, M_TEXT);
 
    type Delimiter_Type;
@@ -58,7 +58,8 @@ package body Wiki.Parsers.Markdown is
                                Token     : in Wiki.Strings.WChar) return Boolean;
    procedure Get_List_Level (Text   : in out Wiki.Buffers.Buffer_Access;
                              From   : in out Positive;
-                             Level  : out Natural);
+                             Level  : out Integer;
+                             Indent : out Natural);
    function Is_End_Preformat (Text   : in Wiki.Buffers.Buffer_Access;
                               From   : in Positive;
                               Expect : in WChar;
@@ -147,31 +148,38 @@ package body Wiki.Parsers.Markdown is
 
    procedure Get_List_Level (Text   : in out Wiki.Buffers.Buffer_Access;
                              From   : in out Positive;
-                             Level  : out Natural) is
+                             Level  : out Integer;
+                             Indent : out Natural) is
       Block : Wiki.Buffers.Buffer_Access := Text;
       Pos   : Positive := From;
       C     : Strings.WChar;
    begin
       Level := 0;
+      Indent := 0;
+      Main :
       while Block /= null loop
          declare
-            Last : constant Natural := Block.Last;
+            Last  : constant Natural := Block.Last;
+            Count : Natural;
          begin
             while Pos <= Last loop
                C := Block.Content (Pos);
                if C >= '0' and C <= '9' then
                   Level := Level * 10;
                   Level := Level + WChar'Pos (C) - WChar'Pos ('0');
+                  Indent := Indent + 1;
                elsif C = '.' or C = ')' then
+                  Indent := Indent + 1;
                   Buffers.Next (Block, Pos);
-                  if Block /= null then
-                     Common.Skip_Spaces (Block, Pos);
-                  end if;
+                  exit Main when Block = null;
+                  Common.Skip_Spaces (Block, Pos, Count);
+                  exit Main when Count = 0;
+                  Indent := Indent + Count;
                   Text := Block;
                   From := Pos;
                   return;
                else
-                  Level := 0;
+                  Level := -1;
                   return;
                end if;
                Pos := Pos + 1;
@@ -179,8 +187,8 @@ package body Wiki.Parsers.Markdown is
          end;
          Block := Block.Next_Block;
          Pos := 1;
-      end loop;
-      Level := 0;
+      end loop Main;
+      Level := -1;
    end Get_List_Level;
 
    procedure Add_Header (Parser : in out Parser_Type;
@@ -206,8 +214,15 @@ package body Wiki.Parsers.Markdown is
                Last := Last - 1;
             end loop;
          end if;
+         Parser.Context.Filters.Start_Block (Parser.Document, Nodes.N_HEADER, Level);
          Parser.Context.Filters.Add_Header (Parser.Document,
                                             Content (Content'First .. Last), Level);
+         Strings.Clear (Parser.Text);
+         Buffers.Append (Parser.Text_Buffer, Content (Content'First .. Last));
+
+         Parse_Inline_Text (Parser, Parser.Text_Buffer.First'Unchecked_Access);
+         Buffers.Clear (Parser.Text_Buffer);
+         Parser.Document.Pop_Node (Wiki.H1_TAG);
       end Add_Header;
 
       procedure Add_Header is
@@ -216,11 +231,12 @@ package body Wiki.Parsers.Markdown is
       Block   : Wiki.Buffers.Buffer_Access := Text;
       Pos     : Positive := From;
       C       : Wiki.Strings.WChar;
+      Space_Count : Natural;
    begin
       Flush_Text (Parser);
       Flush_List (Parser);
       if not Parser.Context.Is_Hidden then
-         Common.Skip_Spaces (Block, Pos);
+         Common.Skip_Spaces (Block, Pos, Space_Count);
          while Block /= null loop
             declare
                Last : constant Natural := Block.Last;
@@ -379,6 +395,7 @@ package body Wiki.Parsers.Markdown is
    --  Example:
    --    [label]: url
    --    [label]: url "title"
+   --    [label]: <url>
    procedure Parse_Link_Definition (Parser : in out Parser_Type;
                                     Text   : in out Wiki.Buffers.Buffer_Access;
                                     From   : in out Positive) is
@@ -389,6 +406,7 @@ package body Wiki.Parsers.Markdown is
       Label       : Wiki.Strings.BString (128);
       Link        : Wiki.Strings.BString (128);
       Title       : Wiki.Strings.BString (128);
+      Space_Count : Natural;
    begin
       Parse_Link_Label (Parser, Block, Pos, Label);
       if Block = null or else Block.Content (Pos) /= ']' then
@@ -402,14 +420,15 @@ package body Wiki.Parsers.Markdown is
          return;
       end if;
       Buffers.Next (Block, Pos);
-      Common.Skip_Spaces (Block, Pos);
+      Common.Skip_Spaces (Block, Pos, Space_Count);
       Scan_Link_Title (Block, Pos, ' ', Link, Title);
       if Block = null then
          if Wiki.Strings.Length (Link) = 0 then
             return;
          end if;
          Parser.Document.Set_Link (Strings.To_WString (Label),
-                                   Strings.To_WString (Link));
+                                   Strings.To_WString (Link),
+                                   Strings.To_WString (Title));
          Text := null;
          return;
       end if;
@@ -427,7 +446,7 @@ package body Wiki.Parsers.Markdown is
       Pos    : Positive := 1;
       C      : WChar;
       Count  : Natural := 0;
-      Level  : Natural;
+      Level  : Integer;
    begin
       --  Feed the HTML parser if there are some pending state.
       if not Wiki.Html_Parser.Is_Empty (Parser.Html) then
@@ -464,19 +483,33 @@ package body Wiki.Parsers.Markdown is
 
       --  Continue a pre-formatted block.
       if Parser.Current_Node = N_PREFORMAT then
+         if Parser.Preformat_Fence = ' ' and Count = 0
+           and C in Wiki.Helpers.LF | Wiki.Helpers.Cr
+           and not Parser.Previous_Line_Empty
+         then
+            Parser.Previous_Line_Empty := True;
+            return;
+         end if;
          if Parser.Preformat_Fence = ' ' and Count <= 3 then
             Pop_Block (Parser);
          else
-            if C = Parser.Preformat_Fence and Count <= 3 then
+            if C = Parser.Preformat_Fence then
                if Is_End_Preformat (Block, Pos, C, Parser.Preformat_Fcount) then
+                  Parser.Previous_Line_Empty := False;
                   Pop_Block (Parser);
                   return;
                end if;
             end if;
             if Count > Parser.Preformat_Indent then
-               Pos := (if Parser.Preformat_Indent > 0 then Parser.Preformat_Indent else 1);
+               Block := Text;
+               Pos := 1;
+               Buffers.Next (Block, Pos, Parser.Preformat_Indent);
+            end if;
+            if Parser.Previous_Line_Empty then
+               Strings.Append_Char (Parser.Text, Wiki.Helpers.LF);
             end if;
             Common.Append (Parser.Text, Block, Pos);
+            Parser.Previous_Line_Empty := False;
             return;
          end if;
       end if;
@@ -489,8 +522,31 @@ package body Wiki.Parsers.Markdown is
          Pop_Block (Parser);
       end if;
 
+      if Parser.Current_Node = Nodes.N_List_Item then
+         declare
+            Level : constant Natural := Get_Current_Level (Parser);
+         begin
+            if Count >= Level + 3 then
+               Parser.Preformat_Indent := Count;
+               Parser.Preformat_Fence := ' ';
+               Parser.Preformat_Fcount := 0;
+               Push_Block (Parser, N_PREFORMAT);
+               Common.Append (Parser.Text, Block, Pos);
+               return;
+            end if;
+            if ((Count > 0 and Count < Level) or Parser.Previous_Line_Empty)
+              and C not in Wiki.Helpers.LF | Wiki.Helpers.Cr
+            then
+               Pop_Block (Parser);
+            end if;
+         end;
+      end if;
+
       if Count > 3 and Parser.Current_Node not in Nodes.N_LIST_ITEM then
-         Parser.Preformat_Indent := 4;
+         if Parser.Current_Node in Nodes.N_LIST_START | Nodes.N_NUM_LIST_START then
+            Pop_Block (Parser);
+         end if;
+         Parser.Preformat_Indent := Count;
          Parser.Preformat_Fence := ' ';
          Parser.Preformat_Fcount := 0;
          Push_Block (Parser, N_PREFORMAT);
@@ -498,25 +554,39 @@ package body Wiki.Parsers.Markdown is
          return;
       end if;
 
-      case C is
-         when Wiki.Helpers.LF | Wiki.Helpers.CR =>
-            Parser.In_Html := False;
-            if Parser.Current_Node = Nodes.N_PARAGRAPH then
-               Pop_Block (Parser);
+      if C in Wiki.Helpers.LF | Wiki.Helpers.CR then
+         Parser.In_Html := False;
+         if Parser.Current_Node = Nodes.N_PARAGRAPH then
+            Pop_Block (Parser);
+            return;
+         end if;
+         if Count = 0 and Parser.Current_Node = N_LIST_ITEM then
+            if not Parser.Previous_Line_Empty then
+               Parser.Previous_Line_Empty := True;
                return;
             end if;
-            if Count = 0 and Parser.Current_Node = N_LIST_ITEM then
-               if not Parser.Previous_Line_Empty then
-                  Parser.Previous_Line_Empty := True;
-                  return;
-               end if;
+            Pop_Block (Parser);
+            if Parser.Current_Node in N_LIST_START | N_NUM_LIST_START then
                Pop_Block (Parser);
-               if Parser.Current_Node in N_LIST_START | N_NUM_LIST_START then
-                  Pop_Block (Parser);
-               end if;
-               return;
             end if;
+            return;
+         end if;
+      else
+         if Parser.Previous_Line_Empty and Parser.Current_Node = Nodes.N_List_Item then
+            Flush_Block (Parser);
+            Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_PARAGRAPH);
+            Parser.Is_Empty_Paragraph := True;
 
+         elsif Parser.Previous_Line_Empty and Parser.Current_Node = Nodes.N_Paragraph then
+            Flush_Block (Parser);
+            Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_PARAGRAPH);
+            Parser.Is_Empty_Paragraph := True;
+
+         end if;
+         Parser.Previous_Line_Empty := False;
+      end if;
+
+      case C is
          when '#' =>
             if Count < 4 then
                Level := Get_Header_Level (Block, Pos);
@@ -550,48 +620,63 @@ package body Wiki.Parsers.Markdown is
             end if;
 
             if Pos + 1 <= Block.Last and then Helpers.Is_Space (Block.Content (Pos + 1)) then
-               Common.Skip_Spaces (Block, Pos);
-               Pop_Block (Parser);
-               Level := Count;
-               Pop_List (Parser, Level, C);
+               Level := Count + 1;
+               Buffers.Next (Block, Pos);
+               Common.Skip_Spaces (Block, Pos, Count);
+               Level := Level + Count;
+               Pop_List (Parser, Level, C, 0);
                if not Is_List_Item (Parser, Level) then
+                  Pop_Block (Parser);
                   Push_Block (Parser, Nodes.N_LIST_START, Level, C);
                end if;
-               Buffers.Next (Block, Pos);
-               Buffers.Next (Block, Pos);
-               Push_Block (Parser, Nodes.N_LIST_ITEM, Level, C);
-               Buffers.Append (Parser.Text_Buffer, Block, Pos);
-               Parser.Previous_Line_Empty := False;
+               if Count >= 4 then
+                  Push_Block (Parser, Nodes.N_LIST_ITEM, Level - 4, C);
+                  Parser.Preformat_Indent := Level - 1;
+                  Parser.Preformat_Fence := ' ';
+                  Parser.Preformat_Fcount := 0;
+                  Push_Block (Parser, N_PREFORMAT);
+                  Common.Append (Parser.Text, Block, Pos);
+               else
+                  Push_Block (Parser, Nodes.N_LIST_ITEM, Level, C);
+                  Buffers.Append (Parser.Text_Buffer, Block, Pos);
+                  Parser.Previous_Line_Empty := False;
+               end if;
                return;
             end if;
 
-         when '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' =>
-            Get_List_Level (Block, Pos, Level);
-            if Level > 0 then
-               Pop_List (Parser, Count, '0');
-               if not Is_List_Item (Parser, Count) then
-                  Push_Block (Parser, Nodes.N_NUM_LIST_START,
-                              Level => Count, Marker => '0', Number => Level);
-               else
-                  Pop_Block (Parser);
-               end if;
-               Push_Block (Parser, Nodes.N_LIST_ITEM,
-                           Level => Count, Marker => '0', Number => Level);
-            end if;
-            Parser.List_Level := Level;
-            Buffers.Append (Parser.Text_Buffer, Block, Pos);
-            return;
-
-         when '~' | '`' =>
-            if Count <= 3 then
-               Common.Parse_Preformatted (Parser, Block, Pos, C);
-               if Parser.Current_Node = Nodes.N_PREFORMAT then
-                  --  Parser.Preformat_Indent := Count;
-                  --  Parser.Preformat_Fence := C;
-                  --  Parser.Preformat_Fcount := Level;
-                  --  Push_Block (Parser, N_PREFORMAT);
+         when '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' =>
+            Parser.Previous_Line_Empty := False;
+            declare
+               Indent : Natural;
+            begin
+               Get_List_Level (Block, Pos, Level, Indent);
+               if Level >= 0 then
+                  Indent := Indent + Count;
+                  Pop_List (Parser, Indent, '0', Level);
+                  if not Is_List_Item (Parser, Indent) then
+                     Push_Block (Parser, Nodes.N_NUM_LIST_START,
+                                 Level => Indent, Marker => '0', Number => Level);
+                  end if;
+                  Push_Block (Parser, Nodes.N_LIST_ITEM,
+                              Level => Indent, Marker => '0', Number => Level);
+                  Parser.List_Level := Level;
+                  Buffers.Append (Parser.Text_Buffer, Block, Pos);
                   return;
                end if;
+            end;
+
+         when '~' | '`' =>
+            if Count > 0 and Parser.Current_Node in Nodes.N_List_Item then
+               Common.Parse_Preformatted (Parser, Block, Pos, C, True);
+            else
+               Common.Parse_Preformatted (Parser, Block, Pos, C, False);
+            end if;
+            if Parser.Current_Node = Nodes.N_PREFORMAT then
+               Parser.Preformat_Indent := Count;
+               --  Parser.Preformat_Fence := C;
+               --  Parser.Preformat_Fcount := Level;
+               --  Push_Block (Parser, N_PREFORMAT);
+               return;
             end if;
 
          when '>' =>
@@ -657,10 +742,11 @@ package body Wiki.Parsers.Markdown is
       Block  : Wiki.Buffers.Buffer_Access := Text;
       Pos    : Positive := From;
       C      : Wiki.Strings.WChar;
+      Space_Count : Natural;
    begin
       Wiki.Strings.Clear (Link);
       Wiki.Strings.Clear (Title);
-      if Block.Content (Pos) = '<' then
+      if Block /= null and then Block.Content (Pos) = '<' then
          Buffers.Next (Block, Pos);
          Scan_Bracket_Link :
          while Block /= null loop
@@ -688,7 +774,7 @@ package body Wiki.Parsers.Markdown is
             begin
                while Pos <= Last loop
                   C := Block.Content (Pos);
-                  exit Scan_Link when C = Expect or Wiki.Helpers.Is_Space (C);
+                  exit Scan_Link when C = Expect or Wiki.Helpers.Is_Space_Or_Newline (C);
                   Pos := Pos + 1;
                   Append (Link, C);
                end loop;
@@ -697,7 +783,7 @@ package body Wiki.Parsers.Markdown is
             Pos := 1;
          end loop Scan_Link;
       end if;
-      Common.Skip_Spaces (Block, Pos);
+      Common.Skip_Spaces (Block, Pos, Space_Count);
       if Block /= null and then Block.Content (Pos) in '"' | ''' then
          Buffers.Next (Block, Pos);
          Scan_Title :
@@ -718,7 +804,7 @@ package body Wiki.Parsers.Markdown is
          if Block /= null then
             Buffers.Next (Block, Pos);
          end if;
-         Common.Skip_Spaces (Block, Pos);
+         Common.Skip_Spaces (Block, Pos, Space_Count);
       end if;
       Text := Block;
       From := Pos;
@@ -786,12 +872,11 @@ package body Wiki.Parsers.Markdown is
 
    --  Parse a link at the ']' position:
    --
-   --  Link definition (M_LINK_DEFINITION):
-   --    [link]: uri
-   --    [link]: <uri>
-   --
    --  Link (M_LINK):
+   --    [link-label]
    --    [link](url)
+   --  Link (M_IMAGE):
+   --    ![label](url)
    procedure Parse_Link (Text   : in Wiki.Buffers.Buffer_Access;
                          From   : in Positive;
                          Delim  : in Delimiter_Vectors.Reference_Type) is
@@ -818,14 +903,9 @@ package body Wiki.Parsers.Markdown is
          else
             Delim.Marker := M_TEXT;
          end if;
+      elsif Delim.Marker = M_LINK then
+         Delim.Marker := M_LINK_REF;
       else
-         for Count in 1 .. 3 loop
-            if Block.Content (Pos) = ':' then
-               Delim.Marker := M_LINK_DEFINITION;
-               return;
-            end if;
-            exit when not Wiki.Helpers.Is_Space (Block.Content (Pos));
-         end loop;
          Delim.Marker := M_TEXT;
       end if;
    end Parse_Link;
@@ -939,6 +1019,54 @@ package body Wiki.Parsers.Markdown is
       From := Pos;
    end Add_Link;
 
+   procedure Add_Link_Ref (Parser : in out Parser_Type;
+                           Text   : in out Wiki.Buffers.Buffer_Access;
+                           From   : in out Positive) is
+      Block  : Wiki.Buffers.Buffer_Access := Text;
+      Pos    : Positive := From;
+      Label  : Wiki.Strings.BString (128);
+      C      : Wiki.Strings.WChar;
+   begin
+      Scan_Label :
+      while Block /= null loop
+         declare
+            Last : Natural := Block.Last;
+         begin
+            while Pos <= Last loop
+               C := Block.Content (Pos);
+               exit Scan_Label when C = ']';
+               if C = '\' then
+                  Pos := Pos + 1;
+                  if Pos > Last then
+                     Block := Block.Next_Block;
+                     exit Scan_Label when Block = null;
+                     Last := Block.Last;
+                     Pos := 1;
+                  end if;
+                  C := Block.Content (Pos);
+                  if not Is_Escapable (C) then
+                     Append (Label, '\');
+                  end if;
+               end if;
+               Append (Label, C);
+               Pos := Pos + 1;
+            end loop;
+         end;
+         Block := Block.Next_Block;
+         Pos := 1;
+      end loop Scan_Label;
+      if Block /= null and then C = ']' then
+         Buffers.Next (Block, Pos);
+      end if;
+      Flush_Text (Parser);
+      if not Parser.Context.Is_Hidden then
+         Parser.Context.Filters.Add_Link_Ref (Parser.Document,
+                                              Strings.To_WString (Label));
+      end if;
+      Text := Block;
+      From := Pos;
+   end Add_Link_Ref;
+
    procedure Add_Text (Parser   : in out Parser_Type;
                        Text     : in out Wiki.Buffers.Buffer_Access;
                        From     : in out Positive;
@@ -958,14 +1086,22 @@ package body Wiki.Parsers.Markdown is
                end if;
                C := Block.Content (Pos);
                if C = Wiki.Helpers.CR or C = Wiki.Helpers.LF then
-                  Append (Parser.Text, ' ');
+                  if Parser.Format (Strong) or Parser.Format (Emphasis) then
+                     Flush_Text (Parser);
+                     Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_LINE_BREAK);
+                  else
+                     Append (Parser.Text, ' ');
+                  end if;
                elsif C = '\' then
                   Buffers.Next (Block, Pos);
                   if Block = Limit and Pos = Last_Pos then
                      return;
                   end if;
                   C := Block.Content (Pos);
-                  if Wiki.Helpers.Is_Newline (C) then
+                  if Wiki.Helpers.Is_Newline (C)
+                    and not Parser.Format (CODE)
+                    and (Limit /= null or Pos < Last)
+                  then
                      Flush_Text (Parser);
                      if not Parser.Context.Is_Hidden then
                         Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_LINE_BREAK);
@@ -1191,91 +1327,102 @@ package body Wiki.Parsers.Markdown is
          declare
             Delim : constant Delimiter_Vectors.Reference_Type := Delimiters.Reference (Iter);
          begin
-            if Delim.Marker = M_ENTITY then
-               Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
-               Pos := Delim.Pos;
-               Block := Delim.Block;
-               while Block /= null and then Block.Content (Pos) /= ';' loop
-                  Buffers.Next (Block, Pos);
-               end loop;
-               if Block /= null then
-                  Buffers.Next (Block, Pos);
-               end if;
-            elsif Delim.Marker = M_LINK and Delim.Link_Pos > 0 then
-               Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
-               Block := Delim.Block;
-               Pos := Delim.Pos;
-               Buffers.Next (Block, Pos);
-               Add_Link (Parser, Block, Pos);
-
-            elsif Delim.Marker = M_IMAGE then
-               Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
-               Block := Delim.Block;
-               Pos := Delim.Pos;
-               Buffers.Next (Block, Pos);
-               Buffers.Next (Block, Pos);
-               Add_Image (Parser, Block, Pos);
-
-            elsif Delim.Marker = M_LINK_DEFINITION then
-               Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
-               --  if Pos <= Delim.Pos - 1 then
-               --   Parser.Context.Filters.Add_Text (Parser.Document,
-               --  Text (Pos .. Delim.Pos - 1), Parser.Format);
-               --  end if;
-               Block := Delim.Block;
-               Pos := Delim.Pos;
-               Add_Link (Parser, Block, Pos);
-
-            elsif Delim.Count > 0 and then Delim.Can_Open
-              and then (Has_Closing (Iter, Delim) or else Delim.Marker = M_CODE)
+            if Delim.Block.Offset > Block.Offset
+              or else (Delim.Block.Offset = Block.Offset and then Delim.Pos >= Pos)
             then
-               Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
-               Flush_Text (Parser);
-               --  if Pos < Delim.Pos then
-               --   Parser.Context.Filters.Add_Text (Parser.Document,
-               --   Text (Pos .. Delim.Pos - 1), Parser.Format);
-               --  end if;
-               if Delim.Marker in M_STAR | M_UNDERSCORE and Delim.Count = 2 then
-                  Parser.Format (STRONG) := True; --  not Parser.Format (STRONG);
-
-               elsif Delim.Marker in M_STAR | M_UNDERSCORE then
-                  Parser.Format (EMPHASIS) := True; --  not Parser.Format (EMPHASIS);
-
-               elsif Delim.Marker = M_CODE then
-                  Parser.Format (CODE) := not Parser.Format (CODE);
-
-               end if;
-               Block := Delim.Block;
-               Pos := Delim.Pos;
-               for I in 1 .. Delim.Count loop
+               if Delim.Marker = M_ENTITY then
+                  Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
+                  Pos := Delim.Pos;
+                  Block := Delim.Block;
+                  while Block /= null and then Block.Content (Pos) /= ';' loop
+                     Buffers.Next (Block, Pos);
+                  end loop;
+                  if Block /= null then
+                     Buffers.Next (Block, Pos);
+                  end if;
+               elsif Delim.Marker = M_LINK and Delim.Link_Pos > 0 then
+                  Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
+                  Block := Delim.Block;
+                  Pos := Delim.Pos;
                   Buffers.Next (Block, Pos);
-               end loop;
-            elsif Delim.Count > 0 and then Delim.Can_Close then
-               Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
-               if Delim.Marker in M_STAR | M_UNDERSCORE and Delim.Count = 2
-                 and Parser.Format (STRONG)
+                  Add_Link (Parser, Block, Pos);
+
+               elsif Delim.Marker = M_LINK_REF then
+                  Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
+                  Block := Delim.Block;
+                  Pos := Delim.Pos;
+                  Buffers.Next (Block, Pos);
+                  Add_Link_Ref (Parser, Block, Pos);
+
+               elsif Delim.Marker = M_IMAGE then
+                  Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
+                  Block := Delim.Block;
+                  Pos := Delim.Pos;
+                  Buffers.Next (Block, Pos);
+                  Buffers.Next (Block, Pos);
+                  Add_Image (Parser, Block, Pos);
+
+               elsif Delim.Marker = M_LINK_REF then
+                  Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
+                  --  if Pos <= Delim.Pos - 1 then
+                  --   Parser.Context.Filters.Add_Text (Parser.Document,
+                  --  Text (Pos .. Delim.Pos - 1), Parser.Format);
+                  --  end if;
+                  Block := Delim.Block;
+                  Pos := Delim.Pos;
+                  Add_Link (Parser, Block, Pos);
+
+               elsif Delim.Count > 0 and then Delim.Can_Open
+                 and then (Has_Closing (Iter, Delim) or else Delim.Marker = M_CODE)
                then
+                  Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
                   Flush_Text (Parser);
-                  Parser.Format (STRONG) := False;
-               elsif Delim.Marker in M_STAR | M_UNDERSCORE and Parser.Format (EMPHASIS) then
-                  Flush_Text (Parser);
-                  Parser.Format (EMPHASIS) := False;
-               elsif Delim.Marker = M_CODE and Parser.Format (CODE) then
-                  Flush_Text (Parser);
-                  Parser.Format (CODE) := False;
-               else
+                  --  if Pos < Delim.Pos then
+                  --   Parser.Context.Filters.Add_Text (Parser.Document,
+                  --   Text (Pos .. Delim.Pos - 1), Parser.Format);
+                  --  end if;
+                  if Delim.Marker in M_STAR | M_UNDERSCORE and Delim.Count = 2 then
+                     Parser.Format (STRONG) := True; --  not Parser.Format (STRONG);
+
+                  elsif Delim.Marker in M_STAR | M_UNDERSCORE then
+                     Parser.Format (EMPHASIS) := True; --  not Parser.Format (EMPHASIS);
+
+                  elsif Delim.Marker = M_CODE then
+                     Parser.Format (CODE) := not Parser.Format (CODE);
+
+                  end if;
                   Block := Delim.Block;
                   Pos := Delim.Pos;
                   for I in 1 .. Delim.Count loop
-                     Append (Parser.Text, Block.Content (Pos));
+                     Buffers.Next (Block, Pos);
+                  end loop;
+               elsif Delim.Count > 0 and then Delim.Can_Close then
+                  Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
+                  if Delim.Marker in M_STAR | M_UNDERSCORE and Delim.Count = 2
+                    and Parser.Format (STRONG)
+                  then
+                     Flush_Text (Parser);
+                     Parser.Format (STRONG) := False;
+                  elsif Delim.Marker in M_STAR | M_UNDERSCORE and Parser.Format (EMPHASIS) then
+                     Flush_Text (Parser);
+                     Parser.Format (EMPHASIS) := False;
+                  elsif Delim.Marker = M_CODE and Parser.Format (CODE) then
+                     Flush_Text (Parser);
+                     Parser.Format (CODE) := False;
+                  else
+                     Block := Delim.Block;
+                     Pos := Delim.Pos;
+                     for I in 1 .. Delim.Count loop
+                        Append (Parser.Text, Block.Content (Pos));
+                        Buffers.Next (Block, Pos);
+                     end loop;
+                  end if;
+                  Block := Delim.Block;
+                  Pos := Delim.Pos;
+                  for I in 1 .. Delim.Count loop
                      Buffers.Next (Block, Pos);
                   end loop;
                end if;
-               Block := Delim.Block;
-               Pos := Delim.Pos;
-               for I in 1 .. Delim.Count loop
-                  Buffers.Next (Block, Pos);
-               end loop;
             end if;
          end;
       end loop;
