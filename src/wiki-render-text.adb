@@ -251,7 +251,7 @@ package body Wiki.Render.Text is
             if not Engine.Empty_Line then
                Engine.Add_Line_Break;
             end if;
-            Engine.Output.Write (Node.Header);
+            Engine.Render (Doc, Node.Content);
             Engine.Add_Line_Break;
 
          when Wiki.Nodes.N_LINE_BREAK =>
