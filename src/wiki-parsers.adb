@@ -394,10 +394,6 @@ package body Wiki.Parsers is
       pragma Inline (Add_Text);
 
    begin
-      if P.Pending_Paragraph then
-         P.Context.Filters.Add_Node (P.Document, Wiki.Nodes.N_PARAGRAPH);
-         P.Pending_Paragraph := False;
-      end if;
       if Length (P.Text) > 0 then
          if P.Previous_Tag /= UNKNOWN_TAG and then No_End_Tag (P.Previous_Tag) then
             if not P.Context.Is_Hidden then
@@ -670,7 +666,6 @@ package body Wiki.Parsers is
                           Tag  : in Wiki.Html_Tag) is
       Previous_Tag : constant Wiki.Html_Tag := P.Previous_Tag;
    begin
-      P.Pending_Paragraph := False;
       P.Previous_Tag := UNKNOWN_TAG;
       if Previous_Tag /= UNKNOWN_TAG
         and then Previous_Tag /= Tag

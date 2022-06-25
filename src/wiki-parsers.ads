@@ -153,8 +153,6 @@ private
       In_Paragraph        : Boolean := False;
       In_Table            : Boolean := False;
       In_Html             : Boolean := False;
-      Need_Paragraph      : Boolean := True;
-      Pending_Paragraph   : Boolean := False;
       Link_Double_Bracket : Boolean := False;
       Link_No_Space       : Boolean := False;
       Link_Title_First    : Boolean := False;
