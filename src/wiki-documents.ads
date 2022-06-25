@@ -51,6 +51,13 @@ package Wiki.Documents is
    procedure Append (Into : in out Document;
                      Kind : in Wiki.Nodes.Simple_Node_Kind);
 
+   procedure Start_Block (Into  : in out Document;
+                          Kind  : in Wiki.Nodes.Node_Kind;
+                          Level : in Natural);
+
+   procedure End_Block (From : in out Document;
+                        Kind  : in Wiki.Nodes.Node_Kind);
+
    --  Append a HTML tag start node to the document.
    procedure Push_Node (Into       : in out Document;
                         Tag        : in Html_Tag;
@@ -68,11 +75,6 @@ package Wiki.Documents is
                      Text   : in Wiki.Strings.WString;
                      Format : in Format_Map);
 
-   --  Append a section header at end of the document.
-   procedure Append (Into   : in out Document;
-                     Header : in Wiki.Strings.WString;
-                     Level  : in Positive);
-
    --  Add a definition item at end of the document.
    procedure Add_Definition (Into       : in out Document;
                              Definition : in Wiki.Strings.WString);
@@ -81,6 +83,10 @@ package Wiki.Documents is
    procedure Add_Link (Into       : in out Document;
                        Name       : in Wiki.Strings.WString;
                        Attributes : in out Wiki.Attributes.Attribute_List);
+
+   --  Add a link reference with the given label.
+   procedure Add_Link_Ref (Into   : in out Document;
+                           Label  : in Wiki.Strings.WString);
 
    --  Add an image.
    procedure Add_Image (Into       : in out Document;
@@ -94,7 +100,7 @@ package Wiki.Documents is
 
    --  Add a list (<ul> or <ol>) starting at the given number.
    procedure Add_List (Into     : in out Document;
-                       Level    : in Positive;
+                       Level    : in Natural;
                        Ordered  : in Boolean);
 
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
@@ -143,13 +149,16 @@ package Wiki.Documents is
    function Get_TOC (Doc : in Document) return Wiki.Nodes.Lists.Node_List_Ref;
 
    --  Set a link definition.
-   procedure Set_Link (Doc  : in out Document;
-                       Name : in Wiki.Strings.WString;
-                       Link : in Wiki.Strings.WString);
+   procedure Set_Link (Doc   : in out Document;
+                       Name  : in Wiki.Strings.WString;
+                       Link  : in Wiki.Strings.WString;
+                       Title : in Wiki.Strings.WString);
 
    --  Get a link definition.
-   function Get_Link (Doc  : in out Document;
-                      Name : in Wiki.Strings.WString) return Wiki.Strings.WString;
+   function Get_Link (Doc   : in Document;
+                      Label : in Wiki.Strings.WString) return Wiki.Strings.WString;
+   function Get_Link_Title (Doc   : in Document;
+                            Label : in Wiki.Strings.WString) return Wiki.Strings.WString;
 
 private
 
@@ -161,6 +170,7 @@ private
       Nodes       : Wiki.Nodes.Lists.Node_List_Ref;
       TOC         : Wiki.Nodes.Lists.Node_List_Ref;
       Links       : Wiki.Strings.Maps.Map;
+      Titles      : Wiki.Strings.Maps.Map;
       Current     : Wiki.Nodes.Node_Type_Access;
       Using_TOC   : Boolean := False;
       Visible_TOC : Boolean := True;
