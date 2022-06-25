@@ -32,6 +32,24 @@ package body Wiki.Parsers.Common is
    Attr_Name              : constant String_Array (1 .. 1)
      := (1 => NAME_ATTR'Access);
 
+   procedure Expand_Parameter (Parser  : in out Parser_Type;
+                               Text    : in out Wiki.Buffers.Buffer_Access;
+                               From    : in out Positive;
+                               Into    : in out Wiki.Strings.BString);
+
+   procedure Parse_Parameters (Parser     : in out Parser_Type;
+                               Text       : in out Wiki.Buffers.Buffer_Access;
+                               From       : in out Positive;
+                               Separator  : in Wiki.Strings.WChar;
+                               Terminator : in Wiki.Strings.WChar;
+                               Names      : in String_Array;
+                               Max        : in Positive := 200);
+
+   procedure Parse_Parameter (Parser  : in out Parser_Type;
+                              Text    : in out Wiki.Buffers.Buffer_Access;
+                              From    : in out Positive;
+                              Expect  : in Wiki.Strings.WChar);
+
    procedure Skip_Spaces (Text  : in out Wiki.Buffers.Buffer_Access;
                           From  : in out Positive;
                           Count : out Natural) is
@@ -39,7 +57,7 @@ package body Wiki.Parsers.Common is
       Pos   : Positive := From;
    begin
       Count := 0;
-    Main_Loop :
+      Main_Loop :
       while Block /= null loop
          declare
             Last : constant Natural := Block.Last;
@@ -140,7 +158,8 @@ package body Wiki.Parsers.Common is
 
       procedure Expand (Content : in Wiki.Strings.WString) is
          Name : constant String := Wiki.Strings.To_String (Content);
-         Pos  : constant Attributes.Cursor := Wiki.Attributes.Find (Parser.Context.Variables, Name);
+         Pos  : constant Attributes.Cursor
+           := Wiki.Attributes.Find (Parser.Context.Variables, Name);
       begin
          if Wiki.Attributes.Has_Element (Pos) then
             Append (Into, Wiki.Attributes.Get_Wide_Value (Pos));
@@ -524,8 +543,10 @@ package body Wiki.Parsers.Common is
       Parser.Empty_Line := False;
       if not Parser.Context.Is_Hidden then
          declare
-            Link : constant Strings.WString := Attributes.Get_Attribute (Parser.Attributes, HREF_ATTR);
-            Name : constant Strings.WString := Attributes.Get_Attribute (Parser.Attributes, NAME_ATTR);
+            Link : constant Strings.WString
+              := Attributes.Get_Attribute (Parser.Attributes, HREF_ATTR);
+            Name : constant Strings.WString
+              := Attributes.Get_Attribute (Parser.Attributes, NAME_ATTR);
             Pos  : constant Natural := Parser.Is_Image (Link);
          begin
             if Pos > 0 then
@@ -674,7 +695,9 @@ package body Wiki.Parsers.Common is
       procedure Check_Stack (Stack : in Block_Stack.Element_Type_Array) is
          I : Positive := Stack'Last;
       begin
-         while I >= Stack'First and then Stack (I).Kind in N_NUM_LIST_START | N_LIST_START | N_LIST_ITEM loop
+         while I >= Stack'First
+           and then Stack (I).Kind in N_NUM_LIST_START | N_LIST_START | N_LIST_ITEM
+         loop
             I := I - 1;
          end loop;
          I := I + 1;
@@ -818,10 +841,11 @@ package body Wiki.Parsers.Common is
 
       if not Parser.Context.Is_Hidden then
          declare
-            Name : constant String := Attributes.Get_Value (Wiki.Attributes.First (Parser.Attributes));
-            Pos    : Wiki.Attributes.Cursor;
+            Name : constant String
+              := Attributes.Get_Value (Wiki.Attributes.First (Parser.Attributes));
+            Pos  : constant Wiki.Attributes.Cursor
+              := Wiki.Attributes.Find (Parser.Context.Variables, Name);
          begin
-            Pos := Wiki.Attributes.Find (Parser.Context.Variables, Name);
             if Wiki.Attributes.Has_Element (Pos) then
                Append (Parser.Text, Wiki.Attributes.Get_Wide_Value (Pos));
             end if;
@@ -847,6 +871,7 @@ package body Wiki.Parsers.Common is
    procedure Parse_Paragraph (Parser : in out Parser_Type;
                               Text   : in out Wiki.Buffers.Buffer_Access;
                               From   : in out Positive) is
+      pragma Unreferenced (Text, From);
    begin
       if Parser.Current_Node /= Nodes.N_PARAGRAPH
          or not Parser.Is_Empty_Paragraph
@@ -1060,7 +1085,8 @@ package body Wiki.Parsers.Common is
       Parser.Empty_Line := False;
       declare
          use type Wiki.Strings.UString;
-         Name    : constant Strings.WString := Attributes.Get_Attribute (Parser.Attributes, NAME_ATTR);
+         Name    : constant Strings.WString
+           := Attributes.Get_Attribute (Parser.Attributes, NAME_ATTR);
          Plugin  : constant Wiki.Plugins.Wiki_Plugin_Access := Parser.Find (Name);
          Context : Wiki.Plugins.Plugin_Context;
          Ctx     : access Wiki.Plugins.Plugin_Context;
