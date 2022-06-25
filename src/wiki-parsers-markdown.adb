@@ -81,6 +81,9 @@ package body Wiki.Parsers.Markdown is
    procedure Add_Link (Parser : in out Parser_Type;
                        Text   : in out Wiki.Buffers.Buffer_Access;
                        From   : in out Positive);
+   procedure Add_Link_Ref (Parser : in out Parser_Type;
+                           Text   : in out Wiki.Buffers.Buffer_Access;
+                           From   : in out Positive);
    procedure Add_Image (Parser   : in out Parser_Type;
                         Text     : in out Wiki.Buffers.Buffer_Access;
                         From     : in out Positive);
@@ -95,6 +98,21 @@ package body Wiki.Parsers.Markdown is
                             Before_Char : Strings.WChar;
                             C           : in Strings.WChar;
                             Delim       : in out Delimiter_Type);
+
+   procedure Parse_Link_Label (Parser : in out Parser_Type;
+                               Text   : in out Wiki.Buffers.Buffer_Access;
+                               From   : in out Positive;
+                               Label  : in out Wiki.Strings.BString);
+
+   procedure Parse_Link_Definition (Parser : in out Parser_Type;
+                                    Text   : in out Wiki.Buffers.Buffer_Access;
+                                    From   : in out Positive);
+
+   procedure Scan_Backtick (Parser   : in out Parser_Type;
+                            Text     : in out Wiki.Buffers.Buffer_Access;
+                            From     : in out Positive;
+                            Start    : in out Delimiter_Type;
+                            Stop     : in out Delimiter_Type);
 
    function Is_Escapable (C : in Wiki.Strings.WChar) return Boolean is
      ((C >= '!' and C <= '/')
@@ -356,6 +374,8 @@ package body Wiki.Parsers.Markdown is
                                Text   : in out Wiki.Buffers.Buffer_Access;
                                From   : in out Positive;
                                Label  : in out Wiki.Strings.BString) is
+      pragma Unreferenced (Parser);
+
       Block : Wiki.Buffers.Buffer_Access := Text;
       Pos   : Positive := From;
       C     : Wiki.Strings.WChar;
@@ -401,8 +421,6 @@ package body Wiki.Parsers.Markdown is
                                     From   : in out Positive) is
       Block       : Wiki.Buffers.Buffer_Access := Text;
       Pos         : Positive := From + 1;
-      C           : Wiki.Strings.WChar;
-      Skip_Spaces : Boolean := True;
       Label       : Wiki.Strings.BString (128);
       Link        : Wiki.Strings.BString (128);
       Title       : Wiki.Strings.BString (128);
@@ -484,7 +502,7 @@ package body Wiki.Parsers.Markdown is
       --  Continue a pre-formatted block.
       if Parser.Current_Node = N_PREFORMAT then
          if Parser.Preformat_Fence = ' ' and Count = 0
-           and C in Wiki.Helpers.LF | Wiki.Helpers.Cr
+           and C in Wiki.Helpers.LF | Wiki.Helpers.CR
            and not Parser.Previous_Line_Empty
          then
             Parser.Previous_Line_Empty := True;
@@ -522,7 +540,7 @@ package body Wiki.Parsers.Markdown is
          Pop_Block (Parser);
       end if;
 
-      if Parser.Current_Node = Nodes.N_List_Item then
+      if Parser.Current_Node = Nodes.N_LIST_ITEM then
          declare
             Level : constant Natural := Get_Current_Level (Parser);
          begin
@@ -535,7 +553,7 @@ package body Wiki.Parsers.Markdown is
                return;
             end if;
             if ((Count > 0 and Count < Level) or Parser.Previous_Line_Empty)
-              and C not in Wiki.Helpers.LF | Wiki.Helpers.Cr
+              and C not in Wiki.Helpers.LF | Wiki.Helpers.CR
             then
                Pop_Block (Parser);
             end if;
@@ -572,12 +590,12 @@ package body Wiki.Parsers.Markdown is
             return;
          end if;
       else
-         if Parser.Previous_Line_Empty and Parser.Current_Node = Nodes.N_List_Item then
+         if Parser.Previous_Line_Empty and Parser.Current_Node = Nodes.N_LIST_ITEM then
             Flush_Block (Parser);
             Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_PARAGRAPH);
             Parser.Is_Empty_Paragraph := True;
 
-         elsif Parser.Previous_Line_Empty and Parser.Current_Node = Nodes.N_Paragraph then
+         elsif Parser.Previous_Line_Empty and Parser.Current_Node = Nodes.N_PARAGRAPH then
             Flush_Block (Parser);
             Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_PARAGRAPH);
             Parser.Is_Empty_Paragraph := True;
@@ -666,7 +684,7 @@ package body Wiki.Parsers.Markdown is
             end;
 
          when '~' | '`' =>
-            if Count > 0 and Parser.Current_Node in Nodes.N_List_Item then
+            if Count > 0 and Parser.Current_Node in Nodes.N_LIST_ITEM then
                Common.Parse_Preformatted (Parser, Block, Pos, C, True);
             else
                Common.Parse_Preformatted (Parser, Block, Pos, C, False);
@@ -1086,7 +1104,7 @@ package body Wiki.Parsers.Markdown is
                end if;
                C := Block.Content (Pos);
                if C = Wiki.Helpers.CR or C = Wiki.Helpers.LF then
-                  if Parser.Format (Strong) or Parser.Format (Emphasis) then
+                  if Parser.Format (STRONG) or Parser.Format (EMPHASIS) then
                      Flush_Text (Parser);
                      Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_LINE_BREAK);
                   else
@@ -1131,6 +1149,8 @@ package body Wiki.Parsers.Markdown is
                             From     : in out Positive;
                             Start    : in out Delimiter_Type;
                             Stop     : in out Delimiter_Type) is
+      pragma Unreferenced (Parser);
+
       Block  : Wiki.Buffers.Buffer_Access := Text;
       Pos    : Positive := From;
       Count  : Natural;
