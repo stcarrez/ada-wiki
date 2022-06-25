@@ -42,6 +42,8 @@ procedure Render is
    procedure Render_Html (Doc   : in out Wiki.Documents.Document;
                           Style : in Unbounded_String);
    procedure Render_Text (Doc : in out Wiki.Documents.Document);
+   procedure Dump (Doc : in Wiki.Documents.Document);
+   procedure Render_File (Name : in String);
 
    Arg_Count : constant Natural := Ada.Command_Line.Argument_Count;
    Count     : Natural := 0;
@@ -55,16 +57,18 @@ procedure Render is
    procedure Usage is
    begin
       Ada.Text_IO.Put_Line ("Render a wiki text file into HTML (default) or text");
-      Ada.Text_IO.Put_Line ("Usage: render [-t] [-m] [-M] [-H] [-d] [-c] [-s style] {wiki-file}");
-      Ada.Text_IO.Put_Line ("  -t        Render to text only");
-      Ada.Text_IO.Put_Line ("  -m        Render a Markdown wiki content");
-      Ada.Text_IO.Put_Line ("  -M        Render a Mediawiki wiki content");
-      Ada.Text_IO.Put_Line ("  -T        Render a Textile wiki content");
-      Ada.Text_IO.Put_Line ("  -H        Render a HTML wiki content");
-      Ada.Text_IO.Put_Line ("  -d        Render a Dotclear wiki content");
-      Ada.Text_IO.Put_Line ("  -g        Render a Google wiki content");
-      Ada.Text_IO.Put_Line ("  -c        Render a Creole wiki content");
-      Ada.Text_IO.Put_Line ("  -s style  Use the CSS style file");
+      Ada.Text_IO.Put_Line ("Usage: render [options] {wiki-file}");
+      Ada.Text_IO.Put_Line ("  -0, -1, -2  Controls the indentation level");
+      Ada.Text_IO.Put_Line ("  -t          Render to text only");
+      Ada.Text_IO.Put_Line ("  -m          Render a Markdown wiki content");
+      Ada.Text_IO.Put_Line ("  -M          Render a Mediawiki wiki content");
+      Ada.Text_IO.Put_Line ("  -T          Render a Textile wiki content");
+      Ada.Text_IO.Put_Line ("  -H          Render a HTML wiki content");
+      Ada.Text_IO.Put_Line ("  -d          Render a Dotclear wiki content");
+      Ada.Text_IO.Put_Line ("  -g          Render a Google wiki content");
+      Ada.Text_IO.Put_Line ("  -c          Render a Creole wiki content");
+      Ada.Text_IO.Put_Line ("  -s style    Use the CSS style file");
+      Ada.Text_IO.Put_Line ("  -dump       Dump the document tree");
       Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
    end Usage;
 
@@ -104,10 +108,13 @@ procedure Render is
 
    procedure Dump (Doc : in Wiki.Documents.Document) is
       procedure Write (Indent : in Positive;
+                       Line   : in Wiki.Strings.WString);
+
+      procedure Write (Indent : in Positive;
                        Line   : in Wiki.Strings.WString) is
          S : constant String := Wiki.Strings.To_String (Line);
       begin
-         Ada.Text_IO.Set_Col (Ada.Text_Io.Count (Indent));
+         Ada.Text_IO.Set_Col (Ada.Text_IO.Count (Indent));
          Ada.Text_IO.Put_Line (S);
       end Write;
 
