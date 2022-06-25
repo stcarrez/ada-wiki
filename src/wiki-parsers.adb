@@ -39,17 +39,6 @@ package body Wiki.Parsers is
    procedure Add_Header (Parser : in out Parser_Type;
                          Level  : in Natural);
 
-   procedure Next (Content : in out Content_Access;
-                   Pos     : in out Positive) is
-   begin
-      if Pos + 1 > Content.Last then
-         Content := Content.Next_Block;
-         Pos := 1;
-      else
-         Pos := Pos + 1;
-      end if;
-   end Next;
-
    procedure Append_Preformatted (P      : in out Parser;
                                   Format : in Wiki.Strings.WString) is
       procedure Add_Preformatted (Content : in Wiki.Strings.WString);

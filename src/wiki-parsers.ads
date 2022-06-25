@@ -112,9 +112,6 @@ private
       Content    : Wiki.Strings.WString (1 .. Len);
    end record;
 
-   procedure Next (Content : in out Content_Access;
-                   Pos     : in out Positive) with Inline_Always;
-
    use Wiki.Strings.Wide_Wide_Builders;
 
    type Block_Type is record
