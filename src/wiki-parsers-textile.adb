@@ -24,6 +24,13 @@ package body Wiki.Parsers.Textile is
    use Wiki.Buffers;
    use type Wiki.Nodes.Node_Kind;
 
+   function Get_Header_Level (Text : in Wiki.Strings.WString) return Natural;
+
+   procedure Parse_Header (Parser  : in out Parser_Type;
+                           Text    : in out Wiki.Buffers.Buffer_Access;
+                           From    : in out Positive;
+                           Level   : in Positive);
+
    procedure Parse_Image (Parser  : in out Parser_Type;
                           Text    : in out Wiki.Buffers.Buffer_Access;
                           From    : in out Positive);
@@ -89,6 +96,7 @@ package body Wiki.Parsers.Textile is
                   if not Wiki.Helpers.Is_Space_Or_Newline (Buffer.Content (Pos)) then
                      Common.Append (Parser.Text, Buffer, Pos);
                      Text := null;
+                     From := 1;
                      return;
                   end if;
                   Pos := Pos + 1;
