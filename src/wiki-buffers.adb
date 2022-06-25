@@ -22,6 +22,9 @@ package body Wiki.Buffers is
    subtype Input is Wiki.Strings.WString;
    subtype Block_Access is Buffer_Access;
 
+   --  ------------------------------
+   --  Move forward to skip a number of items.
+   --  ------------------------------
    procedure Next (Content : in out Buffer_Access;
                    Pos     : in out Positive) is
    begin
@@ -31,6 +34,20 @@ package body Wiki.Buffers is
       else
          Pos := Pos + 1;
       end if;
+   end Next;
+
+   procedure Next (Content : in out Buffer_Access;
+                   Pos     : in out Positive;
+                   Count   : in Natural) is
+   begin
+      for I in 1 .. Count loop
+         if Pos + 1 > Content.Last then
+            Content := Content.Next_Block;
+            Pos := 1;
+         else
+            Pos := Pos + 1;
+         end if;
+      end loop;
    end Next;
 
    --  ------------------------------
@@ -89,6 +106,7 @@ package body Wiki.Buffers is
                else
                   B.Next_Block := new Buffer (Source.Block_Size);
                end if;
+               B.Next_Block.Offset := B.Offset + B.Len;
                B := B.Next_Block;
                Source.Current := B;
                if B.Len > Size then
@@ -114,6 +132,7 @@ package body Wiki.Buffers is
    begin
       if B.Len = B.Last then
          B.Next_Block := new Buffer (Source.Block_Size);
+         B.Next_Block.Offset := B.Offset + B.Len;
          B := B.Next_Block;
          Source.Current := B;
       end if;
@@ -129,6 +148,7 @@ package body Wiki.Buffers is
       loop
          if B.Len = B.Last then
             B.Next_Block := new Buffer (Source.Block_Size);
+            B.Next_Block.Offset := B.Offset + B.Len;
             B := B.Next_Block;
             Source.Current := B;
          end if;
