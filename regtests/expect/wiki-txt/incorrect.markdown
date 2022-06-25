@@ -1,6 +1,6 @@
 
 
-Not a link: [title]
+Not a link: 
 
-Not a link: [title]] (something)
+Not a link:  (something)
 

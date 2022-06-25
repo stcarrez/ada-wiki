@@ -1,3 +1,3 @@
 
-The regular expression /\[^/]\/ matches a C style comment and remove it.
+The regular expression /\\\*\[\^/]\*\\\*/ matches a C style comment and remove it.
 

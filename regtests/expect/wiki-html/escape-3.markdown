@@ -1,1 +1,1 @@
-<p>The regular expression <tt>/\*[^/]*\*/</tt> matches a C style comment and remove it.</p>
+<p>The regular expression <code>/\\\*\[\^/]\*\\\*/</code> matches a C style comment and remove it.</p>
