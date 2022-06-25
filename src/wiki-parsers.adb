@@ -36,6 +36,9 @@ package body Wiki.Parsers is
    procedure Append_Preformatted (P      : in out Parser;
                                   Format : in Wiki.Strings.WString);
 
+   procedure Add_Header (Parser : in out Parser_Type;
+                         Level  : in Natural);
+
    procedure Next (Content : in out Content_Access;
                    Pos     : in out Positive) is
    begin
@@ -108,7 +111,7 @@ package body Wiki.Parsers is
             exit when Top.Kind in Nodes.N_LIST_START | Nodes.N_NUM_LIST_START
               and then Top.Level <= Level and then Top.Marker = Marker;
             exit when Top.Kind = Nodes.N_NUM_LIST_START and Top.Number + 1 = Number;
-            if Top.Kind = Nodes.N_List_Item and Top.Level <= Level and Top.Marker = Marker then
+            if Top.Kind = Nodes.N_LIST_ITEM and Top.Level <= Level and Top.Marker = Marker then
                Pop_Block (P);
                exit;
             end if;
@@ -328,7 +331,7 @@ package body Wiki.Parsers is
               and then Into (Last) in Wiki.Helpers.CR | Wiki.Helpers.LF
               and then Into (Last - 1) in Wiki.Helpers.CR | Wiki.Helpers.LF
             loop
-              Last := Last - 1;
+               Last := Last - 1;
             end loop;
          end if;
       end Read;
@@ -619,7 +622,7 @@ package body Wiki.Parsers is
             P.Context.Is_Hidden := Kind = Html_Parser.HTML_START and P.Context.Is_Included;
          elsif Name = "includeonly" then
             Flush_Text (P, Trim => None);
-            P.Context.Is_Hidden := not (kind = Html_Parser.HTML_START and P.Context.Is_Included);
+            P.Context.Is_Hidden := not (Kind = Html_Parser.HTML_START and P.Context.Is_Included);
          end if;
       elsif Kind = Wiki.Html_Parser.HTML_START then
          Start_Element (P, Tag, Attributes);
