@@ -65,6 +65,7 @@ private package Wiki.Buffers is
    type Buffer (Len : Positive) is limited record
       Next_Block : Buffer_Access;
       Last       : Natural := 0;
+      Offset     : Natural := 0;
       Content    : Wiki.Strings.WString (1 .. Len);
    end record;
 
@@ -84,8 +85,13 @@ private package Wiki.Buffers is
    overriding
    procedure Finalize (Source : in out Builder);
 
+   --  Move forward to skip a number of items.
    procedure Next (Content : in out Buffer_Access;
                    Pos     : in out Positive) with Inline_Always;
+
+   procedure Next (Content : in out Buffer_Access;
+                   Pos     : in out Positive;
+                   Count   : in Natural);
 
    --  Get the length of the item builder.
    function Length (Source : in Builder) return Natural;
