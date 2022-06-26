@@ -183,6 +183,8 @@ package body Wiki.Parsers is
             if Parser.Parse_Inline /= null then
                Parser.Parse_Inline (Parser, Parser.Text_Buffer.First'Unchecked_Access);
                Parser.Text_Buffer.Clear;
+            else
+               Flush_Text (Parser);
             end if;
          elsif Top.Kind = Nodes.N_LIST_ITEM or Top.Kind = Nodes.N_TABLE then
             if Parser.Parse_Inline /= null then
