@@ -497,6 +497,24 @@ package body Wiki.Parsers.Markdown is
          Pos := 1;
       end loop Spaces;
 
+      if Parser.In_Blockquote and Count <= 3 then
+         Level := Buffers.Count_Occurence (Block, Pos, '>');
+         if Level = 0 then
+            loop
+               Pop_Block (Parser);
+               exit when Parser.Current_Node = Nodes.N_NONE;
+            end loop;
+         else
+            Buffers.Next (Block, Pos, Level);
+            Buffers.Skip_Spaces (Block, Pos, Count);
+            if Block = null then
+               return;
+            end if;
+            Push_Block (Parser, Nodes.N_BLOCKQUOTE, Level);
+            C := Block.Content (Pos);
+         end if;
+      end if;
+
       --  Continue a pre-formatted block.
       if Parser.Current_Node = N_PREFORMAT then
          if Parser.Preformat_Fence = ' ' and Count = 0
@@ -528,14 +546,6 @@ package body Wiki.Parsers.Markdown is
             Parser.Previous_Line_Empty := False;
             return;
          end if;
-      end if;
-
-      if Parser.Current_Node = N_BLOCKQUOTE then
-         if C = '>' then
-            --  Continue in blockquote
-            return;
-         end if;
-         Pop_Block (Parser);
       end if;
 
       if Parser.Current_Node = Nodes.N_LIST_ITEM then
@@ -602,12 +612,25 @@ package body Wiki.Parsers.Markdown is
          Parser.Previous_Line_Empty := False;
       end if;
 
+      if C = '>' and Count <= 3 then
+         Count := Buffers.Count_Occurence (Block, Pos, '>');
+         Push_Block (Parser, Nodes.N_BLOCKQUOTE, Count);
+         Buffers.Next (Block, Pos, Count);
+         Buffers.Skip_Optional_Space (Block, Pos);
+         if Block = null then
+            return;
+         end if;
+         C := Block.Content (Pos);
+      end if;
+
       case C is
          when '#' =>
             if Count < 4 then
                Level := Get_Header_Level (Block, Pos);
                if Level > 0 then
-                  Pop_Block (Parser);
+                  if Parser.Current_Node /= N_BLOCKQUOTE then
+                     Pop_Block (Parser);
+                  end if;
                   Pos := Pos + Level + 1;
                   Add_Header (Parser, Block, Pos, Level);
                   Parser.Previous_Line_Empty := False;
@@ -642,7 +665,9 @@ package body Wiki.Parsers.Markdown is
                Level := Level + Count;
                Pop_List (Parser, Level, C, 0);
                if not Is_List_Item (Parser, Level) then
-                  Pop_Block (Parser);
+                  if Parser.Current_Node /= Nodes.N_BLOCKQUOTE then
+                     Pop_Block (Parser);
+                  end if;
                   Push_Block (Parser, Nodes.N_LIST_START, Level, C);
                end if;
                if Count >= 4 then
@@ -740,7 +765,7 @@ package body Wiki.Parsers.Markdown is
 
       end case;
 
-      while not (Parser.Current_Node in N_PARAGRAPH | N_NONE | N_LIST_ITEM) loop
+      while not (Parser.Current_Node in N_PARAGRAPH | N_NONE | N_LIST_ITEM | N_BLOCKQUOTE) loop
          Pop_Block (Parser);
       end loop;
       if not (Parser.Current_Node in N_PARAGRAPH | N_LIST_ITEM) then
