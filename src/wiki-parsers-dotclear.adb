@@ -268,7 +268,7 @@ package body Wiki.Parsers.Dotclear is
             Common.Parse_List (Parser, Buffer, Pos);
 
          when others =>
-            if Parser.Current_Node /= N_PARAGRAPH then
+            if Parser.Current_Node /= N_PARAGRAPH and Parser.Current_Node /= N_BLOCKQUOTE then
                Pop_List (Parser);
                Push_Block (Parser, N_PARAGRAPH);
             end if;
