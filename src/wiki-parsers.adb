@@ -190,6 +190,8 @@ package body Wiki.Parsers is
             if Parser.Parse_Inline /= null then
                Parser.Parse_Inline (Parser, Parser.Text_Buffer.First'Unchecked_Access);
                Parser.Text_Buffer.Clear;
+            else
+               Flush_Text (Parser);
             end if;
             Clear (Parser.Text);
          elsif Top.Kind = Nodes.N_HEADER then
