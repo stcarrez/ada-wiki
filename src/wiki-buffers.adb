@@ -498,7 +498,7 @@ package body Wiki.Buffers is
    procedure Skip_Optional_Space (Buffer : in out Buffer_Access;
                                   From   : in out Positive) is
    begin
-      if From <= Buffer.Last
+      if Buffer /= null and then From <= Buffer.Last
         and then Wiki.Helpers.Is_Space (Buffer.Content (From))
       then
          Next (Buffer, From);
