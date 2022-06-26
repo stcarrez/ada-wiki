@@ -971,7 +971,7 @@ package body Wiki.Parsers.Common is
       Parser.Header_Level := Level;
       Push_Block (Parser, Nodes.N_HEADER);
       declare
-         Pos    : Natural := Count + 1;
+         Pos    : Natural := From + Count;
          Buffer : Wiki.Buffers.Buffer_Access := Text;
       begin
          while Buffer /= null loop
