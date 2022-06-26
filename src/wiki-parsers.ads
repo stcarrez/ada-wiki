@@ -110,6 +110,7 @@ private
       Level  : Natural := 0;
       Marker : Wiki.Strings.WChar := ' ';
       Number : Integer := 0;
+      Quote_Level : Natural := 0;
    end record;
 
    type Parser_State_Type is (State_Html_Doctype,
@@ -141,6 +142,7 @@ private
       In_Paragraph        : Boolean := False;
       In_Table            : Boolean := False;
       In_Html             : Boolean := False;
+      In_Blockquote       : Boolean := False;
       Link_Double_Bracket : Boolean := False;
       Link_No_Space       : Boolean := False;
       Link_Title_First    : Boolean := False;
