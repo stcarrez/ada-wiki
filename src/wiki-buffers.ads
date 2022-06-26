@@ -175,6 +175,10 @@ private package Wiki.Buffers with Preelaborate is
                           From   : in out Positive;
                           Count  : out Natural);
 
+   --  Skip one optional space or tab.
+   procedure Skip_Optional_Space (Buffer : in out Buffer_Access;
+                                  From   : in out Positive);
+
    procedure Find (Buffer : in out Buffer_Access;
                    From   : in out Positive;
                    Item   : in Wiki.Strings.WChar);
