@@ -346,7 +346,6 @@ package body Wiki.Render.Html is
          Engine.Render_TOC (Doc, 3);
       end if;
       Engine.Close_Paragraph;
-      Engine.Add_Blockquote (0);
       Engine.Current_Section (Level) := Engine.Current_Section (Level) + 1;
       for I in Level + 1 .. Engine.Current_Section'Last loop
          Engine.Current_Section (I) := 0;
