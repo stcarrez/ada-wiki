@@ -217,9 +217,34 @@ package body Wiki.Parsers is
                          Level  : in Integer := 0;
                          Marker : in Wiki.Strings.WChar := ' ';
                          Number : in Integer := 0) is
-      Empty : constant Boolean := Block_Stack.Is_Empty (P.Blocks);
+      Empty   : Boolean := Block_Stack.Is_Empty (P.Blocks);
+      Current : Block_Access;
    begin
-      Flush_Block (P);
+      if not Empty then
+         Current := Block_Stack.Current (P.Blocks);
+      end if;
+      if Kind = Nodes.N_BLOCKQUOTE and not Empty then
+         if Current.Quote_Level = Level then
+            return;
+         end if;
+         if Current.Quote_Level = 0 or Current.Kind /= Nodes.N_PARAGRAPH then
+            Pop_Block (P);
+         else
+            Flush_Text (P, Trim => Right);
+         end if;
+
+         --  Pop any blockquote until we reach our same level.
+         --  By doin so, we close every element that was opened within the blockquote.
+         while Current.Quote_Level > Level loop
+            Pop_Block (P);
+            Empty := Block_Stack.Is_Empty (P.Blocks);
+            exit when Empty;
+            Current := Block_Stack.Current (P.Blocks);
+         end loop;
+      else
+         Flush_Block (P);
+      end if;
+
       Block_Stack.Push (P.Blocks);
       declare
          Top : constant Block_Access := Block_Stack.Current (P.Blocks);
@@ -228,6 +253,9 @@ package body Wiki.Parsers is
          Top.Level := Level;
          Top.Marker := Marker;
          Top.Number := Number;
+         if Current /= null then
+            Top.Quote_Level := Current.Quote_Level;
+         end if;
          P.Current_Node := Kind;
          if Kind = Nodes.N_LIST_START then
             P.Context.Filters.Add_List (P.Document, 1, False);
@@ -235,10 +263,14 @@ package body Wiki.Parsers is
             P.Context.Filters.Add_List (P.Document, Number, True);
          elsif Kind = Nodes.N_LIST_ITEM then
             P.Context.Filters.Add_Node (P.Document, Kind);
+         elsif Kind = Nodes.N_BLOCKQUOTE then
+            Top.Quote_Level := Level;
+            P.Context.Filters.Add_Blockquote (P.Document, Level);
          elsif Empty and Kind = Nodes.N_PARAGRAPH then
             P.Context.Filters.Add_Node (P.Document, Kind);
             P.Is_Empty_Paragraph := True;
          end if;
+         P.In_Blockquote := Top.Quote_Level > 0;
       end;
    end Push_Block;
 
@@ -292,13 +324,16 @@ package body Wiki.Parsers is
             Block_Stack.Pop (P.Blocks);
             if not Block_Stack.Is_Empty (P.Blocks) then
                Top := Block_Stack.Current (P.Blocks);
+               P.In_Blockquote := Top.Quote_Level > 0;
                P.Current_Node := Top.Kind;
             else
                P.Current_Node := Nodes.N_NONE;
+               P.In_Blockquote := False;
             end if;
          end;
       else
          P.Current_Node := Nodes.N_NONE;
+         P.In_Blockquote := False;
       end if;
       Clear (P.Text);
    end Pop_Block;
