@@ -45,6 +45,7 @@ package body Wiki.Buffers is
          if Pos + 1 > Content.Last then
             Content := Content.Next_Block;
             Pos := 1;
+            exit when Content = null;
          else
             Pos := Pos + 1;
          end if;
@@ -490,6 +491,19 @@ package body Wiki.Buffers is
       Buffer := Block;
       From := Pos;
    end Skip_Spaces;
+
+   --  ------------------------------
+   --  Skip one optional space or tab.
+   --  ------------------------------
+   procedure Skip_Optional_Space (Buffer : in out Buffer_Access;
+                                  From   : in out Positive) is
+   begin
+      if From <= Buffer.Last
+        and then Wiki.Helpers.Is_Space (Buffer.Content (From))
+      then
+         Next (Buffer, From);
+      end if;
+   end Skip_Optional_Space;
 
    procedure Find (Buffer : in out Buffer_Access;
                    From   : in out Positive;
