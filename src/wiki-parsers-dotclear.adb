@@ -179,6 +179,23 @@ package body Wiki.Parsers.Dotclear is
       Count  : Natural;
       Buffer : Wiki.Buffers.Buffer_Access := Text;
    begin
+      if Parser.In_Blockquote then
+         Count := Count_Occurence (Buffer, 1, '>');
+         if Count = 0 then
+            loop
+               Pop_Block (Parser);
+               exit when Parser.Current_Node = Nodes.N_NONE;
+            end loop;
+         else
+            Buffers.Next (Buffer, Pos, Count);
+            Buffers.Skip_Optional_Space (Buffer, Pos);
+            if Buffer = null then
+               return;
+            end if;
+            Push_Block (Parser, Nodes.N_BLOCKQUOTE, Count);
+         end if;
+      end if;
+
       if Parser.Current_Node = N_PREFORMAT then
          if Parser.Preformat_Fcount = 0 then
             Count := Count_Occurence (Buffer, 1, '/');
@@ -196,23 +213,22 @@ package body Wiki.Parsers.Dotclear is
          Pop_Block (Parser);
       end if;
 
-      if Parser.Quote_Level > 0 then
-         Count := Count_Occurence (Buffer, 1, '>');
-         if Count = 0 then
-            loop
-               Pop_Block (Parser);
-               exit when Parser.Current_Node = Nodes.N_NONE;
-            end loop;
-         else
-            Pos := Pos + Count;
-         end if;
-      end if;
-
       if Parser.Current_Node = N_HEADER then
          Pop_Block (Parser);
       end if;
 
       C := Buffer.Content (Pos);
+      if C = '>' then
+         Count := Count_Occurence (Buffer, Pos, '>');
+         Push_Block (Parser, Nodes.N_BLOCKQUOTE, Count);
+         Buffers.Next (Buffer, Pos, Count);
+         Buffers.Skip_Optional_Space (Buffer, Pos);
+         if Buffer = null then
+            return;
+         end if;
+         C := Buffer.Content (Pos);
+      end if;
+
       case C is
          when CR | LF =>
             Common.Parse_Paragraph (Parser, Buffer, Pos);
@@ -235,23 +251,12 @@ package body Wiki.Parsers.Dotclear is
             Parser.Preformat_Fence := ' ';
             Parser.Preformat_Fcount := 1;
             Flush_Text (Parser, Trim => Right);
-            Pop_Block (Parser);
+            if Parser.Current_Node /= N_BLOCKQUOTE then
+               Pop_Block (Parser);
+            end if;
             Push_Block (Parser, N_PREFORMAT);
             Common.Append (Parser.Text, Buffer, Pos + 1);
             return;
-
-         when '>' =>
-            Count := Count_Occurence (Buffer, Pos + 1, '>');
-            if Parser.Current_Node /= N_BLOCKQUOTE then
-               Flush_Text (Parser, Trim => Right);
-               Pop_Block (Parser);
-               Parser.Quote_Level := Count + 1;
-               Push_Block (Parser, N_BLOCKQUOTE);
-            end if;
-            if not Parser.Context.Is_Hidden then
-               Parser.Context.Filters.Add_Blockquote (Parser.Document, Parser.Quote_Level);
-            end if;
-            Pos := Pos + Count + 1;
 
          when '-' =>
             Common.Parse_Horizontal_Rule (Parser, Buffer, Pos, '-');
