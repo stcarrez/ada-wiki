@@ -100,6 +100,7 @@ package body Wiki.Parsers is
             exit when Top.Kind in Nodes.N_LIST_START | Nodes.N_NUM_LIST_START
               and then Top.Level <= Level and then Top.Marker = Marker;
             exit when Top.Kind = Nodes.N_NUM_LIST_START and Top.Number + 1 = Number;
+            exit when Top.Kind = Nodes.N_BLOCKQUOTE;
             if Top.Kind = Nodes.N_LIST_ITEM and Top.Level <= Level and Top.Marker = Marker then
                Pop_Block (P);
                exit;
@@ -232,6 +233,10 @@ package body Wiki.Parsers is
          else
             Flush_Text (P, Trim => Right);
          end if;
+         if P.Parse_Inline /= null and P.Text_Buffer.Length > 0 then
+            P.Parse_Inline (P, P.Text_Buffer.First'Unchecked_Access);
+            Buffers.Clear (P.Text_Buffer);
+         end if;
 
          --  Pop any blockquote until we reach our same level.
          --  By doin so, we close every element that was opened within the blockquote.
@@ -255,6 +260,8 @@ package body Wiki.Parsers is
          Top.Number := Number;
          if Current /= null then
             Top.Quote_Level := Current.Quote_Level;
+         else
+            Top.Quote_Level := 0;
          end if;
          P.Current_Node := Kind;
          if Kind = Nodes.N_LIST_START then
@@ -266,7 +273,7 @@ package body Wiki.Parsers is
          elsif Kind = Nodes.N_BLOCKQUOTE then
             Top.Quote_Level := Level;
             P.Context.Filters.Add_Blockquote (P.Document, Level);
-         elsif Empty and Kind = Nodes.N_PARAGRAPH then
+         elsif Kind = Nodes.N_PARAGRAPH then
             P.Context.Filters.Add_Node (P.Document, Kind);
             P.Is_Empty_Paragraph := True;
          end if;
