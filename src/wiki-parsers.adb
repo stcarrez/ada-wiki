@@ -173,7 +173,8 @@ package body Wiki.Parsers is
    --  ------------------------------
    --  Push a new block kind on the block stack.
    --  ------------------------------
-   procedure Flush_Block (Parser  : in out Parser_Type) is
+   procedure Flush_Block (Parser : in out Parser_Type;
+                          Trim   : in Trim_End := None) is
       Top : constant Block_Access := Block_Stack.Current (Parser.Blocks);
    begin
       if Top /= null then
@@ -184,20 +185,20 @@ package body Wiki.Parsers is
                Parser.Parse_Inline (Parser, Parser.Text_Buffer.First'Unchecked_Access);
                Parser.Text_Buffer.Clear;
             else
-               Flush_Text (Parser);
+               Flush_Text (Parser, Trim);
             end if;
          elsif Top.Kind = Nodes.N_LIST_ITEM or Top.Kind = Nodes.N_TABLE then
             if Parser.Parse_Inline /= null then
                Parser.Parse_Inline (Parser, Parser.Text_Buffer.First'Unchecked_Access);
                Parser.Text_Buffer.Clear;
             else
-               Flush_Text (Parser);
+               Flush_Text (Parser, Trim);
             end if;
             Clear (Parser.Text);
          elsif Top.Kind = Nodes.N_HEADER then
             Add_Header (Parser, Parser.Header_Level);
          else
-            Flush_Text (Parser);
+            Flush_Text (Parser, Trim);
          end if;
       else
          if Parser.Parse_Inline /= null then
@@ -233,7 +234,7 @@ package body Wiki.Parsers is
             return;
          end if;
          if Current.Quote_Level = 0 or Current.Kind /= Nodes.N_PARAGRAPH then
-            Pop_Block (P);
+            Pop_Block (P, Trim => Right);
          else
             Flush_Text (P, Trim => Right);
          end if;
@@ -245,7 +246,7 @@ package body Wiki.Parsers is
          --  Pop any blockquote until we reach our same level.
          --  By doin so, we close every element that was opened within the blockquote.
          while Current.Quote_Level > Level loop
-            Pop_Block (P);
+            Pop_Block (P, Trim => Right);
             Empty := Block_Stack.Is_Empty (P.Blocks);
             exit when Empty;
             Current := Block_Stack.Current (P.Blocks);
@@ -302,51 +303,52 @@ package body Wiki.Parsers is
    --  ------------------------------
    --  Pop the current block stack.
    --  ------------------------------
-   procedure Pop_Block (P    : in out Parser) is
+   procedure Pop_Block (Parser : in out Parser_Type;
+                        Trim   : in Trim_End := None) is
    begin
-      Flush_Block (P);
-      if not Block_Stack.Is_Empty (P.Blocks) then
+      Flush_Block (Parser, Trim);
+      if not Block_Stack.Is_Empty (Parser.Blocks) then
          declare
-            Top : Block_Access := Block_Stack.Current (P.Blocks);
+            Top : Block_Access := Block_Stack.Current (Parser.Blocks);
          begin
             case Top.Kind is
                when Nodes.N_LIST_START =>
-                  P.Context.Filters.Add_Node (P.Document, Nodes.N_LIST_END);
+                  Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_LIST_END);
 
                when Nodes.N_NUM_LIST_START =>
-                  P.Context.Filters.Add_Node (P.Document, Nodes.N_NUM_LIST_END);
+                  Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_NUM_LIST_END);
 
                when Nodes.N_LIST_ITEM =>
-                  P.Context.Filters.Add_Node (P.Document, Nodes.N_LIST_ITEM_END);
+                  Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_LIST_ITEM_END);
 
                when Nodes.N_BLOCKQUOTE =>
-                  P.Context.Filters.Add_Blockquote (P.Document, 0);
+                  Parser.Context.Filters.Add_Blockquote (Parser.Document, 0);
 
                when Nodes.N_DEFINITION =>
-                  P.Context.Filters.Add_Node (P.Document, Nodes.N_END_DEFINITION);
+                  Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_END_DEFINITION);
 
                when Nodes.N_TABLE =>
-                  P.Context.Filters.Finish_Table (P.Document);
+                  Parser.Context.Filters.Finish_Table (Parser.Document);
 
                when others =>
                   null;
 
             end case;
-            Block_Stack.Pop (P.Blocks);
-            if not Block_Stack.Is_Empty (P.Blocks) then
-               Top := Block_Stack.Current (P.Blocks);
-               P.In_Blockquote := Top.Quote_Level > 0;
-               P.Current_Node := Top.Kind;
+            Block_Stack.Pop (Parser.Blocks);
+            if not Block_Stack.Is_Empty (Parser.Blocks) then
+               Top := Block_Stack.Current (Parser.Blocks);
+               Parser.In_Blockquote := Top.Quote_Level > 0;
+               Parser.Current_Node := Top.Kind;
             else
-               P.Current_Node := Nodes.N_NONE;
-               P.In_Blockquote := False;
+               Parser.Current_Node := Nodes.N_NONE;
+               Parser.In_Blockquote := False;
             end if;
          end;
       else
-         P.Current_Node := Nodes.N_NONE;
-         P.In_Blockquote := False;
+         Parser.Current_Node := Nodes.N_NONE;
+         Parser.In_Blockquote := False;
       end if;
-      Clear (P.Text);
+      Clear (Parser.Text);
    end Pop_Block;
 
    --  ------------------------------

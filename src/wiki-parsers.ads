@@ -187,7 +187,8 @@ private
    procedure Flush_Text (P    : in out Parser;
                          Trim : in Trim_End := None);
 
-   procedure Flush_Block (Parser : in out Parser_Type);
+   procedure Flush_Block (Parser : in out Parser_Type;
+                          Trim   : in Trim_End := None);
 
    --  Flush the wiki dl/dt/dd definition list.
    procedure Flush_List (P : in out Parser);
@@ -255,7 +256,8 @@ private
                          Number : in Integer := 0);
 
    --  Pop the current block stack.
-   procedure Pop_Block (P    : in out Parser);
+   procedure Pop_Block (Parser  : in out Parser_Type;
+                        Trim    : in Trim_End := None);
    procedure Pop_All (P : in out Parser);
 
    procedure Pop_Block_Until (P     : in out Parser;
