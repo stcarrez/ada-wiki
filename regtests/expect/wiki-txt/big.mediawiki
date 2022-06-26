@@ -6,7 +6,7 @@ The rectifier board has the following roles:
 
   - It converts the alternating current into direct current,
   - It selects the best supply voltage for every power supply outputs,
-  - 
+  - It limits and measures the current.
 
 
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
@@ -134,18 +134,18 @@ Changes
 
 {|border="1" |- |2007-07-28 |v1.4.1 |
 
-  - 
+  - Used 0.6mm width for small signals
 
 
 |- |2007-05-06 |v1.4 |
 
   - Use a 12-pin connector instead of a 13-pin connector
-  - 
+  - Added a 10nF capacitor between the ground and the reference ground
 
 
 |- |2007-01-21 |v1.3 |
 
-  - 
+  - Added a diode followed by a resistor to provide a hardware current protection on the power supply regulator board
 
 
 |} 
@@ -156,7 +156,7 @@ The rectifier board has the following roles:
 
   - It converts the alternating current into direct current,
   - It selects the best supply voltage for every power supply outputs,
-  - 
+  - It limits and measures the current.
 
 
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
@@ -284,18 +284,18 @@ Changes
 
 {|border="1" |- |2007-07-28 |v1.4.1 |
 
-  - 
+  - Used 0.6mm width for small signals
 
 
 |- |2007-05-06 |v1.4 |
 
   - Use a 12-pin connector instead of a 13-pin connector
-  - 
+  - Added a 10nF capacitor between the ground and the reference ground
 
 
 |- |2007-01-21 |v1.3 |
 
-  - 
+  - Added a diode followed by a resistor to provide a hardware current protection on the power supply regulator board
 
 
 |} 
@@ -306,7 +306,7 @@ The rectifier board has the following roles:
 
   - It converts the alternating current into direct current,
   - It selects the best supply voltage for every power supply outputs,
-  - 
+  - It limits and measures the current.
 
 
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
@@ -434,18 +434,18 @@ Changes
 
 {|border="1" |- |2007-07-28 |v1.4.1 |
 
-  - 
+  - Used 0.6mm width for small signals
 
 
 |- |2007-05-06 |v1.4 |
 
   - Use a 12-pin connector instead of a 13-pin connector
-  - 
+  - Added a 10nF capacitor between the ground and the reference ground
 
 
 |- |2007-01-21 |v1.3 |
 
-  - 
+  - Added a diode followed by a resistor to provide a hardware current protection on the power supply regulator board
 
 
 |} 
@@ -456,7 +456,7 @@ The rectifier board has the following roles:
 
   - It converts the alternating current into direct current,
   - It selects the best supply voltage for every power supply outputs,
-  - 
+  - It limits and measures the current.
 
 
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
@@ -584,18 +584,18 @@ Changes
 
 {|border="1" |- |2007-07-28 |v1.4.1 |
 
-  - 
+  - Used 0.6mm width for small signals
 
 
 |- |2007-05-06 |v1.4 |
 
   - Use a 12-pin connector instead of a 13-pin connector
-  - 
+  - Added a 10nF capacitor between the ground and the reference ground
 
 
 |- |2007-01-21 |v1.3 |
 
-  - 
+  - Added a diode followed by a resistor to provide a hardware current protection on the power supply regulator board
 
 
 |} 
@@ -606,7 +606,7 @@ The rectifier board has the following roles:
 
   - It converts the alternating current into direct current,
   - It selects the best supply voltage for every power supply outputs,
-  - 
+  - It limits and measures the current.
 
 
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
@@ -734,18 +734,18 @@ Changes
 
 {|border="1" |- |2007-07-28 |v1.4.1 |
 
-  - 
+  - Used 0.6mm width for small signals
 
 
 |- |2007-05-06 |v1.4 |
 
   - Use a 12-pin connector instead of a 13-pin connector
-  - 
+  - Added a 10nF capacitor between the ground and the reference ground
 
 
 |- |2007-01-21 |v1.3 |
 
-  - 
+  - Added a diode followed by a resistor to provide a hardware current protection on the power supply regulator board
 
 
 |} 
@@ -756,7 +756,7 @@ The rectifier board has the following roles:
 
   - It converts the alternating current into direct current,
   - It selects the best supply voltage for every power supply outputs,
-  - 
+  - It limits and measures the current.
 
 
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
@@ -884,18 +884,18 @@ Changes
 
 {|border="1" |- |2007-07-28 |v1.4.1 |
 
-  - 
+  - Used 0.6mm width for small signals
 
 
 |- |2007-05-06 |v1.4 |
 
   - Use a 12-pin connector instead of a 13-pin connector
-  - 
+  - Added a 10nF capacitor between the ground and the reference ground
 
 
 |- |2007-01-21 |v1.3 |
 
-  - 
+  - Added a diode followed by a resistor to provide a hardware current protection on the power supply regulator board
 
 
 |} 
@@ -906,7 +906,7 @@ The rectifier board has the following roles:
 
   - It converts the alternating current into direct current,
   - It selects the best supply voltage for every power supply outputs,
-  - 
+  - It limits and measures the current.
 
 
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
@@ -1034,18 +1034,18 @@ Changes
 
 {|border="1" |- |2007-07-28 |v1.4.1 |
 
-  - 
+  - Used 0.6mm width for small signals
 
 
 |- |2007-05-06 |v1.4 |
 
   - Use a 12-pin connector instead of a 13-pin connector
-  - 
+  - Added a 10nF capacitor between the ground and the reference ground
 
 
 |- |2007-01-21 |v1.3 |
 
-  - 
+  - Added a diode followed by a resistor to provide a hardware current protection on the power supply regulator board
 
 
 |} 
@@ -1056,7 +1056,7 @@ The rectifier board has the following roles:
 
   - It converts the alternating current into direct current,
   - It selects the best supply voltage for every power supply outputs,
-  - 
+  - It limits and measures the current.
 
 
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
@@ -1184,18 +1184,18 @@ Changes
 
 {|border="1" |- |2007-07-28 |v1.4.1 |
 
-  - 
+  - Used 0.6mm width for small signals
 
 
 |- |2007-05-06 |v1.4 |
 
   - Use a 12-pin connector instead of a 13-pin connector
-  - 
+  - Added a 10nF capacitor between the ground and the reference ground
 
 
 |- |2007-01-21 |v1.3 |
 
-  - 
+  - Added a diode followed by a resistor to provide a hardware current protection on the power supply regulator board
 
 
 |} 
@@ -1206,7 +1206,7 @@ The rectifier board has the following roles:
 
   - It converts the alternating current into direct current,
   - It selects the best supply voltage for every power supply outputs,
-  - 
+  - It limits and measures the current.
 
 
 The choice to have all these functionalities on one board was motivated by the PCB form factor, the available space in the final LPS box, a logical grouping of these functionalities and the ability to limit the number of interconnections on the power supply lines.
@@ -1334,18 +1334,18 @@ Changes
 
 {|border="1" |- |2007-07-28 |v1.4.1 |
 
-  - 
+  - Used 0.6mm width for small signals
 
 
 |- |2007-05-06 |v1.4 |
 
   - Use a 12-pin connector instead of a 13-pin connector
-  - 
+  - Added a 10nF capacitor between the ground and the reference ground
 
 
 |- |2007-01-21 |v1.3 |
 
-  - 
+  - Added a diode followed by a resistor to provide a hardware current protection on the power supply regulator board
 
 
 |}
