@@ -1,0 +1,12 @@
+The quote:
+
+<blockquote>
+
+ * Line a
+ * Line b
+ </blockquote>
+
+
+
+and this is the end.
+
