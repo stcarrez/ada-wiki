@@ -282,12 +282,13 @@ package body Wiki.Render.Wiki is
          return;
       end if;
       Engine.Set_Format (Empty_Formats);
-      if Engine.Empty_Line and then  Engine.Quote_Level > 0 then
+      Engine.Output.Write (LF);
+      if Engine.Quote_Level > 0 then
          for Level in 1 .. Engine.Quote_Level loop
             Engine.Output.Write (Engine.Tags (Blockquote_Start).all);
          end loop;
+         Engine.Output.Write (' ');
       end if;
-      Engine.Output.Write (LF);
       Engine.Empty_Previous_Line := Engine.Empty_Line;
       Engine.Empty_Line := True;
       Engine.Need_Newline := False;
@@ -379,6 +380,9 @@ package body Wiki.Render.Wiki is
 
          when Nodes.N_QUOTE =>
             Engine.Render_Quote (Node.Title, Node.Link_Attr);
+
+         when Nodes.N_BLOCKQUOTE =>
+            Engine.Add_Blockquote (Node.Level);
 
          when Nodes.N_TAG_START =>
             Engine.Render_Tag (Doc, Node);
@@ -476,12 +480,15 @@ package body Wiki.Render.Wiki is
       end if;
    end Add_Paragraph;
 
+   --  ------------------------------
    --  Add a blockquote (<blockquote>).  The level indicates the blockquote nested level.
    --  The blockquote must be closed at the next header.
+   --  ------------------------------
    procedure Add_Blockquote (Engine : in out Wiki_Renderer;
                              Level    : in Natural) is
    begin
-      null;
+      Engine.Quote_Level := Level;
+      Engine.New_Line;
    end Add_Blockquote;
 
    --  ------------------------------
@@ -514,7 +521,7 @@ package body Wiki.Render.Wiki is
       --end if;
       Engine.Need_Paragraph := False;
       Engine.Close_Paragraph;
-      Engine.Output.Write (Helpers.LF);
+      Engine.New_Line (False);
       Engine.List_Index := Engine.List_Index + 1;
       Engine.List_Levels (Engine.List_Index) := Level;
       Engine.Indent_Level := Engine.Indent_Level + 2;
@@ -736,11 +743,11 @@ package body Wiki.Render.Wiki is
                   Engine.New_Line;
                end if;
             elsif not Engine.Empty_Line or else not Helpers.Is_Space (Last_Char) then
-               if Engine.Empty_Line and Engine.Quote_Level > 0 then
-                  for Level in 1 .. Engine.Quote_Level loop
-                     Engine.Output.Write (Engine.Tags (Blockquote_Start).all);
-                  end loop;
-               end if;
+               --  if Engine.Empty_Line and Engine.Quote_Level > 0 then
+               --   for Level in 1 .. Engine.Quote_Level loop
+               --      Engine.Output.Write (Engine.Tags (Blockquote_Start).all);
+               --   end loop;
+               --  end if;
                if Engine.In_List and Engine.UL_List_Level + Engine.OL_List_Level > 0 then
                   if Engine.UL_List_Level > Engine.OL_List_Level then
                      Engine.Add_List_Item (Engine.UL_List_Level, False);
@@ -793,7 +800,7 @@ package body Wiki.Render.Wiki is
             Col := Col + 1;
          end if;
          if I = Text'First and then Col > 0 then
-            Engine.Output.Write (LF);
+            Engine.New_Line (False);
             Col := 0;
          end if;
          Engine.Output.Write (Text (I));
@@ -929,7 +936,7 @@ package body Wiki.Render.Wiki is
 
          when BLOCKQUOTE_TAG =>
             Engine.Set_Format (Empty_Formats);
-            Engine.Need_Separator_Line;
+            --  Engine.Need_Separator_Line;
             Engine.Close_Paragraph;
             Engine.Quote_Level := Engine.Quote_Level + 1;
             if Engine.Html_Blockquote then
@@ -1025,6 +1032,7 @@ package body Wiki.Render.Wiki is
                Engine.Output.Write ("</blockquote>" & LF & LF);
             elsif Engine.Quote_Level = 0 then
                Engine.New_Line;
+               Engine.Need_Newline := True;
             end if;
 
          when others =>
