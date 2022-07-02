@@ -246,7 +246,12 @@ package body Wiki.Parsers is
          --  Pop any blockquote until we reach our same level.
          --  By doin so, we close every element that was opened within the blockquote.
          while Current.Quote_Level > Level loop
-            Pop_Block (P, Trim => Right);
+            Flush_Block (P, Trim => Right);
+            if Current.Kind = Nodes.N_Blockquote then
+               Block_Stack.Pop (P.Blocks);
+            else
+               Pop_Block (P, Trim => Right);
+            end if;
             Empty := Block_Stack.Is_Empty (P.Blocks);
             exit when Empty;
             Current := Block_Stack.Current (P.Blocks);
