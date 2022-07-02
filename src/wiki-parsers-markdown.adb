@@ -497,6 +497,8 @@ package body Wiki.Parsers.Markdown is
          Pos := 1;
       end loop Spaces;
 
+      --  Handle blockquote first because it can contain its specific
+      --  formatting (lists, headers, pre-formatted, ...).
       if Parser.In_Blockquote and Count <= 3 then
          Level := Buffers.Count_Occurence (Block, Pos, '>');
          if Level = 0 then
@@ -556,11 +558,17 @@ package body Wiki.Parsers.Markdown is
                Parser.Preformat_Indent := Count;
                Parser.Preformat_Fence := ' ';
                Parser.Preformat_Fcount := 0;
+               Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_PARAGRAPH);
                Push_Block (Parser, N_PREFORMAT);
                Common.Append (Parser.Text, Block, Pos);
                return;
             end if;
-            if ((Count > 0 and Count < Level) or Parser.Previous_Line_Empty)
+            if Count = Level and Parser.Previous_Line_Empty then
+               Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_PARAGRAPH);
+               Flush_Block (Parser);
+               Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_PARAGRAPH);
+
+            elsif ((Count > 0 and Count < Level) or Parser.Previous_Line_Empty)
               and C not in Wiki.Helpers.LF | Wiki.Helpers.CR
             then
                Pop_Block (Parser);
@@ -600,6 +608,7 @@ package body Wiki.Parsers.Markdown is
          Parser.Previous_Line_Empty := False;
       end if;
 
+      --
       if C = '>' and Count <= 3 then
          Count := Buffers.Count_Occurence (Block, Pos, '>');
          Push_Block (Parser, Nodes.N_BLOCKQUOTE, Count);
