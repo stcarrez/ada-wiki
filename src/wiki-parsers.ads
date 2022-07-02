@@ -269,6 +269,9 @@ private
                           From : in Positive;
                           To   : in Positive);
 
+   --  Flush current block and add an horizontal rule in the document.
+   procedure Add_Horizontal_Rule (Parser : in out Parser_Type);
+
    NAME_ATTR  : aliased constant String := "name";
    HREF_ATTR  : aliased constant String := "href";
    LANG_ATTR  : aliased constant String := "lang";

@@ -171,6 +171,19 @@ package body Wiki.Parsers is
    end Add_Header;
 
    --  ------------------------------
+   --  Flush current block and add an horizontal rule in the document.
+   --  ------------------------------
+   procedure Add_Horizontal_Rule (Parser : in out Parser_Type) is
+   begin
+      Flush_Text (Parser, Trim => Right);
+      Pop_All (Parser);
+      Parser.Previous_Line_Empty := False;
+      if not Parser.Context.Is_Hidden then
+         Parser.Context.Filters.Add_Node (Parser.Document, Wiki.Nodes.N_HORIZONTAL_RULE);
+      end if;
+   end Add_Horizontal_Rule;
+
+   --  ------------------------------
    --  Push a new block kind on the block stack.
    --  ------------------------------
    procedure Flush_Block (Parser : in out Parser_Type;

@@ -643,21 +643,13 @@ package body Wiki.Parsers.Markdown is
 
          when '_' =>
             if Count <= 3 and Is_Thematic_Break (Block, Pos, C) then
-               Pop_All (Parser);
-               Parser.Previous_Line_Empty := False;
-               if not Parser.Context.Is_Hidden then
-                  Parser.Context.Filters.Add_Node (Parser.Document, Wiki.Nodes.N_HORIZONTAL_RULE);
-               end if;
+               Add_Horizontal_Rule (Parser);
                return;
             end if;
 
          when '*' | '-' | '+' =>
             if Count <= 3 and then C in '*' | '-' and then Is_Thematic_Break (Block, Pos, C) then
-               Pop_All (Parser);
-               Parser.Previous_Line_Empty := False;
-               if not Parser.Context.Is_Hidden then
-                  Parser.Context.Filters.Add_Node (Parser.Document, Wiki.Nodes.N_HORIZONTAL_RULE);
-               end if;
+               Add_Horizontal_Rule (Parser);
                return;
             end if;
 

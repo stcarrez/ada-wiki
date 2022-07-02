@@ -871,15 +871,10 @@ package body Wiki.Parsers.Common is
       if not Wiki.Helpers.Is_Newline (Text.Content (From + Count)) then
          return;
       end if;
-
-      Flush_Text (Parser, Trim => Right);
-      Pop_List (Parser);
-      Pop_Block (Parser);
-      if not Parser.Context.Is_Hidden then
-         Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_HORIZONTAL_RULE);
-      end if;
       Text := null;
       From := 1;
+
+      Add_Horizontal_Rule (Parser);
    end Parse_Horizontal_Rule;
 
    --  Parse a preformatted header block.
