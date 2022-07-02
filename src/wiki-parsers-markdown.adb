@@ -568,7 +568,7 @@ package body Wiki.Parsers.Markdown is
          end;
       end if;
 
-      if Count > 3 and Parser.Current_Node not in Nodes.N_LIST_ITEM then
+      if Count > 3 and Parser.Current_Node not in Nodes.N_LIST_ITEM | Nodes.N_LIST_START then
          if Parser.Current_Node in Nodes.N_LIST_START | Nodes.N_NUM_LIST_START then
             Pop_Block (Parser);
          end if;
