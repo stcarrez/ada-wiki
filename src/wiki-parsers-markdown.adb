@@ -56,7 +56,8 @@ package body Wiki.Parsers.Markdown is
    function Is_Thematic_Break (Text      : in Wiki.Buffers.Buffer_Access;
                                From      : in Positive;
                                Token     : in Wiki.Strings.WChar) return Boolean;
-   procedure Get_List_Level (Text   : in out Wiki.Buffers.Buffer_Access;
+   procedure Get_List_Level (Parser : in out Parser_Type;
+                             Text   : in out Wiki.Buffers.Buffer_Access;
                              From   : in out Positive;
                              Level  : out Integer;
                              Indent : out Natural);
@@ -164,7 +165,8 @@ package body Wiki.Parsers.Markdown is
       return Count >= 3;
    end Is_Thematic_Break;
 
-   procedure Get_List_Level (Text   : in out Wiki.Buffers.Buffer_Access;
+   procedure Get_List_Level (Parser : in out Parser_Type;
+                             Text   : in out Wiki.Buffers.Buffer_Access;
                              From   : in out Positive;
                              Level  : out Integer;
                              Indent : out Natural) is
@@ -196,6 +198,11 @@ package body Wiki.Parsers.Markdown is
                   exit Main when Block = null;
                   Buffers.Skip_Spaces (Block, Pos, Count);
                   exit Main when Count = 0;
+
+                  --  A list that interrupts a paragraph must start with 1.
+                  exit Main when Level /= 1
+                    and not (Parser.Current_Node in Nodes.N_List_Item)
+                    and Parser.Text_Buffer.Length > 0;
                   Indent := Indent + Count;
                   Text := Block;
                   From := Pos;
@@ -691,7 +698,7 @@ package body Wiki.Parsers.Markdown is
             declare
                Indent : Natural;
             begin
-               Get_List_Level (Block, Pos, Level, Indent);
+               Get_List_Level (Parser, Block, Pos, Level, Indent);
                if Level >= 0 then
                   Indent := Indent + Count;
                   Pop_List (Parser, Indent, '0', Level);
