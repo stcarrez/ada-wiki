@@ -814,16 +814,28 @@ package body Wiki.Parsers.Markdown is
       else
          Scan_Link :
          while Block /= null loop
-            declare
-               Last : constant Natural := Block.Last;
-            begin
-               while Pos <= Last loop
+            while Pos <= Block.Last loop
+               C := Block.Content (Pos);
+               exit Scan_Link when C = Expect or Wiki.Helpers.Is_Space_Or_Newline (C);
+               if C = '\' then
+                  Buffers.Next (Block, Pos);
+                  exit Scan_Link when Block = null;
                   C := Block.Content (Pos);
-                  exit Scan_Link when C = Expect or Wiki.Helpers.Is_Space_Or_Newline (C);
+                  if Is_Escapable (C) then
+                     Buffers.Next (Block, Pos);
+                     exit Scan_Link when Block = null;
+                     Append (Link, C);
+                  else
+                     Append (Link, '\');
+                     Append (Link, C);
+                     Buffers.Next (Block, Pos);
+                     exit Scan_Link when Block = null;
+                  end if;
+               else
                   Pos := Pos + 1;
                   Append (Link, C);
-               end loop;
-            end;
+               end if;
+            end loop;
             Block := Block.Next_Block;
             Pos := 1;
          end loop Scan_Link;
@@ -833,16 +845,28 @@ package body Wiki.Parsers.Markdown is
          Buffers.Next (Block, Pos);
          Scan_Title :
          while Block /= null loop
-            declare
-               Last : constant Natural := Block.Last;
-            begin
-               while Pos <= Last loop
+            while Pos <= Block.Last loop
+               C := Block.Content (Pos);
+               exit Scan_Title when C = '"' or C = ''';
+               if C = '\' then
+                  Buffers.Next (Block, Pos);
+                  exit Scan_Title when Block = null;
                   C := Block.Content (Pos);
-                  exit Scan_Title when C = '"' or C = ''';
-                  Append (Title, C);
+                  if Is_Escapable (C) then
+                     Append (Title, C);
+                     Buffers.Next (Block, Pos);
+                     exit Scan_Title when Block = null;
+                  else
+                     Append (Title, '\');
+                     Append (Title, C);
+                     Buffers.Next (Block, Pos);
+                     exit Scan_Title when Block = null;
+                  end if;
+               else
                   Pos := Pos + 1;
-               end loop;
-            end;
+                  Append (Title, C);
+               end if;
+            end loop;
             Block := Block.Next_Block;
             Pos := 1;
          end loop Scan_Title;
