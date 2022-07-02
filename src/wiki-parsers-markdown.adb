@@ -171,6 +171,7 @@ package body Wiki.Parsers.Markdown is
       Block : Wiki.Buffers.Buffer_Access := Text;
       Pos   : Positive := From;
       C     : Strings.WChar;
+      Limit : Natural := 9;
    begin
       Level := 0;
       Indent := 0;
@@ -183,9 +184,12 @@ package body Wiki.Parsers.Markdown is
             while Pos <= Last loop
                C := Block.Content (Pos);
                if C >= '0' and C <= '9' then
+                  --  Must not exceed 9 digits
+                  exit Main when Limit = 0;
                   Level := Level * 10;
                   Level := Level + WChar'Pos (C) - WChar'Pos ('0');
                   Indent := Indent + 1;
+                  Limit := Limit - 1;
                elsif C = '.' or C = ')' then
                   Indent := Indent + 1;
                   Buffers.Next (Block, Pos);
@@ -583,14 +587,7 @@ package body Wiki.Parsers.Markdown is
             return;
          end if;
          if Count = 0 and Parser.Current_Node = N_LIST_ITEM then
-            if not Parser.Previous_Line_Empty then
-               Parser.Previous_Line_Empty := True;
-               return;
-            end if;
-            Pop_Block (Parser);
-            if Parser.Current_Node in N_LIST_START | N_NUM_LIST_START then
-               Pop_Block (Parser);
-            end if;
+            Parser.Previous_Line_Empty := True;
             return;
          end if;
       else
