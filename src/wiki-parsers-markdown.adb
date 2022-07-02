@@ -568,18 +568,6 @@ package body Wiki.Parsers.Markdown is
          end;
       end if;
 
-      if Count > 3 and Parser.Current_Node not in Nodes.N_LIST_ITEM | Nodes.N_LIST_START then
-         if Parser.Current_Node in Nodes.N_LIST_START | Nodes.N_NUM_LIST_START then
-            Pop_Block (Parser);
-         end if;
-         Parser.Preformat_Indent := Count;
-         Parser.Preformat_Fence := ' ';
-         Parser.Preformat_Fcount := 0;
-         Push_Block (Parser, N_PREFORMAT);
-         Common.Append (Parser.Text, Block, Pos);
-         return;
-      end if;
-
       if C in Wiki.Helpers.LF | Wiki.Helpers.CR then
          Parser.In_Html := False;
          if Parser.Current_Node = Nodes.N_PARAGRAPH then
@@ -616,11 +604,26 @@ package body Wiki.Parsers.Markdown is
          Count := Buffers.Count_Occurence (Block, Pos, '>');
          Push_Block (Parser, Nodes.N_BLOCKQUOTE, Count);
          Buffers.Next (Block, Pos, Count);
-         Buffers.Skip_Optional_Space (Block, Pos);
+         Buffers.Skip_Spaces (Block, Pos, Count);
          if Block = null then
             return;
          end if;
+         if Count > 0 then
+            Count := Count - 1;
+         end if;
          C := Block.Content (Pos);
+      end if;
+
+      if Count > 3 and Parser.Current_Node not in Nodes.N_LIST_ITEM | Nodes.N_LIST_START then
+         if Parser.Current_Node in Nodes.N_LIST_START | Nodes.N_NUM_LIST_START then
+            Pop_Block (Parser);
+         end if;
+         Parser.Preformat_Indent := Count;
+         Parser.Preformat_Fence := ' ';
+         Parser.Preformat_Fcount := 0;
+         Push_Block (Parser, N_PREFORMAT);
+         Common.Append (Parser.Text, Block, Pos);
+         return;
       end if;
 
       case C is
