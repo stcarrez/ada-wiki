@@ -537,7 +537,7 @@ package body Wiki.Parsers.Markdown is
             Parser.Previous_Line_Empty := True;
             return;
          end if;
-         if Parser.Preformat_Fence = ' ' and Count <= 3 then
+         if Parser.Preformat_Fence = ' ' and Count < Parser.Preformat_Indent - 3 then
             Pop_Block (Parser);
          else
             if C = Parser.Preformat_Fence then
@@ -579,7 +579,7 @@ package body Wiki.Parsers.Markdown is
                Flush_Block (Parser);
                Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_PARAGRAPH);
 
-            elsif ((Count > 0 and Count < Level) or Parser.Previous_Line_Empty)
+            elsif ((Count > 0 and Count < Level) and Parser.Previous_Line_Empty)
               and C not in Wiki.Helpers.LF | Wiki.Helpers.CR
             then
                Pop_Block (Parser);
@@ -666,12 +666,16 @@ package body Wiki.Parsers.Markdown is
                return;
             end if;
 
-            if Pos + 1 <= Block.Last and then Helpers.Is_Space (Block.Content (Pos + 1)) then
+            if (Pos + 1 <= Block.Last and then Helpers.Is_Space (Block.Content (Pos + 1)))
+              or else (Parser.Current_Node = Nodes.N_LIST_ITEM)
+            then
                Level := Count + 1;
                Buffers.Next (Block, Pos);
                Buffers.Skip_Spaces (Block, Pos, Count);
                Level := Level + Count;
-               Pop_List (Parser, Level, C, 0);
+               if Level <= Get_Current_Level (Parser) then
+                  Pop_List (Parser, Level, C, 0);
+               end if;
                if not Is_List_Item (Parser, Level) then
                   if Parser.Current_Node /= Nodes.N_BLOCKQUOTE then
                      Pop_Block (Parser);
