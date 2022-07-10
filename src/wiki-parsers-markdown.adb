@@ -201,7 +201,7 @@ package body Wiki.Parsers.Markdown is
 
                   --  A list that interrupts a paragraph must start with 1.
                   exit Main when Level /= 1
-                    and not (Parser.Current_Node in Nodes.N_List_Item)
+                    and not (Parser.Current_Node in Nodes.N_LIST_ITEM)
                     and Parser.Text_Buffer.Length > 0;
                   Indent := Indent + Count;
                   Text := Block;
@@ -457,6 +457,7 @@ package body Wiki.Parsers.Markdown is
                                    Strings.To_WString (Link),
                                    Strings.To_WString (Title));
          Text := null;
+         From := 1;
          return;
       end if;
    end Parse_Link_Definition;

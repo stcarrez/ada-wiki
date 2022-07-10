@@ -166,47 +166,43 @@ package body Wiki.Parsers.MediaWiki is
 
       Main :
       while Buffer /= null loop
-         declare
-            Last : Natural := Buffer.Last;
-         begin
-            while Pos <= Buffer.Last loop
-               C := Buffer.Content (Pos);
-               case C is
-                  when ''' =>
-                     Parse_Bold_Italic (Parser, Buffer, Pos);
-                     exit Main when Buffer = null;
+         while Pos <= Buffer.Last loop
+            C := Buffer.Content (Pos);
+            case C is
+               when ''' =>
+                  Parse_Bold_Italic (Parser, Buffer, Pos);
+                  exit Main when Buffer = null;
 
-                  when '/' =>
-                     Parse_Format_Double (Parser, Buffer, Pos, '/', Wiki.EMPHASIS);
-                     exit Main when Buffer = null;
+               when '/' =>
+                  Parse_Format_Double (Parser, Buffer, Pos, '/', Wiki.EMPHASIS);
+                  exit Main when Buffer = null;
 
-                  when '[' =>
-                     Common.Parse_Link (Parser, Buffer, Pos);
-                     exit Main when Buffer = null;
+               when '[' =>
+                  Common.Parse_Link (Parser, Buffer, Pos);
+                  exit Main when Buffer = null;
 
-                  when '{' =>
-                     Common.Parse_Template (Parser, Buffer, Pos, '{');
-                     exit Main when Buffer = null;
+               when '{' =>
+                  Common.Parse_Template (Parser, Buffer, Pos, '{');
+                  exit Main when Buffer = null;
 
-                  when CR | LF =>
-                     Append (Parser.Text, ' ');
-                     Pos := Pos + 1;
+               when CR | LF =>
+                  Append (Parser.Text, ' ');
+                  Pos := Pos + 1;
 
-                  when '<' =>
-                     Common.Parse_Html_Element (Parser, Buffer, Pos, Start => True);
-                     exit Main when Buffer = null;
+               when '<' =>
+                  Common.Parse_Html_Element (Parser, Buffer, Pos, Start => True);
+                  exit Main when Buffer = null;
 
-                  when '&' =>
-                     Common.Parse_Entity (Parser, Buffer, Pos);
-                     exit Main when Buffer = null;
+               when '&' =>
+                  Common.Parse_Entity (Parser, Buffer, Pos);
+                  exit Main when Buffer = null;
 
-                  when others =>
-                     Append (Parser.Text, C);
-                     Pos := Pos + 1;
+               when others =>
+                  Append (Parser.Text, C);
+                  Pos := Pos + 1;
 
-               end case;
-            end loop;
-         end;
+            end case;
+         end loop;
          Buffer := Buffer.Next_Block;
          Pos := 1;
       end loop Main;
