@@ -24,7 +24,7 @@ package body Wiki.Helpers is
    --  ------------------------------
    function Is_Space (C : in Wiki.Strings.WChar) return Boolean is
    begin
-      return Ada.Wide_Wide_Characters.Handling.Is_Space (C) or C = HT or C = NBSP;
+      return Ada.Wide_Wide_Characters.Handling.Is_Space (C) or else C = HT or else C = NBSP;
    end Is_Space;
 
    --  ------------------------------
@@ -32,7 +32,7 @@ package body Wiki.Helpers is
    --  ------------------------------
    function Is_Space_Or_Newline (C : in Wiki.Strings.WChar) return Boolean is
    begin
-      return Is_Space (C) or Ada.Wide_Wide_Characters.Handling.Is_Line_Terminator (C);
+      return Is_Space (C) or else Ada.Wide_Wide_Characters.Handling.Is_Line_Terminator (C);
    end Is_Space_Or_Newline;
 
    --  ------------------------------
@@ -60,7 +60,7 @@ package body Wiki.Helpers is
          return False;
       else
          return Text (Text'First .. Text'First + 6) = "http://"
-           or Text (Text'First .. Text'First + 7) = "https://";
+           or else Text (Text'First .. Text'First + 7) = "https://";
       end if;
    end Is_Url;
 
@@ -72,7 +72,7 @@ package body Wiki.Helpers is
    function Is_Image_Extension (Ext : in Wiki.Strings.WString) return Boolean is
       S : constant Wiki.Strings.WString := Ada.Wide_Wide_Characters.Handling.To_Lower (Ext);
    begin
-      return S = ".png" or S = ".jpg" or S = ".gif" or S = ".jpeg";
+      return S in ".png" | ".jpg" | ".gif" | ".jpeg";
    end Is_Image_Extension;
 
    --  ------------------------------
@@ -85,15 +85,15 @@ package body Wiki.Helpers is
    begin
       if No_End_Tag (Current_Tag) then
          return True;
-      elsif Current_Tag = Tag and Tag_Omission (Current_Tag) then
+      elsif Current_Tag = Tag and then Tag_Omission (Current_Tag) then
          return True;
       else
          case Current_Tag is
             when DT_TAG | DD_TAG =>
-               return Tag = DD_TAG or Tag = DL_TAG or Tag = DT_TAG;
+               return Tag in DD_TAG | DL_TAG | DT_TAG;
 
             when TD_TAG =>
-               return Tag = TD_TAG or Tag = TR_TAG or Tag = TH_TAG;
+               return Tag in TD_TAG | TR_TAG | TH_TAG;
 
             when TR_TAG =>
                return False;
@@ -124,13 +124,13 @@ package body Wiki.Helpers is
       if Dimension = "original" then
          Width  := Natural'Last;
          Height := Natural'Last;
-      elsif Dimension = "default" or Dimension = "upright" then
+      elsif Dimension in "default" | "upright" then
          Width  := 800;
          Height := 0;
       else
          Pos  := Wiki.Strings.Index (Dimension, "x");
          Last := Wiki.Strings.Index (Dimension, "px");
-         if Pos > Dimension'First and Last + 1 /= Pos then
+         if Pos > Dimension'First and then Last + 1 /= Pos then
             Width := Natural'Wide_Wide_Value (Dimension (Dimension'First .. Pos - 1));
          elsif Last > 0 then
             Width := Natural'Wide_Wide_Value (Dimension (Dimension'First .. Last - 1));

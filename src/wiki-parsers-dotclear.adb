@@ -95,9 +95,9 @@ package body Wiki.Parsers.Dotclear is
 
       procedure Append_Position (Position : in Wiki.Strings.WString) is
       begin
-         if Position = "L" or Position = "G" then
+         if Position in "L" | "G" then
             Wiki.Attributes.Append (Parser.Attributes, String '("align"), "left");
-         elsif Position = "R" or Position = "D" then
+         elsif Position in "R" | "D" then
             Wiki.Attributes.Append (Parser.Attributes, String '("align"), "right");
          elsif Position = "C" then
             Wiki.Attributes.Append (Parser.Attributes, String '("align"), "center");
@@ -268,7 +268,7 @@ package body Wiki.Parsers.Dotclear is
             Common.Parse_List (Parser, Buffer, Pos);
 
          when others =>
-            if Parser.Current_Node /= N_PARAGRAPH and Parser.Current_Node /= N_BLOCKQUOTE then
+            if Parser.Current_Node not in N_PARAGRAPH | N_BLOCKQUOTE then
                Pop_List (Parser);
                Push_Block (Parser, N_PARAGRAPH);
             end if;

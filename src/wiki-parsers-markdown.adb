@@ -116,10 +116,7 @@ package body Wiki.Parsers.Markdown is
                             Stop     : in out Delimiter_Type);
 
    function Is_Escapable (C : in Wiki.Strings.WChar) return Boolean is
-     ((C >= '!' and C <= '/')
-       or (C >= ':' and C <= '@')
-       or (C >= '{' and C <= '~')
-       or (C >= '[' and C <= '`'));
+     (C in '!' .. '/' | ':' .. '@' | '{' .. '~' | '[' .. '`');
 
    function Get_Header_Level (Text   : in Wiki.Buffers.Buffer_Access;
                               From   : in Positive) return Natural is
@@ -165,11 +162,6 @@ package body Wiki.Parsers.Markdown is
       return Count >= 3;
    end Is_Thematic_Break;
 
-   procedure Test (Parser : in out Parser_Type) is
-   begin
-      null;
-   end Test;
-
    procedure Get_List_Level (Parser : in out Parser_Type;
                              Text   : in out Wiki.Buffers.Buffer_Access;
                              From   : in out Positive;
@@ -190,14 +182,14 @@ package body Wiki.Parsers.Markdown is
          begin
             while Pos <= Last loop
                C := Block.Content (Pos);
-               if C >= '0' and C <= '9' then
+               if C in '0' .. '9' then
                   --  Must not exceed 9 digits
                   exit Main when Limit = 0;
                   Level := Level * 10;
                   Level := Level + WChar'Pos (C) - WChar'Pos ('0');
                   Indent := Indent + 1;
                   Limit := Limit - 1;
-               elsif C = '.' or C = ')' then
+               elsif C in '.' | ')' then
                   Indent := Indent + 1;
                   Buffers.Next (Block, Pos);
                   exit Main when Block = null;
@@ -206,8 +198,8 @@ package body Wiki.Parsers.Markdown is
 
                   --  A list that interrupts a paragraph must start with 1.
                   exit Main when Level /= 1
-                    and not (Parser.Current_Node in Nodes.N_LIST_ITEM)
-                    and Parser.Text_Buffer.Length > 0;
+                    and then not (Parser.Current_Node in Nodes.N_LIST_ITEM)
+                    and then Parser.Text_Buffer.Length > 0;
                   Indent := Indent + Count;
                   Text := Block;
                   From := Pos;
@@ -346,7 +338,7 @@ package body Wiki.Parsers.Markdown is
          begin
             while Pos <= Last loop
                C := Block.Content (Pos);
-               if Skip_Spaces and Is_Space_Or_Newline (C) then
+               if Skip_Spaces and then Is_Space_Or_Newline (C) then
                   Pos := Pos + 1;
                else
                   if Skip_Spaces then
@@ -516,7 +508,7 @@ package body Wiki.Parsers.Markdown is
 
       --  Handle blockquote first because it can contain its specific
       --  formatting (lists, headers, pre-formatted, ...).
-      if Parser.In_Blockquote and Count <= 3 then
+      if Parser.In_Blockquote and then Count <= 3 then
          Level := Buffers.Count_Occurence (Block, Pos, '>');
          if Level = 0 then
             loop
@@ -536,14 +528,15 @@ package body Wiki.Parsers.Markdown is
 
       --  Continue a pre-formatted block.
       if Parser.Current_Node = N_PREFORMAT then
-         if Parser.Preformat_Fence = ' ' and Count = 0
-           and C in Wiki.Helpers.LF | Wiki.Helpers.CR
-           and not Parser.Previous_Line_Empty
+         if Parser.Preformat_Fence = ' '
+           and then Count = 0
+           and then C in Wiki.Helpers.LF | Wiki.Helpers.CR
+           and then not Parser.Previous_Line_Empty
          then
             Parser.Previous_Line_Empty := True;
             return;
          end if;
-         if Parser.Preformat_Fence = ' ' and Count < Parser.Preformat_Indent - 3 then
+         if Parser.Preformat_Fence = ' ' and then Count < Parser.Preformat_Indent - 3 then
             Pop_Block (Parser);
          else
             if C = Parser.Preformat_Fence then
@@ -580,13 +573,13 @@ package body Wiki.Parsers.Markdown is
                Common.Append (Parser.Text, Block, Pos);
                return;
             end if;
-            if Count = Level and Parser.Previous_Line_Empty then
+            if Count = Level and then Parser.Previous_Line_Empty then
                Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_PARAGRAPH);
                Flush_Block (Parser);
                Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_PARAGRAPH);
 
-            elsif ((Count > 0 and Count < Level) and Parser.Previous_Line_Empty)
-              and C not in Wiki.Helpers.LF | Wiki.Helpers.CR
+            elsif Count > 0 and then Count < Level and then Parser.Previous_Line_Empty
+              and then C not in Wiki.Helpers.LF | Wiki.Helpers.CR
             then
                Pop_Block (Parser);
             end if;
@@ -599,17 +592,17 @@ package body Wiki.Parsers.Markdown is
             Pop_Block (Parser);
             return;
          end if;
-         if Count = 0 and Parser.Current_Node = N_LIST_ITEM then
+         if Count = 0 and then Parser.Current_Node = N_LIST_ITEM then
             Parser.Previous_Line_Empty := True;
             return;
          end if;
       else
-         if Parser.Previous_Line_Empty and Parser.Current_Node = Nodes.N_LIST_ITEM then
+         if Parser.Previous_Line_Empty and then Parser.Current_Node = Nodes.N_LIST_ITEM then
             Flush_Block (Parser);
             Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_PARAGRAPH);
             Parser.Is_Empty_Paragraph := True;
 
-         elsif Parser.Previous_Line_Empty and Parser.Current_Node = Nodes.N_PARAGRAPH then
+         elsif Parser.Previous_Line_Empty and then Parser.Current_Node = Nodes.N_PARAGRAPH then
             Flush_Block (Parser);
             Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_PARAGRAPH);
             Parser.Is_Empty_Paragraph := True;
@@ -619,7 +612,7 @@ package body Wiki.Parsers.Markdown is
       end if;
 
       --
-      if C = '>' and Count <= 3 then
+      if C = '>' and then Count <= 3 then
          Count := Buffers.Count_Occurence (Block, Pos, '>');
          Push_Block (Parser, Nodes.N_BLOCKQUOTE, Count);
          Buffers.Next (Block, Pos, Count);
@@ -633,7 +626,7 @@ package body Wiki.Parsers.Markdown is
          C := Block.Content (Pos);
       end if;
 
-      if Count > 3 and Parser.Current_Node not in Nodes.N_LIST_ITEM | Nodes.N_LIST_START then
+      if Count > 3 and then Parser.Current_Node not in Nodes.N_LIST_ITEM | Nodes.N_LIST_START then
          if Parser.Current_Node in Nodes.N_LIST_START | Nodes.N_NUM_LIST_START then
             Pop_Block (Parser);
          end if;
@@ -661,7 +654,7 @@ package body Wiki.Parsers.Markdown is
             end if;
 
          when '_' =>
-            if Count <= 3 and Is_Thematic_Break (Block, Pos, C) then
+            if Count <= 3 and then Is_Thematic_Break (Block, Pos, C) then
                Add_Horizontal_Rule (Parser);
                return;
             end if;
@@ -725,7 +718,7 @@ package body Wiki.Parsers.Markdown is
             end;
 
          when '~' | '`' =>
-            if Count > 0 and Parser.Current_Node in Nodes.N_LIST_ITEM then
+            if Count > 0 and then Parser.Current_Node in Nodes.N_LIST_ITEM then
                Common.Parse_Preformatted (Parser, Block, Pos, C, True);
             else
                Common.Parse_Preformatted (Parser, Block, Pos, C, False);
@@ -770,13 +763,13 @@ package body Wiki.Parsers.Markdown is
             if Block = null then
                return;
             end if;
-            if Parser.Previous_Line_Empty and Parser.Current_Node /= N_PARAGRAPH then
+            if Parser.Previous_Line_Empty and then Parser.Current_Node /= N_PARAGRAPH then
                Pop_List (Parser);
                Push_Block (Parser, N_PARAGRAPH);
             end if;
 
          when others =>
-            if Parser.Previous_Line_Empty and Parser.Current_Node /= N_PARAGRAPH then
+            if Parser.Previous_Line_Empty and then Parser.Current_Node /= N_PARAGRAPH then
                Pop_List (Parser);
                Push_Block (Parser, N_PARAGRAPH);
             end if;
@@ -822,7 +815,7 @@ package body Wiki.Parsers.Markdown is
             Block := Block.Next_Block;
             Pos := 1;
          end loop Scan_Bracket_Link;
-         if Block /= null and C = '>' then
+         if Block /= null and then C = '>' then
             Buffers.Next (Block, Pos);
          end if;
       else
@@ -830,7 +823,7 @@ package body Wiki.Parsers.Markdown is
          while Block /= null loop
             while Pos <= Block.Last loop
                C := Block.Content (Pos);
-               exit Scan_Link when C = Expect or Wiki.Helpers.Is_Space_Or_Newline (C);
+               exit Scan_Link when C = Expect or else Wiki.Helpers.Is_Space_Or_Newline (C);
                if C = '\' then
                   Buffers.Next (Block, Pos);
                   exit Scan_Link when Block = null;
@@ -861,7 +854,7 @@ package body Wiki.Parsers.Markdown is
          while Block /= null loop
             while Pos <= Block.Last loop
                C := Block.Content (Pos);
-               exit Scan_Title when C = '"' or C = ''';
+               exit Scan_Title when C in '"' | ''';
                if C = '\' then
                   Buffers.Next (Block, Pos);
                   exit Scan_Title when Block = null;
@@ -904,7 +897,7 @@ package body Wiki.Parsers.Markdown is
       Numdelims     : Natural := 1;
    begin
       Buffers.Next (Block, Pos);
-      if C /= ''' and C /= '"' then
+      if C not in ''' | '"' then
          Count_Delimiters :
          while Block /= null loop
             while Pos <= Block.Last loop
@@ -927,19 +920,19 @@ package body Wiki.Parsers.Markdown is
          After_Space   : constant Boolean := Helpers.Is_Space_Or_Newline (After_Char);
          After_Punct   : constant Boolean := Helpers.Is_Punctuation (After_Char);
          Left_Flanking : constant Boolean
-            := Numdelims > 0 and not After_Space
-                and (not After_Punct or Before_Space or Before_Punct);
+            := Numdelims > 0 and then not After_Space
+                and then (not After_Punct or else Before_Space or else Before_Punct);
          Right_Flanking : constant Boolean
-            := Numdelims > 0 and not Before_Space
-                and (not Before_Punct or After_Space or After_Punct);
+            := Numdelims > 0 and then not Before_Space
+                and then (not Before_Punct or else After_Space or else After_Punct);
       begin
          if C = '_' then
-            Delim.Can_Open := Left_Flanking and (not Right_Flanking or Before_Punct);
-            Delim.Can_Close := Right_Flanking and (not Left_Flanking or After_Punct);
-         elsif C = ''' or C = '"' then
+            Delim.Can_Open := Left_Flanking and then (not Right_Flanking or else Before_Punct);
+            Delim.Can_Close := Right_Flanking and then (not Left_Flanking or else After_Punct);
+         elsif C in ''' | '"' then
             Delim.Can_Open := Left_Flanking
-                 and (not Right_Flanking or Before_Char = '(' or Before_Char = '[')
-                 and Before_Char /= ']' and Before_Char /= ')';
+                 and then (not Right_Flanking or else Before_Char in '(' | '[')
+                 and then Before_Char not in ']' | ')';
             Delim.Can_Close := Right_Flanking;
          else
             Delim.Can_Open := Left_Flanking;
@@ -1164,12 +1157,12 @@ package body Wiki.Parsers.Markdown is
             C    : Wiki.Strings.WChar;
          begin
             while Pos <= Last loop
-               if Block = Limit and Pos = Last_Pos then
+               if Block = Limit and then Pos = Last_Pos then
                   return;
                end if;
                C := Block.Content (Pos);
-               if C = Wiki.Helpers.CR or C = Wiki.Helpers.LF then
-                  if Parser.Format (STRONG) or Parser.Format (EMPHASIS) then
+               if C = Wiki.Helpers.CR or else C = Wiki.Helpers.LF then
+                  if Parser.Format (STRONG) or else Parser.Format (EMPHASIS) then
                      Flush_Text (Parser);
                      Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_LINE_BREAK);
                   else
@@ -1177,20 +1170,20 @@ package body Wiki.Parsers.Markdown is
                   end if;
                elsif C = '\' then
                   Buffers.Next (Block, Pos);
-                  if Block = Limit and Pos = Last_Pos then
+                  if Block = Limit and then Pos = Last_Pos then
                      return;
                   end if;
                   C := Block.Content (Pos);
                   if Wiki.Helpers.Is_Newline (C)
-                    and not Parser.Format (CODE)
-                    and (Limit /= null or Pos < Last)
+                    and then not Parser.Format (CODE)
+                    and then (Limit /= null or else Pos < Last)
                   then
                      Flush_Text (Parser);
                      if not Parser.Context.Is_Hidden then
                         Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_LINE_BREAK);
                      end if;
 
-                  elsif Parser.Format (CODE) or not Is_Escapable (C) then
+                  elsif Parser.Format (CODE) or else not Is_Escapable (C) then
                      Append (Parser.Text, '\');
                      Append (Parser.Text, C);
                   else
@@ -1318,7 +1311,7 @@ package body Wiki.Parsers.Markdown is
 
                when '*' =>
                   Get_Delimiter (Block, Pos, Prev, C, Delim);
-                  if Delim.Can_Open or Delim.Can_Close then
+                  if Delim.Can_Open or else Delim.Can_Close then
                      Delim.Marker := M_STAR;
                      Delimiters.Append (Delim);
                   end if;
@@ -1327,7 +1320,7 @@ package body Wiki.Parsers.Markdown is
 
                when '_' =>
                   Get_Delimiter (Block, Pos, Prev, C, Delim);
-                  if Delim.Can_Open or Delim.Can_Close then
+                  if Delim.Can_Open or else Delim.Can_Close then
                      Delim.Marker := M_UNDERSCORE;
                      Delimiters.Append (Delim);
                   end if;
@@ -1336,7 +1329,7 @@ package body Wiki.Parsers.Markdown is
 
                when '[' =>
                   Get_Delimiter (Block, Pos, Prev, C, Delim);
-                  if Delim.Can_Open or Delim.Can_Close then
+                  if Delim.Can_Open or else Delim.Can_Close then
                      Delim.Marker := M_LINK;
                      Delimiters.Append (Delim);
                   end if;
@@ -1349,7 +1342,7 @@ package body Wiki.Parsers.Markdown is
                         Delim : constant Delimiter_Vectors.Reference_Type
                          := Delimiters.Reference (Iter);
                      begin
-                        if Delim.Marker in M_LINK | M_IMAGE and Delim.Link_Pos = 0 then
+                        if Delim.Marker in M_LINK | M_IMAGE and then Delim.Link_Pos = 0 then
                            Parse_Link (Block, Pos, Delim);
                            exit;
                         end if;
@@ -1425,7 +1418,7 @@ package body Wiki.Parsers.Markdown is
                   if Block /= null then
                      Buffers.Next (Block, Pos);
                   end if;
-               elsif Delim.Marker = M_LINK and Delim.Link_Pos > 0 then
+               elsif Delim.Marker = M_LINK and then Delim.Link_Pos > 0 then
                   Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
                   Block := Delim.Block;
                   Pos := Delim.Pos;
@@ -1466,7 +1459,7 @@ package body Wiki.Parsers.Markdown is
                   --   Parser.Context.Filters.Add_Text (Parser.Document,
                   --   Text (Pos .. Delim.Pos - 1), Parser.Format);
                   --  end if;
-                  if Delim.Marker in M_STAR | M_UNDERSCORE and Delim.Count = 2 then
+                  if Delim.Marker in M_STAR | M_UNDERSCORE and then Delim.Count = 2 then
                      Parser.Format (STRONG) := True; --  not Parser.Format (STRONG);
 
                   elsif Delim.Marker in M_STAR | M_UNDERSCORE then
@@ -1483,15 +1476,18 @@ package body Wiki.Parsers.Markdown is
                   end loop;
                elsif Delim.Count > 0 and then Delim.Can_Close then
                   Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
-                  if Delim.Marker in M_STAR | M_UNDERSCORE and Delim.Count = 2
-                    and Parser.Format (STRONG)
+                  if Delim.Marker in M_STAR | M_UNDERSCORE
+                    and then Delim.Count = 2
+                    and then Parser.Format (STRONG)
                   then
                      Flush_Text (Parser);
                      Parser.Format (STRONG) := False;
-                  elsif Delim.Marker in M_STAR | M_UNDERSCORE and Parser.Format (EMPHASIS) then
+                  elsif Delim.Marker in M_STAR | M_UNDERSCORE
+                    and then Parser.Format (EMPHASIS)
+                  then
                      Flush_Text (Parser);
                      Parser.Format (EMPHASIS) := False;
-                  elsif Delim.Marker = M_CODE and Parser.Format (CODE) then
+                  elsif Delim.Marker = M_CODE and then Parser.Format (CODE) then
                      Flush_Text (Parser);
                      Parser.Format (CODE) := False;
                   else

@@ -44,6 +44,7 @@ package Wiki.Streams.Text_IO is
    --  we reach the end of line.  Returns in `Last` the last valid position in the
    --  `Into` buffer.  When there is no character to read, return True in
    --  the `Eof` indicator.
+   overriding
    procedure Read (Input : in out File_Input_Stream;
                    Into  : in out Wiki.Strings.WString;
                    Last  : out Natural;

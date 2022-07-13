@@ -99,9 +99,12 @@ package body Wiki.Parsers is
          begin
             exit when Top.Kind in Nodes.N_LIST_START | Nodes.N_NUM_LIST_START
               and then Top.Level <= Level and then Top.Marker = Marker;
-            exit when Top.Kind = Nodes.N_NUM_LIST_START and Top.Number + 1 = Number;
+            exit when Top.Kind = Nodes.N_NUM_LIST_START and then Top.Number + 1 = Number;
             exit when Top.Kind = Nodes.N_BLOCKQUOTE;
-            if Top.Kind = Nodes.N_LIST_ITEM and Top.Level <= Level and Top.Marker = Marker then
+            if Top.Kind = Nodes.N_LIST_ITEM
+              and then Top.Level <= Level
+              and then Top.Marker = Marker
+            then
                Pop_Block (P);
                exit;
             end if;
@@ -140,7 +143,7 @@ package body Wiki.Parsers is
             if Content (Last) = '=' then
                exit when not Ignore_Token;
                Seen_Token := True;
-            elsif Content (Last) = ' ' or Content (Last) = HT then
+            elsif Content (Last) in ' ' | HT then
                Ignore_Token := not Seen_Token;
             else
                exit;
@@ -200,7 +203,7 @@ package body Wiki.Parsers is
             else
                Flush_Text (Parser, Trim);
             end if;
-         elsif Top.Kind = Nodes.N_LIST_ITEM or Top.Kind = Nodes.N_TABLE then
+         elsif Top.Kind in Nodes.N_LIST_ITEM | Nodes.N_TABLE then
             if Parser.Parse_Inline /= null then
                Parser.Parse_Inline (Parser, Parser.Text_Buffer.First'Unchecked_Access);
                Parser.Text_Buffer.Clear;
@@ -242,16 +245,16 @@ package body Wiki.Parsers is
       if not Empty then
          Current := Block_Stack.Current (P.Blocks);
       end if;
-      if Kind = Nodes.N_BLOCKQUOTE and not Empty then
+      if Kind = Nodes.N_BLOCKQUOTE and then not Empty then
          if Current.Quote_Level = Level then
             return;
          end if;
-         if Current.Quote_Level = 0 or Current.Kind /= Nodes.N_PARAGRAPH then
+         if Current.Quote_Level = 0 or else Current.Kind /= Nodes.N_PARAGRAPH then
             Pop_Block (P, Trim => Right);
          else
             Flush_Text (P, Trim => Right);
          end if;
-         if P.Parse_Inline /= null and P.Text_Buffer.Length > 0 then
+         if P.Parse_Inline /= null and then P.Text_Buffer.Length > 0 then
             P.Parse_Inline (P, P.Text_Buffer.First'Unchecked_Access);
             Buffers.Clear (P.Text_Buffer);
          end if;
@@ -260,7 +263,7 @@ package body Wiki.Parsers is
          --  By doin so, we close every element that was opened within the blockquote.
          while Current.Quote_Level > Level loop
             Flush_Block (P, Trim => Right);
-            if Current.Kind = Nodes.N_Blockquote then
+            if Current.Kind = Nodes.N_BLOCKQUOTE then
                Block_Stack.Pop (P.Blocks);
             else
                Pop_Block (P, Trim => Right);
@@ -396,7 +399,7 @@ package body Wiki.Parsers is
    begin
       Parser.Line_Buffer.Clear;
       Fill (Parser.Line_Buffer);
-      if Parser.Is_Last_Line and Parser.Line_Buffer.First.Last = 0 then
+      if Parser.Is_Last_Line and then Parser.Line_Buffer.First.Last = 0 then
          Buffer := null;
       else
          Buffer := Parser.Line_Buffer.First'Unchecked_Access;
@@ -497,8 +500,8 @@ package body Wiki.Parsers is
          return 0;
       elsif Link (Link'First .. Link'First + 5) = "Image:" then
          return Link'First + 6;
-      elsif Link (Link'First .. Link'First + 4) /= "File:" and
-        Link (Link'First .. Link'First + 5) /= "Image:"
+      elsif Link (Link'First .. Link'First + 4) /= "File:"
+        and then Link (Link'First .. Link'First + 5) /= "Image:"
       then
          return 0;
       else
@@ -665,10 +668,11 @@ package body Wiki.Parsers is
       if Tag = Wiki.UNKNOWN_TAG then
          if Name = "noinclude" then
             Flush_Text (P, Trim => None);
-            P.Context.Is_Hidden := Kind = Html_Parser.HTML_START and P.Context.Is_Included;
+            P.Context.Is_Hidden := Kind = Html_Parser.HTML_START and then P.Context.Is_Included;
          elsif Name = "includeonly" then
             Flush_Text (P, Trim => None);
-            P.Context.Is_Hidden := not (Kind = Html_Parser.HTML_START and P.Context.Is_Included);
+            P.Context.Is_Hidden := not (Kind = Html_Parser.HTML_START
+                                          and then P.Context.Is_Included);
          end if;
       elsif Kind = Wiki.Html_Parser.HTML_START then
          Start_Element (P, Tag, Attributes);
@@ -706,7 +710,7 @@ package body Wiki.Parsers is
       end if;
 
       --  When we are within a <pre> HTML element, switch to HTML to emit the text as is.
-      if Tag = PRE_TAG and P.Context.Syntax /= SYNTAX_HTML then
+      if Tag = PRE_TAG and then P.Context.Syntax /= SYNTAX_HTML then
          P.Previous_Syntax := P.Context.Syntax;
          P.Set_Syntax (SYNTAX_HTML);
       end if;
@@ -740,12 +744,12 @@ package body Wiki.Parsers is
          P.Context.Filters.Pop_Node (P.Document, Tag);
       end if;
 
-      if Tag = PRE_TAG and P.Pre_Tag_Counter > 0 then
+      if Tag = PRE_TAG and then P.Pre_Tag_Counter > 0 then
          P.Pre_Tag_Counter := P.Pre_Tag_Counter - 1;
       end if;
 
       --  Switch back to the previous syntax when we reached the </pre> HTML element.
-      if P.Previous_Syntax /= P.Context.Syntax and Tag = PRE_TAG then
+      if P.Previous_Syntax /= P.Context.Syntax and then Tag = PRE_TAG then
          P.Set_Syntax (P.Previous_Syntax);
       end if;
    end End_Element;
@@ -819,17 +823,17 @@ package body Wiki.Parsers is
          --  11 U+0080   U+07FF   2  110xxxxx 10xxxxxx
          --  16 U+0800   U+FFFF   3  1110xxxx 10xxxxxx 10xxxxxx
          --  21 U+10000  U+1FFFFF 4  11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-         if Val >= 16#80# and Pos <= Content'Last then
+         if Val >= 16#80# and then Pos <= Content'Last then
             Val := Shift_Left (Val, 6);
             Val := Val or (Character'Pos (Content (Pos)) and 16#3F#);
             Pos := Pos + 1;
-            if Val <= 16#37FF# or Pos > Content'Last then
+            if Val <= 16#37FF# or else Pos > Content'Last then
                Val := Val and 16#07ff#;
             else
                Val := Shift_Left (Val, 6);
                Val := Val or (Character'Pos (Content (Pos)) and 16#3F#);
                Pos := Pos + 1;
-               if Val <= 16#EFFFF# or Pos > Content'Last then
+               if Val <= 16#EFFFF# or else Pos > Content'Last then
                   Val := Val and 16#FFFF#;
                else
                   Val := Shift_Left (Val, 6);

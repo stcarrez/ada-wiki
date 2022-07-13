@@ -72,7 +72,7 @@ package body Wiki.Render.Html is
       Wiki.Strings.Append (Result, Prefix);
       for I in 1 .. Engine.Section_Level loop
          Value := Engine.Current_Section (I);
-         if Value > 0 or not Empty then
+         if Value > 0 or else not Empty then
             declare
                N : constant Strings.WString := Positive'Wide_Wide_Image (Value);
             begin
@@ -93,19 +93,11 @@ package body Wiki.Render.Html is
    --  ------------------------------
    function Has_Html_Paragraph (Engine : in Html_Renderer) return Boolean is
    begin
-      return Engine.Html_Tag = Wiki.SPAN_TAG
-        or Engine.Html_Tag = Wiki.A_TAG
-        or Engine.Html_Tag = Wiki.EM_TAG
-        or Engine.Html_Tag = Wiki.STRONG_TAG
-        or Engine.Html_Tag = Wiki.SMALL_TAG
-        or Engine.Html_Tag = Wiki.B_TAG
-        or Engine.Html_Tag = Wiki.I_TAG
-        or Engine.Html_Tag = Wiki.U_TAG
-        or Engine.Html_Tag = Wiki.S_TAG
-        or Engine.Html_Tag = Wiki.SUB_TAG
-        or Engine.Html_Tag = Wiki.SUP_TAG
-        or Engine.Html_Tag = Wiki.INS_TAG
-        or Engine.Html_Tag = Wiki.DEL_TAG;
+      return Engine.Html_Tag in Wiki.SPAN_TAG
+        | Wiki.A_TAG | Wiki.EM_TAG | Wiki.STRONG_TAG
+        | Wiki.SMALL_TAG | Wiki.B_TAG | Wiki.I_TAG
+        | Wiki.U_TAG | Wiki.S_TAG | Wiki.SUB_TAG
+        | Wiki.SUP_TAG | Wiki.INS_TAG | Wiki.DEL_TAG;
    end Has_Html_Paragraph;
 
    --  ------------------------------
@@ -157,7 +149,7 @@ package body Wiki.Render.Html is
             end if;
 
          when Wiki.Nodes.N_HORIZONTAL_RULE =>
-            if Engine.Html_Level = 0 or not Engine.Has_Html_Paragraph then
+            if Engine.Html_Level = 0 or else not Engine.Has_Html_Paragraph then
                Engine.Close_Paragraph;
                Engine.Add_Blockquote (0);
             end if;
@@ -166,7 +158,7 @@ package body Wiki.Render.Html is
          when Wiki.Nodes.N_PARAGRAPH =>
             --  Close the paragraph and start a new one except if the current HTML
             --  element is within a paragraph (ex: a, b, i, u, span, ...).
-            if Engine.Html_Level = 0 or not Engine.Has_Html_Paragraph then
+            if Engine.Html_Level = 0 or else not Engine.Has_Html_Paragraph then
                Engine.Close_Paragraph;
                Engine.Need_Paragraph := True;
             end if;
@@ -253,31 +245,19 @@ package body Wiki.Render.Html is
       if Node.Tag_Start = Wiki.P_TAG then
          Engine.Has_Paragraph := True;
          Engine.Need_Paragraph := False;
-      elsif Node.Tag_Start = Wiki.UL_TAG
-        or Node.Tag_Start = Wiki.OL_TAG
-        or Node.Tag_Start = Wiki.DL_TAG
-        or Node.Tag_Start = Wiki.DT_TAG
-        or Node.Tag_Start = Wiki.DD_TAG
-        or Node.Tag_Start = Wiki.LI_TAG
-        or Node.Tag_Start = Wiki.H1_TAG
-        or Node.Tag_Start = Wiki.H2_TAG
-        or Node.Tag_Start = Wiki.H3_TAG
-        or Node.Tag_Start = Wiki.H4_TAG
-        or Node.Tag_Start = Wiki.H5_TAG
-        or Node.Tag_Start = Wiki.H6_TAG
-        or Node.Tag_Start = Wiki.DIV_TAG
-        or Node.Tag_Start = Wiki.TABLE_TAG
+      elsif Node.Tag_Start in Wiki.UL_TAG
+        | Wiki.OL_TAG | Wiki.DL_TAG | Wiki.DT_TAG
+        | Wiki.DD_TAG | Wiki.LI_TAG | Wiki.H1_TAG
+        | Wiki.H2_TAG | Wiki.H3_TAG | Wiki.H4_TAG
+        | Wiki.H5_TAG | Wiki.H6_TAG | Wiki.DIV_TAG | Wiki.TABLE_TAG
       then
          Engine.Close_Paragraph;
          Engine.Need_Paragraph := False;
          Engine.Has_Paragraph := False;
          Engine.Open_Paragraph;
-      elsif Node.Tag_Start = Wiki.B_TAG
-        or Node.Tag_Start = Wiki.I_TAG
-        or Node.Tag_Start = Wiki.SPAN_TAG
-        or Node.Tag_Start = Wiki.INS_TAG
-        or Node.Tag_Start = Wiki.DEL_TAG
-        or Node.Tag_Start = Wiki.A_TAG
+      elsif Node.Tag_Start in Wiki.B_TAG
+        | Wiki.I_TAG | Wiki.SPAN_TAG
+        | Wiki.INS_TAG | Wiki.DEL_TAG | Wiki.A_TAG
       then
          Engine.Open_Paragraph;
          Prev_Para := Engine.Has_Paragraph;
@@ -306,20 +286,11 @@ package body Wiki.Render.Html is
       if Node.Tag_Start = Wiki.P_TAG then
          Engine.Has_Paragraph := False;
          Engine.Need_Paragraph := True;
-      elsif Node.Tag_Start = Wiki.UL_TAG
-        or Node.Tag_Start = Wiki.OL_TAG
-        or Node.Tag_Start = Wiki.DL_TAG
-        or Node.Tag_Start = Wiki.DT_TAG
-        or Node.Tag_Start = Wiki.DD_TAG
-        or Node.Tag_Start = Wiki.LI_TAG
-        or Node.Tag_Start = Wiki.H1_TAG
-        or Node.Tag_Start = Wiki.H2_TAG
-        or Node.Tag_Start = Wiki.H3_TAG
-        or Node.Tag_Start = Wiki.H4_TAG
-        or Node.Tag_Start = Wiki.H5_TAG
-        or Node.Tag_Start = Wiki.H6_TAG
-        or Node.Tag_Start = Wiki.DIV_TAG
-        or Node.Tag_Start = Wiki.TABLE_TAG
+      elsif Node.Tag_Start in Wiki.UL_TAG | Wiki.OL_TAG | Wiki.DL_TAG
+        | Wiki.DT_TAG | Wiki.DD_TAG | Wiki.LI_TAG
+        | Wiki.H1_TAG | Wiki.H2_TAG | Wiki.H3_TAG
+        | Wiki.H4_TAG | Wiki.H5_TAG
+        | Wiki.H6_TAG | Wiki.DIV_TAG | Wiki.TABLE_TAG
       then
          Engine.Close_Paragraph;
          Engine.Has_Paragraph := False;
@@ -340,8 +311,10 @@ package body Wiki.Render.Html is
       Level : constant Natural := Node.Level;
       Tag   : String_Access;
    begin
-      if Engine.Enable_Render_TOC and not Engine.TOC_Rendered and not Doc.Is_Using_TOC
-        and Doc.Is_Visible_TOC
+      if Engine.Enable_Render_TOC
+        and then not Engine.TOC_Rendered
+        and then not Doc.Is_Using_TOC
+        and then Doc.Is_Visible_TOC
       then
          Engine.Render_TOC (Doc, 3);
       end if;
@@ -509,7 +482,7 @@ package body Wiki.Render.Html is
       end if;
       Engine.Need_Paragraph := False;
       Engine.Output.Start_Element (Tag);
-      if Tag = "ol" and Level /= 1 then
+      if Tag = "ol" and then Level /= 1 then
          Engine.Output.Write_Attribute ("start", Util.Strings.Image (Level));
       end if;
       Engine.Has_Item := False;
@@ -573,7 +546,7 @@ package body Wiki.Render.Html is
          Engine.Has_Paragraph  := True;
          Engine.Need_Paragraph := False;
       end if;
-      if Engine.Current_Level > 0 and not Engine.Has_Item then
+      if Engine.Current_Level > 0 and then not Engine.Has_Item then
          Engine.Output.Start_Element ("li");
          Engine.Has_Item := True;
       end if;
@@ -753,7 +726,7 @@ package body Wiki.Render.Html is
       if Style'Length > 0 then
          Engine.Output.Write_Wide_Attribute ("style", Style);
       end if;
-      if Title'Length > 0 and Alt'Length = 0 then
+      if Title'Length > 0 and then Alt'Length = 0 then
          Engine.Output.Write_Wide_Attribute ("alt", Title);
       elsif Alt'Length > 0 then
          Engine.Output.Write_Wide_Attribute ("alt", Alt);
@@ -765,7 +738,7 @@ package body Wiki.Render.Html is
       Engine.Output.End_Element ("img");
       if Strings.Length (Frame_Attr) > 0 then
          Engine.Output.End_Element ("div");
-         if Title'Length > 0 and Frame not in "border" | "frameless" | "" then
+         if Title'Length > 0 and then Frame not in "border" | "frameless" | "" then
             Engine.Output.Start_Element ("div");
             Engine.Output.Write_Wide_Attribute ("class", "wiki-img-caption");
             Engine.Output.Write_Wide_Text (Title);

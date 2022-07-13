@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-collectors -- Wiki word and link collectors
---  Copyright (C) 2016, 2020 Stephane Carrez
+--  Copyright (C) 2016, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -76,30 +76,35 @@ package Wiki.Filters.Collectors is
    type Word_Collector_Type_Access is access all Word_Collector_Type'Class;
 
    --  Add a text content with the given format to the document.
+   overriding
    procedure Add_Text (Filter    : in out Word_Collector_Type;
                        Document  : in out Wiki.Documents.Document;
                        Text      : in Wiki.Strings.WString;
                        Format    : in Wiki.Format_Map);
 
    --  Add a link.
+   overriding
    procedure Add_Link (Filter     : in out Word_Collector_Type;
                        Document   : in out Wiki.Documents.Document;
                        Name       : in Wiki.Strings.WString;
                        Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Add an image.
+   overriding
    procedure Add_Image (Filter     : in out Word_Collector_Type;
                         Document   : in out Wiki.Documents.Document;
                         Name       : in Wiki.Strings.WString;
                         Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Add a quote.
+   overriding
    procedure Add_Quote (Filter     : in out Word_Collector_Type;
                         Document   : in out Wiki.Documents.Document;
                         Name       : in Wiki.Strings.WString;
                         Attributes : in out Wiki.Attributes.Attribute_List);
 
    --  Add a text block that is pre-formatted.
+   overriding
    procedure Add_Preformatted (Filter   : in out Word_Collector_Type;
                                Document : in out Wiki.Documents.Document;
                                Text     : in Wiki.Strings.WString;

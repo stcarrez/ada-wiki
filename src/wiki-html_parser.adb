@@ -57,17 +57,17 @@ package body Wiki.Html_Parser is
 
    --  Check if the character is valid for a name attribute.
    function Is_Valid_For_Name (C : in Wiki.Strings.WChar) return Boolean
-      is (C > ' ' and C /= '/' and C /= ''' and C /= '"' and C /= '>' and C /= '=');
+      is (C > ' ' and then C not in '/' | ''' | '"' | '>' | '=');
 
    --  Check if the character is valid for a value attribute without quotes.
    function Is_Valid_For_Value (C : in Wiki.Strings.WChar) return Boolean
-      is (C > ' ' and C /= '/' and C /= ''' and C /= '"' and C /= '>'
-          and C /= '=' and C /= '<' and C /= '`');
+      is (C > ' ' and then C not in '/' | ''' | '"' | '>'
+           | '=' | '<' | '`');
 
    function Is_Letter (C : in Wiki.Strings.WChar) return Boolean is
    begin
-      return C > ' ' and C /= ':' and C /= '>' and C /= ''' and C /= '"'
-        and C /= '/' and C /= '=' and C /= '<';
+      return C > ' ' and then C not in ':' | '>' | ''' | '"'
+        | '/' | '=' | '<';
    end Is_Letter;
 
    function Is_Empty (Parser : in Parser_Type) return Boolean is
@@ -144,7 +144,7 @@ package body Wiki.Html_Parser is
       Token : Wiki.Strings.WChar := Parser.Separator;
       Pos   : Positive := From;
    begin
-      if Parser.State /= State_Parse_Attribute_Value or Token = '=' then
+      if Parser.State /= State_Parse_Attribute_Value or else Token = '=' then
          Parser.State := State_Parse_Attribute_Value;
          Token := Text (Pos);
          if Wiki.Helpers.Is_Space_Or_Newline (Token) then
@@ -155,7 +155,7 @@ package body Wiki.Html_Parser is
             end if;
             Token := Text (Pos);
          end if;
-         if Token = ''' or Token = '"' then
+         if Token = ''' or else Token = '"' then
             Parser.Separator := Token;
             Pos := Pos + 1;
          else
@@ -163,7 +163,7 @@ package body Wiki.Html_Parser is
          end if;
       end if;
 
-      if Token /= ''' and Token /= '"' then
+      if Token /= ''' and then Token /= '"' then
          while Pos <= Text'Last loop
             C := Text (Pos);
             if not Is_Valid_For_Value (C) then
@@ -338,7 +338,7 @@ package body Wiki.Html_Parser is
                   return;
                end if;
                Pos := Last;
-               if Parser.State = State_Check_Attribute and Text (Pos) = '>' then
+               if Parser.State = State_Check_Attribute and then Text (Pos) = '>' then
                   Last := Pos + 1;
                   Parser.State := State_None;
                   Process (HTML_END, To_WString (Parser.Elt_Name), Parser.Attributes);
@@ -464,9 +464,9 @@ package body Wiki.Html_Parser is
    use Interfaces;
 
    function From_Hex (C : in Character) return Interfaces.Unsigned_8 is
-      (if C >= '0' and C <= '9' then Character'Pos (C) - Character'Pos ('0')
-      elsif C >= 'A' and C <= 'F' then Character'Pos (C) - Character'Pos ('A') + 10
-      elsif C >= 'a' and C <= 'f' then Character'Pos (C) - Character'Pos ('a') + 10
+      (if C in '0' .. '9' then Character'Pos (C) - Character'Pos ('0')
+      elsif C in 'A' .. 'F' then Character'Pos (C) - Character'Pos ('A') + 10
+      elsif C in 'a' .. 'f' then Character'Pos (C) - Character'Pos ('a') + 10
       else raise Constraint_Error);
 
    function From_Hex (Value : in String) return Wiki.Strings.WChar is

@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-plugins-conditions -- Condition Plugin
---  Copyright (C) 2016, 2020 Stephane Carrez
+--  Copyright (C) 2016, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,7 +45,7 @@ package body Wiki.Plugins.Conditions is
          Pos : Wiki.Attributes.Cursor;
       begin
          Index := Index + 1;
-         if Index > 1 and not Result then
+         if Index > 1 and then not Result then
             Pos := Attributes.Find (Plugin.Params, Wiki.Strings.To_String (Value));
             Result := Attributes.Has_Element (Pos);
          end if;

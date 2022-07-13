@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-autolink -- Autolink filter to identify links in wiki
---  Copyright (C) 2016, 2020 Stephane Carrez
+--  Copyright (C) 2016, 2020, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,6 +43,5 @@ package Wiki.Filters.Autolink is
                        Document  : in out Wiki.Documents.Document;
                        Text      : in Wiki.Strings.WString;
                        Format    : in Wiki.Format_Map);
-
 
 end Wiki.Filters.Autolink;

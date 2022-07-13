@@ -41,7 +41,7 @@ package body Wiki.Streams.Html.Stream is
    overriding
    procedure Newline (Writer : in out Html_Output_Stream) is
    begin
-      if Writer.Indent_Level > 0 and Writer.Text_Length > 0 then
+      if Writer.Indent_Level > 0 and then Writer.Text_Length > 0 then
          Writer.Write (Wiki.Helpers.LF);
          Writer.Empty_Line := True;
       end if;
@@ -143,7 +143,7 @@ package body Wiki.Streams.Html.Stream is
       else
          Close_Current (Stream);
          if Stream.Text_Length = 0 then
-            if not Stream.Empty_Line and Stream.Indent_Level > 0 then
+            if not Stream.Empty_Line and then Stream.Indent_Level > 0 then
                Stream.Write (Wiki.Helpers.LF);
             end if;
             if Stream.Indent_Pos > 1 then

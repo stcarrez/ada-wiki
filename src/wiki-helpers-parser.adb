@@ -79,5 +79,3 @@ begin
    Buffer.Len   := Length (Content);
    Parse (Engine, Buffer'Unchecked_Access, Doc);
 end Wiki.Helpers.Parser;
-
-

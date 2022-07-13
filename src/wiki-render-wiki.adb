@@ -367,7 +367,7 @@ package body Wiki.Render.Wiki is
                F : Format_Map := Node.Format;
             begin
                for I in F'Range loop
-                  F (I) := F (I) or Engine.Current_Style (I);
+                  F (I) := F (I) or else Engine.Current_Style (I);
                end loop;
                Engine.Render_Text (Node.Text, F);
             end;
@@ -516,9 +516,6 @@ package body Wiki.Render.Wiki is
                                 Numbered : in Boolean;
                                 Level    : in Natural) is
    begin
-      --if not Engine.Empty_Line then
-      --   Engine.Add_Line_Break;
-      --end if;
       Engine.Need_Paragraph := False;
       Engine.Close_Paragraph;
       Engine.New_Line (False);
@@ -530,9 +527,6 @@ package body Wiki.Render.Wiki is
    procedure Render_List_End (Engine   : in out Wiki_Renderer;
                               Tag      : in String) is
    begin
-      --if not Engine.Empty_Line then
-      --   Engine.Add_Line_Break;
-      --end if;
       Engine.Need_Paragraph := False;
       Engine.Close_Paragraph;
       Engine.List_Index := Engine.List_Index - 1;
@@ -545,9 +539,6 @@ package body Wiki.Render.Wiki is
    --  ------------------------------
    procedure Render_List_Item_Start (Engine   : in out Wiki_Renderer) is
    begin
-      --if not Engine.Empty_Line then
-      --  Engine.Add_Line_Break;
-      --end if;
       Engine.Need_Paragraph := False;
       Engine.Close_Paragraph;
 
@@ -568,11 +559,7 @@ package body Wiki.Render.Wiki is
    begin
       Engine.Need_Space := False;
       Engine.Close_Paragraph;
---      if not Engine.Empty_Line then
---         Engine.Add_Line_Break;
---      end if;
       Engine.Need_Paragraph := False;
---      Engine.Open_Paragraph;
       if Engine.List_Levels (Engine.List_Index) > 0 then
          Engine.Indent_Level := Engine.Indent_Level - 4;
       else
@@ -599,7 +586,7 @@ package body Wiki.Render.Wiki is
       Lang : constant Strings.WString := Attributes.Get_Attribute (Attrs, "lang");
 
    begin
-      if Engine.Empty_Line and Engine.In_List then
+      if Engine.Empty_Line and then Engine.In_List then
          if Engine.UL_List_Level + Engine.OL_List_Level > 0 then
             if Engine.UL_List_Level > Engine.OL_List_Level then
                Engine.Add_List_Item (Engine.UL_List_Level, False);
@@ -610,7 +597,7 @@ package body Wiki.Render.Wiki is
          Engine.In_List := False;
       end if;
       Engine.Write_Optional_Space;
-      if Engine.Syntax = SYNTAX_DOTCLEAR and Engine.In_Header then
+      if Engine.Syntax = SYNTAX_DOTCLEAR and then Engine.In_Header then
          Engine.Output.Write (Name);
          return;
       end if;
@@ -621,7 +608,7 @@ package body Wiki.Render.Wiki is
             Engine.Output.Write (Engine.Tags (Link_Separator).all);
             Engine.Output.Write (Name);
          end if;
-         if Engine.Allow_Link_Language and Lang'Length > 0 then
+         if Engine.Allow_Link_Language and then Lang'Length > 0 then
             Engine.Output.Write (Engine.Tags (Link_Separator).all);
             Engine.Output.Write (Lang);
          end if;
@@ -666,7 +653,7 @@ package body Wiki.Render.Wiki is
    begin
       Engine.Output.Write (Engine.Tags (Quote_Start).all);
       Engine.Output.Write (Title);
-      if Engine.Allow_Link_Language and Lang'Length > 0 then
+      if Engine.Allow_Link_Language and then Lang'Length > 0 then
          Engine.Output.Write (Engine.Tags (Quote_Separator).all);
          Engine.Output.Write (Lang);
       end if;
@@ -710,7 +697,7 @@ package body Wiki.Render.Wiki is
       Apply_Format : Boolean := True;
       Last_Char    : Strings.WChar;
    begin
-      if Engine.Keep_Content > 0 or Engine.Empty_Line then
+      if Engine.Keep_Content > 0 or else Engine.Empty_Line then
          while Start <= Text'Last and then Helpers.Is_Space_Or_Newline (Text (Start)) loop
             Start := Start + 1;
          end loop;
@@ -748,7 +735,7 @@ package body Wiki.Render.Wiki is
                --      Engine.Output.Write (Engine.Tags (Blockquote_Start).all);
                --   end loop;
                --  end if;
-               if Engine.In_List and Engine.UL_List_Level + Engine.OL_List_Level > 0 then
+               if Engine.In_List and then Engine.UL_List_Level + Engine.OL_List_Level > 0 then
                   if Engine.UL_List_Level > Engine.OL_List_Level then
                      Engine.Add_List_Item (Engine.UL_List_Level, False);
                   else
@@ -775,7 +762,7 @@ package body Wiki.Render.Wiki is
                Engine.Empty_Line := False;
             end if;
          end loop;
-         if not Helpers.Is_Space_Or_Newline (Last_Char) and not Engine.Empty_Line then
+         if not Helpers.Is_Space_Or_Newline (Last_Char) and then not Engine.Empty_Line then
             Engine.Need_Space := True;
          end if;
       end if;
@@ -1060,7 +1047,7 @@ package body Wiki.Render.Wiki is
       end if;
       Engine.Need_Space := False;
       Engine.Has_Item := False;
-      if Need_Newline and not Engine.Empty_Previous_Line then
+      if Need_Newline and then not Engine.Empty_Previous_Line then
          Engine.New_Line;
       end if;
    end Close_Paragraph;

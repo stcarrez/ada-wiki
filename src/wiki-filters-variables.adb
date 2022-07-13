@@ -128,7 +128,7 @@ package body Wiki.Filters.Variables is
          Strings.Wide_Wide_Builders.Append (Result, Text (First .. Pos - 1));
          First := Pos;
          Name_Start := Pos + 1;
-         if Text (Name_Start) = '(' or Text (Name_Start) = '{' then
+         if Text (Name_Start) in '(' | '{' then
             Match_End := (if Text (Name_Start) = '(' then ')' else '}');
             Name_Start := Name_Start + 1;
             Name_End := Name_Start;

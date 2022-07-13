@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-streams-html -- Wiki HTML output stream
---  Copyright (C) 2011, 2012, 2013, 2015, 2016 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2022 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,7 +32,7 @@ package body Wiki.Streams.Html is
    begin
       --  If "?" or over, no escaping is needed (this covers
       --  most of the Latin alphabet)
-      if Code > 16#3F# or Code <= 16#20# then
+      if Code > 16#3F# or else Code <= 16#20# then
          Stream.Write (Char);
       elsif Char = '<' then
          Stream.Write ("&lt;");

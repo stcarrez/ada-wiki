@@ -113,7 +113,6 @@ private package Wiki.Parsers.Common with Preelaborate is
                                       Text    : in out Wiki.Buffers.Buffer_Access;
                                       From    : in out Positive);
 
-
    --  Parse a link.
    --  Example:
    --    [name]

@@ -44,7 +44,7 @@ package body Wiki.Parsers.Textile is
       if Text'Length <= 4 or else Text (Text'First) /= 'h' then
          return 0;
       end if;
-      if Text (Text'First + 2) /= '.' or not Is_Space (Text (Text'First + 3)) then
+      if Text (Text'First + 2) /= '.' or else not Is_Space (Text (Text'First + 3)) then
          return 0;
       end if;
       case Text (Text'First + 1) is
@@ -138,7 +138,7 @@ package body Wiki.Parsers.Textile is
          Next (Block, Pos);
          while Block /= null loop
             C := Block.Content (Pos);
-            exit when C = '(' or C = '!';
+            exit when C in '(' | '!';
             Append (Link, C);
             Next (Block, Pos);
          end loop;
@@ -147,7 +147,7 @@ package body Wiki.Parsers.Textile is
             Next (Block, Pos);
             while Block /= null loop
                C := Block.Content (Pos);
-               exit when C = ')' or C = '!';
+               exit when C in ')' | '!';
                Append (Title, C);
                Next (Block, Pos);
             end loop;
@@ -275,7 +275,7 @@ package body Wiki.Parsers.Textile is
 
          when 'h' =>
             Level := Get_Header_Level (Buffer.Content (1 .. Buffer.Last));
-            if Level > 0 and Level <= 6 then
+            if Level > 0 and then Level <= 6 then
                Pos := 4;
                Parse_Header (Parser, Buffer, Pos, Level);
                return;

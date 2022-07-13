@@ -168,7 +168,7 @@ package body Wiki.Render.Text is
       if Title'Length /= 0 then
          Engine.Output.Write (Title);
       end if;
-      if Title /= Href and Href'Length /= 0 then
+      if Title /= Href and then Href'Length /= 0 then
          if Title'Length /= 0 then
             Engine.Output.Write (" (");
          end if;
@@ -192,7 +192,7 @@ package body Wiki.Render.Text is
       if Title'Length > 0 then
          Engine.Output.Write (Title);
       end if;
-      if Title'Length > 0 and Desc'Length > 0 then
+      if Title'Length > 0 and then Desc'Length > 0 then
          Engine.Output.Write (' ');
       end if;
       if Desc'Length > 0 then

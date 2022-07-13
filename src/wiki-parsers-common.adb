@@ -97,7 +97,7 @@ package body Wiki.Parsers.Common is
                   end if;
                   C := Block.Content (Pos);
 
-               elsif C = LF or C = CR or C = Marker1 or C = Marker2 then
+               elsif C = LF or else C = CR or else C = Marker1 or else C = Marker2 then
                   Text := Block;
                   From := Pos;
                   return;
@@ -273,7 +273,7 @@ package body Wiki.Parsers.Common is
                   C := Block.Content (Pos);
                   Append (Value, C);
                   Pos := Pos + 1;
-               elsif C = Separator and Index <= Max then
+               elsif C = Separator and then Index <= Max then
                   Add_Attribute (Value);
                   Clear (Value);
                   Pos := Pos + 1;
@@ -293,7 +293,7 @@ package body Wiki.Parsers.Common is
                   Text := Block;
                   From := Pos;
                   return;
-               elsif Length (Value) > 0 or not Wiki.Helpers.Is_Space (C) then
+               elsif Length (Value) > 0 or else not Wiki.Helpers.Is_Space (C) then
                   Append (Value, C);
                   Pos := Pos + 1;
                else
@@ -423,17 +423,14 @@ package body Wiki.Parsers.Common is
             if Pos = 1 then
                return;
             end if;
-            if Value = "border" or Value = "frameless" or Value = "thumb"
-              or Value = "thumbnail"
-            then
+            if Value in "border" | "frameless" | "thumb" | "thumbnail" then
                Wiki.Attributes.Append (Attr, String '("frame"), Value);
 
-            elsif Value = "left" or Value = "right" or Value = "center" or Value = "none" then
+            elsif Value in "left" | "right" | "center" | "none" then
                Wiki.Attributes.Append (Attr, String '("align"), Value);
 
-            elsif Value = "baseline" or Value = "sup" or Value = "super" or Value = "top"
-              or Value  = "text-top" or Value = "middle" or Value = "bottom"
-              or Value = "text-bottom"
+            elsif Value in "baseline" | "sup" | "super" | "top"
+              | "text-top" | "middle" | "bottom" | "text-bottom"
             then
                Wiki.Attributes.Append (Attr, String '("valign"), Value);
 
@@ -475,7 +472,7 @@ package body Wiki.Parsers.Common is
          end if;
          C := Block.Content (Pos);
          if C /= '[' then
-            if Parser.Context.Syntax /= SYNTAX_MEDIA_WIKI and C /= 'h' then
+            if Parser.Context.Syntax /= SYNTAX_MEDIA_WIKI and then C /= 'h' then
                Append (Parser.Text, '[');
                Next (Text, From);
                return;
@@ -527,10 +524,10 @@ package body Wiki.Parsers.Common is
             if Pos > 0 then
                Add_Mediawiki_Image (Link (Pos .. Link'Last));
             else
-               if Parser.Link_Title_First and Link'Length = 0 then
+               if Parser.Link_Title_First and then Link'Length = 0 then
                   Wiki.Attributes.Append (Parser.Attributes, HREF_ATTR, Name);
                end if;
-               if not Parser.Link_Title_First and Name'Length = 0 then
+               if not Parser.Link_Title_First and then Name'Length = 0 then
                   Parser.Context.Filters.Add_Link (Parser.Document, Link, Parser.Attributes);
                else
                   Parser.Context.Filters.Add_Link (Parser.Document, Name, Parser.Attributes);
@@ -664,7 +661,8 @@ package body Wiki.Parsers.Common is
       function Is_List (Kind : in Wiki.Nodes.Node_Kind;
                         C    : in Wiki.Strings.WChar) return Boolean is
       begin
-         return (C = '#' and Kind = N_NUM_LIST_START) or (C = '*' and Kind = N_LIST_START);
+         return (C = '#' and then Kind = N_NUM_LIST_START)
+           or else (C = '*' and then Kind = N_LIST_START);
       end Is_List;
 
       procedure Check_Stack (Stack : in Block_Stack.Element_Type_Array) is
@@ -705,7 +703,9 @@ package body Wiki.Parsers.Common is
       Flush_Text (Parser, Trim => Right);
       Block_Stack.Read (Parser.Blocks, Check_Stack'Access);
 
-      if Parser.Current_Node = N_LIST_ITEM and not (Block.Content (Pos) in '#' | '*') then
+      if Parser.Current_Node = N_LIST_ITEM
+        and then not (Block.Content (Pos) in '#' | '*')
+      then
          Pop_Block (Parser);
       elsif Parser.Current_Node = N_PARAGRAPH then
          Pop_Block (Parser);
@@ -713,7 +713,7 @@ package body Wiki.Parsers.Common is
 
       while Pos <= Last loop
          C := Block.Content (Pos);
-         exit when C /= '*' and C /= '#';
+         exit when C not in '*' | '#';
 
          if Parser.Current_Node in N_LIST_START | N_NUM_LIST_START then
             Push_Block (Parser, Nodes.N_LIST_ITEM, Level, C);
@@ -849,8 +849,8 @@ package body Wiki.Parsers.Common is
       pragma Unreferenced (Text, From);
    begin
       if Parser.Current_Node /= Nodes.N_PARAGRAPH
-         or not Parser.Is_Empty_Paragraph
-         or Wiki.Strings.Length (Parser.Text) > 0
+        or else not Parser.Is_Empty_Paragraph
+        or else Wiki.Strings.Length (Parser.Text) > 0
       then
          Flush_Text (Parser, Trim => Right);
          Pop_List (Parser);
@@ -894,7 +894,7 @@ package body Wiki.Parsers.Common is
       if Count < 3 then
          return;
       end if;
-      if Parser.Context.Syntax /= SYNTAX_MARKDOWN and Count /= 3 then
+      if Parser.Context.Syntax /= SYNTAX_MARKDOWN and then Count /= 3 then
          return;
       end if;
 
@@ -952,7 +952,7 @@ package body Wiki.Parsers.Common is
       Count : constant Natural := Count_Occurence (Text, From, Marker);
       Level : Integer;
    begin
-      if Count = 0 or Count >= 6 then
+      if Count = 0 or else Count >= 6 then
          return;
       end if;
 

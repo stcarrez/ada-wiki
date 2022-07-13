@@ -155,7 +155,7 @@ package body Wiki.Buffers is
             Source.Current := B;
          end if;
          Process (B.Content (B.Last + 1 .. B.Len), Last);
-         exit when Last > B.Len or Last <= B.Last;
+         exit when Last > B.Len or else Last <= B.Last;
          Source.Length := Source.Length + Last - B.Last;
          B.Last := Last;
          exit when Last < B.Len;

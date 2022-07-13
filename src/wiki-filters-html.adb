@@ -108,7 +108,7 @@ package body Wiki.Filters.Html is
    begin
       if Filter.Stack.Is_Empty then
          return;
-      elsif not Filter.Allowed (Tag) and not Filter.Hidden (Tag) then
+      elsif not Filter.Allowed (Tag) and then not Filter.Hidden (Tag) then
          return;
       end if;
 
@@ -116,7 +116,7 @@ package body Wiki.Filters.Html is
       --  allows the end tag to be omitted (ex: a td, tr, td, dd, ...).
       while not Filter.Stack.Is_Empty loop
          Current_Tag := Filter.Stack.Last_Element;
-         exit when Current_Tag = Tag or not Tag_Omission (Current_Tag);
+         exit when Current_Tag = Tag or else not Tag_Omission (Current_Tag);
          if Filter.Hide_Level = 0 then
             Filter_Type (Filter).Pop_Node (Document, Current_Tag);
          end if;
