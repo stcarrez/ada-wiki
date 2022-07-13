@@ -165,6 +165,11 @@ package body Wiki.Parsers.Markdown is
       return Count >= 3;
    end Is_Thematic_Break;
 
+   procedure Test (Parser : in out Parser_Type) is
+   begin
+      null;
+   end Test;
+
    procedure Get_List_Level (Parser : in out Parser_Type;
                              Text   : in out Wiki.Buffers.Buffer_Access;
                              From   : in out Positive;

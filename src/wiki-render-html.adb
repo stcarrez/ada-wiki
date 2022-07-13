@@ -608,9 +608,7 @@ package body Wiki.Render.Html is
          elsif Value'Length = 0 then
             return;
 
-         elsif Name = "lang" or Name = "title" or Name = "rel" or Name = "target"
-           or Name = "style" or Name = "class"
-         then
+         elsif Name in "lang" | "title" | "rel" | "target" | "style" | "class" then
             Engine.Output.Write_Wide_Attribute (Name, Value);
          end if;
       end Render_Attribute;
@@ -767,7 +765,7 @@ package body Wiki.Render.Html is
       Engine.Output.End_Element ("img");
       if Strings.Length (Frame_Attr) > 0 then
          Engine.Output.End_Element ("div");
-         if Title'Length > 0 and Frame /= "border" and Frame /= "frameless" and Frame /= "" then
+         if Title'Length > 0 and Frame not in "border" | "frameless" | "" then
             Engine.Output.Start_Element ("div");
             Engine.Output.Write_Wide_Attribute ("class", "wiki-img-caption");
             Engine.Output.Write_Wide_Text (Title);
@@ -795,9 +793,7 @@ package body Wiki.Render.Html is
          if Value'Length = 0 then
             return;
 
-         elsif Name = "cite" or Name = "title" or Name = "lang"
-           or Name = "style" or Name = "class"
-         then
+         elsif Name in "cite" | "title" | "lang" | "style" | "class" then
             Engine.Output.Write_Wide_Attribute (Name, Value);
          end if;
       end Render_Attribute;
@@ -846,7 +842,7 @@ package body Wiki.Render.Html is
                        Text     : in Wiki.Strings.WString;
                        Format   : in Wiki.Format_Map) is
    begin
-      if not Engine.Has_Html_Paragraph or Engine.Html_Tag = Wiki.P_TAG then
+      if not Engine.Has_Html_Paragraph or else Engine.Html_Tag = Wiki.P_TAG then
          Engine.Open_Paragraph;
       elsif Engine.Need_Paragraph then
          Engine.Output.Write (' ');
@@ -927,7 +923,7 @@ package body Wiki.Render.Html is
    procedure Finish (Engine : in out Html_Renderer;
                      Doc    : in Wiki.Documents.Document) is
    begin
-      if Engine.Enable_Render_TOC and Doc.Is_Visible_TOC then
+      if Engine.Enable_Render_TOC and then Doc.Is_Visible_TOC then
          Engine.Render_TOC (Doc, 4);
       end if;
       Engine.Close_Paragraph;
