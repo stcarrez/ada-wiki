@@ -79,7 +79,7 @@ package body Wiki.Tests is
                      Name    : in String) return Wiki.Plugins.Wiki_Plugin_Access is
          pragma Unreferenced (Factory);
       begin
-         if Name = "if" or Name = "else" or Name = "elsif" or Name = "end" then
+         if Name in "if" | "else" | "elsif" | "end" then
             return Condition'Unchecked_Access;
          elsif Name = "set" then
             return Variables'Unchecked_Access;
@@ -119,7 +119,7 @@ package body Wiki.Tests is
          Engine.Parse (Input'Unchecked_Access, Doc);
          Var_Filter.Add_Variable (String '("file"), Wiki.Strings.To_WString (To_String (T.Name)));
          Util.Measures.Report (Time, "Parse " & To_String (T.Name));
-         if T.Source = Wiki.SYNTAX_HTML or T.Is_Cvt then
+         if T.Source = Wiki.SYNTAX_HTML or else T.Is_Cvt then
             declare
                Renderer    : aliased Wiki.Render.Wiki.Wiki_Renderer;
             begin
