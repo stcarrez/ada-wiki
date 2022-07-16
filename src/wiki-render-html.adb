@@ -16,9 +16,55 @@
 --  limitations under the License.
 -----------------------------------------------------------------------
 with Util.Strings;
+with Wiki.Attributes;
 with Wiki.Helpers;
 with Wiki.Nodes.Lists;
 package body Wiki.Render.Html is
+
+   procedure Close_Paragraph (Engine : in out Html_Renderer);
+   procedure Open_Paragraph (Engine : in out Html_Renderer);
+
+   procedure Render_Tag (Engine : in out Html_Renderer;
+                         Doc    : in Wiki.Documents.Document;
+                         Node   : in Wiki.Nodes.Node_Type);
+
+   --  Render a section header in the document.
+   procedure Render_Header (Engine : in out Html_Renderer;
+                            Doc    : in Wiki.Documents.Document;
+                            Node   : in Wiki.Nodes.Node_Type);
+
+   --  Render the table of content.
+   procedure Render_TOC (Engine : in out Html_Renderer;
+                         Doc    : in Wiki.Documents.Document;
+                         Level  : in Natural);
+
+   --  Render a link.
+   procedure Render_Link (Engine : in out Html_Renderer;
+                          Doc    : in Wiki.Documents.Document;
+                          Title  : in Wiki.Strings.WString;
+                          Attr   : in Wiki.Attributes.Attribute_List);
+
+   procedure Render_Link_Ref (Engine : in out Html_Renderer;
+                              Doc    : in Wiki.Documents.Document;
+                              Label  : in Wiki.Strings.WString);
+
+   --  Render an image.
+   procedure Render_Image (Engine : in out Html_Renderer;
+                           Doc    : in Wiki.Documents.Document;
+                           Title  : in Wiki.Strings.WString;
+                           Attr   : in Wiki.Attributes.Attribute_List);
+
+   --  Render a quote.
+   procedure Render_Quote (Engine : in out Html_Renderer;
+                           Doc    : in Wiki.Documents.Document;
+                           Title  : in Wiki.Strings.WString;
+                           Attr   : in Wiki.Attributes.Attribute_List);
+
+   --  Returns true if the HTML element being included is already contained in a paragraph.
+   --  This include: a, em, strong, small, b, i, u, s, span, ins, del, sub, sup.
+   function Has_Html_Paragraph (Engine : in Html_Renderer) return Boolean;
+
+   procedure Newline (Engine : in out Html_Renderer);
 
    --  ------------------------------
    --  Set the output stream.
@@ -738,7 +784,11 @@ package body Wiki.Render.Html is
       Engine.Output.End_Element ("img");
       if Strings.Length (Frame_Attr) > 0 then
          Engine.Output.End_Element ("div");
-         if Title'Length > 0 and then Frame not in "border" | "frameless" | "" then
+         if Title'Length > 0
+           and then Frame /= "border"
+           and then Frame /= "frameless"
+           and then Frame /= ""
+         then
             Engine.Output.Start_Element ("div");
             Engine.Output.Write_Wide_Attribute ("class", "wiki-img-caption");
             Engine.Output.Write_Wide_Text (Title);

@@ -15,7 +15,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 -----------------------------------------------------------------------
-with Wiki.Attributes;
 with Wiki.Streams.Html;
 with Wiki.Strings;
 with Wiki.Render.Links;
@@ -98,9 +97,6 @@ package Wiki.Render.Html is
 
 private
 
-   procedure Close_Paragraph (Engine : in out Html_Renderer);
-   procedure Open_Paragraph (Engine : in out Html_Renderer);
-
    type Toc_Number_Array is array (1 .. 6) of Natural;
 
    type List_Style_Array is array (1 .. 32) of Boolean;
@@ -127,47 +123,5 @@ private
       Column            : Natural := 0;
       In_Definition     : Boolean := False;
    end record;
-
-   procedure Render_Tag (Engine : in out Html_Renderer;
-                         Doc    : in Wiki.Documents.Document;
-                         Node   : in Wiki.Nodes.Node_Type);
-
-   --  Render a section header in the document.
-   procedure Render_Header (Engine : in out Html_Renderer;
-                            Doc    : in Wiki.Documents.Document;
-                            Node   : in Wiki.Nodes.Node_Type);
-
-   --  Render the table of content.
-   procedure Render_TOC (Engine : in out Html_Renderer;
-                         Doc    : in Wiki.Documents.Document;
-                         Level  : in Natural);
-
-   --  Render a link.
-   procedure Render_Link (Engine : in out Html_Renderer;
-                          Doc    : in Wiki.Documents.Document;
-                          Title  : in Wiki.Strings.WString;
-                          Attr   : in Wiki.Attributes.Attribute_List);
-
-   procedure Render_Link_Ref (Engine : in out Html_Renderer;
-                              Doc    : in Wiki.Documents.Document;
-                              Label  : in Wiki.Strings.WString);
-
-   --  Render an image.
-   procedure Render_Image (Engine : in out Html_Renderer;
-                           Doc    : in Wiki.Documents.Document;
-                           Title  : in Wiki.Strings.WString;
-                           Attr   : in Wiki.Attributes.Attribute_List);
-
-   --  Render a quote.
-   procedure Render_Quote (Engine : in out Html_Renderer;
-                           Doc    : in Wiki.Documents.Document;
-                           Title  : in Wiki.Strings.WString;
-                           Attr   : in Wiki.Attributes.Attribute_List);
-
-   --  Returns true if the HTML element being included is already contained in a paragraph.
-   --  This include: a, em, strong, small, b, i, u, s, span, ins, del, sub, sup.
-   function Has_Html_Paragraph (Engine : in Html_Renderer) return Boolean;
-
-   procedure Newline (Engine : in out Html_Renderer);
 
 end Wiki.Render.Html;
