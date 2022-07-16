@@ -515,6 +515,7 @@ package body Wiki.Render.Wiki is
    procedure Render_List_Start (Engine   : in out Wiki_Renderer;
                                 Numbered : in Boolean;
                                 Level    : in Natural) is
+      pragma Unreferenced (Numbered);
    begin
       Engine.Need_Paragraph := False;
       Engine.Close_Paragraph;
@@ -526,6 +527,7 @@ package body Wiki.Render.Wiki is
 
    procedure Render_List_End (Engine   : in out Wiki_Renderer;
                               Tag      : in String) is
+      pragma Unreferenced (Tag);
    begin
       Engine.Need_Paragraph := False;
       Engine.Close_Paragraph;
@@ -1058,6 +1060,7 @@ package body Wiki.Render.Wiki is
    procedure Render_TOC (Engine : in out Wiki_Renderer;
                          Doc    : in Documents.Document;
                          Level  : in Natural) is
+      pragma Unreferenced (Doc, Level);
    begin
       if Engine.Syntax = SYNTAX_MEDIA_WIKI then
          Engine.Output.Write ("__TOC__");

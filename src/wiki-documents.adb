@@ -47,6 +47,7 @@ package body Wiki.Documents is
 
    procedure End_Block (From : in out Document;
                         Kind  : in Wiki.Nodes.Node_Kind) is
+      pragma Unreferenced (Kind);
    begin
       if From.Current /= null then
          From.Current := From.Current.Parent;

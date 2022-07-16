@@ -76,6 +76,7 @@ package body Wiki.Render.Text is
    procedure Render_List_Start (Engine   : in out Text_Renderer;
                                 Tag      : in String;
                                 Level    : in Natural) is
+      pragma Unreferenced (Tag);
    begin
       if not Engine.Empty_Line then
          Engine.Add_Line_Break;
@@ -92,6 +93,7 @@ package body Wiki.Render.Text is
 
    procedure Render_List_End (Engine   : in out Text_Renderer;
                               Tag      : in String) is
+      pragma Unreferenced (Tag);
    begin
       if not Engine.Empty_Line then
          Engine.Add_Line_Break;
