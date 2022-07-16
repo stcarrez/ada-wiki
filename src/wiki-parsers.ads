@@ -264,11 +264,6 @@ private
                               Kind  : in Wiki.Nodes.Node_Kind;
                               Level : in Integer);
 
-   procedure Append_Text (P    : in out Parser;
-                          Text : in Wiki.Strings.BString;
-                          From : in Positive;
-                          To   : in Positive);
-
    --  Flush current block and add an horizontal rule in the document.
    procedure Add_Horizontal_Rule (Parser : in out Parser_Type);
 

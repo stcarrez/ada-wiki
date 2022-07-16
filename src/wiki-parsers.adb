@@ -56,25 +56,6 @@ package body Wiki.Parsers is
       Add_Preformatted (P.Text);
    end Append_Preformatted;
 
-   procedure Append_Text (P    : in out Parser;
-                          Text : in Wiki.Strings.BString;
-                          From : in Positive;
-                          To   : in Positive) is
-      procedure Add_Text (Content : in Wiki.Strings.WString);
-
-      procedure Add_Text (Content : in Wiki.Strings.WString) is
-      begin
-         P.Context.Filters.Add_Text (P.Document, Content (From .. To), P.Format);
-      end Add_Text;
-
-      procedure Add_Text is
-         new Wiki.Strings.Wide_Wide_Builders.Get (Add_Text);
-      pragma Inline (Add_Text);
-
-   begin
-      Add_Text (P.Text);
-   end Append_Text;
-
    function Is_List_Item (P     : in Parser;
                           Level : in Natural) return Boolean is
    begin
