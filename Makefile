@@ -50,6 +50,7 @@ samples:
 
 $(eval $(call ada_library,$(NAME)))
 $(eval $(call pandoc_build,wikiada-book,$(WIKI_DOC)))
+$(eval $(call alire_publish,alire.toml,wi/wikiada,wikiada-$(VERSION).toml))
 
 genentities:
 	$(GNATMAKE) $(GPRFLAGS) -p -Psupport $(MAKE_ARGS)
