@@ -1,5 +1,6 @@
-Version 1.4.0   - Under development
+Version 1.4.0   - Aug 2022
   - Add support for Textile markup language
+  - Rewrote the Markdown parser to better follow the Common Mark Specification
 
 Version 1.3.2   - Jul 2021
   - Fix \<hr\> and \<br\> generation to follow HTML5 convention.

@@ -4,9 +4,9 @@
 [![Build Status](https://img.shields.io/jenkins/s/http/jenkins.vacs.fr/Ada-Wiki.svg)](https://jenkins.vacs.fr/job/Ada-Wiki/)
 [![Test Status](https://img.shields.io/jenkins/t/http/jenkins.vacs.fr/Ada-Wiki.svg)](https://jenkins.vacs.fr/job/Ada-Wiki/)
 [![codecov](https://codecov.io/gh/stcarrez/ada-wiki/branch/master/graph/badge.svg)](https://codecov.io/gh/stcarrez/ada-wiki)
-[![Download](https://img.shields.io/badge/download-1.3.2-brightgreen.svg)](http://download.vacs.fr/ada-wiki/ada-wiki-1.3.2.tar.gz)
+[![Download](https://img.shields.io/badge/download-1.4.0-brightgreen.svg)](http://download.vacs.fr/ada-wiki/ada-wiki-1.4.0.tar.gz)
 [![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](LICENSE)
-![Commits](https://img.shields.io/github/commits-since/stcarrez/ada-wiki/1.3.2.svg)
+![Commits](https://img.shields.io/github/commits-since/stcarrez/ada-wiki/1.4.0.svg)
 
 Ada Wiki is a small library that provides a Wiki engine supporting several Wiki syntaxes.
 
@@ -22,13 +22,9 @@ for the implementation of the blog and wiki online plugins.
 
 You can play with the Wiki engine by using [Wi2wic](https://github.com/stcarrez/wi2wic) on https://wi2wic.vacs.fr/wi2wic/index.html
 
-## Version 1.4.0   - Under development
+## Version 1.4.0   - Aug 2022
 - Add support for Textile markup language
-
-## Version 1.3.2   - Jul 2021
-- Fix \<hr\> and \<br\> generation to follow HTML5 convention.
-- Add option -H to the render example
-- Fix for GNAT 2021
+- Rewrote the Markdown parser to better follow the Common Mark Specification
 
 [List all versions](https://github.com/stcarrez/ada-wiki/blob/master/NEWS.md)
 
