@@ -270,9 +270,6 @@ package body Wiki.Parsers.Tests is
    --  ------------------------------
    procedure Test_Wiki_Preformatted (T : in out Test) is
    begin
-      Util.Tests.Assert_Equals (T, "<p><code>code</code></p>",
-                                Wiki.Utils.To_Html ("{{{code}}}", SYNTAX_GOOGLE),
-                                "Preformat rendering invalid");
       Util.Tests.Assert_Equals (T, "<pre><code>* code *" & ASCII.LF & "</code></pre>",
                                 Wiki.Utils.To_Html ("///" & LF & "* code *" & LF & "///",
                                                  SYNTAX_DOTCLEAR),
@@ -283,13 +280,6 @@ package body Wiki.Parsers.Tests is
                                 Wiki.Utils.To_Html (" item1 x" & LF & " item2 x" & LF & " item3 x",
                                                  SYNTAX_DOTCLEAR),
                                 "Preformat rendering invalid");
-      Util.Tests.Assert_Equals (T, "<pre><code>item1 x" & ASCII.LF & "item2 x"
-                                & ASCII.LF & "item3 x"
-                                & "</code></pre>",
-                                Wiki.Utils.To_Html (" item1 x" & CR & LF & " item2 x"
-                                  & CR & LF & " item3 x",
-                                                 SYNTAX_DOTCLEAR),
-                                "Preformat rendering invalid");
    end Test_Wiki_Preformatted;
 
    --  ------------------------------
@@ -298,7 +288,7 @@ package body Wiki.Parsers.Tests is
    procedure Test_Wiki_Text_Renderer (T : in out Test) is
    begin
       Util.Tests.Assert_Equals (T, ASCII.LF & "code" & ASCII.LF,
-                                Wiki.Utils.To_Text ("{{{code}}}", SYNTAX_GOOGLE),
+                                Wiki.Utils.To_Text ("`code`", SYNTAX_MARKDOWN),
                                 "Preformat rendering invalid");
       Util.Tests.Assert_Equals (T, ASCII.LF & "bold item my_title" & ASCII.LF,
                                 Wiki.Utils.To_Text ("_bold_ __item__ [my_title]", SYNTAX_GOOGLE),

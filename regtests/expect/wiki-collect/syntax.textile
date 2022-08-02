@@ -1,6 +1,8 @@
 == Words ==
 And 1
+But 1
 Code 1
+Don 1
 First 1
 Formatting 1
 Images 1
@@ -9,20 +11,25 @@ Line 1
 Other 1
 Second 1
 Section 6
+Shaker 1
 She 1
 Subscript 1
 Superscript 1
 Tables 1
 age 1
+and 2
 archie 1
+beautiful 1
 believe 1
 bella 1
 bloc 1
+both 2
 break 1
 citation 1
 code 1
 com 1
 deleted 1
+don 1
 every 1
 fell 1
 h1 1
@@ -30,6 +37,7 @@ h2 1
 h3 1
 h4 1
 h5 1
+hesitate 1
 hobix 1
 http 1
 inserted 1
@@ -37,19 +45,25 @@ italic 1
 item 9
 joan 1
 know 2
+lesson 1
 line 3
 log 1
+make 2
 name 1
+necessary 2
 num 2
 paragraph 2
 really 1
 said 1
 searched 1
 sex 1
+something 1
 strike 1
 strong 1
 then 1
 title 1
+unless 1
+useful 2
 word 1
 == Links ==
 A link 2

@@ -15,16 +15,24 @@ Section h5
 ---------------------------------------------------------
 
 
-  - * item 1  ** item 1.1  ** item 1.2
-  - * item 2
-  - * item 3  # item 3.1  # item 3.2
+  - item 1
 
-num 1
-num 2
+    - item 1.1
+    - item 1.2
+  - item 2
+  - item 3
 
-  Section bloc:
+  1)  item 3.1
+  2)  item 3.2
 
-L1: line 1  L2: line 2  L3: line 3
+
+  1)  num 1
+  2)  num 2
+
+      Section bloc:
+
+
+L1: line 1 L2: line 2 L3: line 3
 
 Formatting
 
@@ -36,18 +44,20 @@ underline
 
 A link (https://link-url/)
 
-  Some code      Pre-formatted
+  Some code
 
-P1
+  Pre-formatted
 
-  P2
+ P1
+  
+A quote 1 A quote 2 A quote 3
+
+ P2
 Table
 
-  | R1:Col1 | R1:Col2 | R1:Col3 |  | R2:Col1 | R2:Col2 | R2:Col3 |
-
-No change
+ No change
 Spaces
 
 
-  End
+ End
 
