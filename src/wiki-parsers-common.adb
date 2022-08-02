@@ -81,7 +81,7 @@ package body Wiki.Parsers.Common is
             Last : Natural := Block.Last;
             C    : Wiki.Strings.WChar;
          begin
-            while Pos <= Last loop
+            while Pos <= Block.Last loop
                C := Block.Content (Pos);
                if C = Escape_Char then
                   Pos := Pos + 1;
@@ -103,6 +103,11 @@ package body Wiki.Parsers.Common is
                   return;
                end if;
                Next (Block, Pos);
+               if Block = null then
+                  Text := null;
+                  From := Pos;
+                  return;
+               end if;
                Wiki.Strings.Wide_Wide_Builders.Append (Into, C);
             end loop;
          end;
