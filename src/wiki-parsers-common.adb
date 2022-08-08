@@ -266,7 +266,7 @@ package body Wiki.Parsers.Common is
                      Block := Block.Next_Block;
                      Pos := 1;
                      if Block = null then
-                        Parser.Read_Line (Block);
+                        Wiki.Parsers.Read_Line (Parser, Block);
                         if Block = null then
                            Text := null;
                            From := 1;
@@ -285,7 +285,7 @@ package body Wiki.Parsers.Common is
                elsif C = Parser.Param_Char then
                   Expand_Parameter (Parser, Block, Pos, Value);
                   if Block = null then
-                     Parser.Read_Line (Block);
+                     Wiki.Parsers.Read_Line (Parser, Block);
                      if Block = null then
                         Text := null;
                         From := 1;
@@ -309,7 +309,7 @@ package body Wiki.Parsers.Common is
          Block := Block.Next_Block;
          Pos := 1;
          if Block = null then
-            Parser.Read_Line (Block);
+            Wiki.Parsers.Read_Line (Parser, Block);
          end if;
       end loop;
       Text := null;
