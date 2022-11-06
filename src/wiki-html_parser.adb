@@ -499,6 +499,13 @@ package body Wiki.Html_Parser is
          Len := 0;
       end if;
       while Len < MAX_ENTITY_LENGTH loop
+         if Pos > Text'Last then
+            Parser.Counter := Len;
+            Status := ENTITY_MIDDLE;
+            Entity := NUL;
+            Last := Pos;
+            return;
+         end if;
          C := Text (Pos);
          Pos := Pos + 1;
          exit when C = ';';
@@ -511,13 +518,6 @@ package body Wiki.Html_Parser is
          end if;
          Len := Len + 1;
          Parser.Entity_Name (Len) := Wiki.Strings.To_Char (C);
-         if Pos > Text'Last then
-            Parser.Counter := Len;
-            Status := ENTITY_MIDDLE;
-            Entity := NUL;
-            Last := Pos;
-            return;
-         end if;
       end loop;
 
       Parser.Counter := 0;
