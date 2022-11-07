@@ -85,11 +85,7 @@ package body Wiki.Parsers.Html is
                   end if;
                end;
 
-            when Wiki.Helpers.CR =>
-               Text (Pos) := ' ';
-               Pos := Pos + 1;
-
-            when Wiki.Helpers.LF =>
+            when Wiki.Helpers.LF | Wiki.Helpers.CR =>
                if Parser.Pre_Tag_Counter = 0 then
                   Text (Pos) := ' ';
                end if;
