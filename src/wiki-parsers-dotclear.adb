@@ -277,101 +277,94 @@ package body Wiki.Parsers.Dotclear is
 
       Main :
       while Buffer /= null loop
-         declare
-            Last : Natural := Buffer.Last;
-         begin
-            while Pos <= Last loop
-               C := Buffer.Content (Pos);
-               case C is
-                  when '_' =>
-                     Parse_Format_Double (Parser, Buffer, Pos, '_', Wiki.BOLD);
-                     exit Main when Buffer = null;
+         while Pos <= Buffer.Last loop
+            C := Buffer.Content (Pos);
+            case C is
+               when '_' =>
+                  Parse_Format_Double (Parser, Buffer, Pos, '_', Wiki.BOLD);
+                  exit Main when Buffer = null;
 
-                  when ''' =>
-                     Parse_Format_Double (Parser, Buffer, Pos, ''', Wiki.ITALIC);
-                     exit Main when Buffer = null;
+               when ''' =>
+                  Parse_Format_Double (Parser, Buffer, Pos, ''', Wiki.ITALIC);
+                  exit Main when Buffer = null;
 
-                  when '-' =>
-                     Parse_Format_Double (Parser, Buffer, Pos, '-', Wiki.STRIKEOUT);
-                     exit Main when Buffer = null;
+               when '-' =>
+                  Parse_Format_Double (Parser, Buffer, Pos, '-', Wiki.STRIKEOUT);
+                  exit Main when Buffer = null;
 
-                  when '+' =>
-                     Parse_Format_Double (Parser, Buffer, Pos, '+', Wiki.INS);
-                     exit Main when Buffer = null;
+               when '+' =>
+                  Parse_Format_Double (Parser, Buffer, Pos, '+', Wiki.INS);
+                  exit Main when Buffer = null;
 
-                  when ',' =>
-                     Parse_Format_Double (Parser, Buffer, Pos, ',', Wiki.SUBSCRIPT);
-                     exit Main when Buffer = null;
+               when ',' =>
+                  Parse_Format_Double (Parser, Buffer, Pos, ',', Wiki.SUBSCRIPT);
+                  exit Main when Buffer = null;
 
-                  when '@' =>
-                     Parse_Format_Double (Parser, Buffer, Pos, '@', Wiki.CODE);
-                     exit Main when Buffer = null;
+               when '@' =>
+                  Parse_Format_Double (Parser, Buffer, Pos, '@', Wiki.CODE);
+                  exit Main when Buffer = null;
 
-                  when '^' =>
-                     Parse_Format (Parser, Buffer, Pos, '^', Wiki.SUPERSCRIPT);
-                     exit Main when Buffer = null;
+               when '^' =>
+                  Parse_Format (Parser, Buffer, Pos, '^', Wiki.SUPERSCRIPT);
+                  exit Main when Buffer = null;
 
-                  when '{' =>
-                     Common.Parse_Quote (Parser, Buffer, Pos, '{');
-                     exit Main when Buffer = null;
+               when '{' =>
+                  Common.Parse_Quote (Parser, Buffer, Pos, '{');
+                  exit Main when Buffer = null;
 
-                  when '(' =>
-                     Parse_Image (Parser, Buffer, Pos);
-                     exit Main when Buffer = null;
+               when '(' =>
+                  Parse_Image (Parser, Buffer, Pos);
+                  exit Main when Buffer = null;
 
-                  when '[' =>
-                     Common.Parse_Link (Parser, Buffer, Pos);
-                     exit Main when Buffer = null;
+               when '[' =>
+                  Common.Parse_Link (Parser, Buffer, Pos);
+                  exit Main when Buffer = null;
 
-                  when '<' =>
-                     Common.Parse_Template (Parser, Buffer, Pos, '<');
-                     exit Main when Buffer = null;
+               when '<' =>
+                  Common.Parse_Template (Parser, Buffer, Pos, '<');
+                  exit Main when Buffer = null;
 
-                  when '%' =>
-                     Count := Count_Occurence (Buffer, Pos, '%');
-                     if Count >= 3 then
-                        Parser.Empty_Line := True;
-                        Flush_Text (Parser, Trim => Right);
-                        if not Parser.Context.Is_Hidden then
-                           Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_LINE_BREAK);
-                        end if;
-
-                        --  Skip 3 '%' characters.
-                        for I in 1 .. 3 loop
-                           Next (Buffer, Pos);
-                        end loop;
-                        if Buffer /= null and then Helpers.Is_Newline (Buffer.Content (Pos)) then
-                           Next (Buffer, Pos);
-                        end if;
-                        exit Main when Buffer = null;
-                     else
-                        Append (Parser.Text, C);
-                        Pos := Pos + 1;
+               when '%' =>
+                  Count := Count_Occurence (Buffer, Pos, '%');
+                  if Count >= 3 then
+                     Parser.Empty_Line := True;
+                     Flush_Text (Parser, Trim => Right);
+                     if not Parser.Context.Is_Hidden then
+                        Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_LINE_BREAK);
                      end if;
 
-                  when CR | LF =>
-                     --  if Wiki.Strings.Length (Parser.Text) > 0 then
-                        Append (Parser.Text, ' ');
-                     --  end if;
-                     Pos := Pos + 1;
-
-                  when '\' =>
-                     Next (Buffer, Pos);
-                     if Buffer = null then
-                        Append (Parser.Text, C);
-                     else
-                        Append (Parser.Text, Buffer.Content (Pos));
-                        Pos := Pos + 1;
-                        Last := Buffer.Last;
+                     --  Skip 3 '%' characters.
+                     for I in 1 .. 3 loop
+                        Next (Buffer, Pos);
+                     end loop;
+                     if Buffer /= null and then Helpers.Is_Newline (Buffer.Content (Pos)) then
+                        Next (Buffer, Pos);
                      end if;
-
-                  when others =>
+                     exit Main when Buffer = null;
+                  else
                      Append (Parser.Text, C);
                      Pos := Pos + 1;
+                  end if;
 
-               end case;
-            end loop;
-         end;
+               when CR | LF =>
+                  Append (Parser.Text, ' ');
+                  Pos := Pos + 1;
+
+               when '\' =>
+                  Next (Buffer, Pos);
+                  if Buffer = null then
+                     Append (Parser.Text, C);
+                  else
+                     Append (Parser.Text, Buffer.Content (Pos));
+                     Pos := Pos + 1;
+                  end if;
+
+               when others =>
+                  Append (Parser.Text, C);
+                  Pos := Pos + 1;
+
+            end case;
+         end loop;
          Buffer := Buffer.Next_Block;
          Pos := 1;
       end loop Main;
