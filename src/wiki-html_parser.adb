@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-html_parser -- Wiki HTML parser
---  Copyright (C) 2015, 2016, 2018, 2020, 2021, 2022 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2018, 2020, 2021, 2022, 2023 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -283,8 +283,13 @@ package body Wiki.Html_Parser is
    begin
       loop
          case Parser.State is
-            when State_None =>
+            when State_None | State_Start =>
                --  The '<' was found, decide what's next.
+               if Pos > Text'Last then
+                  Parser.State := State_Start;
+                  Last := Pos;
+                  return;
+               end if;
                C := Text (Pos);
                if C = '!' then
                   Pos := Pos + 1;

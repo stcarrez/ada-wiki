@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-html_parser -- Wiki HTML parser
---  Copyright (C) 2015, 2016, 2022 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2022, 2023 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -64,6 +64,7 @@ private package Wiki.Html_Parser is
 private
 
    type Html_Parser_State is (State_None,
+                              State_Start,
                               State_Comment_Or_Doctype,
                               State_Doctype,
                               State_Comment,
