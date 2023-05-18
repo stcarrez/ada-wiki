@@ -25,12 +25,11 @@ Section h5
   1)  item 3.1
   2)  item 3.2
 
-
   1)  num 1
   2)  num 2
 
-      Section bloc:
 
+Section bloc:
 
 L1: line 1 L2: line 2 L3: line 3
 

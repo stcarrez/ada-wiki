@@ -578,7 +578,7 @@ package body Wiki.Parsers.Markdown is
                Flush_Block (Parser);
                Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_PARAGRAPH);
 
-            elsif Count > 0 and then Count < Level and then Parser.Previous_Line_Empty
+            elsif Count < Level and then Parser.Previous_Line_Empty
               and then C not in Wiki.Helpers.LF | Wiki.Helpers.CR
             then
                Pop_Block (Parser);
