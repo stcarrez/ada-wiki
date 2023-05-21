@@ -1,6 +1,7 @@
 Version 1.4.1   - Under development
   - Fix parsing some HTML document when we reach end of line buffer
   - Fix \<pre\> HTML blocks to keep CR in order to preserve the end of lines
+  - Fix releasing memory for some document nodes
 
 Version 1.4.0   - Aug 2022
   - Add support for Textile markup language
