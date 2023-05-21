@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-nodes -- Wiki Document Internal representation
---  Copyright (C) 2016, 2019 Stephane Carrez
+--  Copyright (C) 2016, 2019, 2023 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
@@ -75,10 +75,23 @@ package body Wiki.Nodes is
       procedure Free_Block (Block : in out Node_List_Block) is
       begin
          for I in 1 .. Block.Last loop
-            if Block.List (I).Kind = N_TAG_START and then Block.List (I).Children /= null then
-               Finalize (Block.List (I).Children.all);
-               Free (Block.List (I).Children);
-            end if;
+            case Block.List (I).Kind is
+               when N_TAG_START | N_TABLE | N_ROW | N_COLUMN =>
+                  if Block.List (I).Children /= null then
+                     Finalize (Block.List (I).Children.all);
+                     Free (Block.List (I).Children);
+                  end if;
+
+               when N_HEADER | N_BLOCKQUOTE | N_INDENT
+                  | N_NUM_LIST_START | N_LIST_START | N_DEFINITION =>
+                  if Block.List (I).Content /= null then
+                     Finalize (Block.List (I).Content.all);
+                     Free (Block.List (I).Content);
+                  end if;
+
+               when others =>
+                  null;
+            end case;
             Free (Block.List (I));
          end loop;
       end Free_Block;
