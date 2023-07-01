@@ -17,10 +17,10 @@ The library allows to:
 * Filter out the wiki, HTML or text through customizable filters,
 * Render the wiki text in HTML, text or another wiki format.
 
-The Ada Wiki library is used by [Ada Web Application](https://github.com/stcarrez/ada-awa)
+The Ada Wiki library is used by [Ada Web Application](https://gitlab.com/stcarrez/ada-awa)
 for the implementation of the blog and wiki online plugins.
 
-You can play with the Wiki engine by using [Wi2wic](https://github.com/stcarrez/wi2wic) on https://wi2wic.vacs.fr/wi2wic/index.html
+You can play with the Wiki engine by using [Wi2wic](https://gitlab.com/stcarrez/wi2wic) on https://wi2wic.vacs.fr/wi2wic/index.html
 
 ## Version 1.4.1   - Under development
   - Fix parsing some HTML document when we reach end of line buffer
@@ -31,19 +31,15 @@ You can play with the Wiki engine by using [Wi2wic](https://github.com/stcarrez/
 - Add support for Textile markup language
 - Rewrote the Markdown parser to better follow the Common Mark Specification
 
-[List all versions](https://github.com/stcarrez/ada-wiki/blob/master/NEWS.md)
+[List all versions](https://gitlab.com/stcarrez/ada-wiki/blob/master/NEWS.md)
 
-## Build
-
-### Alire
-
-When using [Alire], use:
+## Build with Alire
 
 ```
 alr with wikiada
 ```
 
-### Manual
+## Build with configure
 
 To use Ada Wiki library, configure as follows:
 ```
@@ -68,11 +64,11 @@ For the installation, use the following command:
 make install
 ```
 
-### Build without configure
+## Build without configure
 
 Since the integration with Alire, you can build without running configure.
 However, there are a number of checks and dependencies which are not verified.
-The following assumes that you have installed the [Ada Utility Library](https://github.com/stcarrez/ada-util).
+The following assumes that you have installed the [Ada Utility Library](https://gitlab.com/stcarrez/ada-util).
 
 For a simple build, use:
 
@@ -112,12 +108,12 @@ document.  The next command reports the links used in the document:
 bin/words -l -M content.wiki
 ```
 
-A complete online Wiki application is part of AWA (https://github.com/stcarrez/ada-awa)
+A complete online Wiki application is part of [AWA](https://gitlab.com/stcarrez/ada-awa)
 and can be tried online with [Atlas](https://demo.vacs.fr/atlas/index.html)
 
 # Documentation
 
-* [Ada Wiki Programmer's Guide](https://ada-wiki.readthedocs.io/en/latest/) [PDF](https://github.com/stcarrez/ada-wiki/blob/master/docs/wiki-book.pdf)
+* [Ada Wiki Programmer's Guide](https://ada-wiki.readthedocs.io/en/latest/) [PDF](https://gitlab.com/stcarrez/ada-wiki/blob/master/docs/wiki-book.pdf)
 
 * [Using the Ada Wiki Engine](https://blog.vacs.fr/vacs/blogs/post.html?post=2016/04/30/Using-the-Ada-Wiki-Engine)
 
@@ -126,4 +122,4 @@ and can be tried online with [Atlas](https://demo.vacs.fr/atlas/index.html)
   * [Java 2 Ada](https://blog.vacs.fr/)
   * [Ada France](https://www.ada-france.org/adafr/index.html)
   * [Atlas](https://demo.vacs.fr/atlas/index.html)
-
+  * [Wi2wic](https://wi2wic.vacs.fr/wi2wic/index.html)
