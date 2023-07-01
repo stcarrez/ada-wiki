@@ -6,7 +6,7 @@
 [![Coverage](https://img.shields.io/endpoint?url=https://porion.vacs.fr/porion/api/v1/projects/ada-wiki/badges/coverage.json)](https://porion.vacs.fr/porion/projects/view/ada-wiki/summary)
 [![Download](https://img.shields.io/badge/download-1.4.0-brightgreen.svg)](http://download.vacs.fr/ada-wiki/ada-wiki-1.4.0.tar.gz)
 [![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](LICENSE)
-![Commits](https://img.shields.io/gitlab/commits-since/stcarrez/ada-wiki/1.4.0.svg)
+![Commits](https://img.shields.io/github/commits-since/stcarrez/ada-wiki/1.4.0.svg)
 
 Ada Wiki is a small library that provides a Wiki engine supporting several Wiki syntaxes.
 
@@ -35,6 +35,16 @@ You can play with the Wiki engine by using [Wi2wic](https://github.com/stcarrez/
 
 ## Build
 
+### Alire
+
+When using [Alire], use:
+
+```
+alr with wikiada
+```
+
+### Manual
+
 To use Ada Wiki library, configure as follows:
 ```
 ./configure
@@ -58,7 +68,7 @@ For the installation, use the following command:
 make install
 ```
 
-## Build without configure
+### Build without configure
 
 Since the integration with Alire, you can build without running configure.
 However, there are a number of checks and dependencies which are not verified.
