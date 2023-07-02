@@ -6,7 +6,7 @@
 [![Coverage](https://img.shields.io/endpoint?url=https://porion.vacs.fr/porion/api/v1/projects/ada-wiki/badges/coverage.json)](https://porion.vacs.fr/porion/projects/view/ada-wiki/summary)
 [![Download](https://img.shields.io/badge/download-1.4.0-brightgreen.svg)](http://download.vacs.fr/ada-wiki/ada-wiki-1.4.0.tar.gz)
 [![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](LICENSE)
-![Commits](https://img.shields.io/github/commits-since/stcarrez/ada-wiki/1.4.0.svg)
+[![Commits](https://img.shields.io/github/commits-since/stcarrez/ada-wiki/1.4.0.svg)](Commits)
 
 Ada Wiki is a small library that provides a Wiki engine supporting several Wiki syntaxes.
 
