@@ -1,6 +1,6 @@
 site_name: Ada Wiki Engine
 docs_dir: docs
-pages:
+nav:
   - Introduction: index.md
   - Installation: Installation.md
   - Wiki Engine: Wiki.md
