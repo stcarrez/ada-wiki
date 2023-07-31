@@ -1,5 +1,5 @@
 dnl Autoconf configure script for Ada Wiki
-dnl Copyright (C) 2015, 2016, 2018, 2019, 2020, 2021, 2022 Stephane Carrez
+dnl Copyright (C) 2015, 2016, 2018, 2019, 2020, 2021, 2022, 2023 Stephane Carrez
 dnl Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 dnl
 dnl  Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,7 @@ AC_CONFIG_SRCDIR([src/wiki.ads])
 # Current release settings
 WIKI_MAJOR_VERSION=1
 WIKI_MINOR_VERSION=4
-WIKI_MICRO_VERSION=0
+WIKI_MICRO_VERSION=1
 WIKI_VERSION=$WIKI_MAJOR_VERSION.$WIKI_MINOR_VERSION.$WIKI_MICRO_VERSION
 
 # Set the version number of Ada Wiki
