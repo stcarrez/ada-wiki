@@ -1,5 +1,7 @@
 NAME=wikiada
 
+MAKE_ARGS += -XWIKI_BUILD=$(BUILD)
+
 -include Makefile.conf
 
 STATIC_MAKE_ARGS = $(MAKE_ARGS) -XWIKI_LIBRARY_TYPE=static
@@ -27,17 +29,11 @@ include Makefile.defaults
 
 # Build executables for all mains defined by the project.
 build-test::	setup
-ifeq ($(HAVE_ADA_UTIL),yes)
-	$(GNATMAKE) $(GPRFLAGS) -p -P$(NAME)_tests $(MAKE_ARGS)
-endif
+	cd regtests && $(BUILD_COMMAND) $(GPRFLAGS) $(MAKE_ARGS) 
 
 # Build and run the unit tests
 test:	build-test
-ifeq ($(HAVE_ADA_UTIL),yes)
 	bin/wiki_harness -l $(NAME): -xml wiki-aunit.xml
-else
-	@echo "WARNING: Tests are not compiled and not executed because Ada Utility Library is not used"
-endif
 
 install-samples:
 	$(MKDIR) -p $(samplesdir)/samples
@@ -46,7 +42,7 @@ install-samples:
 	cp -p $(srcdir)/config.gpr $(samplesdir)
 
 samples:
-	$(GNATMAKE) $(GPRFLAGS) -p -Psamples $(MAKE_ARGS)
+	cd samples && $(BUILD_COMMAND) $(GPRFLAGS) $(MAKE_ARGS)
 
 $(eval $(call ada_library,$(NAME)))
 $(eval $(call pandoc_build,wikiada-book,$(WIKI_DOC)))

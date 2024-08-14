@@ -1,7 +1,7 @@
-with "@UTIL_DIR@config";
-with "@UTIL_DIR@utilada_core";
-with "@UTIL_DIR@utilada_sys";
-with "@UTIL_DIR@utilada_unit";
+with "wikiada_config";
+with "utilada_core";
+with "utilada_sys";
+with "utilada_unit";
 with "wikiada";
 
 project WikiAda_Tests is
@@ -14,11 +14,11 @@ project WikiAda_Tests is
 
    for Main use Mains;
 
-   for Object_Dir use "./" & Config'Object_Dir & "/obj";
-   for Exec_Dir use "./" & Config'Exec_Dir & "/bin";
+   for Object_Dir use "./" & WikiAda_Config'Object_Dir & "/obj";
+   for Exec_Dir use "./bin";
 
    package binder is
-      case Config.Mode is
+      case WikiAda_Config.Mode is
          when "debug" =>
             for Default_Switches ("Ada") use ("-E", "-W8");
 
@@ -28,8 +28,8 @@ project WikiAda_Tests is
       end case;
    end binder;
 
-   package Builder renames Config.Builder;
-   package Compiler renames Config.Compiler;
-   package Linker renames Config.Linker;
+   package Builder  renames WikiAda_Config.Builder;
+   package Compiler renames WikiAda_Config.Compiler;
+   package Linker   renames WikiAda_Config.Linker;
 
 end WikiAda_Tests;

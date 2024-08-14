@@ -1,7 +1,6 @@
 *~
 *.log
 Makefile.conf
-config.status
 CHANGES
 *.cproject
 *.gb_project
@@ -9,13 +8,8 @@ CHANGES
 *.log
 ChangeLog
 .settings
-configure.lineno
-wikiada.gpr
-wikiada_tests.gpr
-samples.gpr
 tests.xml
 wiki-tests.xml
-autom4te.cache
 bin/
 obj/
 lib/

@@ -1,0 +1,20 @@
+description = "Unit tests for Wiki Engines"
+tags = ["wiki-engine", "markdown", "mediawiki", "dotclear", "html", "parser", "renderer"]
+name = "wikiada_tests"
+version = "1.4.2"
+licenses = "Apache-2.0"
+authors = ["Stephane.Carrez@gmail.com"]
+maintainers = ["Stephane.Carrez@gmail.com"]
+maintainers-logins = ["stcarrez"]
+project-files = ["../wikiada_tests.gpr"]
+website = "https://gitlab.com/stcarrez/ada-wiki"
+
+[[depends-on]]
+wikiada = "*"
+utilada_unit = "*"
+
+[configuration]
+disabled = true
+
+[[pins]]
+wikiada = { path = '..' }
