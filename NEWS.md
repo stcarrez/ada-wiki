@@ -1,3 +1,6 @@
+Version 1.4.2   - Under development
+  - Cleanup build environment to drop configure
+
 Version 1.4.1   - Jul 2023
   - Fix parsing some HTML document when we reach end of line buffer
   - Fix \<pre\> HTML blocks to keep CR in order to preserve the end of lines

@@ -22,6 +22,9 @@ for the implementation of the blog and wiki online plugins.
 
 You can play with the Wiki engine by using [Wi2wic](https://gitlab.com/stcarrez/wi2wic) on https://wi2wic.vacs.fr/wi2wic/index.html
 
+## Version 1.4.2   - Under development
+  - Cleanup build environment to drop configure
+
 ## Version 1.4.1   - Jul 2023
   - Fix parsing some HTML document when we reach end of line buffer
   - Fix \<pre\> HTML blocks to keep CR in order to preserve the end of lines
@@ -39,15 +42,6 @@ alr with wikiada
 
 To use Ada Wiki library, configure as follows:
 ```
-./configure
-make
-```
-
-By default the configure is setup to use the Ada Utility Library.  You can disable that
-by using the 'with-ada-util=no' configure option.  When disabled, the build will use some
-locally imported files (in src/util) but the unit tests will not be compiled.
-```
-./configure --with-ada-util=no
 make
 ```
 
@@ -60,31 +54,15 @@ For the installation, use the following command:
 make install
 ```
 
-## Build without configure
-
-Since the integration with Alire, you can build without running configure.
-However, there are a number of checks and dependencies which are not verified.
-The following assumes that you have installed the [Ada Utility Library](https://gitlab.com/stcarrez/ada-util).
-
-For a simple build, use:
-
-```
-gprbuild -aP.alire -Pwikiada -p
-```
-
-You can then use `gprinstall` for the installation:
-
-```
-gprinstall -aP.alire -Pwikiada -p
-```
-
 # Samples
 
 A first example shows how to render a Wiki text into HTML or text.
 Another one takes some HTML content and render a Wiki text in one of the supported
 Wiki format.  To build the samples, use the following command:
+
 ```
-gnatmake -Psamples
+cd samples
+alr build
 ```
 
 To import a HTML content and produce a Wiki text, use the following:
