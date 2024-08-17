@@ -1,4 +1,8 @@
 NAME=wikiada
+VERSION=1.4.2
+
+DIST_DIR=ada-wiki-$(VERSION)
+DIST_FILE=ada-wiki-$(VERSION).tar.gz
 
 MAKE_ARGS += -XWIKI_BUILD=$(BUILD)
 
@@ -28,7 +32,7 @@ HTML_OPTIONS+= --listings --number-sections --toc --css pandoc.css
 include Makefile.defaults
 
 # Build executables for all mains defined by the project.
-build-test::	setup
+build-test::	lib-setup
 	cd regtests && $(BUILD_COMMAND) $(GPRFLAGS) $(MAKE_ARGS) 
 
 # Build and run the unit tests
