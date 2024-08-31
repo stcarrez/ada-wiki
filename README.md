@@ -22,7 +22,7 @@ for the implementation of the blog and wiki online plugins.
 
 You can play with the Wiki engine by using [Wi2wic](https://gitlab.com/stcarrez/wi2wic) on https://wi2wic.vacs.fr/wi2wic/index.html
 
-## Version 1.4.2   - Under development
+## Version 1.4.2   - Aug 2024
   - Cleanup build environment to drop configure
 
 ## Version 1.4.1   - Jul 2023
@@ -36,22 +36,6 @@ You can play with the Wiki engine by using [Wi2wic](https://gitlab.com/stcarrez/
 
 ```
 alr with wikiada
-```
-
-## Build with configure
-
-To use Ada Wiki library, configure as follows:
-```
-make
-```
-
-The unit tests are built and executed with:
-```
-make test
-```
-For the installation, use the following command:
-```
-make install
 ```
 
 # Samples
