@@ -2,24 +2,20 @@
 
 This chapter explains how to build and install the library.
 
-## Before Building
+## Alire setup
 
-Before building the library, you will need:
+To use `wikiada` in your project, run the following command to add the dependency
+to `wikiada`:
 
-* The [GNAT Ada compiler](https://libre.adacore.com/tools/gnat-gpl-edition/),
-* [Ada Utility Library](https://github.com/stcarrez/ada-util).
+```
+alr with wikiada
+```
 
-The build process may also need the following commands:
+## Build for wikiada development
 
-* make (GNU make),
-* gprbuild,
-* gprinstall,
-* gcc (with Ada language support),
-* alr
+You can also build and install the `wikiada` library and install it as follows
+(but the Alire setup is prefered):
 
-## Build
-
-After configuration is successful, you can build the library by running:
 ```
 make
 ```
