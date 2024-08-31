@@ -25,11 +25,6 @@ You can play with the Wiki engine by using [Wi2wic](https://gitlab.com/stcarrez/
 ## Version 1.4.2   - Aug 2024
   - Cleanup build environment to drop configure
 
-## Version 1.4.1   - Jul 2023
-  - Fix parsing some HTML document when we reach end of line buffer
-  - Fix \<pre\> HTML blocks to keep CR in order to preserve the end of lines
-  - Fix releasing memory for some document nodes
-
 [List all versions](https://gitlab.com/stcarrez/ada-wiki/blob/master/NEWS.md)
 
 ## Build with Alire
