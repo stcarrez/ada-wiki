@@ -38,6 +38,12 @@ You can play with the Wiki engine by using [Wi2wic](https://gitlab.com/stcarrez/
 alr with wikiada
 ```
 
+The unit tests are built and executed using:
+
+```
+make test
+```
+
 # Samples
 
 A first example shows how to render a Wiki text into HTML or text.
