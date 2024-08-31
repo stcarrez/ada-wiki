@@ -1,10 +1,10 @@
 -----------------------------------------------------------------------
 --  wiki-helpers-parser -- Generic procedure for the wiki parser
---  Copyright (C) 2016, 2018, 2022 Stephane Carrez
+--  Copyright (C) 2016, 2018, 2022, 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
-with Wiki.Helpers;
+
 with Wiki.Streams;
 procedure Wiki.Helpers.Parser (Engine  : in out Engine_Type;
                                Content : in Element_Type;
