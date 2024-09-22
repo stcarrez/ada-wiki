@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-markdown -- Markdown parser operations
---  Copyright (C) 2016 - 2022 Stephane Carrez
+--  Copyright (C) 2016 - 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -17,7 +17,7 @@ package body Wiki.Parsers.Markdown is
    use type Wiki.Buffers.Buffer_Access;
    use type Wiki.Html_Parser.Entity_State_Type;
 
-   type Marker_Kind is (M_CODE, M_STAR, M_UNDERSCORE, M_LINK,
+   type Marker_Kind is (M_CODE, M_STAR, M_UNDERSCORE, M_LINK, M_TILDE,
                         M_LINK_REF, M_IMAGE, M_END,
                         M_ENTITY, M_TEXT);
 
@@ -1316,6 +1316,15 @@ package body Wiki.Parsers.Markdown is
                   Prev := C;
                   exit Main when Block = null;
 
+               when '~' =>
+                  Get_Delimiter (Block, Pos, Prev, C, Delim);
+                  if Delim.Can_Open or else Delim.Can_Close then
+                     Delim.Marker := M_TILDE;
+                     Delimiters.Append (Delim);
+                  end if;
+                  Prev := C;
+                  exit Main when Block = null;
+
                when '[' =>
                   Get_Delimiter (Block, Pos, Prev, C, Delim);
                   if Delim.Can_Open or else Delim.Can_Close then
@@ -1451,6 +1460,9 @@ package body Wiki.Parsers.Markdown is
                   if Delim.Marker in M_STAR | M_UNDERSCORE and then Delim.Count = 2 then
                      Parser.Format (STRONG) := True; --  not Parser.Format (STRONG);
 
+                  elsif Delim.Marker in M_TILDE and then Delim.Count = 2 then
+                     Parser.Format (STRIKEOUT) := True;
+
                   elsif Delim.Marker in M_STAR | M_UNDERSCORE then
                      Parser.Format (EMPHASIS) := True; --  not Parser.Format (EMPHASIS);
 
@@ -1479,6 +1491,12 @@ package body Wiki.Parsers.Markdown is
                   elsif Delim.Marker = M_CODE and then Parser.Format (CODE) then
                      Flush_Text (Parser);
                      Parser.Format (CODE) := False;
+                  elsif Delim.Marker = M_TILDE
+                    and then Delim.Count = 2
+                    and then Parser.Format (STRIKEOUT)
+                  then
+                     Flush_Text (Parser);
+                     Parser.Format (STRIKEOUT) := False;
                   else
                      Block := Delim.Block;
                      Pos := Delim.Pos;
