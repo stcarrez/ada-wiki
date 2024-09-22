@@ -24,6 +24,7 @@ You can play with the Wiki engine by using [Wi2wic](https://gitlab.com/stcarrez/
 
 ## Version 1.4.3   - Under development
   - Feature #7: Add a style on HTML table
+  - Feature #8: Add support for strikeout in markdown
 
 ## Version 1.4.2   - Aug 2024
   - Cleanup build environment to drop configure
