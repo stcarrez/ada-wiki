@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-html -- Wiki HTML renderer
---  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2019, 2020, 2022 Stephane Carrez
+--  Copyright (C) 2011 - 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -77,7 +77,8 @@ package Wiki.Render.Html is
    procedure Render_Table (Engine : in out Html_Renderer;
                            Doc    : in Wiki.Documents.Document;
                            Node   : in Wiki.Nodes.Node_Type;
-                           Tag    : in String);
+                           Tag    : in String;
+                           Class  : in String);
 
    --  Finish the document after complete wiki text has been parsed.
    overriding

@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-html -- Wiki HTML renderer
---  Copyright (C) 2011, 2012, 2013, 2014, 2015, 2016, 2018, 2019, 2020, 2021, 2022 Stephane Carrez
+--  Copyright (C) 2011 - 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -258,13 +258,13 @@ package body Wiki.Render.Html is
             Engine.Render_TOC (Doc, 3);
 
          when Wiki.Nodes.N_TABLE =>
-            Engine.Render_Table (Doc, Node, "table");
+            Engine.Render_Table (Doc, Node, "table", "wiki-table");
 
          when Wiki.Nodes.N_ROW =>
-            Engine.Render_Table (Doc, Node, "tr");
+            Engine.Render_Table (Doc, Node, "tr", "");
 
          when Wiki.Nodes.N_COLUMN =>
-            Engine.Render_Table (Doc, Node, "td");
+            Engine.Render_Table (Doc, Node, "td", "");
 
       end case;
    end Render;
@@ -905,7 +905,8 @@ package body Wiki.Render.Html is
    procedure Render_Table (Engine : in out Html_Renderer;
                            Doc    : in Wiki.Documents.Document;
                            Node   : in Wiki.Nodes.Node_Type;
-                           Tag    : in String) is
+                           Tag    : in String;
+                           Class  : in String) is
       Iter         : Wiki.Attributes.Cursor := Wiki.Attributes.First (Node.Attributes);
    begin
       Engine.Close_Paragraph;
@@ -914,6 +915,9 @@ package body Wiki.Render.Html is
       Engine.Open_Paragraph;
 
       Engine.Output.Start_Element (Tag);
+      if Class'Length > 0 then
+         Engine.Output.Write_Attribute ("class", Class);
+      end if;
       while Wiki.Attributes.Has_Element (Iter) loop
          Engine.Output.Write_Wide_Attribute (Name    => Wiki.Attributes.Get_Name (Iter),
                                              Content => Wiki.Attributes.Get_Wide_Value (Iter));
