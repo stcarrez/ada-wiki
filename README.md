@@ -22,6 +22,9 @@ for the implementation of the blog and wiki online plugins.
 
 You can play with the Wiki engine by using [Wi2wic](https://gitlab.com/stcarrez/wi2wic) on https://wi2wic.vacs.fr/wi2wic/index.html
 
+## Version 1.4.3   - Under development
+  - Feature #7: Add a style on HTML table
+
 ## Version 1.4.2   - Aug 2024
   - Cleanup build environment to drop configure
 
