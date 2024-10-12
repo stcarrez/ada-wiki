@@ -44,7 +44,7 @@ alr with wikiada
 
 If you don't have [Alire](https://alire.ada.dev/) or want to build and install the library
 on a specific place, run a `setup` command to configure the build as well as installation
-directory:
+directory (note: you must have built and installed [Ada Utility Library](https://gitlab.com/stcarrez/ada-util/)):
 
 ```
 make setup BUILD=debug PREFIX=/build/install HAVE_ALIRE=no
