@@ -31,16 +31,31 @@ You can play with the Wiki engine by using [Wi2wic](https://gitlab.com/stcarrez/
 
 [List all versions](https://gitlab.com/stcarrez/ada-wiki/blob/master/NEWS.md)
 
-## Build with Alire
+## Using with Alire
+
+If you are using [Alire](https://alire.ada.dev/) in your project, run the following command
+within your [Alire](https://alire.ada.dev/) project to use the library:
 
 ```
 alr with wikiada
 ```
 
-The unit tests are built and executed using:
+## Using without Alire
+
+If you don't have [Alire](https://alire.ada.dev/) or want to build and install the library
+on a specific place, run a `setup` command to configure the build as well as installation
+directory:
 
 ```
+make setup BUILD=debug PREFIX=/build/install HAVE_ALIRE=no
+```
+
+Then build, run the unit tests and install by using:
+
+```
+make build
 make test
+make install
 ```
 
 # Samples
