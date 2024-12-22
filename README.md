@@ -58,6 +58,10 @@ make test
 make install
 ```
 
+To use the installed libraries, make sure your `ADA_PROJECT_PATH` contains the directory
+where you installed the libraries (configured by the `PREFIX=<path>` option in the setup phase).
+The installed GNAT projects are the same as those used when using [Alire](https://alire.ada.dev/).
+
 # Samples
 
 A first example shows how to render a Wiki text into HTML or text.
@@ -67,6 +71,12 @@ Wiki format.  To build the samples, use the following command:
 ```
 cd samples
 alr build
+```
+
+or use:
+
+```
+make samples
 ```
 
 To import a HTML content and produce a Wiki text, use the following:
