@@ -1,4 +1,4 @@
-Version 1.4.3   - Under development
+Version 1.4.3   - Nov 2024
   - Feature #7: Add a style on HTML table
   - Feature #8: Add support for strikeout in markdown
 
