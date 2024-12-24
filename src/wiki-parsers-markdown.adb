@@ -585,6 +585,14 @@ package body Wiki.Parsers.Markdown is
             Parser.Previous_Line_Empty := True;
             return;
          end if;
+         while not (Parser.Current_Node in N_PARAGRAPH | N_NONE | N_LIST_ITEM | N_BLOCKQUOTE) loop
+            Pop_Block (Parser);
+         end loop;
+         if not (Parser.Current_Node in N_PARAGRAPH | N_LIST_ITEM) then
+            Push_Block (Parser, N_PARAGRAPH);
+         end if;
+         Parser.Previous_Line_Empty := False;
+         return;
       else
          if Parser.Previous_Line_Empty and then Parser.Current_Node = Nodes.N_LIST_ITEM then
             Flush_Block (Parser);
