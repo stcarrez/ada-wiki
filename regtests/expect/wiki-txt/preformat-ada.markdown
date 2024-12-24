@@ -17,5 +17,5 @@ begin
    null;
 end Test;
 
- A last paragraph.
+A last paragraph.
 

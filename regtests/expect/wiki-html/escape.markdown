@@ -1,1 +1,1 @@
-<p>\   : Anti-slash `   : Apostrophe curve *   : Asterisk _   : Low dash / Underscore {} : Braces [] : Hooks () : Parentheses #   : Sharp +   : Sign more -   : Less sign / hyphen !   : Exclamation dot .   : Dot</p><p> Not escaped: \a \s \b $</p>
+<p>\   : Anti-slash `   : Apostrophe curve *   : Asterisk _   : Low dash / Underscore {} : Braces [] : Hooks () : Parentheses #   : Sharp +   : Sign more -   : Less sign / hyphen !   : Exclamation dot .   : Dot</p><p>Not escaped: \a \s \b $</p>

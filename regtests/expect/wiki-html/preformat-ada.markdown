@@ -10,4 +10,4 @@ end Test;
 begin
    null;
 end Test;
-</code></pre><p> A last paragraph.</p>
+</code></pre><p>A last paragraph.</p>
