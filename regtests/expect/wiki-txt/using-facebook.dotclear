@@ -42,6 +42,7 @@ FB_Auth.Set_Application_Secret ("xxxxxxxxxxx");
 FB_Auth.Set_Application_Callback ("http://demo.vacs.fr/oauth/localhost:8080/demo/oauth_callback.html");
 
 The first step in the OAuth process is to build the authorization page with the link that redirects the user to the service provider OAuth authorization process. The link must be created by using the Get_State and Get_Auth_Params functions provided by the Application type. The first one generates a secure unique key that will be returned back by the service provider.  The second one builds a list of request parameters that are necessary for the service provider to identify the application and redirect the user back to the application once the authentication is done.
+
 Id : constant String := "...";
 State  : constant String := FB_Auth.Get_State (Id);
 Params : constant String := FB_Auth.Get_Auth_Params (State, "read_stream");
@@ -67,6 +68,7 @@ The OAuth provider will first redirect to the public internet site which will re
 Getting the OAuth access token
 
 The next step is to receive the code parameter from the callback which grants the application access to the service provider API. For this, we will use an XHTML view file and a view action that will be executed when the page is displayed.  When this happens, the EL method authenticate will be called on the facebook bean (ie, our FB_Auth instance).
+
 <f:view xmlns:f="http://java.sun.com/jsf/core">
     <f:metadata>
         <f:viewAction action="#{facebook.authenticate}"/>
@@ -74,6 +76,7 @@ The next step is to receive the code parameter from the callback which grants th
 </f:view>
 
 The Authenticate procedure extracts from the request the OAuth state and code parameters. It verifies that the state parameter is a valid key that we submitted and it makes a HTTP POST request on the OAuth service provider to transform the code into an access token.  This step is handled by the Ada Security (http://code.google.com/p/ada-security)  library through the Request_Access_Token operation.
+
 procedure Authenticate (From    : in out Facebook_Auth;
                         Outcome : in out Ada.Strings.Unbounded.Unbounded_String) is
    use type Security.OAuth.Clients.Access_Token_Access;
@@ -109,6 +112,7 @@ Until now we have dealt with the authorization process.  Let's look at using the
 Defining the Ada beans
 
 To represent the API result, we will use an Ada bean object that can easily be used from a presentation page. For the Facebook friend, a name and an identifier are necessary:
+
 type Friend_Info is new Util.Beans.Basic.Readonly_Bean with record
    Name : Util.Beans.Objects.Object;
    Id   : Util.Beans.Objects.Object;
@@ -116,6 +120,7 @@ end record;
 type Friend_Info_Access is access all Friend_Info;
 
 Having a bean type to represent each friend, we will get a list of friends by instantiating the Ada bean Lists package:
+
 package Friend_List is new Util.Beans.Basic.Lists (Element_Type => Friend_Info);
 
 Mapping JSON or XML to Ada
@@ -129,6 +134,7 @@ procedure Set_Member (Into : in out Friend_Info;
                       Value : in Util.Beans.Objects.Object);
 
 The Set_Member procedure is rather simple as it just populates the data record with the value.
+
 procedure Set_Member (Into : in out Friend_Info;
                       Field : in Friend_Field_Type;
                       Value : in Util.Beans.Objects.Object) is
@@ -144,6 +150,7 @@ begin
 end Set_Member;
 
 The mapper is a package that defines and controls how to map the JSON/XML data fields into the Ada record by using the Set_Member operation.  We just have to instantiate the package. The Record_Mapper generic package will map JSON/XML into the Ada record and the Vector_Mapper will map a list of JSON/XML elements following a given structure into an Ada vector.
+
 package Friend_Mapper is
   new Util.Serialize.Mappers.Record_Mapper (Element_Type        => Friend_Info,
                                             Element_Type_Access => Friend_Info_Access,
@@ -155,6 +162,7 @@ package Friend_Vector_Mapper is
                                              Element_Mapper => Friend_Mapper);
 
 Now we need to control how the JSON/XML fields are mapped to our Ada fields.  For this we have to setup the mapping.  The Facebook JSON structure is so simple that we can use the default mapping provided by the mapper. For this we use the Add_Default_Mapping procedure. We also have to tell what is the JSON mapping used by the friend vector mapper.
+
 Friend_Map        : aliased Friend_Mapper.Mapper;
 Friend_Vector_Map : aliased Friend_Vector_Mapper.Mapper;
 ...
@@ -164,12 +172,14 @@ Friend_Vector_Map : aliased Friend_Vector_Mapper.Mapper;
 Creating the REST client
 
 Now it would be nice if we could get an operation that invokes the service provider API through an HTTP GET operation and put the result in our Ada object. The Facebook friends API returns a list of friends which correspond to our Friend_List.Vectors.  To get our operation, we just have to instantiate the Rest_Get_Vector operation with our vector mapper (the generic parameter is a package name).
+
 procedure Get_Friends is
   new Util.Http.Rest.Rest_Get_Vector (Vector_Mapper => Friend_Vector_Mapper);
 
 Calling the REST client
 
 Invoking the service provider API is now as simple as calling a procedure.  The URI must include the access token as parameter. The HTTP GET operation must be made using SSL/TLS since this is part of OAuth 2.0.
+
  List  : Friend_List.List_Bean;
 ...
    Get_Friends ("https://graph.facebook.com/me/friends?access_token="
