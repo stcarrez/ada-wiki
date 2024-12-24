@@ -26,6 +26,21 @@ package body Wiki.Render.Text is
       Engine.No_Newline := Enable;
    end Set_No_Newline;
 
+   procedure Set_Line_Length (Engine : in out Text_Renderer;
+                              Length : in Natural) is
+   begin
+      Engine.Line_Length := Length;
+   end Set_Line_Length;
+
+   --  ------------------------------
+   --  Set the display of links in the output (default enabled).
+   --  ------------------------------
+   procedure Set_Display_Links (Engine : in out Text_Renderer;
+                                Enable : in Boolean) is
+   begin
+      Engine.Display_Links := Enable;
+   end Set_Display_Links;
+
    --  ------------------------------
    --  Emit a new line.
    --  ------------------------------
@@ -159,7 +174,7 @@ package body Wiki.Render.Text is
       if Title'Length /= 0 then
          Engine.Output.Write (Title);
       end if;
-      if Title /= Href and then Href'Length /= 0 then
+      if Title /= Href and then Href'Length /= 0 and then Engine.Display_Links then
          if Title'Length /= 0 then
             Engine.Output.Write (" (");
          end if;
@@ -199,8 +214,12 @@ package body Wiki.Render.Text is
                                   Text   : in Wiki.Strings.WString;
                                   Format : in Wiki.Strings.WString) is
       pragma Unreferenced (Format);
+      Empty_Line : constant Boolean := Engine.Empty_Line;
    begin
       Engine.Close_Paragraph;
+      if not Empty_Line then
+         Engine.New_Line;
+      end if;
       Engine.Output.Write (Text);
       Engine.Empty_Line := False;
    end Render_Preformatted;
@@ -210,12 +229,21 @@ package body Wiki.Render.Text is
    --  ------------------------------
    procedure Render_Paragraph (Engine : in out Text_Renderer;
                                Text   : in Wiki.Strings.WString) is
+      Max : constant Natural := Engine.Line_Length;
+      C : Wiki.Strings.WChar;
    begin
-      for C of Text loop
+      for I in Text'Range loop
+         C := Text (I);
          if C = Helpers.LF then
             Engine.Empty_Line := True;
             Engine.Current_Indent := 0;
             Engine.Output.Write (C);
+         elsif Max > 0
+           and then Engine.Current_Indent > Max
+           and then Wiki.Helpers.Is_Space (C) then
+            Engine.Empty_Line := True;
+            Engine.Current_Indent := 0;
+            Engine.Output.Write (Helpers.LF);
          else
             while Engine.Current_Indent < Engine.Indent_Level loop
                Engine.Output.Write (' ');

@@ -26,6 +26,15 @@ package Wiki.Render.Text is
    procedure Set_No_Newline (Engine : in out Text_Renderer;
                              Enable : in Boolean);
 
+   --  Set the length of output line.  A positive value will try to insert
+   --  new lines to break long lines if possible.  0 means the line is not limited.
+   procedure Set_Line_Length (Engine : in out Text_Renderer;
+                              Length : in Natural);
+
+   --  Set the display of links in the output (default enabled).
+   procedure Set_Display_Links (Engine : in out Text_Renderer;
+                                Enable : in Boolean);
+
    --  Render the node instance from the document.
    overriding
    procedure Render (Engine : in out Text_Renderer;
@@ -92,8 +101,10 @@ private
       Need_Paragraph : Boolean := False;
       Empty_Line     : Boolean := True;
       No_Newline     : Boolean := False;
+      Display_Links  : Boolean := True;
       Current_Indent : Natural := 0;
       Indent_Level   : Natural := 0;
+      Line_Length    : Natural := 0;
       List_Index     : List_Index_Type := 0;
       List_Levels    : List_Level_Array;
    end record;
