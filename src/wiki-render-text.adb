@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-text -- Wiki Text renderer
---  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2018, 2019, 2022 Stephane Carrez
+--  Copyright (C) 2011 - 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -40,6 +40,15 @@ package body Wiki.Render.Text is
    begin
       Engine.Display_Links := Enable;
    end Set_Display_Links;
+
+   --  ------------------------------
+   --  Set the indentation of pre-formatted text (default is 0).
+   --  ------------------------------
+   procedure Set_Preformatted_Indentation (Engine : in out Text_Renderer;
+                                           Level  : in Natural) is
+   begin
+      Engine.Indent_Preformatted := Level;
+   end Set_Preformatted_Indentation;
 
    --  ------------------------------
    --  Emit a new line.
@@ -220,7 +229,27 @@ package body Wiki.Render.Text is
       if not Empty_Line then
          Engine.New_Line;
       end if;
-      Engine.Output.Write (Text);
+      if Engine.Indent_Preformatted = 0 then
+         Engine.Output.Write (Text);
+      else
+         declare
+            First : Natural := Text'First;
+            Pos   : Natural;
+         begin
+            loop
+               for I in 1 .. Engine.Indent_Preformatted loop
+                  Engine.Output.Write (' ');
+               end loop;
+               Pos := First;
+               while Pos < Text'Last and then not Helpers.Is_Newline (Text (Pos)) loop
+                  Pos := Pos + 1;
+               end loop;
+               Engine.Output.Write (Text (First .. Pos));
+               exit when Pos >= Text'Last;
+               First := Pos + 1;
+            end loop;
+         end;
+      end if;
       Engine.Empty_Line := False;
    end Render_Preformatted;
 
@@ -240,7 +269,8 @@ package body Wiki.Render.Text is
             Engine.Output.Write (C);
          elsif Max > 0
            and then Engine.Current_Indent > Max
-           and then Wiki.Helpers.Is_Space (C) then
+           and then Wiki.Helpers.Is_Space (C)
+         then
             Engine.Empty_Line := True;
             Engine.Current_Indent := 0;
             Engine.Output.Write (Helpers.LF);

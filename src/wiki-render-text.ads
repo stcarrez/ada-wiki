@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-text -- Wiki Text renderer
---  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2019, 2020, 2022 Stephane Carrez
+--  Copyright (C) 2011 - 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -34,6 +34,10 @@ package Wiki.Render.Text is
    --  Set the display of links in the output (default enabled).
    procedure Set_Display_Links (Engine : in out Text_Renderer;
                                 Enable : in Boolean);
+
+   --  Set the indentation of pre-formatted text (default is 0).
+   procedure Set_Preformatted_Indentation (Engine : in out Text_Renderer;
+                                           Level  : in Natural);
 
    --  Render the node instance from the document.
    overriding
@@ -105,6 +109,7 @@ private
       Current_Indent : Natural := 0;
       Indent_Level   : Natural := 0;
       Line_Length    : Natural := 0;
+      Indent_Preformatted : Natural := 0;
       List_Index     : List_Index_Type := 0;
       List_Levels    : List_Level_Array;
    end record;
