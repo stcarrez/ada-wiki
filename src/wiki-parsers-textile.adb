@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-textile -- Textile parser operations
---  Copyright (C) 2022 Stephane Carrez
+--  Copyright (C) 2022 - 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -280,16 +280,6 @@ package body Wiki.Parsers.Textile is
             if Common.Is_List (Buffer, Pos) then
                Common.Parse_List (Parser, Buffer, Pos);
             end if;
-
-         when ' ' =>
-            Parser.Preformat_Indent := 1;
-            Parser.Preformat_Fence := ' ';
-            Parser.Preformat_Fcount := 1;
-            Flush_Text (Parser, Trim => Right);
-            Pop_Block (Parser);
-            Push_Block (Parser, Nodes.N_PREFORMAT);
-            Common.Append (Parser.Text, Buffer, Pos + 1);
-            return;
 
          when ';' =>
             Common.Parse_Definition (Parser, Buffer, Pos);
