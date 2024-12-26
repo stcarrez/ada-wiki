@@ -205,13 +205,13 @@ package body Wiki.Render.Text is
    begin
       Engine.Open_Paragraph;
       if Title'Length > 0 then
-         Engine.Output.Write (Title);
+         Engine.Render_Paragraph (Title);
       end if;
       if Title'Length > 0 and then Desc'Length > 0 then
-         Engine.Output.Write (' ');
+         Engine.Render_Paragraph (" ");
       end if;
       if Desc'Length > 0 then
-         Engine.Output.Write (Desc);
+         Engine.Render_Paragraph (Desc);
       end if;
       Engine.Empty_Line := False;
    end Render_Image;
@@ -231,7 +231,7 @@ package body Wiki.Render.Text is
       end if;
       if Engine.Indent_Preformatted = 0 then
          Engine.Output.Write (Text);
-      else
+      elsif Text'Length > 0 then
          declare
             First : Natural := Text'First;
             Pos   : Natural;
@@ -254,6 +254,16 @@ package body Wiki.Render.Text is
    end Render_Preformatted;
 
    --  ------------------------------
+   --  Render a table component such as N_TABLE, N_ROW or N_COLUMN.
+   --  ------------------------------
+   procedure Render_Table (Engine : in out Text_Renderer;
+                           Doc    : in Wiki.Documents.Document;
+                           Node   : in Wiki.Nodes.Node_Type) is
+   begin
+      Engine.Close_Paragraph;
+   end Render_Table;
+
+   --  ------------------------------
    --  Render a text block indenting the text if necessary.
    --  ------------------------------
    procedure Render_Paragraph (Engine : in out Text_Renderer;
@@ -274,7 +284,9 @@ package body Wiki.Render.Text is
             Engine.Empty_Line := True;
             Engine.Current_Indent := 0;
             Engine.Output.Write (Helpers.LF);
-         else
+         elsif Engine.Current_Indent /= 0
+           or else not Wiki.Helpers.Is_Space (C)
+         then
             while Engine.Current_Indent < Engine.Indent_Level loop
                Engine.Output.Write (' ');
                Engine.Current_Indent := Engine.Current_Indent + 1;
@@ -297,14 +309,7 @@ package body Wiki.Render.Text is
    begin
       case Node.Kind is
          when Wiki.Nodes.N_HEADER =>
-            Engine.Close_Paragraph;
-            if not Engine.Empty_Line then
-               Engine.Add_Line_Break;
-            end if;
-            Engine.Render (Doc, Node.Content);
-            Engine.Add_Line_Break;
-            Engine.Has_Paragraph := False;
-            Engine.Empty_Line := False;
+            Engine.Render_Header (Doc, Node, Node.Level, Node.Content);
 
          when Wiki.Nodes.N_LINE_BREAK =>
             Engine.Add_Line_Break;
@@ -391,11 +396,59 @@ package body Wiki.Render.Text is
                end if;
             end if;
 
+         when Wiki.Nodes.N_TABLE =>
+            Engine.Render_Table (Doc, Node);
+
          when others =>
             null;
 
       end case;
    end Render;
+
+   --  ------------------------------
+   --  Add a section header in the document.
+   --  ------------------------------
+   procedure Render_Header (Engine : in out Text_Renderer;
+                            Doc    : in Documents.Document;
+                            Node   : in Nodes.Node_Type;
+                            Level  : in Natural;
+                            List   : in Nodes.Node_List_Access) is
+      Empty_Line : constant Boolean := Engine.Empty_Line;
+      New_Level : constant List_Index_Type :=
+        (if List_Index_Type (Level) < List_Index_Type'Last
+         then List_Index_Type (Level) else List_Index_Type'Last);
+   begin
+      Engine.Close_Paragraph;
+      if not Empty_Line then
+         Engine.Add_Line_Break;
+      end if;
+      if Engine.Header_Index < New_Level then
+         for I in Engine.Header_Index + 1 .. New_Level loop
+            Engine.Header_Levels (I) := 1;
+         end loop;
+      else
+         Engine.Header_Levels (New_Level) := Engine.Header_Levels (New_Level) + 1;
+      end if;
+      Engine.Header_Index := New_Level;
+      Engine.Render_Section_Number (Engine.Header_Levels (1 .. New_Level));
+      Engine.Render (Doc, Node.Content);
+      Engine.Add_Line_Break;
+      Engine.Has_Paragraph := False;
+      Engine.Empty_Line := False;
+   end Render_Header;
+
+   --  ------------------------------
+   --  Render the section number before the header title.
+   --  ------------------------------
+   procedure Render_Section_Number (Engine  : in out Text_Renderer;
+                                    Numbers : in List_Level_Array) is
+   begin
+      for Number of Numbers loop
+         Engine.Output.Write (Strings.To_WString (Util.Strings.Image (Number)));
+         Engine.Output.Write (".");
+      end loop;
+      Engine.Output.Write (" ");
+   end Render_Section_Number;
 
    --  ------------------------------
    --  Finish the document after complete wiki text has been parsed.

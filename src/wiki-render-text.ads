@@ -13,6 +13,10 @@ with Wiki.Strings;
 --  The formatting rules are ignored except for the paragraphs and sections.
 package Wiki.Render.Text is
 
+   type List_Index_Type is new Integer range 0 .. 32;
+
+   type List_Level_Array is array (List_Index_Type range <>) of Natural;
+
    --  ------------------------------
    --  Wiki to Text renderer
    --  ------------------------------
@@ -77,16 +81,28 @@ package Wiki.Render.Text is
                                   Text     : in Wiki.Strings.WString;
                                   Format   : in Wiki.Strings.WString);
 
+   --  Render a table component such as N_TABLE, N_ROW or N_COLUMN.
+   procedure Render_Table (Engine : in out Text_Renderer;
+                           Doc    : in Wiki.Documents.Document;
+                           Node   : in Wiki.Nodes.Node_Type);
+
+   --  Render a section header in the document.
+   procedure Render_Header (Engine : in out Text_Renderer;
+                            Doc    : in Documents.Document;
+                            Node   : in Nodes.Node_Type;
+                            Level  : in Natural;
+                            List   : in Nodes.Node_List_Access);
+
+   --  Render the section number before the header title.
+   procedure Render_Section_Number (Engine  : in out Text_Renderer;
+                                    Numbers : in List_Level_Array);
+
    --  Finish the document after complete wiki text has been parsed.
    overriding
    procedure Finish (Engine : in out Text_Renderer;
                      Doc    : in Wiki.Documents.Document);
 
 private
-
-   type List_Index_Type is new Integer range 0 .. 32;
-
-   type List_Level_Array is array (List_Index_Type range 1 .. 32) of Natural;
 
    --  Emit a new line.
    procedure New_Line (Document : in out Text_Renderer);
@@ -111,7 +127,9 @@ private
       Line_Length    : Natural := 0;
       Indent_Preformatted : Natural := 0;
       List_Index     : List_Index_Type := 0;
-      List_Levels    : List_Level_Array;
+      List_Levels    : List_Level_Array (1 .. 30);
+      Header_Index   : List_Index_Type := 0;
+      Header_Levels  : List_Level_Array (1 .. 30);
    end record;
 
 end Wiki.Render.Text;
