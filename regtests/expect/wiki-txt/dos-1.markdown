@@ -2,15 +2,16 @@
 First paragraph.
 
 Second paragraph.
-Section h1
 
-Section h2
+1. Section h1
 
-Section h3
+1.1. Section h2
 
-Section h4
+1.1.1. Section h3
 
-Section h5
+1.1.1.1. Section h4
+
+1.1.1.1.1. Section h5
 
 ---------------------------------------------------------
 
@@ -52,10 +53,12 @@ P1
 A quote 1 A quote 2 A quote 3
 
 P2
-Table
+
+2. Table
 
 No change
-Spaces
+
+3. Spaces
 
 
 End

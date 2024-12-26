@@ -7,5 +7,5 @@ definition item 1definition item 2
 
 Second paragraph
 
-Section 1
+1.1. Section 1
 

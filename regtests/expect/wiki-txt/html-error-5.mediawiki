@@ -1,5 +1,5 @@
 
-         Italic
+Italic
 Item 1
     Result 1
 Item2

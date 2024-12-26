@@ -1,8 +1,8 @@
 
 
 
- This is the visible section
+This is the visible section
 
-Visible header
+1.1. Visible header
 
 
