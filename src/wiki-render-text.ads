@@ -20,7 +20,7 @@ package Wiki.Render.Text is
    --  ------------------------------
    --  Wiki to Text renderer
    --  ------------------------------
-   type Text_Renderer is new Wiki.Render.Renderer with private;
+   type Text_Renderer is limited new Wiki.Render.Renderer with private;
 
    --  Set the output stream.
    procedure Set_Output_Stream (Engine : in out Text_Renderer;
@@ -48,6 +48,14 @@ package Wiki.Render.Text is
    procedure Render (Engine : in out Text_Renderer;
                      Doc    : in Wiki.Documents.Document;
                      Node   : in Wiki.Nodes.Node_Type);
+
+   --  Add a text block with the given format.
+   procedure Write_Text (Engine : in out Text_Renderer;
+                         Kind   : in Wiki.Nodes.Node_Kind;
+                         Text   : in Strings.WString;
+                         Format : in Format_Map);
+
+   procedure Write_Newline (Engine : in out Text_Renderer);
 
    --  Add a line break (<br>).
    procedure Add_Line_Break (Document : in out Text_Renderer);
@@ -102,8 +110,6 @@ package Wiki.Render.Text is
    procedure Finish (Engine : in out Text_Renderer;
                      Doc    : in Wiki.Documents.Document);
 
-private
-
    --  Emit a new line.
    procedure New_Line (Document : in out Text_Renderer);
 
@@ -112,9 +118,13 @@ private
 
    --  Render a text block indenting the text if necessary.
    procedure Render_Paragraph (Engine : in out Text_Renderer;
-                               Text   : in Wiki.Strings.WString);
+                               Kind   : in Wiki.Nodes.Node_Kind;
+                               Text   : in Wiki.Strings.WString;
+                               Format : in Format_Map := (others => False));
 
-   type Text_Renderer is new Wiki.Render.Renderer with record
+private
+
+   type Text_Renderer is limited new Wiki.Render.Renderer with record
       Output         : Streams.Output_Stream_Access := null;
       Format         : Wiki.Format_Map := (others => False);
       Has_Paragraph  : Boolean := False;

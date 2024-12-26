@@ -1,16 +1,16 @@
 -----------------------------------------------------------------------
 --  wiki-streams-builders -- Wiki writer to a string builder
---  Copyright (C) 2011, 2012, 2013, 2015, 2016 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
 with Wiki.Strings;
 
 --  === Output Builder Stream ==
---  The <tt>Output_Builder_Stream</tt> is a concrete in-memory output stream.
---  It collects the output in a <tt>Wiki.Strings.Bstring</tt> object and the
---  content can be retrieved at the end by using the <tt>To_String</tt>
---  or <tt>Iterate</tt> operation.
+--  The `Output_Builder_Stream` is a concrete in-memory output stream.
+--  It collects the output in a `Wiki.Strings.Bstring` object and the
+--  content can be retrieved at the end by using the `To_String`
+--  or `Iterate` operation.
 package Wiki.Streams.Builders is
 
    type Output_Builder_Stream is limited new Output_Stream with private;

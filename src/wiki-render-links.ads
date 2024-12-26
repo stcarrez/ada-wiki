@@ -1,13 +1,13 @@
 -----------------------------------------------------------------------
 --  wiki-render-links -- Wiki links renderering
---  Copyright (C) 2015, 2016 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
 with Wiki.Strings;
 
 --  === Link Renderer ===
---  The <tt>Wiki.Render.Links</tt> package defines the <tt>Link_Renderer</tt> interface used
+--  The `Wiki.Render.Links` package defines the `Link_Renderer` interface used
 --  for the rendering of links and images.  The interface allows to customize the generated
 --  links and image source for the final HTML.
 --

@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-wiki -- Wiki to Wiki renderer
---  Copyright (C) 2015, 2016, 2020, 2022 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020, 2022, 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -13,7 +13,7 @@ with Wiki.Streams;
 with Wiki.Strings;
 
 --  === Wiki Renderer ===
---  The `Wiki_Renderer</tt> allows to render a wiki document into another wiki content.
+--  The `Wiki_Renderer` allows to render a wiki document into another wiki content.
 --  The formatting rules are ignored except for the paragraphs and sections.
 package Wiki.Render.Wiki is
 
