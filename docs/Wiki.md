@@ -4,7 +4,6 @@ The Wiki engine parses a Wiki text in several Wiki syntax such as `MediaWiki`,
 another Wiki format.  The Wiki engine is used in two steps:
 
 * The Wiki text is parsed according to its syntax to produce a Wiki Document instance.
-
 * The Wiki document is then rendered by a renderer to produce the final HTML, text.
 
 Through this process, it is possible to insert filters and plugins to customize the
@@ -15,28 +14,23 @@ parsing and the rendering.
 The Ada Wiki engine is organized in several packages:
 
 * The [Wiki Streams](#wiki-streams) packages define the interface, types and operations
- for the Wiki engine to read the Wiki or HTML content and for the Wiki renderer to generate
- the HTML or text outputs.
-
+  for the Wiki engine to read the Wiki or HTML content and for the Wiki renderer to generate
+  the HTML or text outputs.
 * The [Wiki parser](#wiki-parsers) is responsible for parsing HTML or Wiki content
- according to a selected Wiki syntax.  It builds the final Wiki document through filters
- and plugins.
-
+  according to a selected Wiki syntax.  It builds the final Wiki document through filters
+  and plugins.
 * The [Wiki Filters](#wiki-filters) provides a simple filter framework that allows to plug
- specific filters when a Wiki document is parsed and processed.  Filters are used for the
- table of content generation, for the HTML filtering, to collect words or links
- and so on.
-
+  specific filters when a Wiki document is parsed and processed.  Filters are used for the
+  table of content generation, for the HTML filtering, to collect words or links
+  and so on.
 * The [Wiki Plugins](#wiki-plugins) defines the plugin interface that is used
- by the Wiki engine to provide pluggable extensions in the Wiki.  Plugins are used
- for the Wiki template support, to hide some Wiki text content when it is rendered
- or to interact with other systems.
-
+  by the Wiki engine to provide pluggable extensions in the Wiki.  Plugins are used
+  for the Wiki template support, to hide some Wiki text content when it is rendered
+  or to interact with other systems.
 * The Wiki documents and attributes are used for the representation of the Wiki
- document after the Wiki content is parsed.
-
+  document after the Wiki content is parsed.
 * The [Wiki renderers](@wiki-render) are the last packages which are used for the rendering
- of the Wiki document to produce the final HTML or text.
+  of the Wiki document to produce the final HTML or text.
 
 ## Parsing and rendering example
 
@@ -143,13 +137,11 @@ By default the output stream is configured to write on the standard output.  Thi
 `Render` is called, the output will be written to the standard output.  You can choose another
 output stream or open the output stream to a file according to your needs.
 
-
 ## Documents
 The `Document` type is used to hold a Wiki document that was parsed by the parser
 with one of the supported syntax.  The `Document` holds two distinct parts:
 
 * A main document body that represents the Wiki content that was parsed.
-
 * A table of contents part that was built while Wiki sections are collected.
 
 Most of the operations provided by the `Wiki.Documents` package are intended to
@@ -165,6 +157,7 @@ A document instance must be declared before parsing a text:
 After parsing some HTML or Wiki text, it will contain a representation of the
 HTML or Wiki text.  It is possible to populate the document by using one of
 the `Append`, `Add_Link`, `Add_Image` operation.
+
 ## Attributes
 The `Attributes` package defines a simple management of attributes for
 the wiki document parser.  Attribute lists are described by the `Attribute_List`
@@ -176,6 +169,7 @@ The Wiki filters and Wiki plugins have access to the attributes before they are 
 to the Wiki document.  They can check them or modify them according to their needs.
 
 The Wiki renderers use the attributes to render the final HTML content.
+
 ## Wiki Parsers {#wiki-parsers}
 The `Wikis.Parsers` package implements a parser for several well known wiki formats
 but also for HTML.  While reading the input, the parser populates a wiki `Document`
@@ -209,6 +203,7 @@ completes, the `Document` instance holds the wiki document.
 ```Ada
 Engine.Parse (Some_Text, Doc);
 ```
+
 ## Filters
 The `Wiki.Filters` package provides a simple filter framework that allows to plug
 specific filters when a wiki document is parsed and processed.  The `Filter_Type`
@@ -216,11 +211,8 @@ implements the operations that the `Wiki.Parsers` will use to populate the docum
 A filter can do some operations while calls are made so that it can:
 
 * Get the text content and filter it by looking at forbidden words in some dictionary,
-
 * Ignore some formatting construct (for example to forbid the use of links),
-
 * Verify and do some corrections on HTML content embedded in wiki text,
-
 * Expand some plugins, specific links to complex content.
 
 To implement a new filter, the `Filter_Type` type must be used as a base type
@@ -244,6 +236,7 @@ and add the filter to the Wiki parser engine:
 ```Ada
  Engine.Add_Filter (TOC'Unchecked_Access);
 ```
+
 ### HTML Filters
 The `Wiki.Filters.Html` package implements a customizable HTML filter that verifies
 the HTML content embedded in the Wiki text.  The HTML filter can be customized to indicate
@@ -251,13 +244,12 @@ the HTML tags that must be accepted or ignored.  By default, the filter accepts 
 tags except 'script', 'noscript', 'style'.
 
 * A tag can be `Forbidden` in which case it is not passed to the document.
- If this tag contains inner HTML elements, they are passed to the document.
- By default, the `html`, `head`, `meta`, `title`, `script`, `body` are not
- passed to the document.
-
+  If this tag contains inner HTML elements, they are passed to the document.
+  By default, the `html`, `head`, `meta`, `title`, `script`, `body` are not
+  passed to the document.
 * A tag can be `Hidden` in which case it is not passed to the document and
- the inner HTML elements it contains are also silently ignored.
- By default this is the case for `script`, `noscript` and `style`.
+  the inner HTML elements it contains are also silently ignored.
+  By default this is the case for `script`, `noscript` and `style`.
 
 The HTML filter may be declared and configured as follows:
 
@@ -283,6 +275,7 @@ operation:
 Engine.Add_Filter (F'Unchecked_Access);
 
 ```
+
 ### Collector Filters
 The `Wiki.Filters.Collectors` package defines three filters that can be used to
 collect words, links or images contained in a Wiki document.  The collector filters are
@@ -292,9 +285,7 @@ and they can be queried by using the `Find` or `Iterate` operations.
 The following collectors are defined:
 
 * The `Word_Collector_Type` collects words from text, headers, links,
-
 * The `Link_Collector_Type` collects links,
-
 * The `Image_Collector_Type` collects images,
 
 The filter is inserted in the filter chain before parsing the Wiki document.
@@ -312,6 +303,7 @@ collected by the filter.
 ```Ada
 Words.Iterate (Print'Access);
 ```
+
 ### Autolink Filters
 The `Wiki.Filters.Autolink` package defines a filter that transforms URLs
 in the Wiki text into links.  The filter should be inserted in the filter chain
@@ -319,6 +311,7 @@ after the HTML and after the collector filters.  The filter looks for the
 text and transforms `http://`, `https://`, `ftp://` and `ftps://` links into real links.
 When such links are found, the text is split so that next filters see only the text without
 links and the `Add_Link` filter operations are called with the link.
+
 ### Variables Filters
 The `Wiki.Filters.Variables` package defines a filter that replaces variables
 in the text, links, quotes.  Variables are represented as `$name`, `$(name)`
@@ -340,6 +333,7 @@ And variables can be inserted by using the `Add_Variable` procedure:
 ```Ada
 F.Add_Variable ("username", "gandalf");
 ```
+
 ## Plugins {#wiki-plugins}
 The `Wiki.Plugins` package defines the plugin interface that is used by the wiki
 engine to provide pluggable extensions in the Wiki.  The plugins works by using
@@ -358,6 +352,7 @@ Find (Factory : in Factory;
 ### Variables Plugins
 The `Wiki.Plugins.Variables` package defines a the variables plugin that allows
 to set or update a variable that will be replaced by the `Wiki.Filters.Variables` filter.
+
 ### Conditions Plugins
 The <b>Wiki.Plugins.Conditions</b> package defines a set of conditional plugins
 to show or hide wiki content according to some conditions evaluated during the parsing phase.
@@ -375,16 +370,18 @@ and render the result either in text, HTML or another format.
 The `Html_Renderer` allows to render a wiki document into an HTML content.
 
 ### Link Renderer
-The <tt>Wiki.Render.Links</tt> package defines the <tt>Link_Renderer</tt> interface used
+The `Wiki.Render.Links` package defines the `Link_Renderer` interface used
 for the rendering of links and images.  The interface allows to customize the generated
 links and image source for the final HTML.
 
 ### Text Renderer
 The `Text_Renderer` allows to render a wiki document into a text content.
 The formatting rules are ignored except for the paragraphs and sections.
+
 ### Wiki Renderer
-The `Wiki_Renderer</tt> allows to render a wiki document into another wiki content.
+The `Wiki_Renderer` allows to render a wiki document into another wiki content.
 The formatting rules are ignored except for the paragraphs and sections.
+
 ## Input and Output streams {#wiki-streams}
 The `Wiki.Streams` package defines the interfaces used by
 the parser or renderer to read and write their outputs.
@@ -404,11 +401,13 @@ their outputs.
 The `Input_Stream` interface defines the interface that must be implemented to
 read the source Wiki content.  The `Read` procedure is called by the parser
 repeatedly while scanning the Wiki content.
+
 ### Output Builder Stream
-The <tt>Output_Builder_Stream</tt> is a concrete in-memory output stream.
-It collects the output in a <tt>Wiki.Strings.Bstring</tt> object and the
-content can be retrieved at the end by using the <tt>To_String</tt>
-or <tt>Iterate</tt> operation.
+The `Output_Builder_Stream` is a concrete in-memory output stream.
+It collects the output in a `Wiki.Strings.Bstring` object and the
+content can be retrieved at the end by using the `To_String`
+or `Iterate` operation.
+
 ### HTML Output Builder Stream
 The `Html_Output_Builder_Stream` type defines a HTML output stream that collects the
 HTML into expandable buffers.  Once the complete HTML document is rendered, the content is
