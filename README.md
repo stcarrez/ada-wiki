@@ -22,12 +22,12 @@ for the implementation of the blog and wiki online plugins.
 
 You can play with the Wiki engine by using [Wi2wic](https://gitlab.com/stcarrez/wi2wic) on https://wi2wic.vacs.fr/wi2wic/index.html
 
+## Version 1.5.0   - Under development
+  - Fix #11: Newline in link titles should be ignored and replaced by space
+
 ## Version 1.4.3   - Nov 2024
   - Feature #7: Add a style on HTML table
   - Feature #8: Add support for strikeout in markdown
-
-## Version 1.4.2   - Aug 2024
-  - Cleanup build environment to drop configure
 
 [List all versions](https://gitlab.com/stcarrez/ada-wiki/blob/master/NEWS.md)
 

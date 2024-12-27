@@ -1,3 +1,6 @@
+Version 1.5.0   - Under development
+  - Fix #11: Newline in link titles should be ignored and replaced by space
+
 Version 1.4.3   - Nov 2024
   - Feature #7: Add a style on HTML table
   - Feature #8: Add support for strikeout in markdown
