@@ -1061,6 +1061,8 @@ package body Wiki.Parsers.Markdown is
                   if not Is_Escapable (C) then
                      Append (Alt, '\');
                   end if;
+               elsif Is_Newline (C) then
+                  C := ' ';
                end if;
                Append (Alt, C);
                Pos := Pos + 1;
