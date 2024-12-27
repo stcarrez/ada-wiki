@@ -68,6 +68,10 @@ package Wiki.Render.Html is
                        Text     : in Wiki.Strings.WString;
                        Format   : in Wiki.Format_Map);
 
+   --  Apply the given format before writing some text or after closing some paragraph.
+   procedure Set_Format (Engine : in out Html_Renderer;
+                         Format : in Wiki.Format_Map);
+
    --  Render a text block that is pre-formatted.
    procedure Render_Preformatted (Engine : in out Html_Renderer;
                                   Text   : in Wiki.Strings.WString;
@@ -112,6 +116,7 @@ private
       Section_Level     : Natural := 0;
       Column            : Natural := 0;
       In_Definition     : Boolean := False;
+      Current_Format    : Format_Map := (others => False);
    end record;
 
 end Wiki.Render.Html;

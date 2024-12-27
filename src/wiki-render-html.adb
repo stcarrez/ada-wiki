@@ -551,6 +551,7 @@ package body Wiki.Render.Html is
       if Engine.Has_Html_Paragraph then
          return;
       end if;
+      Engine.Set_Format ((others => False));
       if Engine.Has_Paragraph then
          Engine.Output.End_Element ("p");
          if not Engine.No_Newline then
@@ -860,18 +861,28 @@ package body Wiki.Render.Html is
          Engine.Output.Write (' ');
          Engine.Need_Paragraph := False;
       end if;
-      for I in Format'Range loop
-         if Format (I) then
-            Engine.Output.Start_Element (HTML_ELEMENT (I).all);
-         end if;
-      end loop;
+      Engine.Set_Format (Format);
       Engine.Output.Write_Wide_Text (Text);
+   end Add_Text;
+
+   --  ------------------------------
+   --  Apply the given format before writing some text or after closing some paragraph.
+   --  ------------------------------
+   procedure Set_Format (Engine : in out Html_Renderer;
+                         Format : in Wiki.Format_Map) is
+   begin
       for I in reverse Format'Range loop
-         if Format (I) then
+         if not Format (I) and then Engine.Current_Format (I) then
             Engine.Output.End_Element (HTML_ELEMENT (I).all);
          end if;
       end loop;
-   end Add_Text;
+      for I in Format'Range loop
+         if Format (I) and then not Engine.Current_Format (I) then
+            Engine.Output.Start_Element (HTML_ELEMENT (I).all);
+         end if;
+      end loop;
+      Engine.Current_Format := Format;
+   end Set_Format;
 
    --  ------------------------------
    --  Render a text block that is pre-formatted.

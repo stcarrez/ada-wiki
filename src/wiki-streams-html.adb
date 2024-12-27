@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-streams-html -- Wiki HTML output stream
---  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2022 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2022, 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -29,6 +29,8 @@ package body Wiki.Streams.Html is
          Stream.Write ("&gt;");
       elsif Char = '&' then
          Stream.Write ("&amp;");
+      elsif Char = '"' then
+         Stream.Write ("&quot;");
       else
          Stream.Write (Char);
       end if;
