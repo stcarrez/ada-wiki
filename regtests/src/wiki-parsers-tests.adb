@@ -101,7 +101,7 @@ package body Wiki.Parsers.Tests is
    --  ------------------------------
    procedure Test_Wiki_Formats (T : in out Test) is
    begin
-      Util.Tests.Assert_Equals (T, "<p><i>it</i><b><i>bold</i></b><i>em</i></p>",
+      Util.Tests.Assert_Equals (T, "<p><i>it<b>bold</b>em</i></p>",
                                 Wiki.Utils.To_Html ("_it*bold*em_", SYNTAX_GOOGLE),
                                 "Italic+Bold rendering invalid");
       Util.Tests.Assert_Equals (T, "<p>x <i>item</i> y</p>",
