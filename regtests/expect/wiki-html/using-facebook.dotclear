@@ -3,18 +3,18 @@
      and Util.Beans.Methods.Method_Bean with private;
 
 FB_Auth      : aliased Facebook.Facebook_Auth;
-</code></pre><p>Before anything we have to initialize the <code>Application</code> type to setup the application identifier, the application secret, the provider URL and a callback URL.</p><pre><code class="lang-ada">FB_Auth.Set_Application_Identifier ("116337738505130");
-FB_Auth.Set_Application_Secret ("xxxxxxxxxxx");
-FB_Auth.Set_Application_Callback ("http://demo.vacs.fr/oauth/localhost:8080/demo/oauth_callback.html");
-</code></pre><p>The first step in the OAuth process is to build the authorization page with the link that redirects the user to the service provider OAuth authorization process. The link must be created by using the <code>Get_State</code> and <code>Get_Auth_Params</code> functions provided by the <code>Application</code> type. The first one generates a secure unique key that will be returned back by the service provider.  The second one builds a list of request parameters that are necessary for the service provider to identify the application and redirect the user back to the application once the authentication is done.</p><pre><code class="lang-ada">Id : constant String := "...";
+</code></pre><p>Before anything we have to initialize the <code>Application</code> type to setup the application identifier, the application secret, the provider URL and a callback URL.</p><pre><code class="lang-ada">FB_Auth.Set_Application_Identifier (&quot;116337738505130&quot;);
+FB_Auth.Set_Application_Secret (&quot;xxxxxxxxxxx&quot;);
+FB_Auth.Set_Application_Callback (&quot;http://demo.vacs.fr/oauth/localhost:8080/demo/oauth_callback.html&quot;);
+</code></pre><p>The first step in the OAuth process is to build the authorization page with the link that redirects the user to the service provider OAuth authorization process. The link must be created by using the <code>Get_State</code> and <code>Get_Auth_Params</code> functions provided by the <code>Application</code> type. The first one generates a secure unique key that will be returned back by the service provider.  The second one builds a list of request parameters that are necessary for the service provider to identify the application and redirect the user back to the application once the authentication is done.</p><pre><code class="lang-ada">Id : constant String := &quot;...&quot;;
 State  : constant String := FB_Auth.Get_State (Id);
-Params : constant String := FB_Auth.Get_Auth_Params (State, "read_stream");
-</code></pre><p>For a Facebook authorization process, the URI would be created as follows:</p><pre><code class="lang-ada">URI : constant String := "https://www.facebook.com/dialog/oauth?" &amp; Params;
+Params : constant String := FB_Auth.Get_Auth_Params (State, &quot;read_stream&quot;);
+</code></pre><p>For a Facebook authorization process, the URI would be created as follows:</p><pre><code class="lang-ada">URI : constant String := &quot;https://www.facebook.com/dialog/oauth?&quot; &amp; Params;
 </code></pre><p>For another service provider, the process is similar but the URL is different.</p><h3 id="section_3_1">OAuth callback</h3><p>When the user has granted access to his data, he will be redirected to the callback defined by the application. Most service providers will require that the OAuth callback be a public URL. If you want to run you application on <code>localhost</code> (which is the case when you are developing), you will need a second redirection. If you are using the Apache server, you can easily setup a rewrite rule:</p><pre><code>RewriteRule ^/oauth/localhost:([0-9]+)/(.*) http://localhost:$1/$2 [L,R=302]
 </code></pre><p>With the above rewrite rule, the callback given to the OAuth provider would look like:</p><pre><code>http://demo.vacs.fr/oauth/localhost:8080/demo/oauth_callback.html
-</code></pre><p>The OAuth provider will first redirect to the public internet site which will redirect again to localhost and port 8080.</p><h3 id="section_3_2">Getting the OAuth access token</h3><p>The next step is to receive the <code>code</code> parameter from the callback which grants the application access to the service provider API. For this, we will use an XHTML view file and a view action that will be executed when the page is displayed.  When this happens, the EL method <code>authenticate</code> will be called on the <code>facebook</code> bean (ie, our <code>FB_Auth</code> instance).</p><pre><code>&lt;f:view xmlns:f="http://java.sun.com/jsf/core"&gt;
+</code></pre><p>The OAuth provider will first redirect to the public internet site which will redirect again to localhost and port 8080.</p><h3 id="section_3_2">Getting the OAuth access token</h3><p>The next step is to receive the <code>code</code> parameter from the callback which grants the application access to the service provider API. For this, we will use an XHTML view file and a view action that will be executed when the page is displayed.  When this happens, the EL method <code>authenticate</code> will be called on the <code>facebook</code> bean (ie, our <code>FB_Auth</code> instance).</p><pre><code>&lt;f:view xmlns:f=&quot;http://java.sun.com/jsf/core&quot;&gt;
     &lt;f:metadata&gt;
-        &lt;f:viewAction action="#{facebook.authenticate}"/&gt;
+        &lt;f:viewAction action=&quot;#{facebook.authenticate}&quot;/&gt;
     &lt;/f:metadata&gt;
 &lt;/f:view&gt;
 </code></pre><p>The <code>Authenticate</code> procedure extracts from the request the OAuth <code>state</code> and <code>code</code> parameters. It verifies that the <code>state</code> parameter is a valid key that we submitted and it makes a HTTP POST request on the OAuth service provider to transform the <code>code</code> into an access token.  This step is handled by the <a href="http://code.google.com/p/ada-security">Ada Security</a>  library through the <code>Request_Access_Token</code> operation.</p><pre><code class="lang-ada">procedure Authenticate (From    : in out Facebook_Auth;
@@ -26,7 +26,7 @@ Params : constant String := FB_Auth.Get_Auth_Params (State, "read_stream");
    Code  : constant String := F.Get_Parameter (Security.OAuth.Code);
    Session : ASF.Sessions.Session := F.Get_Session;
 begin
-   Log.Info ("Auth code {0} for state {1}", Code, State);
+   Log.Info (&quot;Auth code {0} for state {1}&quot;, Code, State);
    if Session.Is_Valid then
       if From.Is_Valid_State (Session.Get_Id, State) then
          declare
@@ -34,8 +34,8 @@ begin
               := From.Request_Access_Token (Code);
          begin
             if Acc /= null then
-               Log.Info ("Access token is {0}", Acc.Get_Name);
-               Session.Set_Attribute ("access_token",
+               Log.Info (&quot;Access token is {0}&quot;, Acc.Get_Name);
+               Session.Set_Attribute (&quot;access_token&quot;,
                                       Util.Beans.Objects.To_Object (Acc.Get_Name));
             end if;
          end;
@@ -84,9 +84,9 @@ Friend_Vector_Map : aliased Friend_Vector_Mapper.Mapper;
   new Util.Http.Rest.Rest_Get_Vector (Vector_Mapper =&gt; Friend_Vector_Mapper);
 </code></pre><h3 id="section_4_4">Calling the REST client</h3><p>Invoking the service provider API is now as simple as calling a procedure.  The URI must include the access token as parameter. The HTTP GET operation must be made using SSL/TLS since this is part of OAuth 2.0.</p><pre><code> List  : Friend_List.List_Bean;
 ...
-   Get_Friends ("https://graph.facebook.com/me/friends?access_token="
+   Get_Friends (&quot;https://graph.facebook.com/me/friends?access_token=&quot;
                       &amp; Token,
                       Friend_Vector_Map'Access,
-                      "/data",
+                      &quot;/data&quot;,
                       List.List'Access);
 </code></pre><p>Now you are ready to use and access the user's data as easily as other information...</p><h3 id="section_4_5">References</h3><p><a href="http://code.google.com/p/ada-asf/source/browse/trunk/samples/beans/facebook.ads">facebook.ads</a><br><a href="http://code.google.com/p/ada-asf/source/browse/trunk/samples/beans/facebook.adb">facebook.adb</a><br><a href="http://developers.facebook.com/docs/reference/api/">Facebook API</a></p>

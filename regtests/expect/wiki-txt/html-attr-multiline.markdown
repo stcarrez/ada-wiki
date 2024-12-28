@@ -1,7 +1,3 @@
 
-=
-
-"/images/image.png"
-alt = "Image Title"
-/>
+<img src = "/images/image.png" alt = "Image Title" />
 
