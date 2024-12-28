@@ -147,7 +147,7 @@ private
       Attributes          : Wiki.Attributes.Attribute_List;
       Current_Node        : Wiki.Nodes.Node_Kind := Wiki.Nodes.N_NONE;
       Blocks              : Block_Stack.Stack;
-      Previous_Line_Empty : Boolean := False;
+      Previous_Line_Empty : Boolean := True;
       Header_Level        : Natural := 0;
       Is_Empty_Paragraph  : Boolean := True;
       Pre_Tag_Counter     : Natural := 0;

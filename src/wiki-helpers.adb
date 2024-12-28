@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-helpers -- Helper operations for wiki parsers and renderer
---  Copyright (C) 2016, 2020, 2022 Stephane Carrez
+--  Copyright (C) 2016, 2020, 2022, 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -31,6 +31,45 @@ package body Wiki.Helpers is
    begin
       return Ada.Wide_Wide_Characters.Unicode.Is_Punctuation (C);
    end Is_Punctuation;
+
+   --  ------------------------------
+   --  Returns True if the character is a punctuation or symbol character
+   --  (class P or S from Unicode).
+   --  ------------------------------
+   function Is_Symbol_Or_Punctuation (C : in Wiki.Strings.WChar) return Boolean is
+      use Ada.Wide_Wide_Characters.Unicode;
+   begin
+      --  An [ASCII punctuation character](@)
+      --  is `!`, `"`, `#`, `$`, `%`, `&`, `'`, `(`, `)`,
+      --  `*`, `+`, `,`, `-`, `.`, `/` (U+0021–2F),
+      --  `:`, `;`, `<`, `=`, `>`, `?`, `@` (U+003A–0040),
+      --  `[`, `\`, `]`, `^`, `_`, `` ` `` (U+005B–0060),
+      --  `{`, `|`, `}`, or `~` (U+007B–007E).
+      case C is
+         when '!' | '"' | '#' | '$' | '%' | '&' | ''' | '(' | ')'
+            | '*' | '+' | ',' | '/' | ':' | ';' | '<' | '=' | '>'
+            | '?' | '@' | '[' | '\' | '^' | '_' | '`' | '{' | '|'
+            | '}' | '~' =>
+            return True;
+
+         when others =>
+
+            --  Pc,   --  Punctuation, Connector
+            --  Pd,   --  Punctuation, Dash
+            --  Pe,   --  Punctuation, Close
+            --  Pf,   --  Punctuation, Final quote
+            --  Pi,   --  Punctuation, Initial quote
+            --  Po,   --  Punctuation, Other
+            --  Ps,   --  Punctuation, Open
+            --  Sc,   --  Symbol, Currency
+            --  Sk,   --  Symbol, Modifier
+            --  Sm,   --  Symbol, Math
+            --  So,   --  Symbol, Other
+            return Get_Category (C) in Pc | Pd | Pe | Pf | Pi | Po | Sc | Sk | Sm | So;
+
+      end case;
+
+   end Is_Symbol_Or_Punctuation;
 
    --  ------------------------------
    --  Returns True if the character is a line terminator.

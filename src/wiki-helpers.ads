@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-helpers -- Helper operations for wiki parsers and renderer
---  Copyright (C) 2016, 2020, 2022 Stephane Carrez
+--  Copyright (C) 2016, 2020, 2022, 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -22,6 +22,10 @@ package Wiki.Helpers is
 
    --  Returns True if the character is a punctuation character.
    function Is_Punctuation (C : in Wiki.Strings.WChar) return Boolean;
+
+   --  Returns True if the character is a punctuation or symbol character
+   --  (class P or S from Unicode).
+   function Is_Symbol_Or_Punctuation (C : in Wiki.Strings.WChar) return Boolean;
 
    --  Returns True if the character is a line terminator.
    function Is_Newline (C : in Wiki.Strings.WChar) return Boolean;

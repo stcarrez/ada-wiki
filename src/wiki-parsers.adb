@@ -198,7 +198,7 @@ package body Wiki.Parsers is
    function Get_Current_Level (Parser : in Parser_Type) return Natural is
       Top : constant Block_Access := Block_Stack.Current (Parser.Blocks);
    begin
-      return Top.Level;
+      return (if Top = null then 0 else Top.Level);
    end Get_Current_Level;
 
    --  ------------------------------
@@ -916,10 +916,10 @@ package body Wiki.Parsers is
       Engine.Link_Double_Bracket := False;
       Engine.Escape_Char := '~';
       Engine.Param_Char := Wiki.Strings.WChar'Last;
-      if Main then
-         Push_Block (Engine, Wiki.Nodes.N_PARAGRAPH);
-      else
+      if not Main then
          Engine.Current_Node := Wiki.Nodes.N_PARAGRAPH;
+      elsif Engine.Context.Syntax /= SYNTAX_MARKDOWN then
+         Push_Block (Engine, Wiki.Nodes.N_PARAGRAPH);
       end if;
       case Engine.Context.Syntax is
          when SYNTAX_DOTCLEAR =>
