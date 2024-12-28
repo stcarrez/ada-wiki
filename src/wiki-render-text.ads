@@ -79,6 +79,11 @@ package Wiki.Render.Text is
                           Title    : in Wiki.Strings.WString;
                           Attr     : in Wiki.Attributes.Attribute_List);
 
+   --  Render a link reference.
+   procedure Render_Link_Ref (Engine : in out Text_Renderer;
+                              Doc    : in Wiki.Documents.Document;
+                              Label  : in Wiki.Strings.WString);
+
    --  Render an image.
    procedure Render_Image (Engine   : in out Text_Renderer;
                            Title    : in Wiki.Strings.WString;

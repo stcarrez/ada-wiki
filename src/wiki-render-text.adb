@@ -196,6 +196,26 @@ package body Wiki.Render.Text is
    end Render_Link;
 
    --  ------------------------------
+   --  Render a link reference.
+   --  ------------------------------
+   procedure Render_Link_Ref (Engine : in out Text_Renderer;
+                              Doc    : in Wiki.Documents.Document;
+                              Label  : in Wiki.Strings.WString) is
+      Link : constant Wiki.Strings.WString := Doc.Get_Link (Label);
+      Title  : constant Wiki.Strings.WString := Doc.Get_Link_Title (Label);
+   begin
+      Engine.Open_Paragraph;
+      if Title'Length = 0 then
+         Engine.Render_Paragraph (Nodes.N_TEXT, "[", (others => False));
+         Engine.Render_Paragraph (Nodes.N_TEXT, Label, (others => False));
+         Engine.Render_Paragraph (Nodes.N_TEXT, "]", (others => False));
+      else
+         Engine.Render_Paragraph (Nodes.N_LINK, Title, (others => False));
+      end if;
+      Engine.Empty_Line := False;
+   end Render_Link_Ref;
+
+   --  ------------------------------
    --  Render an image.
    --  ------------------------------
    procedure Render_Image (Engine   : in out Text_Renderer;
@@ -387,6 +407,9 @@ package body Wiki.Render.Text is
 
          when Wiki.Nodes.N_LINK =>
             Text_Renderer'Class (Engine).Render_Link (Node.Title, Node.Link_Attr);
+
+         when Wiki.Nodes.N_LINK_REF =>
+            Engine.Render_Link_Ref (Doc, Node.Title);
 
          when Wiki.Nodes.N_IMAGE =>
             Engine.Render_Image (Node.Title, Node.Link_Attr);
