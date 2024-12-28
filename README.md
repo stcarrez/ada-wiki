@@ -23,6 +23,8 @@ for the implementation of the blog and wiki online plugins.
 You can play with the Wiki engine by using [Wi2wic](https://gitlab.com/stcarrez/wi2wic) on https://wi2wic.vacs.fr/wi2wic/index.html
 
 ## Version 1.5.0   - Under development
+  - Feature #12: Improvement of HTML renderer
+  - Feature #10: Text renderer improvement
   - Fix #11: Newline in link titles should be ignored and replaced by space
 
 ## Version 1.4.3   - Nov 2024
