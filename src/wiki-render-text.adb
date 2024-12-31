@@ -8,6 +8,10 @@ with Wiki.Helpers;
 with Util.Strings;
 package body Wiki.Render.Text is
 
+   use type Wiki.Nodes.Node_Kind;
+
+   Empty_Formats : constant Format_Map := (others => False);
+
    --  ------------------------------
    --  Set the output writer.
    --  ------------------------------
@@ -51,26 +55,61 @@ package body Wiki.Render.Text is
    end Set_Preformatted_Indentation;
 
    --  ------------------------------
+   --  Set the text style format.
+   --  ------------------------------
+   procedure Set_Format (Engine : in out Text_Renderer;
+                         Format   : in Format_Map) is
+   begin
+      Engine.Format := Format;
+   end Set_Format;
+
+   --  ------------------------------
    --  Emit a new line.
    --  ------------------------------
    procedure New_Line (Document : in out Text_Renderer) is
    begin
       if not Document.No_Newline then
-         Text_Renderer'Class (Document).Write_Newline;
+         if Document.Current_Indent > 0 then
+            Text_Renderer'Class (Document).Write_Newline;
+         end if;
+         if not Document.Empty_Line then
+            Text_Renderer'Class (Document).Write_Newline;
+         end if;
       end if;
       Document.Empty_Line := True;
+      Document.Current_Indent := 0;
+      Document.Has_Space := False;
    end New_Line;
+
+   procedure Close_Paragraph (Document : in out Text_Renderer) is
+   begin
+      if Document.Current_Indent > 0 then
+         Document.Add_Line_Break;
+      end if;
+      Document.Has_Paragraph := False;
+      Document.Has_Space := False;
+   end Close_Paragraph;
+
+   procedure Open_Paragraph (Document : in out Text_Renderer) is
+   begin
+      if Document.Need_Paragraph then
+         Document.Has_Paragraph  := True;
+         Document.Need_Paragraph := False;
+      end if;
+   end Open_Paragraph;
 
    --  ------------------------------
    --  Add a line break (<br>).
    --  ------------------------------
    procedure Add_Line_Break (Document : in out Text_Renderer) is
    begin
-      if not Document.No_Newline then
-         Text_Renderer'Class (Document).Write_Newline;
+      if Document.Current_Indent > 0 then
+         if not Document.No_Newline then
+            Text_Renderer'Class (Document).Write_Newline;
+         end if;
       end if;
-      Document.Empty_Line := True;
       Document.Current_Indent := 0;
+      Document.Has_Space := False;
    end Add_Line_Break;
 
    --  ------------------------------
@@ -91,28 +130,19 @@ package body Wiki.Render.Text is
                                 Level    : in Natural) is
       pragma Unreferenced (Tag);
    begin
-      if not Engine.Empty_Line then
-         Engine.Add_Line_Break;
-      end if;
+      Engine.New_Line;
       Engine.Need_Paragraph := False;
       Engine.Open_Paragraph;
-      if not Engine.No_Newline then
-         Text_Renderer'Class (Engine).Write_Newline;
-      end if;
       Engine.List_Index := Engine.List_Index + 1;
       Engine.List_Levels (Engine.List_Index) := Level;
       Engine.Indent_Level := Engine.Indent_Level + 2;
+      Engine.Current_Indent := 0;
    end Render_List_Start;
 
-   procedure Render_List_End (Engine   : in out Text_Renderer;
-                              Tag      : in String) is
-      pragma Unreferenced (Tag);
+   procedure Render_List_End (Engine   : in out Text_Renderer) is
    begin
-      if not Engine.Empty_Line then
-         Engine.Add_Line_Break;
-      end if;
       Engine.Need_Paragraph := False;
-      Engine.Open_Paragraph;
+      Engine.Close_Paragraph;
       Engine.List_Index := Engine.List_Index - 1;
       Engine.Indent_Level := Engine.Indent_Level - 2;
    end Render_List_End;
@@ -123,9 +153,6 @@ package body Wiki.Render.Text is
    --  ------------------------------
    procedure Render_List_Item_Start (Engine   : in out Text_Renderer) is
    begin
-      if not Engine.Empty_Line then
-         Engine.Add_Line_Break;
-      end if;
       Engine.Need_Paragraph := False;
       Engine.Open_Paragraph;
 
@@ -143,33 +170,15 @@ package body Wiki.Render.Text is
 
    procedure Render_List_Item_End (Engine   : in out Text_Renderer) is
    begin
-      if not Engine.Empty_Line then
+      if Engine.Current_Indent > 0 then
          Engine.Add_Line_Break;
       end if;
-      Engine.Need_Paragraph := False;
-      Engine.Open_Paragraph;
       if Engine.List_Levels (Engine.List_Index) > 0 then
          Engine.Indent_Level := Engine.Indent_Level - 4;
       else
          Engine.Indent_Level := Engine.Indent_Level - 2;
       end if;
    end Render_List_Item_End;
-
-   procedure Close_Paragraph (Document : in out Text_Renderer) is
-   begin
-      if Document.Has_Paragraph then
-         Document.Add_Line_Break;
-      end if;
-      Document.Has_Paragraph := False;
-   end Close_Paragraph;
-
-   procedure Open_Paragraph (Document : in out Text_Renderer) is
-   begin
-      if Document.Need_Paragraph then
-         Document.Has_Paragraph  := True;
-         Document.Need_Paragraph := False;
-      end if;
-   end Open_Paragraph;
 
    --  ------------------------------
    --  Render a link.
@@ -179,7 +188,6 @@ package body Wiki.Render.Text is
                           Attr   : in Wiki.Attributes.Attribute_List) is
       Href : constant Wiki.Strings.WString := Wiki.Attributes.Get_Attribute (Attr, "href");
    begin
-      Engine.Open_Paragraph;
       if Title'Length /= 0 then
          Engine.Render_Paragraph (Nodes.N_LINK, Title, (others => False));
       end if;
@@ -192,7 +200,6 @@ package body Wiki.Render.Text is
             Engine.Render_Paragraph (Nodes.N_LINK, ")", (others => False));
          end if;
       end if;
-      Engine.Empty_Line := False;
    end Render_Link;
 
    --  ------------------------------
@@ -204,7 +211,6 @@ package body Wiki.Render.Text is
       Link : constant Wiki.Strings.WString := Doc.Get_Link (Label);
       Title  : constant Wiki.Strings.WString := Doc.Get_Link_Title (Label);
    begin
-      Engine.Open_Paragraph;
       if Title'Length = 0 then
          Engine.Render_Paragraph (Nodes.N_TEXT, "[", (others => False));
          Engine.Render_Paragraph (Nodes.N_TEXT, Label, (others => False));
@@ -212,7 +218,6 @@ package body Wiki.Render.Text is
       else
          Engine.Render_Paragraph (Nodes.N_LINK, Title, (others => False));
       end if;
-      Engine.Empty_Line := False;
    end Render_Link_Ref;
 
    --  ------------------------------
@@ -223,7 +228,6 @@ package body Wiki.Render.Text is
                            Attr     : in Wiki.Attributes.Attribute_List) is
       Desc : constant Wiki.Strings.WString := Wiki.Attributes.Get_Attribute (Attr, "longdesc");
    begin
-      Engine.Open_Paragraph;
       if Title'Length > 0 then
          Engine.Render_Paragraph (Nodes.N_IMAGE, Title);
       end if;
@@ -233,7 +237,6 @@ package body Wiki.Render.Text is
       if Desc'Length > 0 then
          Engine.Render_Paragraph (Nodes.N_IMAGE, Desc);
       end if;
-      Engine.Empty_Line := False;
    end Render_Image;
 
    --  ------------------------------
@@ -243,12 +246,9 @@ package body Wiki.Render.Text is
                                   Text   : in Wiki.Strings.WString;
                                   Format : in Wiki.Strings.WString) is
       pragma Unreferenced (Format);
-      Empty_Line : constant Boolean := Engine.Empty_Line;
    begin
       Engine.Close_Paragraph;
-      if not Empty_Line then
-         Text_Renderer'Class (Engine).New_Line;
-      end if;
+      Text_Renderer'Class (Engine).New_Line;
       if Engine.Indent_Preformatted = 0 then
          Text_Renderer'Class (Engine).Write_Text (Nodes.N_PREFORMAT, Text, (others => False));
       elsif Text'Length > 0 then
@@ -269,13 +269,15 @@ package body Wiki.Render.Text is
                Text_Renderer'Class (Engine).Write_Text (Nodes.N_PREFORMAT,
                                                         Text (First .. Last),
                                                         (others => False));
-               Text_Renderer'Class (Engine).New_Line;
+               Engine.Current_Indent := 1;
+               Engine.Add_Line_Break;
                exit when Pos >= Text'Last;
                First := Pos + 1;
             end loop;
          end;
+         Engine.Empty_Line := False;
+         Engine.New_Line;
       end if;
-      Engine.Empty_Line := False;
    end Render_Preformatted;
 
    --  ------------------------------
@@ -298,17 +300,18 @@ package body Wiki.Render.Text is
       Max : constant Natural := Engine.Line_Length;
       C : Wiki.Strings.WChar;
    begin
+      Engine.Open_Paragraph;
       for I in Text'Range loop
          C := Text (I);
          if C = Helpers.LF then
-            Engine.Empty_Line := True;
             Engine.Current_Indent := 0;
             Text_Renderer'Class (Engine).Write_Newline;
+         elsif C = ' ' and then Engine.Has_Space then
+            null;
          elsif Max > 0
            and then Engine.Current_Indent > Max
            and then Wiki.Helpers.Is_Space (C)
          then
-            Engine.Empty_Line := True;
             Engine.Current_Indent := 0;
             Text_Renderer'Class (Engine).Write_Newline;
          elsif Engine.Current_Indent /= 0
@@ -321,6 +324,7 @@ package body Wiki.Render.Text is
 
             Text_Renderer'Class (Engine).Write_Text (Kind, C & "", Format);
 
+            Engine.Has_Space := C = ' ';
             Engine.Empty_Line := False;
             Engine.Current_Indent := Engine.Current_Indent + 1;
             Engine.Has_Paragraph := True;
@@ -362,9 +366,7 @@ package body Wiki.Render.Text is
             Engine.Add_Line_Break;
 
          when Wiki.Nodes.N_PARAGRAPH =>
-            Engine.Close_Paragraph;
-            Engine.Need_Paragraph := True;
-            Engine.Add_Line_Break;
+            Engine.New_Line;
 
          when Wiki.Nodes.N_NEWLINE =>
             if not Engine.No_Newline then
@@ -385,11 +387,8 @@ package body Wiki.Render.Text is
          when Wiki.Nodes.N_NUM_LIST_START =>
             Engine.Render_List_Start (".", Node.Level);
 
-         when Wiki.Nodes.N_LIST_END =>
-            Engine.Render_List_End ("");
-
-         when Wiki.Nodes.N_NUM_LIST_END =>
-            Engine.Render_List_End ("");
+         when Wiki.Nodes.N_LIST_END | Wiki.Nodes.N_NUM_LIST_END =>
+            Engine.Render_List_End;
 
          when Wiki.Nodes.N_LIST_ITEM =>
             Engine.Render_List_Item_Start;
@@ -398,12 +397,16 @@ package body Wiki.Render.Text is
             Engine.Render_List_Item_End;
 
          when Wiki.Nodes.N_TEXT =>
-            Engine.Render_Paragraph (Nodes.N_TEXT, Node.Text, Node.Format);
+            if Engine.Current_Mode = Nodes.N_NONE then
+               Engine.Render_Paragraph (Nodes.N_TEXT, Node.Text, Node.Format or Engine.Format);
+            elsif Engine.Current_Mode = Nodes.N_PREFORMAT then
+               Engine.Render_Preformatted (Node.Text, "");
+            else
+               Engine.Render_Paragraph (Engine.Current_Mode, Node.Text, Node.Format or Engine.Format);
+            end if;
 
          when Wiki.Nodes.N_QUOTE =>
-            Engine.Open_Paragraph;
-            Engine.Output.Write (Node.Title);
-            Engine.Empty_Line := False;
+            Engine.Render_Paragraph (Nodes.N_QUOTE, Node.Title, Engine.Format);
 
          when Wiki.Nodes.N_LINK =>
             Text_Renderer'Class (Engine).Render_Link (Node.Title, Node.Link_Attr);
@@ -418,28 +421,7 @@ package body Wiki.Render.Text is
             Engine.Render_Preformatted (Node.Preformatted, "");
 
          when Wiki.Nodes.N_TAG_START =>
-            if Node.Children /= null then
-               if Node.Tag_Start = Wiki.DT_TAG then
-                  Engine.Close_Paragraph;
-                  Engine.Indent_Level := 0;
-                  Engine.Render (Doc, Node.Children);
-                  Engine.Close_Paragraph;
-                  Engine.Indent_Level := 0;
-               elsif Node.Tag_Start = Wiki.DD_TAG then
-                  Engine.Close_Paragraph;
-                  Engine.Empty_Line := True;
-                  Engine.Indent_Level := 4;
-                  Engine.Render (Doc, Node.Children);
-                  Engine.Close_Paragraph;
-                  Engine.Indent_Level := 0;
-               else
-                  Engine.Render (Doc, Node.Children);
-                  if Node.Tag_Start = Wiki.DL_TAG then
-                     Engine.Close_Paragraph;
-                     Engine.New_Line;
-                  end if;
-               end if;
-            end if;
+            Engine.Render_Tag (Doc, Node);
 
          when Wiki.Nodes.N_TABLE =>
             Engine.Render_Table (Doc, Node);
@@ -450,6 +432,185 @@ package body Wiki.Render.Text is
       end case;
    end Render;
 
+   procedure Render_Tag (Engine : in out Text_Renderer;
+                         Doc    : in Documents.Document;
+                         Node   : in Nodes.Node_Type) is
+   begin
+      case Node.Tag_Start is
+         when H1_TAG =>
+            Engine.Render_Header (Doc, Node, 1, Node.Children);
+            return;
+
+         when H2_TAG =>
+            Engine.Render_Header (Doc, Node, 2, Node.Children);
+            return;
+
+         when H3_TAG =>
+            Engine.Render_Header (Doc, Node, 3, Node.Children);
+            return;
+
+         when H4_TAG =>
+            Engine.Render_Header (Doc, Node, 4, Node.Children);
+            return;
+
+         when H5_TAG =>
+            Engine.Render_Header (Doc, Node, 5, Node.Children);
+            return;
+
+         when H6_TAG =>
+            Engine.Render_Header (Doc, Node, 6, Node.Children);
+            return;
+
+         when BR_TAG =>
+            Engine.Add_Line_Break;
+            return;
+
+         when HR_TAG =>
+            Engine.Close_Paragraph;
+            --  Engine.Output.Write (Engine.Tags (Horizontal_Rule).all);
+            return;
+
+         when IMG_TAG =>
+            Engine.Render_Image (Title => Attributes.Get_Attribute (Node.Attributes, "alt"),
+                                 Attr  => Node.Attributes);
+
+         when A_TAG | Q_TAG =>
+            declare
+               Previous_Mode : constant Nodes.Node_Kind := Engine.Current_Mode;
+            begin
+               Engine.Current_Mode := Nodes.N_LINK;
+               Engine.Render (Doc, Node.Children);
+               engine.Current_Mode := Previous_Mode;
+               return;
+            end;
+
+         when B_TAG | EM_TAG | STRONG_TAG =>
+            Engine.Format (BOLD) := True;
+
+         when I_TAG =>
+            Engine.Format (ITALIC) := True;
+
+         when U_TAG | TT_TAG | CODE_TAG | KBD_TAG =>
+            Engine.Format (CODE) := True;
+
+         when SUP_TAG =>
+            Engine.Format (SUPERSCRIPT) := True;
+
+         when SUB_TAG =>
+            Engine.Format (SUBSCRIPT) := True;
+
+         when P_TAG | DL_TAG =>
+            Engine.Set_Format (Empty_Formats);
+            Engine.Close_Paragraph;
+            Engine.Need_Paragraph := True;
+            Engine.New_Line;
+
+         when PRE_TAG =>
+            declare
+               Current : constant Nodes.Node_Kind := Engine.Current_Mode;
+            begin
+               Engine.Current_Mode := Nodes.N_PREFORMAT;
+               Engine.Render (Doc, Node.Children);
+               Engine.New_Line;
+               Engine.Current_Mode := Current;
+               return;
+            end;
+
+         when DD_TAG =>
+            Engine.Close_Paragraph;
+            Engine.Indent_Level := Engine.Indent_Level + 4;
+            Engine.Render (Doc, Node.Children);
+            Engine.Close_Paragraph;
+            Engine.Indent_Level := Engine.Indent_Level - 4;
+            return;
+
+         when DT_TAG =>
+            Engine.Close_Paragraph;
+            Engine.Render (Doc, Node.Children);
+            return;
+
+         when UL_TAG =>
+            Engine.Render_List_Start ("", 0);
+
+         when OL_TAG =>
+            Engine.Render_List_Start ("", 1);
+
+         when LI_TAG =>
+            Engine.Render_List_Item_Start;
+
+         when BLOCKQUOTE_TAG =>
+            Engine.Set_Format (Empty_Formats);
+            --  Engine.Need_Separator_Line;
+            Engine.Close_Paragraph;
+            Engine.Quote_Level := Engine.Quote_Level + 1;
+            --if Engine.Html_Blockquote then
+               --  Make sure there is en empty line before the HTML <blockquote>.
+            --   Engine.Output.Write (LF & "<blockquote>" & LF);
+            --end if;
+
+         when others =>
+            null;
+
+      end case;
+      Engine.Render (Doc, Node.Children);
+
+      case Node.Tag_Start is
+
+         when A_TAG | Q_TAG =>
+            null;
+
+         when P_TAG =>
+            Engine.Set_Format (Empty_Formats);
+            Engine.New_Line;
+
+         when B_TAG | EM_TAG | STRONG_TAG =>
+            Engine.Format (BOLD) := False;
+
+         when I_TAG =>
+            Engine.Format (ITALIC) := False;
+
+         when U_TAG | TT_TAG | CODE_TAG | KBD_TAG =>
+            Engine.Format (CODE) := False;
+
+         when SUP_TAG =>
+            Engine.Format (SUPERSCRIPT) := False;
+
+         when SUB_TAG =>
+            Engine.Format (SUBSCRIPT) := False;
+
+         when UL_TAG | OL_TAG =>
+            Engine.Render_List_End;
+
+         when LI_TAG =>
+            Engine.Render_List_Item_End;
+
+         when BLOCKQUOTE_TAG =>
+            Engine.Set_Format (Empty_Formats);
+            --  Engine.Need_Separator_Line;
+            Engine.Quote_Level := Engine.Quote_Level - 1;
+            Engine.Need_Space := False;
+            --if Engine.Html_Blockquote then
+               --  Make sure there is an empty line after the HTML </blockquote>.
+            --   Engine.Output.Write ("</blockquote>" & LF & LF);
+            --elsif Engine.Quote_Level = 0 then
+            --   Engine.New_Line;
+            --   Engine.Need_Newline := True;
+            --end if;
+
+         when others =>
+            Engine.Need_Space := True;
+
+      end case;
+   end Render_Tag;
+
+   --  Render a quote.
+   procedure Render_Quote (Engine : in out Text_Renderer;
+                           Title  : in Strings.WString;
+                           Attrs  : in Attributes.Attribute_List) is
+   begin
+      Engine.Render_Paragraph (Nodes.N_QUOTE, Title, Engine.Format);
+   end Render_Quote;
+
    --  ------------------------------
    --  Add a section header in the document.
    --  ------------------------------
@@ -458,15 +619,12 @@ package body Wiki.Render.Text is
                             Node   : in Nodes.Node_Type;
                             Level  : in Natural;
                             List   : in Nodes.Node_List_Access) is
-      Empty_Line : constant Boolean := Engine.Empty_Line;
       New_Level : constant List_Index_Type :=
         (if List_Index_Type (Level) < List_Index_Type'Last
          then List_Index_Type (Level) else List_Index_Type'Last);
    begin
       Engine.Close_Paragraph;
-      if not Empty_Line then
-         Engine.Add_Line_Break;
-      end if;
+      Engine.New_Line;
       if Engine.Header_Index < New_Level then
          for I in Engine.Header_Index + 1 .. New_Level loop
             Engine.Header_Levels (I) := 1;
@@ -476,10 +634,13 @@ package body Wiki.Render.Text is
       end if;
       Engine.Header_Index := New_Level;
       Engine.Render_Section_Number (Engine.Header_Levels (1 .. New_Level));
-      Engine.Render (Doc, Node.Content);
+      if Node.Kind = Nodes.N_HEADER then
+         Engine.Render (Doc, Node.Content);
+      else
+         Engine.Render (Doc, Node.Children);
+      end if;
       Engine.Add_Line_Break;
       Engine.Has_Paragraph := False;
-      Engine.Empty_Line := False;
    end Render_Header;
 
    --  ------------------------------

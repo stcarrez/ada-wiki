@@ -4,6 +4,8 @@
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
+with Ada.Strings.Wide_Wide_Unbounded;
+
 with Wiki.Attributes;
 with Wiki.Streams;
 with Wiki.Strings;
@@ -69,8 +71,7 @@ package Wiki.Render.Text is
                                 Tag      : in String;
                                 Level    : in Natural);
 
-   procedure Render_List_End (Engine   : in out Text_Renderer;
-                              Tag      : in String);
+   procedure Render_List_End (Engine   : in out Text_Renderer);
    procedure Render_List_Item_Start (Engine   : in out Text_Renderer);
    procedure Render_List_Item_End (Engine   : in out Text_Renderer);
 
@@ -110,6 +111,10 @@ package Wiki.Render.Text is
    procedure Render_Section_Number (Engine  : in out Text_Renderer;
                                     Numbers : in List_Level_Array);
 
+   procedure Render_Tag (Engine : in out Text_Renderer;
+                         Doc    : in Documents.Document;
+                         Node   : in Nodes.Node_Type);
+
    --  Finish the document after complete wiki text has been parsed.
    overriding
    procedure Finish (Engine : in out Text_Renderer;
@@ -127,7 +132,18 @@ package Wiki.Render.Text is
                                Text   : in Wiki.Strings.WString;
                                Format : in Format_Map := (others => False));
 
+   --  Render a quote.
+   procedure Render_Quote (Engine : in out Text_Renderer;
+                           Title  : in Strings.WString;
+                           Attrs  : in Attributes.Attribute_List);
+
+   --  Set the text style format.
+   procedure Set_Format (Engine : in out Text_Renderer;
+                         Format   : in Format_Map);
+
 private
+
+   use Ada.Strings.Wide_Wide_Unbounded;
 
    type Text_Renderer is limited new Wiki.Render.Renderer with record
       Output         : Streams.Output_Stream_Access := null;
@@ -137,6 +153,7 @@ private
       Empty_Line     : Boolean := True;
       No_Newline     : Boolean := False;
       Display_Links  : Boolean := True;
+      Has_Space      : Boolean := False;
       Current_Indent : Natural := 0;
       Indent_Level   : Natural := 0;
       Line_Length    : Natural := 0;
@@ -145,6 +162,12 @@ private
       List_Levels    : List_Level_Array (1 .. 30);
       Header_Index   : List_Index_Type := 0;
       Header_Levels  : List_Level_Array (1 .. 30);
+      Need_Space          : Boolean := False;
+      Quote_Level         : Natural := 0;
+      UL_List_Level       : Natural := 0;
+      OL_List_Level       : Natural := 0;
+      In_List             : Boolean := False;
+      Current_Mode        : Nodes.Node_Kind := Nodes.N_NONE;
    end record;
 
 end Wiki.Render.Text;
