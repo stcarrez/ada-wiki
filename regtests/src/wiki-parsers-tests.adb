@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-tests -- Unit tests for wiki parsing
---  Copyright (C) 2011, 2012, 2013, 2015, 2016, 2017, 2021, 2022 Stephane Carrez
+--  Copyright (C) 2011 - 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -276,10 +276,10 @@ package body Wiki.Parsers.Tests is
    --  ------------------------------
    procedure Test_Wiki_Text_Renderer (T : in out Test) is
    begin
-      Util.Tests.Assert_Equals (T, ASCII.LF & "code" & ASCII.LF,
+      Util.Tests.Assert_Equals (T, "code" & ASCII.LF,
                                 Wiki.Utils.To_Text ("`code`", SYNTAX_MARKDOWN),
                                 "Preformat rendering invalid");
-      Util.Tests.Assert_Equals (T, ASCII.LF & "bold item my_title" & ASCII.LF,
+      Util.Tests.Assert_Equals (T, "bold item my_title" & ASCII.LF,
                                 Wiki.Utils.To_Text ("_bold_ __item__ [my_title]", SYNTAX_GOOGLE),
                                 "Preformat rendering invalid");
 
@@ -314,7 +314,7 @@ package body Wiki.Parsers.Tests is
          procedure Get (Value : in Wiki.Strings.WString) is
          begin
             --  Verify that we got the expected characters.
-            T.Assert (Wiki.Helpers.LF & Text & Wiki.Helpers.LF = Value,
+            T.Assert (Text & Wiki.Helpers.LF = Value,
                       "Invalid parsing for [" & Content & "]");
          end Get;
 
