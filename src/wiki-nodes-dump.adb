@@ -52,9 +52,9 @@ procedure Wiki.Nodes.Dump (Node : in Wiki.Nodes.Node_Type) is
             Strings.Append_String (Result, Natural'Wide_Wide_Image (Node.Level));
             Strings.Append_String (Result, " ");
             Write (Level, Wiki.Strings.To_WString (Result));
-            if Node.Content /= null then
+            if Node.Children /= null then
                Level := Level + 1;
-               Lists.Iterate (Node.Content, Dump_Node'Access);
+               Lists.Iterate (Node.Children, Dump_Node'Access);
                Level := Level - 1;
             end if;
             return;

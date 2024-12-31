@@ -1,11 +1,12 @@
 -----------------------------------------------------------------------
 --  wiki-render -- Wiki renderer
---  Copyright (C) 2015, 2016, 2020 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020, 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
 with Wiki.Nodes;
 with Wiki.Documents;
+with Wiki.Strings;
 
 --  == Wiki Renderer {#wiki-render} ==
 --  The `Wiki.Render` package represents the renderer that takes a wiki document
@@ -42,5 +43,21 @@ package Wiki.Render is
    --  Render the document.
    procedure Render (Engine : in out Renderer'Class;
                      Doc    : in Wiki.Documents.Document);
+
+   MAX_LIST_LEVEL : constant := 32;
+   MAX_TOC_LEVEL  : constant := 6;
+
+   type List_Index_Type is new Integer range 0 .. MAX_LIST_LEVEL;
+
+   type List_Level_Array is array (List_Index_Type range <>) of Natural;
+
+   subtype Toc_Index_Type is List_Index_Type range 0 .. MAX_TOC_LEVEL;
+
+   subtype Toc_Number_Array is List_Level_Array;
+
+   --  Format the section or list number with the optional prefix and separator.
+   function Format_Section_Number (List      : in List_Level_Array;
+                                   Prefix    : in Wiki.Strings.WString;
+                                   Separator : in Wiki.Strings.WChar) return Wiki.Strings.WString;
 
 end Wiki.Render;

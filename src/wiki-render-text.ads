@@ -4,7 +4,6 @@
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
-with Ada.Strings.Wide_Wide_Unbounded;
 
 with Wiki.Attributes;
 with Wiki.Streams;
@@ -14,10 +13,6 @@ with Wiki.Strings;
 --  The `Text_Renderer` allows to render a wiki document into a text content.
 --  The formatting rules are ignored except for the paragraphs and sections.
 package Wiki.Render.Text is
-
-   type List_Index_Type is new Integer range 0 .. 32;
-
-   type List_Level_Array is array (List_Index_Type range <>) of Natural;
 
    --  ------------------------------
    --  Wiki to Text renderer
@@ -143,8 +138,6 @@ package Wiki.Render.Text is
 
 private
 
-   use Ada.Strings.Wide_Wide_Unbounded;
-
    type Text_Renderer is limited new Wiki.Render.Renderer with record
       Output         : Streams.Output_Stream_Access := null;
       Format         : Wiki.Format_Map := (others => False);
@@ -159,9 +152,10 @@ private
       Line_Length    : Natural := 0;
       Indent_Preformatted : Natural := 0;
       List_Index     : List_Index_Type := 0;
-      List_Levels    : List_Level_Array (1 .. 30);
+      List_Levels    : List_Level_Array (1 .. MAX_LIST_LEVEL);
       Header_Index   : List_Index_Type := 0;
       Header_Levels  : List_Level_Array (1 .. 30);
+      Current_Section     : Toc_Number_Array (1 .. MAX_TOC_LEVEL) := (others => 0);
       Need_Space          : Boolean := False;
       Quote_Level         : Natural := 0;
       UL_List_Level       : Natural := 0;

@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-nodes -- Wiki Document Internal representation
---  Copyright (C) 2016, 2019, 2020, 2022 Stephane Carrez
+--  Copyright (C) 2016 - 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -57,11 +57,11 @@ package Wiki.Nodes is
 
    type Node_Type (Kind : Node_Kind; Len : Natural) is limited record
       Parent     : Node_Type_Access;
+      Children   : Node_List_Access;
       case Kind is
          when N_HEADER | N_BLOCKQUOTE | N_INDENT
             | N_NUM_LIST_START | N_LIST_START | N_DEFINITION =>
             Level  : Natural := 0;
-            Content   : Node_List_Access;
 
          when N_TEXT =>
             Format : Format_Map;
@@ -74,7 +74,6 @@ package Wiki.Nodes is
          when N_TAG_START | N_TABLE | N_ROW | N_COLUMN =>
             Tag_Start  : Html_Tag;
             Attributes : Wiki.Attributes.Attribute_List;
-            Children   : Node_List_Access;
 
          when N_PREFORMAT =>
             Language     : Wiki.Strings.UString;
@@ -83,9 +82,6 @@ package Wiki.Nodes is
          when N_TOC_ENTRY =>
             Header    : Wiki.Strings.WString (1 .. Len);
             Toc_Level : Natural := 0;
-
-         when N_TOC =>
-            Entries    : Node_List_Access;
 
          when others =>
             null;

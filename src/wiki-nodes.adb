@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-nodes -- Wiki Document Internal representation
---  Copyright (C) 2016, 2019, 2023 Stephane Carrez
+--  Copyright (C) 2016, 2019, 2023, 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -13,19 +13,11 @@ package body Wiki.Nodes is
    procedure Append (Into : in Node_Type_Access;
                      Node : in Node_Type_Access) is
    begin
-      if Into.Kind in N_HEADER .. N_DEFINITION then
-         if Into.Content = null then
-            Into.Content := new Node_List;
-            Into.Content.Current := Into.Content.First'Access;
-         end if;
-         Append (Into.Content.all, Node);
-      else
-         if Into.Children = null then
-            Into.Children := new Node_List;
-            Into.Children.Current := Into.Children.First'Access;
-         end if;
-         Append (Into.Children.all, Node);
+      if Into.Children = null then
+         Into.Children := new Node_List;
+         Into.Children.Current := Into.Children.First'Access;
       end if;
+      Append (Into.Children.all, Node);
    end Append;
 
    --  ------------------------------
@@ -64,23 +56,10 @@ package body Wiki.Nodes is
       procedure Free_Block (Block : in out Node_List_Block) is
       begin
          for I in 1 .. Block.Last loop
-            case Block.List (I).Kind is
-               when N_TAG_START | N_TABLE | N_ROW | N_COLUMN =>
-                  if Block.List (I).Children /= null then
-                     Finalize (Block.List (I).Children.all);
-                     Free (Block.List (I).Children);
-                  end if;
-
-               when N_HEADER | N_BLOCKQUOTE | N_INDENT
-                  | N_NUM_LIST_START | N_LIST_START | N_DEFINITION =>
-                  if Block.List (I).Content /= null then
-                     Finalize (Block.List (I).Content.all);
-                     Free (Block.List (I).Content);
-                  end if;
-
-               when others =>
-                  null;
-            end case;
+            if Block.List (I).Children /= null then
+               Finalize (Block.List (I).Children.all);
+               Free (Block.List (I).Children);
+            end if;
             Free (Block.List (I));
          end loop;
       end Free_Block;

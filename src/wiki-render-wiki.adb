@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-wiki -- Wiki to Wiki renderer
---  Copyright (C) 2015, 2016, 2018, 2020, 2022 Stephane Carrez
+--  Copyright (C) 2015 - 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -315,7 +315,7 @@ package body Wiki.Render.Wiki is
    begin
       case Node.Kind is
          when Nodes.N_HEADER =>
-            Engine.Render_Header (Doc, Node, Node.Level, Node.Content);
+            Engine.Render_Header (Doc, Node, Node.Level, Node.Children);
 
          when Nodes.N_LINE_BREAK =>
             Engine.Output.Write (Engine.Tags (Line_Break).all);
@@ -431,7 +431,7 @@ package body Wiki.Render.Wiki is
          Engine.Output.Write (Strings.To_WString (Util.Strings.Image (Count)));
          Engine.Output.Write (Engine.Tags (Header_End).all);
          Engine.Output.Write (' ');
-         Engine.Render (Doc, Node.Content);
+         Engine.Render (Doc, Node.Children);
          Engine.New_Line;
          return;
       end if;

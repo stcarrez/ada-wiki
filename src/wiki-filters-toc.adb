@@ -85,6 +85,7 @@ package body Wiki.Filters.TOC is
                                          Len    => Header'Length,
                                          Header => Header,
                                          Parent => null,
+                                         Children => null,
                                          Toc_Level  => Filter.Header_Level));
             Filter.Header_Level := -1;
             Filter.Header := Wiki.Strings.To_UString ("");

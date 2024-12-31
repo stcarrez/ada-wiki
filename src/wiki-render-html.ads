@@ -91,8 +91,6 @@ package Wiki.Render.Html is
 
 private
 
-   type Toc_Number_Array is array (1 .. 6) of Natural;
-
    type List_Style_Array is array (1 .. 32) of Boolean;
 
    Default_Links : aliased Wiki.Render.Links.Default_Link_Renderer;
@@ -112,8 +110,8 @@ private
       List_Styles       : List_Style_Array := (others => False);
       Quote_Level       : Natural := 0;
       Html_Level        : Natural := 0;
-      Current_Section   : Toc_Number_Array := (others => 0);
-      Section_Level     : Natural := 0;
+      Current_Section   : Toc_Number_Array (1 .. MAX_TOC_LEVEL) := (others => 0);
+      Section_Level     : List_Index_Type := 0;
       Column            : Natural := 0;
       In_Definition     : Boolean := False;
       Current_Format    : Format_Map := (others => False);

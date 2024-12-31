@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render -- Wiki renderer
---  Copyright (C) 2015, 2016, 2019 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2019, 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -43,5 +43,35 @@ package body Wiki.Render is
       Doc.Iterate (Process'Access);
       Engine.Finish (Doc);
    end Render;
+
+   --  ------------------------------
+   --  Format the section or list number with the optional prefix and separator.
+   --  ------------------------------
+   function Format_Section_Number (List      : in List_Level_Array;
+                                   Prefix    : in Wiki.Strings.WString;
+                                   Separator : in Wiki.Strings.WChar) return Wiki.Strings.WString is
+      Result : Wiki.Strings.UString;
+      Value  : Natural;
+      Empty  : Boolean := True;
+   begin
+      if List'Length = 0 then
+         return "";
+      end if;
+      Wiki.Strings.Append (Result, Prefix);
+      for Value of List loop
+         if Value > 0 or else not Empty then
+            declare
+               N : constant Strings.WString := Positive'Wide_Wide_Image (Value);
+            begin
+               if not Empty then
+                  Wiki.Strings.Append (Result, Separator);
+               end if;
+               Empty := False;
+               Wiki.Strings.Append (Result, N (N'First + 1 .. N'Last));
+            end;
+         end if;
+      end loop;
+      return Wiki.Strings.To_WString (Result);
+   end Format_Section_Number;
 
 end Wiki.Render;

@@ -134,10 +134,6 @@ private
    procedure Close_Paragraph (Engine : in out Wiki_Renderer);
    procedure Start_Keep_Content (Engine : in out Wiki_Renderer);
 
-   type List_Index_Type is new Integer range 0 .. 32;
-
-   type List_Level_Array is array (List_Index_Type range 1 .. 32) of Natural;
-
    EMPTY_TAG : aliased constant Wide_Wide_String := "";
 
    type Wiki_Renderer is new Renderer with record
@@ -149,7 +145,7 @@ private
       Style_End_Tags      : Wiki_Format_Array := (others => EMPTY_TAG'Access);
       Escape_Set          : Ada.Strings.Wide_Wide_Maps.Wide_Wide_Character_Set;
       List_Index          : List_Index_Type := 0;
-      List_Levels         : List_Level_Array;
+      List_Levels         : List_Level_Array (1 .. MAX_LIST_LEVEL);
       Has_Paragraph       : Boolean := False;
       Has_Item            : Boolean := False;
       Need_Paragraph      : Boolean := False;

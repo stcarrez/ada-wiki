@@ -97,29 +97,9 @@ package body Wiki.Render.Html is
    function Get_Section_Number (Engine    : in Html_Renderer;
                                 Prefix    : in Wiki.Strings.WString;
                                 Separator : in Wiki.Strings.WChar) return Wiki.Strings.WString is
-      Result : Wiki.Strings.UString;
-      Value  : Natural;
-      Empty  : Boolean := True;
    begin
-      if Engine.Section_Level = 0 then
-         return "";
-      end if;
-      Wiki.Strings.Append (Result, Prefix);
-      for I in 1 .. Engine.Section_Level loop
-         Value := Engine.Current_Section (I);
-         if Value > 0 or else not Empty then
-            declare
-               N : constant Strings.WString := Positive'Wide_Wide_Image (Value);
-            begin
-               if not Empty then
-                  Wiki.Strings.Append (Result, Separator);
-               end if;
-               Empty := False;
-               Wiki.Strings.Append (Result, N (N'First + 1 .. N'Last));
-            end;
-         end if;
-      end loop;
-      return Wiki.Strings.To_WString (Result);
+      return Format_Section_Number (Engine.Current_Section (1 .. Engine.Section_Level),
+                                    Prefix, Separator);
    end Get_Section_Number;
 
    --  ------------------------------
@@ -167,7 +147,7 @@ package body Wiki.Render.Html is
                Engine.Output.End_Element ("dd");
             end if;
             Engine.Output.Start_Element ("dt");
-            Engine.Render (Doc, Node.Content);
+            Engine.Render (Doc, Node.Children);
             --  Engine.Output.Write_Wide_Text (Node.Header);
             Engine.Output.End_Element ("dt");
             Engine.Output.Start_Element ("dd");
@@ -343,7 +323,7 @@ package body Wiki.Render.Html is
    procedure Render_Header (Engine : in out Html_Renderer;
                             Doc    : in Wiki.Documents.Document;
                             Node   : in Wiki.Nodes.Node_Type) is
-      Level : constant Natural := Node.Level;
+      Level : constant List_Index_Type := List_Index_Type (Node.Level);
       Tag   : String_Access;
    begin
       if Engine.Enable_Render_TOC
@@ -384,7 +364,7 @@ package body Wiki.Render.Html is
          Engine.Output.Write_Wide_Attribute ("id", Engine.Get_Section_Number ("section_", '_'));
       end if;
       Engine.Need_Paragraph := False;
-      Engine.Render (Doc, Node.Content);
+      Engine.Render (Doc, Node.Children);
       Engine.Output.End_Element (Tag.all);
       Engine.Newline;
    end Render_Header;
@@ -397,11 +377,11 @@ package body Wiki.Render.Html is
                          Level  : in Natural) is
 
       procedure Render_Entry (Node : in Wiki.Nodes.Node_Type);
-      procedure Set_Current_Level (New_Level : in Natural);
+      procedure Set_Current_Level (New_Level : in List_Index_Type);
 
       use Wiki.Nodes;
 
-      procedure Set_Current_Level (New_Level : in Natural) is
+      procedure Set_Current_Level (New_Level : in List_Index_Type) is
       begin
          if New_Level = Engine.Section_Level and then New_Level /= 0 then
             Engine.Output.End_Element ("li");
@@ -430,7 +410,7 @@ package body Wiki.Render.Html is
          if Node.Kind /= Wiki.Nodes.N_TOC_ENTRY or else Node.Toc_Level > Level then
             return;
          end if;
-         Set_Current_Level (Node.Toc_Level);
+         Set_Current_Level (List_Index_Type (Node.Toc_Level));
          Engine.Current_Section (Engine.Section_Level)
            := Engine.Current_Section (Engine.Section_Level) + 1;
          Engine.Output.Start_Element ("a");

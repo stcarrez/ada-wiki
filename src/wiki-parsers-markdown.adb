@@ -682,18 +682,9 @@ package body Wiki.Parsers.Markdown is
                      end if;
                      Push_Block (Parser, Nodes.N_LIST_START, Level, C);
                   end if;
-                  --if Count >= 4 then
-                  --   Push_Block (Parser, Nodes.N_LIST_ITEM, Level - 4, C);
-                  --   Parser.Preformat_Indent := Level - 1;
-                  --   Parser.Preformat_Fence := ' ';
-                  --   Parser.Preformat_Fcount := 0;
-                  --   Push_Block (Parser, N_PREFORMAT);
-                  --   Common.Append (Parser.Text, Block, Pos);
-                  --else
-                     Push_Block (Parser, Nodes.N_LIST_ITEM, Level, C);
-                     Buffers.Append (Parser.Text_Buffer, Block, Pos);
-                     Parser.Previous_Line_Empty := False;
-                  --end if;
+                  Push_Block (Parser, Nodes.N_LIST_ITEM, Level, C);
+                  Buffers.Append (Parser.Text_Buffer, Block, Pos);
+                  Parser.Previous_Line_Empty := False;
                   return;
                end;
             end if;

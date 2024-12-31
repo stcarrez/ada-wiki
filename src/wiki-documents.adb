@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-nodes -- Wiki Document Internal representation
---  Copyright (C) 2016, 2019, 2020, 2022 Stephane Carrez
+--  Copyright (C) 2016, 2019, 2020, 2022, 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -23,7 +23,7 @@ package body Wiki.Documents is
             Node := new Node_Type '(Kind       => N_HEADER,
                                     Len        => 0,
                                     Level      => Level,
-                                    Content    => null,
+                                    Children   => null,
                                     Parent     => Into.Current);
 
          when others =>
@@ -103,42 +103,52 @@ package body Wiki.Documents is
       case Kind is
          when N_LINE_BREAK =>
             Append (Into, new Node_Type '(Kind => N_LINE_BREAK, Len => 0,
+                                          Children => null,
                                           Parent => Into.Current));
 
          when N_HORIZONTAL_RULE =>
             Append (Into, new Node_Type '(Kind => N_HORIZONTAL_RULE, Len => 0,
+                                          Children => null,
                                           Parent => Into.Current));
 
          when N_PARAGRAPH =>
             Append (Into, new Node_Type '(Kind => N_PARAGRAPH, Len => 0,
+                                          Children => null,
                                           Parent => Into.Current));
 
          when N_LIST_ITEM =>
             Append (Into, new Node_Type '(Kind => N_LIST_ITEM, Len => 0,
+                                          Children => null,
                                           Parent => Into.Current));
 
          when N_LIST_END =>
             Append (Into, new Node_Type '(Kind => N_LIST_END, Len => 0,
+                                          Children => null,
                                           Parent => Into.Current));
 
          when N_NUM_LIST_END =>
             Append (Into, new Node_Type '(Kind => N_NUM_LIST_END, Len => 0,
+                                          Children => null,
                                           Parent => Into.Current));
 
          when N_LIST_ITEM_END =>
             Append (Into, new Node_Type '(Kind => N_LIST_ITEM_END, Len => 0,
+                                          Children => null,
                                           Parent => Into.Current));
 
          when N_NEWLINE =>
             Append (Into, new Node_Type '(Kind => N_NEWLINE, Len => 0,
+                                          Children => null,
                                           Parent => Into.Current));
 
          when N_END_DEFINITION =>
             Append (Into, new Node_Type '(Kind => N_END_DEFINITION, Len => 0,
+                                          Children => null,
                                           Parent => Into.Current));
 
          when N_TOC_DISPLAY =>
             Append (Into, new Node_Type '(Kind => N_TOC_DISPLAY, Len => 0,
+                                          Children => null,
                                           Parent => Into.Current));
             Into.Using_TOC := True;
 
@@ -157,6 +167,7 @@ package body Wiki.Documents is
    begin
       Append (Into, new Node_Type '(Kind => N_TEXT, Len => Text'Length,
                                     Parent => Into.Current,
+                                    Children => null,
                                     Text => Text, Format => Format));
    end Append;
 
@@ -183,6 +194,7 @@ package body Wiki.Documents is
    begin
       Append (Into, new Node_Type '(Kind => N_LINK, Len => Name'Length,
                                     Parent => Into.Current,
+                                    Children => null,
                                     Title => Name, Link_Attr => Attributes));
    end Add_Link;
 
@@ -194,6 +206,7 @@ package body Wiki.Documents is
    begin
       Append (Into, new Node_Type '(Kind => N_LINK_REF, Len => Label'Length,
                                     Parent => Into.Current,
+                                    Children => null,
                                     Title => Label, others => <>));
    end Add_Link_Ref;
 
@@ -206,6 +219,7 @@ package body Wiki.Documents is
    begin
       Append (Into, new Node_Type '(Kind => N_IMAGE, Len => Name'Length,
                                     Parent => Into.Current,
+                                    Children => null,
                                     Title => Name, Link_Attr => Attributes));
    end Add_Image;
 
@@ -218,6 +232,7 @@ package body Wiki.Documents is
    begin
       Append (Into, new Node_Type '(Kind => N_QUOTE, Len => Name'Length,
                                     Parent => Into.Current,
+                                    Children => null,
                                     Title => Name, Link_Attr => Attributes));
    end Add_Quote;
 
@@ -231,11 +246,13 @@ package body Wiki.Documents is
       if Ordered then
          Append (Into, new Node_Type '(Kind => N_NUM_LIST_START, Len => 0,
                                        Parent => Into.Current,
-                                       Level => Level, others => <>));
+                                       Children => null,
+                                       Level => Level));
       else
          Append (Into, new Node_Type '(Kind => N_LIST_START, Len => 0,
                                        Parent => Into.Current,
-                                       Level => Level, others => <>));
+                                       Children => null,
+                                       Level => Level));
       end if;
    end Add_List;
 
@@ -248,7 +265,8 @@ package body Wiki.Documents is
    begin
       Append (Into, new Node_Type '(Kind => N_BLOCKQUOTE, Len => 0,
                                     Parent => Into.Current,
-                                    Level => Level, others => <>));
+                                    Children => null,
+                                    Level => Level));
    end Add_Blockquote;
 
    --  ------------------------------
@@ -260,6 +278,7 @@ package body Wiki.Documents is
    begin
       Append (Into, new Node_Type '(Kind => N_PREFORMAT, Len => Text'Length,
                                     Parent => Into.Current,
+                                    Children => null,
                                     Preformatted => Text,
                                     Language => Strings.To_UString (Format)));
    end Add_Preformatted;
