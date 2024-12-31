@@ -1,4 +1,3 @@
-
 Include 1 (img):
 
 Current Measurement
@@ -9,9 +8,5 @@ Include 2 (pre):
 * item 1
 ''item''
 == dd ==
-
-
-
   - item 2
-
 

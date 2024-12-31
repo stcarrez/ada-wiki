@@ -1,3 +1,2 @@
-
 word strike
 

@@ -1,9 +1,6 @@
-
-
 1.1. Name: Joe Roger
 
 Expand: `Joe Roger`
-
 
 1.2. Alias: Buck Roger
 

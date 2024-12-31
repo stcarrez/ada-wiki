@@ -1,4 +1,3 @@
-
 First paragraph.
 
 Second paragraph.
@@ -13,10 +12,7 @@ Second paragraph.
 
 1.1.1.1.1. Section h5
 
----------------------------------------------------------
-
-
-  - item 1
+---------------------------------------------------------  - item 1
 
   - * item 1.1
   - * item 1.2
@@ -37,7 +33,6 @@ Second paragraph.
   1)  num 1
   2)  num 2
 
-
 Section bloc:
 
 L1: line 1 L2: line 2 L3: line 3
@@ -55,7 +50,6 @@ A link (https://link-url/)
   Some code
 
   Pre-formatted
-
 P1
   
 A quote 1 A quote 2 A quote 3

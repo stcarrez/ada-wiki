@@ -1,4 +1,3 @@
-
 A & in a wiki text must be recognized and not dropped. Examples:
 
 Q&A

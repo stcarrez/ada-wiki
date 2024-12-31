@@ -1,4 +1,3 @@
-
 First paragraph.
 
 Second paragraph.
@@ -17,10 +16,7 @@ Second paragraph.
 
 1.1.2. **not** //parsed//
 
----------------------------------------------------------
-
-
-  - item 1
+---------------------------------------------------------  - item 1
 
       - item 1.1
       - item 1.2
@@ -35,15 +31,12 @@ Second paragraph.
       1)  item 3.1
       2)  item 3.2
 
-
-
   1)  num 1
   2)  num 2
 
-
 Section bloc:
 
-L1: line 1  L2: line 2  L3: line 3
+L1: line 1 L2: line 2 L3: line 3
 
 Formatting
 
@@ -62,16 +55,14 @@ Alt text
 
 //A// **pre**-formatted section 
 == [[Nowiki]]
+|=Heading Col 1 |=Heading Col 2 | |Cell 1.1 |Two lines
+in Cell 1.2 | |Cell 2.1 |Cell 2.2 |
 
-|=Heading Col 1 |=Heading Col 2         | |Cell 1.1       |Two lines
-in Cell 1.2 | |Cell 2.1       |Cell 2.2               |
-
-Some examples of markup are:  <i>this</i>  
+Some examples of markup are: <i>this</i> 
 
 #1
 
 Escape **not bold**
-
 
   - bold item
   - italic item
@@ -80,20 +71,15 @@ Escape **not bold**
       1)  item about a certain page
   - 
 
-      1)   this is not processed 
-
+      1)  this is not processed 
 
 1.2. Creole Additions
-
-
-
-
 
 This is monospace text.
 
 This is superscripted text.
 
-This is subscripted text.    This is __underlined__ text.
+This is subscripted text. This is __underlined__ text.
 
 ; First title of definition list : Definition of first item. ; Second title: Second definition beginning on the same line.
 

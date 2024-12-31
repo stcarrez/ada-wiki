@@ -1,8 +1,6 @@
-
 This is my documentation test.
 
 The document begins:
-
 
 and there is no table of content.
 

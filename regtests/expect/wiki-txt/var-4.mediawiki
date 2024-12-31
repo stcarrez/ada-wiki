@@ -1,17 +1,9 @@
-
-
 1.1. Empty variables
-
 
 1.2. One variable
 
-
-
 1.3. Two variables
 
-
-
 1.4. More variables
-
 
 

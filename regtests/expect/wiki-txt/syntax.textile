@@ -1,4 +1,3 @@
-
 First paragraph.
 
 Second paragraph.
@@ -12,7 +11,6 @@ Second paragraph.
 1.1.1.1. Section h4
 
 1.1.1.1.1. Section h5
-
 
   - item 1
 
@@ -29,15 +27,12 @@ Second paragraph.
       1)  item 3.1
       2)  item 3.2
 
-
-
   1)  num 1
   2)  num 2
 
-
 Section bloc:
 
-L1: line 1  L2: line 2  L3: line 3
+L1: line 1 L2: line 2 L3: line 3
 
 1.1.2. Formatting
 
@@ -71,14 +66,11 @@ I searched Google (http://google.com.)
 
 1.1.3. Images
 
-
-
 Bunny.
 
 :http://hobix.com/
 
 Don’t make something, unless it is both necessary and useful. But if it is both necessary and useful, don't hesitate to make it beautiful. -- Shaker lesson
-
 
 1.1.4. Tables
 
@@ -90,5 +82,4 @@ Don’t make something, unless it is both necessary and useful. But if it is bot
 * item 1
 ''item''
 == dd ==
-
 

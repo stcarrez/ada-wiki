@@ -1,13 +1,8 @@
-
-
   - item1
   - item2
   - item3
 
-
-
   1)  itemA
   2)  itemB
   3)  itemC
-
 

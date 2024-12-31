@@ -1,4 +1,3 @@
-
 definition for item 1definition 3
 
 Paragraph

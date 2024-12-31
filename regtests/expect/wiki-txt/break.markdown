@@ -1,4 +1,3 @@
-
 1.1. Pros and Cons
 
 +: high performance in SMP environments

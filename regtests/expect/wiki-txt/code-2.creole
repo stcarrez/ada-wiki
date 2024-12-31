@@ -1,3 +1,2 @@
-
-The double }}  and }} is kept.
+The double }} and }} is kept.
 
