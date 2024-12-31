@@ -108,7 +108,7 @@ package body Wiki.Tests is
          Engine.Parse (Input'Unchecked_Access, Doc);
          Var_Filter.Add_Variable (String '("file"), Wiki.Strings.To_WString (To_String (T.Name)));
          Util.Measures.Report (Time, "Parse " & To_String (T.Name));
-         if T.Source = Wiki.SYNTAX_HTML or else T.Is_Cvt then
+         if T.Is_Cvt then
             declare
                Renderer    : aliased Wiki.Render.Wiki.Wiki_Renderer;
             begin
@@ -133,6 +133,11 @@ package body Wiki.Tests is
                Renderer : aliased Wiki.Render.Text.Text_Renderer;
             begin
                Renderer.Set_Output_Stream (Output'Unchecked_Access);
+               if T.Line_Length > 0 then
+                  Renderer.Set_Line_Length (T.Line_Length);
+                  Renderer.Set_Display_Links (False);
+                  Renderer.Set_Preformatted_Indentation (4);
+               end if;
                Renderer.Render (Doc);
                Output.Close;
                Util.Measures.Report (Time, "Render Text " & To_String (T.Name));
@@ -345,7 +350,15 @@ package body Wiki.Tests is
                      end case;
                      if Tst /= null then
                         Tst.Source := Wiki.SYNTAX_HTML;
+                        Tst.Is_Cvt := True;
                         Suite.Add_Test (Tst.all'Access);
+
+                        if Syntax = Wiki.SYNTAX_MARKDOWN then
+                           Tst := Create_Test (Name & ".txt", Path & "/" & Simple,
+                                               Wiki.SYNTAX_HTML, "/wiki-import/", "", False);
+                           Tst.Line_Length := 80;
+                           Suite.Add_Test (Tst.all'Access);
+                        end if;
                      end if;
                   end loop;
                end if;

@@ -49,4 +49,6 @@ package Wiki.Parsers.Tests is
    --  Test the string parser with UTF-8 support.
    procedure Test_Wiki_UTF_8 (T : in out Test);
 
+   procedure Test_Buffer (T : in out Test);
+
 end Wiki.Parsers.Tests;

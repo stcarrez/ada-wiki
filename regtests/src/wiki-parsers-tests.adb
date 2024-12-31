@@ -44,6 +44,8 @@ package body Wiki.Parsers.Tests is
                        Test_Wiki_Text_Renderer'Access);
       Caller.Add_Test (Suite, "Test Wiki.Parsers.Parse (String UTF-8)",
                        Test_Wiki_UTF_8'Access);
+      Caller.Add_Test (Suite, "Test Wiki.Buffers.Append)",
+                       Test_Buffer'Access);
    end Add_Tests;
 
    --  ------------------------------
@@ -337,5 +339,16 @@ package body Wiki.Parsers.Tests is
          end loop;
       end loop;
    end Test_Wiki_UTF_8;
+
+   procedure Test_Buffer (T : in out Test) is
+      B : Wiki.Buffers.Builder (128);
+   begin
+      Wiki.Buffers.Append (B, "   hello   ");
+      declare
+         R : Wiki.Strings.WString :=  Wiki.Buffers.To_Array (B);
+      begin
+         T.Assert ("   hello   " = R, "Invalid buffer");
+      end;
+   end Test_Buffer;
 
 end Wiki.Parsers.Tests;

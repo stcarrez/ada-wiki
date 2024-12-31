@@ -24,6 +24,7 @@ package Wiki.Tests is
       Format  : Wiki.Wiki_Syntax;
       Is_Html : Boolean := False;
       Is_Cvt  : Boolean := False;
+      Line_Length : Natural := 0;
    end record;
    type Test_Case_Access is access all Test;
 
