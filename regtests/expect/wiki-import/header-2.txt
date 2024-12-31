@@ -1,0 +1,6 @@
+some text
+
+1.1. Features
+
+  - Written in C - It runs on any unix machine, including Linux, BSD, ...
+

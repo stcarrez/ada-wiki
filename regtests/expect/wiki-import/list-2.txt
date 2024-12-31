@@ -1,0 +1,18 @@
+1. Presentations
+
+  - Persistence with Ada Database Objects FOSDEM 2019
+  - Ada for Web Development AdaCore Tech Days 2019
+  - Secure Web Applications with AWA FOSDEM 2019
+  - Protect Sensitive Data with Ada Keystore Ada devroom FOSDEM 2020
+
+2. Articles
+
+  - Use Ada for Your Web Development | Electronic Design
+
+3. Sites Using AWA
+
+  - Java 2 Ada
+  - Ada France
+  - Atlas
+  - Jason
+

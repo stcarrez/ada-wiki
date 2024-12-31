@@ -1,0 +1,7 @@
+  - Ada
+  - Tutorial
+  - files
+
+Reading a file to get its content in a String is a simple operation
+
+
