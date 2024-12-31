@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  util-texts-builders -- Text builder
---  Copyright (C) 2013, 2016, 2017, 2021, 2022 Stephane Carrez
+--  Copyright (C) 2013, 2016, 2017, 2021, 2022, 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -151,45 +151,6 @@ package body Wiki.Buffers is
       end loop;
    end Inline_Append;
 
-   --  ------------------------------
-   --  Append in `Into` builder the `Content` builder starting at `From` position
-   --  and the up to and including the `To` position.
-   --  ------------------------------
-   procedure Append (Into    : in out Builder;
-                     Content : in Builder;
-                     From    : in Positive;
-                     To      : in Positive) is
-   begin
-      if From <= Content.First.Last then
-         if To <= Content.First.Last then
-            Append (Into, Content.First.Content (From .. To));
-            return;
-         end if;
-         Append (Into, Content.First.Content (From .. Content.First.Last));
-      end if;
-      declare
-         Pos    : Integer := From - Into.First.Last;
-         Last   : Integer := To - Into.First.Last;
-         B      : Block_Access := Into.First.Next_Block;
-      begin
-         loop
-            if B = null then
-               return;
-            end if;
-            if Pos <= B.Last then
-               if Last <= B.Last then
-                  Append (Into, B.Content (1 .. Last));
-                  return;
-               end if;
-               Append (Into, B.Content (1 .. B.Last));
-            end if;
-            Pos := Pos - B.Last;
-            Last := Last - B.Last;
-            B := B.Next_Block;
-         end loop;
-      end;
-   end Append;
-
    procedure Append (Into     : in out Builder;
                      Buffer   : in Buffer_Access;
                      From     : in Positive) is
@@ -223,26 +184,6 @@ package body Wiki.Buffers is
       Source.Length           := 0;
    end Clear;
 
-   --  ------------------------------
-   --  Iterate over the buffer content calling the <tt>Process</tt> procedure with each
-   --  chunk.
-   --  ------------------------------
-   procedure Iterate (Source  : in Builder;
-                      Process : not null access procedure (Chunk : in Input)) is
-   begin
-      if Source.First.Last > 0 then
-         Process (Source.First.Content (1 .. Source.First.Last));
-         declare
-            B : Block_Access := Source.First.Next_Block;
-         begin
-            while B /= null loop
-               Process (B.Content (1 .. B.Last));
-               B := B.Next_Block;
-            end loop;
-         end;
-      end if;
-   end Iterate;
-
    procedure Inline_Iterate (Source  : in Builder) is
    begin
       if Source.First.Last > 0 then
@@ -274,50 +215,6 @@ package body Wiki.Buffers is
    end Inline_Update;
 
    --  ------------------------------
-   --  Return the content starting from the tail and up to <tt>Length</tt> items.
-   --  ------------------------------
-   function Tail (Source : in Builder;
-                  Length : in Natural) return Input is
-      Last : constant Natural := Source.Current.Last;
-   begin
-      if Last >= Length then
-         return Source.Current.Content (Last - Length + 1 .. Last);
-      elsif Length >= Source.Length then
-         return To_Array (Source);
-      else
-         declare
-            Result  : Input (1 .. Length);
-            Offset  : Natural := Source.Length - Length;
-            B       : access constant Buffer := Source.First'Access;
-            Src_Pos : Positive := 1;
-            Dst_Pos : Positive := 1;
-            Len     : Natural;
-         begin
-            --  Skip the data moving to next blocks as needed.
-            while Offset /= 0 loop
-               if Offset < B.Last then
-                  Src_Pos := Offset + 1;
-                  Offset := 0;
-               else
-                  Offset := Offset - B.Last + 1;
-                  B := B.Next_Block;
-               end if;
-            end loop;
-
-            --  Copy what remains until we reach the length.
-            while Dst_Pos <= Length loop
-               Len := B.Last - Src_Pos + 1;
-               Result (Dst_Pos .. Dst_Pos + Len - 1) := B.Content (Src_Pos .. B.Last);
-               Src_Pos := 1;
-               Dst_Pos := Dst_Pos + Len;
-               B := B.Next_Block;
-            end loop;
-            return Result;
-         end;
-      end if;
-   end Tail;
-
-   --  ------------------------------
    --  Get the buffer content as an array.
    --  ------------------------------
    function To_Array (Source : in Builder) return Input is
@@ -338,30 +235,6 @@ package body Wiki.Buffers is
       end if;
       return Result;
    end To_Array;
-
-   --  ------------------------------
-   --  Get the element at the given position.
-   --  ------------------------------
-   function Element (Source   : in Builder;
-                     Position : in Positive) return Wiki.Strings.WChar is
-   begin
-      if Position <= Source.First.Last then
-         return Source.First.Content (Position);
-      else
-         declare
-            Pos : Positive := Position - Source.First.Last;
-            B   : Block_Access := Source.First.Next_Block;
-         begin
-            loop
-               if Pos <= B.Last then
-                  return B.Content (Pos);
-               end if;
-               Pos := Pos - B.Last;
-               B := B.Next_Block;
-            end loop;
-         end;
-      end if;
-   end Element;
 
    --  ------------------------------
    --  Call the <tt>Process</tt> procedure with the full buffer content, trying to avoid

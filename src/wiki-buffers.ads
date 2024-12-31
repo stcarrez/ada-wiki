@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  util-texts-builders -- Text builder
---  Copyright (C) 2013, 2017, 2021, 2022 Stephane Carrez
+--  Copyright (C) 2013, 2017, 2021, 2022, 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -104,10 +104,6 @@ private package Wiki.Buffers with Preelaborate is
    --  Append in `Into` builder the `Content` builder starting at `From` position
    --  and the up to and including the `To` position.
    procedure Append (Into     : in out Builder;
-                     Content  : in Builder;
-                     From     : in Positive;
-                     To       : in Positive);
-   procedure Append (Into     : in out Builder;
                      Buffer   : in Buffer_Access;
                      From     : in Positive);
 
@@ -120,10 +116,6 @@ private package Wiki.Buffers with Preelaborate is
 
    --  Iterate over the buffer content calling the <tt>Process</tt> procedure with each
    --  chunk.
-   procedure Iterate (Source  : in Builder;
-                      Process : not null
-                        access procedure (Chunk : in Wiki.Strings.WString)) with Inline;
-
    generic
       with procedure Process (Content : in Wiki.Strings.WString);
    procedure Inline_Iterate (Source  : in Builder);
@@ -134,14 +126,6 @@ private package Wiki.Buffers with Preelaborate is
 
    --  Get the buffer content as an array.
    function To_Array (Source : in Builder) return Wiki.Strings.WString;
-
-   --  Return the content starting from the tail and up to <tt>Length</tt> items.
-   function Tail (Source : in Builder;
-                  Length : in Natural) return Wiki.Strings.WString;
-
-   --  Get the element at the given position.
-   function Element (Source   : in Builder;
-                     Position : in Positive) return Wiki.Strings.WChar;
 
    --  Call the <tt>Process</tt> procedure with the full buffer content, trying to avoid
    --  secondary stack copies as much as possible.
