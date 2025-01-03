@@ -42,6 +42,22 @@ package body Wiki.Buffers is
    end Next;
 
    --  ------------------------------
+   --  Move forward and return the next character or NUL.
+   --  ------------------------------
+   function Next (Content : in out Buffer_Access;
+                  Pos     : in out Positive) return Strings.WChar is
+   begin
+      if Pos + 1 > Content.Last then
+         Content := Content.Next_Block;
+         Pos := 1;
+         return (if Content /= null then Content.Content (1) else Helpers.NUL);
+      else
+         Pos := Pos + 1;
+         return Content.Content (Pos);
+      end if;
+   end Next;
+
+   --  ------------------------------
    --  Get the length of the item builder.
    --  ------------------------------
    function Length (Source : in Builder) return Natural is

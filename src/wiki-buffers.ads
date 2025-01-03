@@ -80,6 +80,10 @@ private package Wiki.Buffers with Preelaborate is
                    Pos     : in out Positive;
                    Count   : in Natural);
 
+   --  Move forward and return the next character or NUL.
+   function Next (Content : in out Buffer_Access;
+                  Pos     : in out Positive) return Strings.WChar with Inline_Always;
+
    --  Get the length of the item builder.
    function Length (Source : in Builder) return Natural;
 
