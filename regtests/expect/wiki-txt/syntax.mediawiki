@@ -52,7 +52,12 @@ InsertUnderline Strike Delete
 
 A link title (A link) rectifier (http://en.wikipedia.org/wiki/Rectifier) Sun Microsystems (http://www.sun.com)
 
-definition item 1definition item 2definition item 3
+item 1
+    definition item 1
+item 2
+    definition item 2
+item 3
+    definition item 3
 
 
 * item 1

@@ -1,0 +1,8 @@
+HTML
+    HyperText Markup Language, based on SGML.
+XHTML
+    HTML 4.0 rewritten to be compliant with XML rules.
+HTML5
+    The latest revision of the HTML standard.
+    Still under development.
+

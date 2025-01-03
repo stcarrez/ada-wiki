@@ -1,0 +1,1 @@
+<h2>Similar Projects</h2><dl><dt><a href="http://linuxfocus.org/English/June2005/article379.shtml">A digital DC powersupply</a> by Guido Socher</dt><dd>An excellent and simple power supply controlled by an Atmega8.</dd></dl><p>Last paragraph</p>
