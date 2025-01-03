@@ -1,1 +1,1 @@
-<p><b class="none" /></p>
+<p><b class="none"></b></p>

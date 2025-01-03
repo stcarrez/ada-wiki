@@ -1,1 +1,1 @@
-<div class="adafr-block"><h3 /><p /></div>
+<div class="adafr-block"><h3></h3><p></p></div>

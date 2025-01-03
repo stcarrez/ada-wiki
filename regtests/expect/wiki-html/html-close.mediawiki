@@ -1,1 +1,1 @@
-<p><img src="tst" /></p><div /><div class="empty" /><p>   test</p>
+<p><img src="tst" /></p><div></div><div class="empty"></div><p>   test</p>
