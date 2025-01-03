@@ -132,6 +132,10 @@ package Wiki.Render.Text is
                            Title  : in Strings.WString;
                            Attrs  : in Attributes.Attribute_List);
 
+   procedure Render_Definition (Engine : in out Text_Renderer;
+                                Doc    : in Documents.Document;
+                                Node   : in Nodes.Node_Type);
+
    --  Set the text style format.
    procedure Set_Format (Engine : in out Text_Renderer;
                          Format   : in Format_Map);
@@ -161,6 +165,7 @@ private
       UL_List_Level       : Natural := 0;
       OL_List_Level       : Natural := 0;
       In_List             : Boolean := False;
+      In_Definition       : Boolean := False;
       Current_Mode        : Nodes.Node_Kind := Nodes.N_NONE;
    end record;
 

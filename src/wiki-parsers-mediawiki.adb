@@ -132,17 +132,11 @@ package body Wiki.Parsers.MediaWiki is
             end if;
 
          when ';' =>
-            Common.Parse_Definition (Parser, Buffer, Pos);
-            return;
+            Common.Parse_Definition (Parser, Buffer, Pos, True);
 
          when ':' =>
             if Parser.Current_Node = Nodes.N_DEFINITION then
-               Next (Buffer, Pos);
-               declare
-                  Count : Natural;
-               begin
-                  Buffers.Skip_Spaces (Buffer, Pos, Count);
-               end;
+               Common.Parse_Definition (Parser, Buffer, Pos, False);
             end if;
 
          when others =>
@@ -187,8 +181,12 @@ package body Wiki.Parsers.MediaWiki is
                   exit Main when Buffer = null;
 
                when others =>
-                  Append (Parser.Text, C);
-                  Pos := Pos + 1;
+                  if C = ':' and then Parser.Current_Node = Nodes.N_DEFINITION_TERM then
+                     Common.Parse_Definition (Parser, Buffer, Pos, False);
+                  else
+                     Append (Parser.Text, C);
+                     Pos := Pos + 1;
+                  end if;
 
             end case;
          end loop;

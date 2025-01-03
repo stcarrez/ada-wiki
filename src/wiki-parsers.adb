@@ -92,8 +92,13 @@ package body Wiki.Parsers is
             Top : constant Block_Access := Block_Stack.Current (P.Blocks);
          begin
             exit when Top.Kind not in Nodes.N_LIST_ITEM
-              | Nodes.N_LIST_START | Nodes.N_NUM_LIST_START | Nodes.N_DEFINITION;
+              | Nodes.N_LIST_START | Nodes.N_NUM_LIST_START
+                | Nodes.N_DEFINITION | Nodes.N_DEFINITION_TERM;
             Flush_Text (P, Trim => Right);
+            if Top.Kind in Nodes.N_DEFINITION | Nodes.N_DEFINITION_TERM then
+               P.Context.Filters.End_Block (P.Document, Top.Kind);
+               P.Context.Filters.Add_Node (P.Document, Nodes.N_END_DEFINITION);
+            end if;
             Pop_Block (P);
          end;
       end loop;
@@ -315,9 +320,6 @@ package body Wiki.Parsers is
                when Nodes.N_BLOCKQUOTE =>
                   Parser.Context.Filters.Add_Blockquote (Parser.Document, 0);
 
-               when Nodes.N_DEFINITION =>
-                  Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_END_DEFINITION);
-
                when Nodes.N_TABLE =>
                   Parser.Context.Filters.Finish_Table (Parser.Document);
 
@@ -441,8 +443,13 @@ package body Wiki.Parsers is
    --  ------------------------------
    procedure Flush_List (P : in out Parser) is
    begin
-      Flush_Block (P);
-      while P.Current_Node in Nodes.N_LIST_ITEM | Nodes.N_LIST_START | Nodes.N_NUM_LIST_START loop
+      Flush_Block (P, Trim => Right);
+      while P.Current_Node in Nodes.N_LIST_ITEM | Nodes.N_LIST_START
+        | Nodes.N_NUM_LIST_START | Nodes.N_DEFINITION | Nodes.N_DEFINITION_TERM loop
+         if P.Current_Node in Nodes.N_DEFINITION | Nodes.N_DEFINITION_TERM then
+            P.Context.Filters.End_Block (P.Document, P.Current_Node);
+            P.Context.Filters.Add_Node (P.Document, Nodes.N_END_DEFINITION);
+         end if;
          Pop_Block (P);
       end loop;
    end Flush_List;
@@ -968,8 +975,9 @@ package body Wiki.Parsers is
             Engine.Parse_Block (Engine, Buffer);
          end loop;
          while not Block_Stack.Is_Empty (Engine.Blocks) loop
-            if Engine.Current_Node in Nodes.N_PARAGRAPH | Nodes.N_LIST_ITEM then
-               Flush_Text (Engine, Trim => Right);
+            if Engine.Current_Node in Nodes.N_PARAGRAPH | Nodes.N_LIST_ITEM | Nodes.N_DEFINITION | Nodes.N_DEFINITION_TERM then
+               Flush_List (Engine);
+               --  Flush_Text (Engine, Trim => Right);
             end if;
             Pop_Block (Engine);
          end loop;

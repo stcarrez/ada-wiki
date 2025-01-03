@@ -424,6 +424,12 @@ package body Wiki.Render.Text is
          when Wiki.Nodes.N_PREFORMAT =>
             Engine.Render_Preformatted (Node.Preformatted, "");
 
+         when Wiki.Nodes.N_DEFINITION_TERM | Wiki.Nodes.N_DEFINITION =>
+            Engine.Render_Definition (Doc, Node);
+
+         when Wiki.Nodes.N_END_DEFINITION =>
+            Engine.In_Definition := False;
+
          when Wiki.Nodes.N_TAG_START =>
             Engine.Render_Tag (Doc, Node);
 
@@ -435,6 +441,21 @@ package body Wiki.Render.Text is
 
       end case;
    end Render;
+
+   procedure Render_Definition (Engine : in out Text_Renderer;
+                                Doc    : in Documents.Document;
+                                Node   : in Nodes.Node_Type) is
+      Indent : constant Natural
+        := (if Node.Kind = Nodes.N_DEFINITION then 4 else 0);
+   begin
+      if not Engine.In_Definition then
+         Engine.In_Definition := True;
+      end if;
+      Engine.Indent_Level := Engine.Indent_Level + Indent;
+      Engine.Render (Doc, Node.Children);
+      Engine.Indent_Level := Engine.Indent_Level - Indent;
+      Engine.Add_Line_Break;
+   end Render_Definition;
 
    procedure Render_Tag (Engine : in out Text_Renderer;
                          Doc    : in Documents.Document;

@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-common -- Common operations with several wiki parsers
---  Copyright (C) 2011 - 2022 Stephane Carrez
+--  Copyright (C) 2011 - 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -123,6 +123,7 @@ private package Wiki.Parsers.Common with Preelaborate is
    --    : definition 1
    procedure Parse_Definition (Parser  : in out Parser_Type;
                                Text    : in out Wiki.Buffers.Buffer_Access;
-                               From    : in out Positive);
+                               From    : in out Positive;
+                               Is_Term : in Boolean);
 
 end Wiki.Parsers.Common;

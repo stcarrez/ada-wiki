@@ -29,6 +29,7 @@ package Wiki.Nodes is
                       N_INDENT,
                       N_NUM_LIST_START,
                       N_LIST_START,
+                      N_DEFINITION_TERM,
                       N_DEFINITION,
 
                       --  Nodes with children and attributes.
@@ -60,7 +61,7 @@ package Wiki.Nodes is
       Children   : Node_List_Access;
       case Kind is
          when N_HEADER | N_BLOCKQUOTE | N_INDENT
-            | N_NUM_LIST_START | N_LIST_START | N_DEFINITION =>
+            | N_NUM_LIST_START | N_LIST_START | N_DEFINITION | N_DEFINITION_TERM =>
             Level  : Natural := 0;
 
          when N_TEXT =>

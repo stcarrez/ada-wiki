@@ -48,7 +48,7 @@ procedure Wiki.Nodes.Dump (Node : in Wiki.Nodes.Node_Type) is
       Print_Length (Node.Len);
       case Node.Kind is
          when N_HEADER | N_BLOCKQUOTE | N_INDENT | N_TOC_ENTRY | N_NUM_LIST_START
-          | N_LIST_START | N_DEFINITION =>
+          | N_LIST_START | N_DEFINITION | N_DEFINITION_TERM =>
             Strings.Append_String (Result, Natural'Wide_Wide_Image (Node.Level));
             Strings.Append_String (Result, " ");
             Write (Level, Wiki.Strings.To_WString (Result));

@@ -138,7 +138,7 @@ package body Wiki.Render.Html is
          when Wiki.Nodes.N_NEWLINE =>
             Engine.Newline;
 
-         when Wiki.Nodes.N_DEFINITION =>
+         when Wiki.Nodes.N_DEFINITION_TERM =>
             if not Engine.In_Definition then
                Engine.Close_Paragraph;
                Engine.In_Definition := True;
@@ -147,17 +147,21 @@ package body Wiki.Render.Html is
                Engine.Output.End_Element ("dd");
             end if;
             Engine.Output.Start_Element ("dt");
+            Engine.Has_Paragraph := True;
+            Engine.Need_Paragraph := False;
             Engine.Render (Doc, Node.Children);
-            --  Engine.Output.Write_Wide_Text (Node.Header);
             Engine.Output.End_Element ("dt");
+
+         when Wiki.Nodes.N_DEFINITION =>
             Engine.Output.Start_Element ("dd");
             Engine.Has_Paragraph := True;
             Engine.Need_Paragraph := False;
+            Engine.Render (Doc, Node.Children);
+            Engine.Output.End_Element ("dd");
 
          when Wiki.Nodes.N_END_DEFINITION =>
             if Engine.In_Definition then
                Engine.In_Definition := False;
-               Engine.Output.End_Element ("dd");
                Engine.Output.End_Element ("dl");
                Engine.Has_Paragraph := False;
                Engine.Need_Paragraph := True;
@@ -256,6 +260,7 @@ package body Wiki.Render.Html is
       Iter         : Wiki.Attributes.Cursor := Wiki.Attributes.First (Node.Attributes);
       Previous_Tag : constant Wiki.Html_Tag := Engine.Html_Tag;
       Prev_Para    : Boolean := Engine.Has_Paragraph;
+      Format       : constant Wiki.Format_Map := Engine.Format;
    begin
       if Node.Tag_Start = Wiki.P_TAG then
          Engine.Has_Paragraph := True;
@@ -299,6 +304,7 @@ package body Wiki.Render.Html is
       Engine.Html_Tag := Previous_Tag;
       Engine.Html_Level := Engine.Html_Level - 1;
       if Node.Tag_Start = Wiki.P_TAG then
+         Engine.Set_Format (Format);
          Engine.Has_Paragraph := False;
          Engine.Need_Paragraph := True;
       elsif Node.Tag_Start in Wiki.UL_TAG | Wiki.OL_TAG | Wiki.DL_TAG
@@ -307,12 +313,16 @@ package body Wiki.Render.Html is
         | Wiki.H4_TAG | Wiki.H5_TAG
         | Wiki.H6_TAG | Wiki.DIV_TAG | Wiki.TABLE_TAG
       then
+         Engine.Set_Format (Format);
          Engine.Close_Paragraph;
          Engine.Has_Paragraph := False;
          Engine.Need_Paragraph := True;
       elsif not Engine.Has_Html_Paragraph then
          --  Leaving the HTML text-element, restore the previous paragraph state.
          Engine.Has_Paragraph := Prev_Para;
+      end if;
+      if Node.Tag_Start = Wiki.A_TAG then
+         Engine.Set_Format (Format);
       end if;
       Engine.Output.End_Element (Name.all);
    end Render_Tag;

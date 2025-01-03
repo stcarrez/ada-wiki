@@ -9,6 +9,7 @@ package Wiki.Helpers is
 
    pragma Preelaborate;
 
+   NUL  : constant Wiki.Strings.WChar := Wiki.Strings.WChar'Val (16#00#);
    LF   : constant Wiki.Strings.WChar := Wiki.Strings.WChar'Val (16#0A#);
    CR   : constant Wiki.Strings.WChar := Wiki.Strings.WChar'Val (16#0D#);
    HT   : constant Wiki.Strings.WChar := Wiki.Strings.WChar'Val (16#09#);

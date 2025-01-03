@@ -26,6 +26,20 @@ package body Wiki.Documents is
                                     Children   => null,
                                     Parent     => Into.Current);
 
+         when N_DEFINITION_TERM =>
+            Node := new Node_Type '(Kind       => N_DEFINITION_TERM,
+                                    Len        => 0,
+                                    Level      => Level,
+                                    Children   => null,
+                                    Parent     => Into.Current);
+
+         when N_DEFINITION =>
+            Node := new Node_Type '(Kind       => N_DEFINITION,
+                                    Len        => 0,
+                                    Level      => Level,
+                                    Children   => null,
+                                    Parent     => Into.Current);
+
          when others =>
             return;
 

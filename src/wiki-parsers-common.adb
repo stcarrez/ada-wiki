@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-common -- Common operations with several wiki parsers
---  Copyright (C) 2011 - 2022 Stephane Carrez
+--  Copyright (C) 2011 - 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -741,43 +741,37 @@ package body Wiki.Parsers.Common is
    --  ------------------------------
    procedure Parse_Definition (Parser  : in out Parser_Type;
                                Text    : in out Wiki.Buffers.Buffer_Access;
-                               From    : in out Positive) is
-
-      procedure Add_Definition (Content : in Wiki.Strings.WString);
-
-      procedure Add_Definition (Content : in Wiki.Strings.WString) is
-         First        : constant Natural := Wiki.Helpers.Skip_Spaces (Content, Content'First);
-         Last         : constant Natural := Wiki.Helpers.Trim_Spaces (Content, Content'Last);
-      begin
-         Parser.Context.Filters.Add_Definition (Parser.Document, Content (First .. Last));
-      end Add_Definition;
-
-      procedure Add_Definition is
-         new Wiki.Strings.Wide_Wide_Builders.Get (Add_Definition);
-
+                               From    : in out Positive;
+                               Is_Term : in Boolean) is
       Buffer : Wiki.Buffers.Buffer_Access := Text;
       Pos    : Positive := From;
+      C      : constant Wiki.Strings.WChar := Next (Buffer, Pos);
+      Count  : Natural;
    begin
-      Next (Buffer, Pos);
-      if Buffer = null or else Wiki.Helpers.Is_Newline (Buffer.Content (Pos)) then
+      if C = Helpers.NUL or else Wiki.Helpers.Is_Newline (C) then
          Common.Parse_Text (Parser, Text, From);
          return;
       end if;
 
       Flush_Text (Parser, Trim => Right);
-      if Parser.Current_Node /= Nodes.N_DEFINITION then
+
+      --  Leave current definition or term.
+      if Parser.Current_Node in Nodes.N_DEFINITION | Nodes.N_DEFINITION_TERM then
+         Pop_Block (Parser);
+         Parser.Context.Filters.End_Block (Parser.Document, Parser.Current_Node);
+      end if;
+
+      --  Start the new term or definition.
+      if Is_Term then
+         Push_Block (Parser, Nodes.N_DEFINITION_TERM);
+         Parser.Context.Filters.Start_Block (Parser.Document, Nodes.N_DEFINITION_TERM, 0);
+      else
          Push_Block (Parser, Nodes.N_DEFINITION);
+         Parser.Context.Filters.Start_Block (Parser.Document, Nodes.N_DEFINITION, 0);
       end if;
-
-      while Buffer /= null loop
-         Append (Parser.Text, Buffer.Content (Pos));
-         Next (Buffer, Pos);
-      end loop;
-
-      if not Parser.Context.Is_Hidden then
-         Add_Definition (Parser.Text);
-         Clear (Parser.Text);
-      end if;
+      Buffers.Skip_Spaces (Buffer, Pos, Count);
+      Text := Buffer;
+      From := Pos;
    end Parse_Definition;
 
    --  ------------------------------

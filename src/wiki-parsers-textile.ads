@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-textile -- Textile parser operations
---  Copyright (C) 2022 Stephane Carrez
+--  Copyright (C) 2022, 2024 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
