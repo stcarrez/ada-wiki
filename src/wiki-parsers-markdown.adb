@@ -5,6 +5,7 @@
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
 with Ada.Containers.Vectors;
+with Util.Encoders.URI;
 with Wiki.Nodes;
 with Wiki.Helpers;
 with Wiki.Parsers.Common;
@@ -18,9 +19,11 @@ package body Wiki.Parsers.Markdown is
    use type Wiki.Html_Parser.Entity_State_Type;
 
    type Marker_Kind is (M_CODE, M_STAR, M_UNDERSCORE, M_LINK, M_TILDE,
-                        M_LINK_REF, M_IMAGE, M_END,
+                        M_LINK_REF, M_IMAGE, M_END, M_BRACKET, M_BRACKET_IMAGE,
                         M_ENTITY, M_TEXT);
 
+   type Delimiter_Index_Type is new Natural;
+   subtype Delimiter_Index is Delimiter_Index_Type range 1 .. Delimiter_Index_Type'Last;
    type Delimiter_Type;
 
    type Delimiter_Type is record
@@ -32,13 +35,13 @@ package body Wiki.Parsers.Markdown is
       Can_Close : Boolean := False;
       Link_Pos  : Natural := 0;
       Link_End  : Natural := 0;
+      Associate : Delimiter_Index_Type := 0;
    end record;
 
    package Delimiter_Vectors is
-      new Ada.Containers.Vectors (Positive, Delimiter_Type);
+      new Ada.Containers.Vectors (Delimiter_Index, Delimiter_Type);
 
    subtype Delimiter_Vector is Delimiter_Vectors.Vector;
-   subtype Delimiter_Cursor is Delimiter_Vectors.Cursor;
 
    function Get_Header_Level (Text   : in Wiki.Buffers.Buffer_Access;
                               From   : in Positive) return Natural;
@@ -80,9 +83,6 @@ package body Wiki.Parsers.Markdown is
    procedure Parse_Table (Parser : in out Parser_Type;
                           Text   : in out Wiki.Buffers.Buffer_Access;
                           From   : in out Positive);
-   procedure Parse_Link (Text   : in Wiki.Buffers.Buffer_Access;
-                         From   : in Positive;
-                         Delim  : in Delimiter_Vectors.Reference_Type);
    procedure Get_Delimiter (Text        : in out Wiki.Buffers.Buffer_Access;
                             From        : in out Positive;
                             Before_Char : Strings.WChar;
@@ -673,7 +673,7 @@ package body Wiki.Parsers.Markdown is
                   Buffers.Next (Block, Pos);
                   Buffers.Skip_Spaces (Block, Pos, Count);
                   Level := Level + Count;
-                  if Level <= Cur_Level then
+                  if Level <= Cur_Level or else Level = Cur_Level + 1 then
                      Pop_List (Parser, Level, C, 0);
                   end if;
                   if not Is_List_Item (Parser, Level) then
@@ -789,6 +789,7 @@ package body Wiki.Parsers.Markdown is
       Block  : Wiki.Buffers.Buffer_Access := Text;
       Pos    : Positive := From;
       C      : Wiki.Strings.WChar;
+      Sep    : Wiki.Strings.WChar;
       Space_Count : Natural;
       Paren_Count : Integer := 0;
    begin
@@ -804,6 +805,9 @@ package body Wiki.Parsers.Markdown is
                while Pos <= Last loop
                   C := Block.Content (Pos);
                   exit Scan_Bracket_Link when C = '>';
+                  if C = LF or else C = '<' then
+                     return;
+                  end if;
                   Pos := Pos + 1;
                   Append (Link, C);
                end loop;
@@ -815,6 +819,7 @@ package body Wiki.Parsers.Markdown is
             Buffers.Next (Block, Pos);
          end if;
       else
+         Buffers.Skip_Spaces (Block, Pos, Space_Count);
          Scan_Link :
          while Block /= null loop
             while Pos <= Block.Last loop
@@ -852,13 +857,17 @@ package body Wiki.Parsers.Markdown is
          end if;
       end if;
       Buffers.Skip_Spaces (Block, Pos, Space_Count);
-      if Block /= null and then Block.Content (Pos) in '"' | ''' then
+      if Block /= null and then Block.Content (Pos) in '"' | ''' | '(' then
+         Sep := Block.Content (Pos);
+         if Sep = '(' then
+            Sep := ')';
+         end if;
          Buffers.Next (Block, Pos);
          Scan_Title :
          while Block /= null loop
             while Pos <= Block.Last loop
                C := Block.Content (Pos);
-               exit Scan_Title when C in '"' | ''';
+               exit Scan_Title when C = Sep;
                if C = '\' then
                   Buffers.Next (Block, Pos);
                   exit Scan_Title when Block = null;
@@ -949,46 +958,6 @@ package body Wiki.Parsers.Markdown is
          From := Pos;
       end;
    end Get_Delimiter;
-
-   --  Parse a link at the ']' position:
-   --
-   --  Link (M_LINK):
-   --    [link-label]
-   --    [link](url)
-   --  Link (M_IMAGE):
-   --    ![label](url)
-   procedure Parse_Link (Text   : in Wiki.Buffers.Buffer_Access;
-                         From   : in Positive;
-                         Delim  : in Delimiter_Vectors.Reference_Type) is
-      Block            : Wiki.Buffers.Buffer_Access := Text;
-      Pos              : Positive := From;
-   begin
-      Buffers.Next (Block, Pos);
-      if Block = null then
-         Delim.Marker := M_TEXT;
-         return;
-      end if;
-
-      if Block.Content (Pos) = '(' then
-         Buffers.Next (Block, Pos);
-         declare
-            Link  : Wiki.Strings.BString (128);
-            Title : Wiki.Strings.BString (128);
-         begin
-            Scan_Link_Title (Block, Pos, ')', Link, Title);
-         end;
-         if Block /= null and then Block.Content (Pos) = ')' then
-            Buffers.Next (Block, Pos);
-            Delim.Link_Pos := Pos;
-         else
-            Delim.Marker := M_TEXT;
-         end if;
-      elsif Delim.Marker = M_LINK then
-         Delim.Marker := M_LINK_REF;
-      else
-         Delim.Marker := M_TEXT;
-      end if;
-   end Parse_Link;
 
    procedure Add_Image (Parser   : in out Parser_Type;
                         Text     : in out Wiki.Buffers.Buffer_Access;
@@ -1259,26 +1228,31 @@ package body Wiki.Parsers.Markdown is
       From := From + 1;
    end Scan_Backtick;
 
+   HREF_LOOSE  : constant Util.Encoders.URI.Encoding_Array
+     := ('0' .. '9' => False,
+         'a' .. 'z' => False,
+         'A' .. 'Z' => False,
+         '-' => False, '.' => False, '_' => False, '~' => False, '+' => False,
+         ''' => False, '*' => False, '(' => False, '&' => False, '$' => False,
+         ')' => False, ',' => False, '%' => False, '#' => False, '@' => False,
+         '?' => False, '=' => False, ';' => False, ':' => False, '/' => False,
+         others => True);
+
    procedure Parse_Inline_Text (Parser : in out Parser_Type;
                                 Text   : in Wiki.Buffers.Buffer_Access) is
       use Delimiter_Vectors;
-      function Has_Closing (Starting : in Delimiter_Cursor;
-                            Opening  : in Delimiter_Type) return Boolean;
 
-      Block      : Wiki.Buffers.Buffer_Access := Text;
-      Pos        : Positive := 1;
       C          : Wiki.Strings.WChar;
       Prev       : Wiki.Strings.WChar := ' ';
       Delimiters : Delimiter_Vector;
 
-      function Has_Closing (Starting : in Delimiter_Cursor;
+      function Has_Closing (Starting : in Delimiter_Index_Type;
+                            Last     : in Delimiter_Index_Type;
                             Opening  : in Delimiter_Type) return Boolean is
-         Iter : Delimiter_Cursor := Starting;
       begin
-         Delimiter_Vectors.Next (Iter);
-         while Delimiter_Vectors.Has_Element (Iter) loop
+         for I in Starting + 1 .. Last loop
             declare
-               Delim : constant Delimiter_Vectors.Reference_Type := Delimiters.Reference (Iter);
+               Delim : constant Delimiter_Vectors.Reference_Type := Delimiters.Reference (I);
             begin
                if Delim.Can_Close and then Opening.Marker = Delim.Marker
                  and then Opening.Count = Delim.Count
@@ -1286,11 +1260,337 @@ package body Wiki.Parsers.Markdown is
                   return True;
                end if;
             end;
-            Delimiter_Vectors.Next (Iter);
          end loop;
          return False;
       end Has_Closing;
 
+      function Find_Closing (Starting : in Delimiter_Index_Type;
+                             Last     : in Delimiter_Index_Type;
+                             Opening  : in Delimiter_Type) return Delimiter_Index_Type is
+      begin
+         for I in Starting + 1 .. Last loop
+            declare
+               Delim : constant Delimiter_Vectors.Reference_Type := Delimiters.Reference (I);
+            begin
+               if Delim.Can_Close and then Opening.Marker = Delim.Marker
+                 and then Opening.Count = Delim.Count
+               then
+                  return I;
+               end if;
+            end;
+         end loop;
+         return 0;
+      end Find_Closing;
+
+      procedure Process_Emphasis (Block : in out Wiki.Buffers.Buffer_Access;
+                                  Pos   : in out Positive;
+                                  First : in Delimiter_Index_Type;
+                                  To    : in Delimiter_Index_Type) is
+      begin
+         for I in First .. To loop
+            declare
+               Delim : constant Delimiter_Vectors.Reference_Type := Delimiters.Reference (I);
+            begin
+               if Delim.Block.Offset > Block.Offset
+                 or else (Delim.Block.Offset = Block.Offset and then Delim.Pos >= Pos)
+               then
+                  if Delim.Marker = M_ENTITY then
+                     Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
+                     Pos := Delim.Pos;
+                     Block := Delim.Block;
+                     while Block /= null and then Block.Content (Pos) /= ';' loop
+                        Buffers.Next (Block, Pos);
+                     end loop;
+                     if Block /= null then
+                        Buffers.Next (Block, Pos);
+                     end if;
+                  elsif Delim.Marker in M_LINK then
+                     Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
+                     Flush_Text (Parser);
+                     Pos := Delim.Pos;
+                     Block := Delim.Block;
+                     Buffers.Next (Block, Pos);
+                     declare
+                        Bracket : constant Delimiter_Vectors.Reference_Type
+                          := Delimiters.Reference (Delim.Associate);
+                        Link  : Wiki.Strings.BString (128);
+                        Title : Wiki.Strings.BString (128);
+                        Tmp_Block : Wiki.Buffers.Buffer_Access := Bracket.Block;
+                        Tmp_Pos : Positive := Bracket.Pos;
+                     begin
+                        --  Skip ']' and then '('
+                        Buffers.Next (Tmp_Block, Tmp_Pos);
+                        Buffers.Next (Tmp_Block, Tmp_Pos);
+                        Scan_Link_Title (Tmp_Block, Tmp_Pos, ')', Link, Title);
+                        if Tmp_Block /= null and then Tmp_Block.Content (Tmp_Pos) = ')' then
+                           Wiki.Attributes.Clear (Parser.Attributes);
+                           Wiki.Attributes.Append (Parser.Attributes, HREF_ATTR,
+                                                   To_WString (Util.Encoders.URI.Encode
+                                                     (Wiki.Strings.To_String (Wiki.Strings.To_WString (Link)), HREF_LOOSE)));
+                           if Wiki.Strings.Length (Title) > 0 then
+                              Wiki.Attributes.Append (Parser.Attributes, TITLE_ATTR, Title);
+                           end if;
+                           Parser.Context.Filters.Push_Node (Parser.Document, A_TAG, Parser.Attributes);
+                           Process_Emphasis (Block, Pos, I + 1, Delim.Associate);
+                           Add_Text (Parser, Block, Pos, Bracket.Block, Bracket.Pos);
+                           Flush_Text (Parser, Trim => Wiki.Parsers.Right);
+                           Parser.Context.Filters.Pop_Node (Parser.Document, A_TAG);
+                           Block := Tmp_Block;
+                           Pos := Tmp_Pos;
+                           Buffers.Next (Block, Pos);
+                        end if;
+                     end;
+                  elsif Delim.Marker in M_IMAGE then
+                     Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
+                     Flush_Text (Parser);
+                     Block := Delim.Block;
+                     Pos := Delim.Pos;
+                     Buffers.Next (Block, Pos);
+                     Buffers.Next (Block, Pos);
+                     Add_Image (Parser, Block, Pos);
+
+                  elsif Delim.Marker = M_TEXT then
+                     null;
+
+                  elsif Delim.Count > 0 and then Delim.Can_Open
+                    and then (Has_Closing (I, To, Delim) or else Delim.Marker = M_CODE)
+                  then
+                     Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
+                     Flush_Text (Parser);
+                     if Delim.Marker in M_STAR | M_UNDERSCORE and then Delim.Count = 2 then
+                        Parser.Format (STRONG) := True;
+
+                     elsif Delim.Marker in M_TILDE and then Delim.Count = 2 then
+                        Parser.Format (STRIKEOUT) := True;
+
+                     elsif Delim.Marker in M_STAR | M_UNDERSCORE then
+                        Parser.Format (EMPHASIS) := True;
+
+                     elsif Delim.Marker = M_CODE then
+                        Parser.Format (CODE) := not Parser.Format (CODE);
+
+                     end if;
+                     Block := Delim.Block;
+                     Pos := Delim.Pos;
+                     for I in 1 .. Delim.Count loop
+                        Buffers.Next (Block, Pos);
+                     end loop;
+                  elsif Delim.Count > 0 and then Delim.Can_Close then
+                     Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
+                     if Delim.Marker in M_STAR | M_UNDERSCORE
+                       and then Delim.Count = 2
+                       and then Parser.Format (STRONG)
+                     then
+                        Flush_Text (Parser);
+                        Parser.Format (STRONG) := False;
+                     elsif Delim.Marker in M_STAR | M_UNDERSCORE
+                       and then Parser.Format (EMPHASIS)
+                     then
+                        Flush_Text (Parser);
+                        Parser.Format (EMPHASIS) := False;
+                     elsif Delim.Marker = M_CODE and then Parser.Format (CODE) then
+                        Flush_Text (Parser);
+                        Parser.Format (CODE) := False;
+                     elsif Delim.Marker = M_TILDE
+                       and then Delim.Count = 2
+                       and then Parser.Format (STRIKEOUT)
+                     then
+                        Flush_Text (Parser);
+                        Parser.Format (STRIKEOUT) := False;
+                     else
+                        Block := Delim.Block;
+                        Pos := Delim.Pos;
+                        for I in 1 .. Delim.Count loop
+                           Append (Parser.Text, Block.Content (Pos));
+                           Buffers.Next (Block, Pos);
+                        end loop;
+                     end if;
+                     Block := Delim.Block;
+                     Pos := Delim.Pos;
+                     for I in 1 .. Delim.Count loop
+                        Buffers.Next (Block, Pos);
+                     end loop;
+                  end if;
+               end if;
+            end;
+         end loop;
+      end Process_Emphasis;
+
+      procedure Clear_Brackets is
+      begin
+         for Iter in Delimiters.Iterate loop
+            declare
+               Delim : constant Delimiter_Vectors.Reference_Type
+                 := Delimiters.Reference (Iter);
+            begin
+               if Delim.Marker in M_BRACKET | M_BRACKET_IMAGE then
+                  Delim.Marker := M_TEXT;
+               end if;
+            end;
+         end loop;
+      end Clear_Brackets;
+
+      function Find_Previous_Bracket return Delimiter_Index_Type is
+      begin
+         for I in reverse 1 .. Delimiters.Last_Index loop
+            declare
+               Previous_Delim : constant Delimiter_Vectors.Reference_Type
+                 := Delimiters.Reference (I);
+            begin
+               if Previous_Delim.Marker in M_BRACKET | M_BRACKET_IMAGE
+                 and then Previous_Delim.Link_Pos = 0
+               then
+                  return I;
+               end if;
+            end;
+         end loop;
+         return 0;
+      end Find_Previous_Bracket;
+
+      procedure Process_Emphasis (From, To : in Delimiter_Index_Type) is
+      begin
+         for I in From .. To loop
+            declare
+               Delim : constant Delimiter_Vectors.Reference_Type
+                 := Delimiters.Reference (I);
+            begin
+               if Delim.Count > 0
+                 and then Delim.Associate = 0
+                 and then Delim.Marker /= M_IMAGE
+                 and then Delim.Marker /= M_LINK
+                 and then Delim.Marker /= M_LINK_REF
+                 and then Delim.Marker /= M_END
+                 and then Delim.Marker /= M_ENTITY
+                 and then Delim.Can_Open
+               then
+                  Delim.Associate := Find_Closing (I, To, Delim);
+                  if Delim.Associate = 0 then
+                     Delim.Marker := M_TEXT;
+                  else
+                     Delimiters.Reference (Delim.Associate).Associate := I;
+                  end if;
+               end if;
+            end;
+         end loop;
+         for I in reverse From .. To loop
+            declare
+               Delim : constant Delimiter_Vectors.Reference_Type
+                 := Delimiters.Reference (I);
+            begin
+               if Delim.Marker /= M_IMAGE
+                 and then Delim.Marker /= M_LINK
+                 and then Delim.Marker /= M_LINK_REF
+                 and then Delim.Marker /= M_END
+                 and then Delim.Marker /= M_TEXT
+                 and then Delim.Marker /= M_ENTITY
+                 and then Delim.Associate = 0
+               then
+                  Delim.Marker := M_TEXT;
+               end if;
+            end;
+         end loop;
+      end Process_Emphasis;
+
+      --  Parse a link at the ']' position:
+      --
+      --  Link (M_LINK):
+      --    [link-label]
+      --    [link](url)
+      --    [link-label][link-ref]
+      --  Link (M_IMAGE):
+      --    ![label](url)
+      --    ![label][image-ref]
+      procedure Parse_Link (Text   : in Wiki.Buffers.Buffer_Access;
+                            From   : in Positive) is
+         First  : constant Delimiter_Index_Type := Find_Previous_Bracket;
+         Block  : Wiki.Buffers.Buffer_Access := Text;
+         Pos    : Positive := From;
+         C      : Wiki.Strings.WChar;
+      begin
+         if First = 0 then
+            return;
+         end if;
+
+         C := Buffers.Next (Block, Pos);
+         if C = '(' then
+            declare
+               Link  : Wiki.Strings.BString (128);
+               Title : Wiki.Strings.BString (128);
+               Delim : Delimiter_Type;
+               Kind  : Marker_Kind;
+            begin
+               Delim.Block := Text;
+               Delim.Pos := From;
+               Delim.Marker := M_END;
+               Delim.Associate := First;
+               Buffers.Next (Block, Pos);
+               Scan_Link_Title (Block, Pos, ')', Link, Title);
+               if Block /= null and then Block.Content (Pos) = ')' then
+                  Delimiters.Append (Delim);
+                  declare
+                     Bracket : constant Delimiter_Vectors.Reference_Type
+                       := Delimiters.Reference (First);
+                  begin
+                     Kind := Bracket.Marker;
+                     Bracket.Marker :=
+                       (if Bracket.Marker = M_BRACKET_IMAGE then M_IMAGE else M_LINK);
+                     Bracket.Associate := Delimiters.Last_Index;
+                  end;
+                  Buffers.Next (Block, Pos);
+                  if Kind = M_BRACKET then
+                     Clear_Brackets;
+                  end if;
+                  Process_Emphasis (First + 1, Delimiters.Last_Index);
+                  return;
+               end if;
+            end;
+         elsif C = '[' then
+            declare
+               Label : Wiki.Strings.BString (128);
+               Delim : Delimiter_Type;
+               Kind  : Marker_Kind;
+            begin
+               Delim.Block := Text;
+               Delim.Pos := From;
+               Delim.Marker := M_END;
+               Delim.Associate := First;
+               Buffers.Next (Block, Pos);
+               Parse_Link_Label (Parser, Block, Pos, Label);
+               if Block /= null and then Block.Content (Pos) = ']' then
+                  Delimiters.Append (Delim);
+                  declare
+                     Bracket : constant Delimiter_Vectors.Reference_Type
+                       := Delimiters.Reference (First);
+                  begin
+                     Kind := Bracket.Marker;
+                     Bracket.Marker :=
+                       (if Bracket.Marker = M_BRACKET_IMAGE then M_IMAGE else M_LINK_REF);
+                     Bracket.Associate := Delimiters.Last_Index;
+                  end;
+                  Buffers.Next (Block, Pos);
+                  if Kind = M_BRACKET then
+                     Clear_Brackets;
+                  end if;
+                  Process_Emphasis (First + 1, Delimiters.Last_Index);
+               end if;
+            end;
+         end if;
+         declare
+            Bracket : constant Delimiter_Vectors.Reference_Type
+              := Delimiters.Reference (First);
+         begin
+            if Block /= null and then Bracket.Marker = M_BRACKET then
+               Bracket.Marker := M_LINK_REF;
+               return;
+            else
+               Bracket.Marker := M_TEXT;
+            end if;
+         end;
+         Clear_Brackets;
+      end Parse_Link;
+
+      Block      : Wiki.Buffers.Buffer_Access := Text;
+      Pos        : Positive := 1;
       Delim : Delimiter_Type;
    begin
       Main :
@@ -1347,24 +1647,14 @@ package body Wiki.Parsers.Markdown is
                when '[' =>
                   Get_Delimiter (Block, Pos, Prev, C, Delim);
                   if Delim.Can_Open or else Delim.Can_Close then
-                     Delim.Marker := M_LINK;
+                     Delim.Marker := M_BRACKET;
                      Delimiters.Append (Delim);
                   end if;
                   Prev := C;
                   exit Main when Block = null;
 
                when ']' =>
-                  for Iter in reverse Delimiters.Iterate loop
-                     declare
-                        Delim : constant Delimiter_Vectors.Reference_Type
-                         := Delimiters.Reference (Iter);
-                     begin
-                        if Delim.Marker in M_LINK | M_IMAGE and then Delim.Link_Pos = 0 then
-                           Parse_Link (Block, Pos, Delim);
-                           exit;
-                        end if;
-                     end;
-                  end loop;
+                  Parse_Link (Block, Pos);
                   Pos := Pos + 1;
                   Prev := C;
 
@@ -1375,7 +1665,7 @@ package body Wiki.Parsers.Markdown is
                   Prev := C;
                   exit Main when Block = null;
                   if Block.Content (Pos) = '[' then
-                     Delim.Marker := M_IMAGE;
+                     Delim.Marker := M_BRACKET_IMAGE;
                      Delim.Count := 1;
                      Delim.Can_Close := False;
                      Delim.Can_Open := False;
@@ -1418,121 +1708,8 @@ package body Wiki.Parsers.Markdown is
 
       Block := Text;
       Pos := 1;
-      for Iter in Delimiters.Iterate loop
-         declare
-            Delim : constant Delimiter_Vectors.Reference_Type := Delimiters.Reference (Iter);
-         begin
-            if Delim.Block.Offset > Block.Offset
-              or else (Delim.Block.Offset = Block.Offset and then Delim.Pos >= Pos)
-            then
-               if Delim.Marker = M_ENTITY then
-                  Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
-                  Pos := Delim.Pos;
-                  Block := Delim.Block;
-                  while Block /= null and then Block.Content (Pos) /= ';' loop
-                     Buffers.Next (Block, Pos);
-                  end loop;
-                  if Block /= null then
-                     Buffers.Next (Block, Pos);
-                  end if;
-               elsif Delim.Marker = M_LINK and then Delim.Link_Pos > 0 then
-                  Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
-                  Block := Delim.Block;
-                  Pos := Delim.Pos;
-                  Buffers.Next (Block, Pos);
-                  Add_Link (Parser, Block, Pos);
-
-               elsif Delim.Marker = M_LINK_REF then
-                  Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
-                  Block := Delim.Block;
-                  Pos := Delim.Pos;
-                  Buffers.Next (Block, Pos);
-                  Add_Link_Ref (Parser, Block, Pos);
-
-               elsif Delim.Marker = M_IMAGE then
-                  Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
-                  Block := Delim.Block;
-                  Pos := Delim.Pos;
-                  Buffers.Next (Block, Pos);
-                  Buffers.Next (Block, Pos);
-                  Add_Image (Parser, Block, Pos);
-
-               elsif Delim.Marker = M_LINK_REF then
-                  Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
-                  --  if Pos <= Delim.Pos - 1 then
-                  --   Parser.Context.Filters.Add_Text (Parser.Document,
-                  --  Text (Pos .. Delim.Pos - 1), Parser.Format);
-                  --  end if;
-                  Block := Delim.Block;
-                  Pos := Delim.Pos;
-                  Add_Link (Parser, Block, Pos);
-
-               elsif Delim.Count > 0 and then Delim.Can_Open
-                 and then (Has_Closing (Iter, Delim) or else Delim.Marker = M_CODE)
-               then
-                  Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
-                  Flush_Text (Parser);
-                  --  if Pos < Delim.Pos then
-                  --   Parser.Context.Filters.Add_Text (Parser.Document,
-                  --   Text (Pos .. Delim.Pos - 1), Parser.Format);
-                  --  end if;
-                  if Delim.Marker in M_STAR | M_UNDERSCORE and then Delim.Count = 2 then
-                     Parser.Format (STRONG) := True; --  not Parser.Format (STRONG);
-
-                  elsif Delim.Marker in M_TILDE and then Delim.Count = 2 then
-                     Parser.Format (STRIKEOUT) := True;
-
-                  elsif Delim.Marker in M_STAR | M_UNDERSCORE then
-                     Parser.Format (EMPHASIS) := True; --  not Parser.Format (EMPHASIS);
-
-                  elsif Delim.Marker = M_CODE then
-                     Parser.Format (CODE) := not Parser.Format (CODE);
-
-                  end if;
-                  Block := Delim.Block;
-                  Pos := Delim.Pos;
-                  for I in 1 .. Delim.Count loop
-                     Buffers.Next (Block, Pos);
-                  end loop;
-               elsif Delim.Count > 0 and then Delim.Can_Close then
-                  Add_Text (Parser, Block, Pos, Delim.Block, Delim.Pos);
-                  if Delim.Marker in M_STAR | M_UNDERSCORE
-                    and then Delim.Count = 2
-                    and then Parser.Format (STRONG)
-                  then
-                     Flush_Text (Parser);
-                     Parser.Format (STRONG) := False;
-                  elsif Delim.Marker in M_STAR | M_UNDERSCORE
-                    and then Parser.Format (EMPHASIS)
-                  then
-                     Flush_Text (Parser);
-                     Parser.Format (EMPHASIS) := False;
-                  elsif Delim.Marker = M_CODE and then Parser.Format (CODE) then
-                     Flush_Text (Parser);
-                     Parser.Format (CODE) := False;
-                  elsif Delim.Marker = M_TILDE
-                    and then Delim.Count = 2
-                    and then Parser.Format (STRIKEOUT)
-                  then
-                     Flush_Text (Parser);
-                     Parser.Format (STRIKEOUT) := False;
-                  else
-                     Block := Delim.Block;
-                     Pos := Delim.Pos;
-                     for I in 1 .. Delim.Count loop
-                        Append (Parser.Text, Block.Content (Pos));
-                        Buffers.Next (Block, Pos);
-                     end loop;
-                  end if;
-                  Block := Delim.Block;
-                  Pos := Delim.Pos;
-                  for I in 1 .. Delim.Count loop
-                     Buffers.Next (Block, Pos);
-                  end loop;
-               end if;
-            end if;
-         end;
-      end loop;
+      Process_Emphasis (1, Delimiters.Last_Index);
+      Process_Emphasis (Block, Pos, 1, Delimiters.Last_Index);
 
       Add_Text (Parser, Block, Pos, null, 1);
       Flush_Text (Parser, Trim => Wiki.Parsers.Right);

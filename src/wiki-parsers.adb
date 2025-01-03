@@ -54,7 +54,7 @@ package body Wiki.Parsers is
       declare
          Top : constant Block_Access := Block_Stack.Current (P.Blocks);
       begin
-         return Top.Level = Level;
+         return Top.Level = Level or else Top.Level + 1 = Level;
       end;
    end Is_List_Item;
 

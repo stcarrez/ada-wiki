@@ -122,16 +122,17 @@ package body Wiki.Streams.Html.Stream is
    overriding
    procedure End_Element (Stream : in out Html_Output_Stream;
                           Name   : in String) is
+      Close_Start : constant Boolean := Stream.Close_Start;
    begin
       if Stream.Indent_Pos >= Stream.Indent_Level then
          Stream.Indent_Pos := Stream.Indent_Pos - Stream.Indent_Level;
       end if;
-      if Stream.Close_Start then
+      if Close_Start and then (Name in "br" | "img" | "hr") then
          Stream.Write (" />");
          Stream.Close_Start := False;
       else
          Close_Current (Stream);
-         if Stream.Text_Length = 0 then
+         if Stream.Text_Length = 0 and then not Close_Start then
             if not Stream.Empty_Line and then Stream.Indent_Level > 0 then
                Stream.Write (Wiki.Helpers.LF);
             end if;

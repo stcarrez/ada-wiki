@@ -135,7 +135,7 @@ package body Wiki.Parsers.MediaWiki is
             Common.Parse_Definition (Parser, Buffer, Pos, True);
 
          when ':' =>
-            if Parser.Current_Node = Nodes.N_DEFINITION then
+            if Parser.Current_Node = Nodes.N_DEFINITION_TERM then
                Common.Parse_Definition (Parser, Buffer, Pos, False);
             end if;
 
