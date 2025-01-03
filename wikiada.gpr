@@ -1,5 +1,6 @@
 with "wikiada_config";
 with "utilada_core";
+with "utilada_sys";
 
 library project WikiAda is
    Version := "1.4.3";
