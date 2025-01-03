@@ -1,0 +1,1 @@
+<p><a href="./target.md"></a></p><p>*<a href="/uri">foo*</a></p><p><a href="/uri"><img src="moon.jpg" alt="moon" /></a></p><p><em>Hello</em> <a href="https://www.sun.com">This<em>is a link</em></a></p>

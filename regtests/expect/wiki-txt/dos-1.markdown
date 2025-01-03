@@ -37,7 +37,7 @@ strong
 
 underline
 
-A link (https://link-url/)
+A link
 
   Some code
 
