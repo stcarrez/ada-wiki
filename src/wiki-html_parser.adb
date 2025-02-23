@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-html_parser -- Wiki HTML parser
---  Copyright (C) 2015, 2016, 2018, 2020, 2021, 2022, 2023 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2018, 2020, 2021, 2022, 2023, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -105,7 +105,12 @@ package body Wiki.Html_Parser is
    begin
       Parser.State := State_Parse_Attribute;
       if Wiki.Strings.Length (Parser.Attr_Name) = 0 then
-         Pos := Wiki.Helpers.Skip_Spaces (Text, From);
+         Pos := Wiki.Helpers.Skip_Spaces_Or_Newline (Text, From);
+         if Pos <= Text'Last and then Text (Pos) = ':' then
+            Last := Pos;
+            Parser.State := State_Error;
+            return;
+         end if;
       end if;
       while Pos <= Text'Last loop
          C := Text (Pos);
@@ -137,7 +142,7 @@ package body Wiki.Html_Parser is
          Parser.State := State_Parse_Attribute_Value;
          Token := Text (Pos);
          if Wiki.Helpers.Is_Space_Or_Newline (Token) then
-            Pos := Wiki.Helpers.Skip_Spaces (Text, Pos);
+            Pos := Wiki.Helpers.Skip_Spaces_Or_Newline (Text, Pos);
             if Pos > Text'Last then
                Last := Pos;
                return;
@@ -233,6 +238,34 @@ package body Wiki.Html_Parser is
       Last := Pos;
    end Parse_Doctype;
 
+   procedure Replace_Entities (Parser : in out Parser_Type;
+                               From   : in Wiki.Strings.WString;
+                               Into   : in out Wiki.Strings.WString;
+                               Last   : out Natural) is
+      Pos        : Natural := From'First;
+      Target_Pos : Natural := Into'First - 1;
+      C          : Wiki.Strings.WChar;
+      Status     : Entity_State_Type := ENTITY_NONE;
+   begin
+      while Pos <= From'Last loop
+         Target_Pos := Target_Pos + 1;
+         C := From (Pos);
+         if C = '&' then
+            Parse_Entity (Parser, From, Pos + 1, Status, C, Pos);
+            if Status = ENTITY_VALID then
+               Into (Target_Pos) := C;
+            else
+               Into (Target_Pos) := '&';
+               Pos := Pos + 1;
+            end if;
+         else
+            Into (Target_Pos) := C;
+            Pos := Pos + 1;
+         end if;
+      end loop;
+      Last := Target_Pos;
+   end Replace_Entities;
+
    --  ------------------------------
    --  Parse a HTML element <XXX attributes>
    --  or parse an end of HTML element </XXX>
@@ -252,7 +285,17 @@ package body Wiki.Html_Parser is
 
          procedure Attribute_Value (Value : in Wiki.Strings.WString) is
          begin
-            Attributes.Append (Parser.Attributes, Name, Value);
+            if (for some C of Value => C = '&') then
+               declare
+                  New_Value : Wiki.Strings.WString (1 .. Value'Length);
+                  Last : Natural;
+               begin
+                  Replace_Entities (Parser, Value, New_Value, Last);
+                  Attributes.Append (Parser.Attributes, Name, New_Value (1 .. Last));
+               end;
+            else
+               Attributes.Append (Parser.Attributes, Name, Value);
+            end if;
          end Attribute_Value;
 
          procedure Attribute_Value is
@@ -266,6 +309,16 @@ package body Wiki.Html_Parser is
 
       procedure Append_Attribute is
         new Wiki.Strings.Wide_Wide_Builders.Get (Append_Attribute);
+
+      procedure Append_Attribute_No_Value (Name : in Wiki.Strings.WString);
+      procedure Append_Attribute_No_Value (Name : in Wiki.Strings.WString) is
+      begin
+         Attributes.Append (Parser.Attributes, Name);
+      end Append_Attribute_No_Value;
+      pragma Inline (Append_Attribute_No_Value);
+
+      procedure Append_Attribute_No_Value is
+        new Wiki.Strings.Wide_Wide_Builders.Get (Append_Attribute_No_Value);
 
       C   : Wiki.Strings.WChar;
       Pos : Positive := From;
@@ -358,7 +411,7 @@ package body Wiki.Html_Parser is
                end if;
 
             when State_Expect_End_Element =>
-               Pos := Wiki.Helpers.Skip_Spaces (Text, Pos);
+               Pos := Wiki.Helpers.Skip_Spaces_Or_Newline (Text, Pos);
                if Pos > Text'Last then
                   Last := Pos;
                   return;
@@ -401,7 +454,7 @@ package body Wiki.Html_Parser is
                C := Text (Pos);
                if C = '>' then
                   if Length (Parser.Attr_Name) > 0 then
-                     Append_Attribute (Parser.Attr_Name);
+                     Append_Attribute_No_Value (Parser.Attr_Name);
                   end if;
                   Process (HTML_START, To_WString (Parser.Elt_Name), Parser.Attributes);
                   Last := Pos + 1;
@@ -450,6 +503,12 @@ package body Wiki.Html_Parser is
                Wiki.Strings.Wide_Wide_Builders.Clear (Parser.Attr_Name);
                Wiki.Strings.Wide_Wide_Builders.Clear (Parser.Attr_Value);
                Parser.State := State_Check_Attribute;
+
+            when State_Error =>
+               Last := Pos;
+               Parser.State := State_None;
+               Process (HTML_ERROR, To_WString (Parser.Elt_Name), Parser.Attributes);
+               return;
 
          end case;
       end loop;
@@ -537,8 +596,8 @@ package body Wiki.Html_Parser is
          end loop;
       end;
 
-      if Len > 0 and then Parser.Entity_Name (1) = '#' then
-         if Parser.Entity_Name (2) >= '0' and then Parser.Entity_Name (2) <= '9' then
+      if Len >= 2 and then Parser.Entity_Name (1) = '#' then
+         if Parser.Entity_Name (2) in '0' .. '9' and then Len <= 7 then
             begin
                C := Wiki.Strings.WChar'Val (Natural'Value (Parser.Entity_Name (2 .. Len)));
                if C = NUL then
@@ -553,7 +612,7 @@ package body Wiki.Html_Parser is
                when Constraint_Error =>
                   null;
             end;
-         elsif Parser.Entity_Name (2) in 'x' | 'X' then
+         elsif Parser.Entity_Name (2) in 'x' | 'X' and then Len in 3 .. 6 then
             begin
                C := From_Hex (Parser.Entity_Name (3 .. Len));
                if C = NUL then

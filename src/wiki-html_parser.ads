@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-html_parser -- Wiki HTML parser
---  Copyright (C) 2015, 2016, 2022, 2023 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2022, 2023, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -48,6 +48,14 @@ private package Wiki.Html_Parser is
                            Entity  : out Wiki.Strings.WChar;
                            Last    : out Natural);
 
+   --  Copy the string represented by `From` in `Into` and replace the HTML
+   --  entities when they are found and valid.  Return in `Last` the index
+   --  of the last valid character in `Into`.
+   procedure Replace_Entities (Parser : in out Parser_Type;
+                               From   : in Wiki.Strings.WString;
+                               Into   : in out Wiki.Strings.WString;
+                               Last   : out Natural);
+
    NUL : constant Wiki.Strings.WChar := Wiki.Strings.WChar'Val (0);
 
 private
@@ -66,7 +74,8 @@ private
                               State_No_Attribute_Value,
                               State_Expect_Start_End_Element,
                               State_Expect_End_Element,
-                              State_End_Element);
+                              State_End_Element,
+                              State_Error);
 
    MAX_ENTITY_LENGTH : constant := 32;
 
