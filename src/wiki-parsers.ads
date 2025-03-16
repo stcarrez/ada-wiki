@@ -11,7 +11,7 @@ with Wiki.Strings;
 with Wiki.Documents;
 with Wiki.Streams;
 private with Wiki.Buffers;
-private with Util.Stacks;
+private with Wiki.Stacks;
 private with Wiki.Nodes;
 private with Wiki.Html_Parser;
 
@@ -92,6 +92,15 @@ private
 
    type Trim_End is (None, Left, Right, Both);
 
+   type Html_Block_Type is (HTML_NONE,
+                            HTML_BLOCK_PRE,
+                            HTML_PRE,
+                            HTML_COMMENT,
+                            HTML_DATA1,
+                            HTML_DATA2,
+                            HTML_CDATA,
+                            HTML_BLOCK);
+
    use Wiki.Strings.Wide_Wide_Builders;
 
    type Block_Type is record
@@ -100,6 +109,7 @@ private
       Marker : Wiki.Strings.WChar := ' ';
       Number : Integer := 0;
       Quote_Level : Natural := 0;
+      Line_Count  : Natural := 0;
    end record;
 
    type Parser_State_Type is (State_Html_Doctype,
@@ -109,7 +119,7 @@ private
 
    type Block_Access is access all Block_Type;
 
-   package Block_Stack is new Util.Stacks (Element_Type        => Block_Type,
+   package Block_Stack is new Wiki.Stacks (Element_Type        => Block_Type,
                                            Element_Type_Access => Block_Access);
 
    type Parser_Handler is access procedure (Parser : in out Parser_Type;
@@ -130,7 +140,7 @@ private
       Is_Eof              : Boolean := False;
       In_Paragraph        : Boolean := False;
       In_Table            : Boolean := False;
-      In_Html             : Boolean := False;
+      In_Html             : Html_Block_Type := HTML_NONE;
       In_Blockquote       : Boolean := False;
       Link_Double_Bracket : Boolean := False;
       Link_No_Space       : Boolean := False;
@@ -143,14 +153,17 @@ private
       Param_Char          : Wiki.Strings.WChar;
       List_Level          : Natural := 0;
       Previous_Tag        : Html_Tag := UNKNOWN_TAG;
+      Last_Closing_Tag    : Html_Tag := UNKNOWN_TAG;
       Reader              : Wiki.Streams.Input_Stream_Access := null;
       Attributes          : Wiki.Attributes.Attribute_List;
       Current_Node        : Wiki.Nodes.Node_Kind := Wiki.Nodes.N_NONE;
       Blocks              : Block_Stack.Stack;
-      Previous_Line_Empty : Boolean := True;
+      Previous_Line_Empty : Natural := 0;
       Header_Level        : Natural := 0;
       Is_Empty_Paragraph  : Boolean := True;
+      Need_Paragraph      : Boolean := False;
       Pre_Tag_Counter     : Natural := 0;
+      Pre_Tag             : Html_Tag := UNKNOWN_TAG;
 
       --  Pre-format code block
       Preformat_Fence     : Wiki.Strings.WChar;
@@ -158,6 +171,10 @@ private
       Preformat_Fcount    : Natural := 0;
       Preformat_Format    : Wiki.Strings.BString (32);
 
+      Is_Blank            : Boolean := False;
+      Column              : Natural := 0;
+      Indent              : Natural := 0;
+      Line_Count          : Natural := 0;
       Html                : Wiki.Html_Parser.Parser_Type;
    end record;
 
@@ -175,6 +192,8 @@ private
    --  Flush the wiki text that was collected in the text buffer.
    procedure Flush_Text (P    : in out Parser;
                          Trim : in Trim_End := None);
+   procedure Flush_Inline_Text (Parser : in out Parser_Type;
+                                Trim   : in Trim_End := None);
 
    procedure Flush_Block (Parser : in out Parser_Type;
                           Trim   : in Trim_End := None);
@@ -204,7 +223,7 @@ private
 
    type String_Array is array (Positive range <>) of Wiki.String_Access;
 
-   procedure Process_Html (P          : in out Parser;
+   procedure Process_Html (Parser     : in out Parser_Type;
                            Kind       : in Wiki.Html_Parser.State_Type;
                            Name       : in Wiki.Strings.WString;
                            Attributes : in out Wiki.Attributes.Attribute_List);
@@ -255,6 +274,14 @@ private
 
    --  Flush current block and add an horizontal rule in the document.
    procedure Add_Horizontal_Rule (Parser : in out Parser_Type);
+
+   function Current (Parser : in out Parser_Type'Class) return Block_Access with Inline_Always;
+
+   --  Find first non space and update column and information in the parser.
+   procedure First_Nonspace (Parser : in out Parser_Type;
+                             Block  : in out Wiki.Buffers.Buffer_Access;
+                             Pos    : in out Natural;
+                             C      : out Wiki.Strings.WChar);
 
    NAME_ATTR  : aliased constant String := "name";
    HREF_ATTR  : aliased constant String := "href";

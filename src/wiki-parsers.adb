@@ -58,6 +58,37 @@ package body Wiki.Parsers is
       end;
    end Is_List_Item;
 
+   function Current (Parser : in out Parser_Type'Class) return Block_Access is
+   begin
+      return (if Block_Stack.Is_Empty (Parser.Blocks)
+              then null else Block_Stack.Current (Parser.Blocks));
+   end Current;
+
+   --  Find first non space and update column and information in the parser.
+   procedure First_Nonspace (Parser : in out Parser_Type;
+                             Block  : in out Wiki.Buffers.Buffer_Access;
+                             Pos    : in out Natural;
+                             C      : out Wiki.Strings.WChar) is
+      Column : constant Natural := Parser.Column;
+   begin
+      loop
+         C := Buffers.Next (Block, Pos);
+         if C = ' ' then
+            Parser.Column := Parser.Column + 1;
+         elsif C = Helpers.HT then
+            Parser.Column := ((Parser.Column + 4) / 4) * 4;
+         elsif C in Helpers.NUL | Helpers.LF | Helpers.CR then
+            Parser.Is_Blank := True;
+            return;
+         else
+            Parser.Is_Blank := False;
+            Parser.Indent := Parser.Column - Column;
+            Parser.Column := Parser.Column + 1;
+            return;
+         end if;
+      end loop;
+   end First_Nonspace;
+
    procedure Pop_List (P      : in out Parser;
                        Level  : in Natural;
                        Marker : in Wiki.Strings.WChar;
@@ -125,18 +156,10 @@ package body Wiki.Parsers is
             end if;
             Last := Last - 1;
          end loop;
-         Parser.Context.Filters.Start_Block (Parser.Document, Nodes.N_HEADER, Level);
          Strings.Clear (Parser.Text);
-         if Parser.Parse_Inline /= null then
-            Buffers.Append (Parser.Text_Buffer, Content (Content'First .. Last));
-            Parser.Parse_Inline (Parser, Parser.Text_Buffer.First'Unchecked_Access);
-            Buffers.Clear (Parser.Text_Buffer);
-         else
-            Parser.Context.Filters.Add_Text (Parser.Document,
-                                             Content (Content'First .. Last),
-                                             Format => (others => False));
-         end if;
-         Parser.Context.Filters.End_Block (Parser.Document, Nodes.N_HEADER);
+         Parser.Context.Filters.Add_Text (Parser.Document,
+                                          Content (Content'First .. Last),
+                                          Format => (others => False));
       end Add_Header;
 
       procedure Add_Header is
@@ -144,7 +167,14 @@ package body Wiki.Parsers is
 
    begin
       if not Parser.Context.Is_Hidden then
-         Add_Header (Parser.Text);
+         if Parser.Parse_Inline /= null then
+            --  Parser.Context.Filters.Start_Block (Parser.Document, Nodes.N_HEADER, Level);
+            Parser.Parse_Inline (Parser, Parser.Text_Buffer.First'Unchecked_Access);
+            Buffers.Clear (Parser.Text_Buffer);
+         else
+            Add_Header (Parser.Text);
+         end if;
+         Parser.Context.Filters.End_Block (Parser.Document, Nodes.N_HEADER);
       end if;
    end Add_Header;
 
@@ -155,7 +185,7 @@ package body Wiki.Parsers is
    begin
       Flush_Text (Parser, Trim => Right);
       Pop_All (Parser);
-      Parser.Previous_Line_Empty := False;
+      Parser.Previous_Line_Empty := 0;
       if not Parser.Context.Is_Hidden then
          Parser.Context.Filters.Add_Node (Parser.Document, Wiki.Nodes.N_HORIZONTAL_RULE);
       end if;
@@ -171,7 +201,7 @@ package body Wiki.Parsers is
       if Top /= null then
          if Top.Kind = Nodes.N_PREFORMAT then
             Append_Preformatted (Parser, Strings.To_WString (Parser.Preformat_Format));
-         elsif Top.Kind = Nodes.N_PARAGRAPH then
+         elsif Top.Kind in Nodes.N_NONE | Nodes.N_PARAGRAPH | Nodes.N_BLOCKQUOTE then
             if Parser.Parse_Inline /= null then
                Parser.Parse_Inline (Parser, Parser.Text_Buffer.First'Unchecked_Access);
                Parser.Text_Buffer.Clear;
@@ -187,7 +217,7 @@ package body Wiki.Parsers is
             end if;
             Clear (Parser.Text);
          elsif Top.Kind = Nodes.N_HEADER then
-            Add_Header (Parser, Parser.Header_Level);
+            Add_Header (Parser, Top.Level);
          else
             Flush_Text (Parser, Trim);
          end if;
@@ -198,6 +228,7 @@ package body Wiki.Parsers is
          end if;
          Clear (Parser.Text);
       end if;
+      Parser.Line_Count := 0;
    end Flush_Block;
 
    function Get_Current_Level (Parser : in Parser_Type) return Natural is
@@ -214,17 +245,13 @@ package body Wiki.Parsers is
                          Level  : in Integer := 0;
                          Marker : in Wiki.Strings.WChar := ' ';
                          Number : in Integer := 0) is
-      Empty   : Boolean := Block_Stack.Is_Empty (P.Blocks);
-      Current : Block_Access;
+      Top   : Block_Access := Current (P);
    begin
-      if not Empty then
-         Current := Block_Stack.Current (P.Blocks);
-      end if;
-      if Kind = Nodes.N_BLOCKQUOTE and then not Empty then
-         if Current.Quote_Level = Level then
+      if Kind = Nodes.N_BLOCKQUOTE and then Top /= null then
+         if Top.Quote_Level = P.Quote_Level then
             return;
          end if;
-         if Current.Quote_Level = 0 or else Current.Kind /= Nodes.N_PARAGRAPH then
+         if Top.Quote_Level = 0 and then not (Top.Kind in Nodes.N_PARAGRAPH | Nodes.N_LIST_ITEM) then
             Pop_Block (P, Trim => Right);
          else
             Flush_Text (P, Trim => Right);
@@ -233,53 +260,64 @@ package body Wiki.Parsers is
             P.Parse_Inline (P, P.Text_Buffer.First'Unchecked_Access);
             Buffers.Clear (P.Text_Buffer);
          end if;
+         P.Line_Count := 0;
 
          --  Pop any blockquote until we reach our same level.
          --  By doin so, we close every element that was opened within the blockquote.
-         while Current.Quote_Level > Level loop
+         while Top.Quote_Level > P.Quote_Level loop
             Flush_Block (P, Trim => Right);
-            if Current.Kind = Nodes.N_BLOCKQUOTE then
+            if Top.Kind = Nodes.N_BLOCKQUOTE then
                Block_Stack.Pop (P.Blocks);
             else
                Pop_Block (P, Trim => Right);
             end if;
-            Empty := Block_Stack.Is_Empty (P.Blocks);
-            exit when Empty;
-            Current := Block_Stack.Current (P.Blocks);
+            Top := Current (P);
+            exit when Top = null;
          end loop;
       else
          Flush_Block (P);
+         if Top /= null then
+            --  If we enter a header, pop everything up to the root.
+            if Kind = Nodes.N_HEADER then
+               while Top /= null and then Top.Kind /= Nodes.N_BLOCKQUOTE loop
+                  Pop_Block (P);
+                  Top := Current (P);
+               end loop;
+            elsif Kind = Nodes.N_PREFORMAT then
+               while Top /= null and then Top.Kind in Nodes.N_PARAGRAPH | Nodes.N_LIST_START | Nodes.N_NUM_LIST_START loop
+                  Pop_Block (P);
+                  Top := Current (P);
+               end loop;
+            end if;
+         end if;
       end if;
 
       Block_Stack.Push (P.Blocks);
-      declare
-         Top : constant Block_Access := Block_Stack.Current (P.Blocks);
-      begin
-         Top.Kind  := Kind;
-         Top.Level := Level;
-         Top.Marker := Marker;
-         Top.Number := Number;
-         if Current /= null then
-            Top.Quote_Level := Current.Quote_Level;
-         else
-            Top.Quote_Level := 0;
-         end if;
-         P.Current_Node := Kind;
+      Top := Current (P);
+      Top.Kind  := Kind;
+      Top.Level := Level;
+      Top.Marker := Marker;
+      Top.Number := Number;
+      Top.Quote_Level := P.Quote_Level;
+      P.Current_Node := Kind;
+      if not P.Context.Is_Hidden then
          if Kind = Nodes.N_LIST_START then
             P.Context.Filters.Add_List (P.Document, 1, False);
          elsif Kind = Nodes.N_NUM_LIST_START then
             P.Context.Filters.Add_List (P.Document, Number, True);
          elsif Kind = Nodes.N_LIST_ITEM then
-            P.Context.Filters.Add_Node (P.Document, Kind);
+            P.Context.Filters.Start_Block (P.Document, Kind, Number);
          elsif Kind = Nodes.N_BLOCKQUOTE then
-            Top.Quote_Level := Level;
-            P.Context.Filters.Add_Blockquote (P.Document, Level);
+            --  Top.Quote_Level := Level;
+            P.Context.Filters.Add_Blockquote (P.Document, P.Quote_Level);
          elsif Kind = Nodes.N_PARAGRAPH then
             P.Context.Filters.Add_Node (P.Document, Kind);
             P.Is_Empty_Paragraph := True;
+         elsif Kind = Nodes.N_HEADER then
+            P.Context.Filters.Start_Block (P.Document, Kind, Level);
          end if;
-         P.In_Blockquote := Top.Quote_Level > 0;
-      end;
+      end if;
+      P.In_Blockquote := Top.Quote_Level > 0;
    end Push_Block;
 
    procedure Pop_Block_Until (P     : in out Parser;
@@ -309,13 +347,13 @@ package body Wiki.Parsers is
          begin
             case Top.Kind is
                when Nodes.N_LIST_START =>
-                  Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_LIST_END);
+                  Parser.Context.Filters.Finish_List (Parser.Document);
 
                when Nodes.N_NUM_LIST_START =>
-                  Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_NUM_LIST_END);
+                  Parser.Context.Filters.Finish_List (Parser.Document);
 
                when Nodes.N_LIST_ITEM =>
-                  Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_LIST_ITEM_END);
+                  Parser.Context.Filters.End_Block (Parser.Document, Top.Kind);
 
                when Nodes.N_BLOCKQUOTE =>
                   Parser.Context.Filters.Add_Blockquote (Parser.Document, 0);
@@ -335,6 +373,7 @@ package body Wiki.Parsers is
             else
                Parser.Current_Node := Nodes.N_NONE;
                Parser.In_Blockquote := False;
+               Parser.Quote_Level := 0;
             end if;
          end;
       else
@@ -437,6 +476,19 @@ package body Wiki.Parsers is
          Clear (P.Text);
       end if;
    end Flush_Text;
+
+   --  Flush the wiki text that was collected in the text buffer.
+   --  ------------------------------
+   procedure Flush_Inline_Text (Parser : in out Parser_Type;
+                                Trim   : in Trim_End := None) is
+   begin
+      if Parser.Parse_Inline /= null then
+         Parser.Parse_Inline (Parser, Parser.Text_Buffer.First'Unchecked_Access);
+         Buffers.Clear (Parser.Text_Buffer);
+      else
+         Flush_Text (Parser, Trim);
+      end if;
+   end Flush_Inline_Text;
 
    --  ------------------------------
    --  Flush the wiki dl/dt/dd definition list.
@@ -634,7 +686,31 @@ package body Wiki.Parsers is
       Next (Text, From);
    end Parse_Format_Double;
 
-   procedure Process_Html (P          : in out Parser;
+   procedure Append (Parser : in out Parser_Type;
+                     C      : in Wiki.Strings.WChar) is
+   begin
+      if Parser.Parse_Inline /= null then
+         Append (Parser.Text_Buffer, C);
+      else
+         Append (Parser.Text, C);
+      end if;
+   end Append;
+   procedure Append (Parser  : in out Parser_Type;
+                     Content : in Wiki.Strings.WString) is
+   begin
+      if Parser.Parse_Inline /= null then
+         Append (Parser.Text_Buffer, Content);
+      else
+         Append (Parser.Text, Content);
+      end if;
+   end Append;
+   procedure Append (Parser  : in out Parser_Type;
+                     Content : in String) is
+   begin
+      Append (Parser, Wiki.Strings.To_WString (Content));
+   end Append;
+
+   procedure Process_Html (Parser     : in out Parser_Type;
                            Kind       : in Wiki.Html_Parser.State_Type;
                            Name       : in Wiki.Strings.WString;
                            Attributes : in out Wiki.Attributes.Attribute_List) is
@@ -644,20 +720,44 @@ package body Wiki.Parsers is
    begin
       if Tag = Wiki.UNKNOWN_TAG then
          if Name = "noinclude" then
-            Flush_Text (P, Trim => None);
-            P.Context.Is_Hidden := Kind = Html_Parser.HTML_START and then P.Context.Is_Included;
+            Flush_Text (Parser, Trim => None);
+            Parser.Context.Is_Hidden := Kind = Html_Parser.HTML_START and then Parser.Context.Is_Included;
          elsif Name = "includeonly" then
-            Flush_Text (P, Trim => None);
-            P.Context.Is_Hidden := not (Kind = Html_Parser.HTML_START
-                                          and then P.Context.Is_Included);
+            Flush_Text (Parser, Trim => None);
+            Parser.Context.Is_Hidden := not (Kind = Html_Parser.HTML_START
+                                             and then Parser.Context.Is_Included);
+         else
+            Append (Parser, '<');
+            if Kind = Html_Parser.HTML_START_END then
+               Append (Parser, '/');
+            end if;
+            Append (Parser, Name);
+            if Wiki.Attributes.Length (Attributes) > 0 then
+               declare
+                  Iter : Wiki.Attributes.Cursor := Wiki.Attributes.First (Attributes);
+               begin
+                  while Wiki.Attributes.Has_Element (Iter) loop
+                     Append (Parser, ' ');
+                     Append (Parser, Wiki.Attributes.Get_Name (Iter));
+                     if Wiki.Attributes.Has_Value (Iter) then
+                        Append (Parser, '=');
+                        Append (Parser, '"');
+                        Append (Parser, Wiki.Attributes.Get_Wide_Value (Iter));
+                        Append (Parser, '"');
+                     end if;
+                     Wiki.Attributes.Next (Iter);
+                  end loop;
+               end;
+            end if;
+            Append (Parser, '>');
          end if;
       elsif Kind = Wiki.Html_Parser.HTML_START then
-         Start_Element (P, Tag, Attributes);
+         Start_Element (Parser, Tag, Attributes);
       elsif Kind = Wiki.Html_Parser.HTML_END then
-         End_Element (P, Tag);
+         End_Element (Parser, Tag);
       elsif Kind = Wiki.Html_Parser.HTML_START_END then
-         Start_Element (P, Tag, Attributes);
-         End_Element (P, Tag);
+         Start_Element (Parser, Tag, Attributes);
+         End_Element (Parser, Tag);
       end if;
    end Process_Html;
 
@@ -667,15 +767,16 @@ package body Wiki.Parsers is
    begin
       if Tag_Text (Tag) then
          if Tag_Text (P.Previous_Tag) then
-            Flush_Text (P, Trim => None);
+            Flush_Inline_Text (P, Trim => None);
          else
-            Flush_Text (P, Trim => Left);
+            Flush_Inline_Text (P, Trim => Left);
          end if;
       elsif Tag_Text (P.Previous_Tag) then
-         Flush_Text (P, Trim => Right);
+         Flush_Inline_Text (P, Trim => Right);
       else
-         Flush_Text (P, Trim => Both);
+         Flush_Inline_Text (P, Trim => Both);
       end if;
+      Flush_Text (P, Trim => (if Tag_Text (Tag) then None else Both));
       if P.Previous_Tag /= UNKNOWN_TAG and then No_End_Tag (P.Previous_Tag) then
          if not P.Context.Is_Hidden then
             P.Context.Filters.Pop_Node (P.Document, P.Previous_Tag);
@@ -686,15 +787,30 @@ package body Wiki.Parsers is
          P.Context.Filters.Push_Node (P.Document, Tag, Attributes);
       end if;
 
-      --  When we are within a <pre> HTML element, switch to HTML to emit the text as is.
-      if Tag = PRE_TAG and then P.Context.Syntax /= SYNTAX_HTML then
-         P.Previous_Syntax := P.Context.Syntax;
-         P.Set_Syntax (SYNTAX_HTML);
+      if P.In_Html = HTML_NONE then
+         --  When we are within a <pre> HTML element, switch to HTML to emit the text as is.
+         if Tag in PRE_TAG | TEXTAREA_TAG | SCRIPT_TAG | STYLE_TAG
+           and then P.Context.Syntax /= SYNTAX_HTML
+         then
+            P.Previous_Syntax := P.Context.Syntax;
+            P.Set_Syntax (SYNTAX_HTML);
+            P.In_Html := HTML_BLOCK_PRE;
+         else
+            P.In_Html := HTML_BLOCK;
+         end if;
       end if;
       P.Previous_Tag := Tag;
-      P.In_Html := True;
-      if Tag = PRE_TAG then
-         P.Pre_Tag_Counter := P.Pre_Tag_Counter + 1;
+      P.Last_Closing_Tag := Tag;
+
+      --  <pre>, <textare>, <script>, <style> have special behavior to collect
+      --  everything until the matching end tag is found.
+      if Tag in PRE_TAG | TEXTAREA_TAG | SCRIPT_TAG | STYLE_TAG then
+         if P.Pre_Tag = UNKNOWN_TAG then
+            P.Pre_Tag := Tag;
+         end if;
+         if Tag = P.Pre_Tag then
+            P.Pre_Tag_Counter := P.Pre_Tag_Counter + 1;
+         end if;
       end if;
    end Start_Element;
 
@@ -713,21 +829,30 @@ package body Wiki.Parsers is
       end if;
 
       if Tag_Text (Tag) then
-         Flush_Text (P, Trim => None);
+         Flush_Inline_Text (P, Trim => None);
       else
-         Flush_Text (P, Trim => Right);
+         Flush_Inline_Text (P, Trim => Right);
       end if;
+      Flush_Text (P, Trim => (if Tag_Text (Tag) then None else Both));
       if not P.Context.Is_Hidden then
          P.Context.Filters.Pop_Node (P.Document, Tag);
       end if;
 
-      if Tag = PRE_TAG and then P.Pre_Tag_Counter > 0 then
-         P.Pre_Tag_Counter := P.Pre_Tag_Counter - 1;
-      end if;
+      P.Last_Closing_Tag := Tag;
+      if P.In_Html = HTML_BLOCK_PRE and then Tag = P.Pre_Tag and then Tag /= UNKNOWN_TAG then
+         if P.Pre_Tag_Counter > 0 then
+            P.Pre_Tag_Counter := P.Pre_Tag_Counter - 1;
+         end if;
 
-      --  Switch back to the previous syntax when we reached the </pre> HTML element.
-      if P.Previous_Syntax /= P.Context.Syntax and then Tag = PRE_TAG then
-         P.Set_Syntax (P.Previous_Syntax);
+         if P.Pre_Tag_Counter = 0 then
+            --  Switch back to the previous syntax when we reached the </pre> HTML element.
+            if P.Previous_Syntax /= P.Context.Syntax then
+               P.Set_Syntax (P.Previous_Syntax);
+            end if;
+            P.Pre_Tag := UNKNOWN_TAG;
+         end if;
+      elsif P.In_Html = HTML_NONE then
+         P.In_Html := HTML_BLOCK;
       end if;
    end End_Element;
 
@@ -984,6 +1109,8 @@ package body Wiki.Parsers is
          if Engine.Parse_Inline /= null then
             Engine.Parse_Inline (Engine, Engine.Text_Buffer.First'Unchecked_Access);
          end if;
+         --  Flush and trim on the right in case we have only spaces.
+         Flush_Text (Engine, Trim => Right);
       end;
 
       if Main then
