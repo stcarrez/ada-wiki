@@ -1,11 +1,12 @@
 -----------------------------------------------------------------------
 --  wiki-helpers -- Helper operations for wiki parsers and renderer
---  Copyright (C) 2016, 2020, 2022, 2024 Stephane Carrez
+--  Copyright (C) 2016, 2020, 2022, 2024, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
 with Ada.Wide_Wide_Characters.Handling;
 with Ada.Wide_Wide_Characters.Unicode;
+with Util.Encoders.URI;
 package body Wiki.Helpers is
 
    --  ------------------------------
@@ -192,6 +193,16 @@ package body Wiki.Helpers is
       return Pos;
    end Skip_Spaces;
 
+   function Skip_Spaces_Or_Newline (Text : in Wiki.Strings.WString;
+                                    From : in Positive) return Positive is
+      Pos : Positive := From;
+   begin
+      while Pos <= Text'Last and then Is_Space_Or_Newline (Text (Pos)) loop
+         Pos := Pos + 1;
+      end loop;
+      return Pos;
+   end Skip_Spaces_Or_Newline;
+
    --  ------------------------------
    --  Find the position of the last non space character scanning the text backward
    --  from the given position.  Returns Text'First - 1 if the text only contains spaces.
@@ -222,5 +233,29 @@ package body Wiki.Helpers is
       end loop;
       return 0;
    end Index;
+
+   HREF_LOOSE  : constant Util.Encoders.URI.Encoding_Array
+     := ('0' .. '9' => False,
+         'a' .. 'z' => False,
+         'A' .. 'Z' => False,
+         '-' => False, '.' => False, '_' => False, '~' => False, '+' => False,
+         ''' => False, '*' => False, '(' => False, '&' => False, '$' => False,
+         ')' => False, ',' => False, '%' => False, '#' => False, '@' => False,
+         '?' => False, '=' => False, ';' => False, ':' => False, '/' => False,
+         others => True);
+
+   --  ------------------------------
+   --  Encode the URI.
+   --  ------------------------------
+   function Encode_URI (URI : in Wiki.Strings.WString) return Strings.WString is
+      S : constant String := Strings.To_String (URI);
+   begin
+      return Strings.To_WString (Util.Encoders.URI.Encode (S, HREF_LOOSE));
+   end Encode_URI;
+
+   function Encode_URI (URI : in Wiki.Strings.BString) return Strings.WString is
+   begin
+      return Encode_URI (Strings.To_WString (URI));
+   end Encode_URI;
 
 end Wiki.Helpers;
