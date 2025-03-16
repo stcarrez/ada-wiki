@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-documents -- Wiki document
---  Copyright (C) 2011, 2015, 2016, 2018, 2019, 2020, 2022 Stephane Carrez
+--  Copyright (C) 2011 - 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -69,18 +69,17 @@ package Wiki.Documents is
                              Definition : in Wiki.Strings.WString);
 
    --  Add a link.
-   procedure Add_Link (Into       : in out Document;
-                       Name       : in Wiki.Strings.WString;
-                       Attributes : in out Wiki.Attributes.Attribute_List);
-
-   --  Add a link reference with the given label.
-   procedure Add_Link_Ref (Into   : in out Document;
-                           Label  : in Wiki.Strings.WString);
+   procedure Add_Link (Into          : in out Document;
+                       Name          : in Wiki.Strings.WString;
+                       Attributes    : in out Wiki.Attributes.Attribute_List;
+                       Reference     : in Boolean;
+                       With_Children : in Boolean);
 
    --  Add an image.
    procedure Add_Image (Into       : in out Document;
                         Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List);
+                        Attributes : in out Wiki.Attributes.Attribute_List;
+                        Reference  : in Boolean);
 
    --  Add a quote.
    procedure Add_Quote (Into       : in out Document;
@@ -102,8 +101,13 @@ package Wiki.Documents is
                                Text     : in Wiki.Strings.WString;
                                Format   : in Wiki.Strings.WString);
 
-   --  Add a new row to the current table.
-   procedure Add_Row (Into : in out Document);
+   --  Add a new table in the document with the column styles.
+   procedure Add_Table (Into    : in out Document;
+                        Columns : in Nodes.Column_Array_Style);
+
+   --  Add a new header/body/footer row to the current table.
+   procedure Add_Row (Into  : in out Document;
+                      Kind  : in Nodes.Row_Kind);
 
    --  Add a column to the current table row.  The column is configured with the
    --  given attributes.  The column content is provided through calls to Append.
@@ -112,6 +116,9 @@ package Wiki.Documents is
 
    --  Finish the creation of the table.
    procedure Finish_Table (Into : in out Document);
+
+   --  Finish the creation of the list.
+   procedure Finish_List (Into : in out Document);
 
    --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
    --  each node instance.
@@ -148,12 +155,21 @@ package Wiki.Documents is
                       Label : in Wiki.Strings.WString) return Wiki.Strings.WString;
    function Get_Link_Title (Doc   : in Document;
                             Label : in Wiki.Strings.WString) return Wiki.Strings.WString;
+   function Has_Link (Doc   : in Document;
+                      Label : in Wiki.Strings.WString) return Boolean;
+
+   --  Set the current list as loose list (items enclosed by <p>).
+   procedure Set_Loose (Doc : in Document);
 
 private
 
    --  Append a node to the document.
    procedure Append (Into : in out Document;
                      Node : in Wiki.Nodes.Node_Type_Access);
+
+   --  Append and push the node to the document.
+   procedure Append_Push (Into : in out Document;
+                          Node : in Wiki.Nodes.Node_Type_Access);
 
    type Document is tagged record
       Nodes       : Wiki.Nodes.Lists.Node_List_Ref;

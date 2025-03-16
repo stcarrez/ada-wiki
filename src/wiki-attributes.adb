@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-attributes -- Wiki document attributes
---  Copyright (C) 2015, 2016, 2022 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2022, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -33,6 +33,15 @@ package body Wiki.Attributes is
    begin
       return Attr.Value.Value;
    end Get_Wide_Value;
+
+   --  ------------------------------
+   --  Returns True if the attribute was defined with a value.
+   --  ------------------------------
+   function Has_Value (Position : in Cursor) return Boolean is
+      Attr : constant Attribute_Ref := Attribute_Vectors.Element (Position.Pos);
+   begin
+      return not (Attr.Value.Element.all in Attribute_No_Value'Class);
+   end Has_Value;
 
    --  ------------------------------
    --  Returns True if the cursor has a valid attribute.
@@ -141,6 +150,18 @@ package body Wiki.Attributes is
          new Wiki.Strings.Wide_Wide_Builders.Get (Append);
    begin
       Append_Attribute (Value);
+   end Append;
+
+   procedure Append (List  : in out Attribute_List;
+                     Name  : in Wiki.Strings.WString) is
+      N : constant String := Wiki.Strings.To_String (Name);
+      Attr : constant Attribute_No_Value_Access
+        := new Attribute_No_Value '(Util.Refs.Ref_Entity with
+                                    Name_Length  => N'Length,
+                                    Name         => N,
+                                    Value        => "");
+   begin
+      List.List.Append (Attribute_Refs.Create (Attr.all'Access));
    end Append;
 
    --  ------------------------------

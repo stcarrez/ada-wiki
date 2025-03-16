@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-attributes -- Wiki document attributes
---  Copyright (C) 2015, 2016, 2020, 2022 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020, 2022, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -35,6 +35,9 @@ package Wiki.Attributes is
    --  Get the attribute wide value.
    function Get_Wide_Value (Position : in Cursor) return Wiki.Strings.WString;
 
+   --  Returns True if the attribute was defined with a value.
+   function Has_Value (Position : in Cursor) return Boolean;
+
    --  Returns True if the cursor has a valid attribute.
    function Has_Element (Position : in Cursor) return Boolean;
 
@@ -65,6 +68,8 @@ package Wiki.Attributes is
    procedure Append (List  : in out Attribute_List;
                      Name  : in String;
                      Value : in Wiki.Strings.BString);
+   procedure Append (List  : in out Attribute_List;
+                     Name  : in Wiki.Strings.WString);
 
    --  Get the cursor to get access to the first attribute.
    function First (List : in Attribute_List) return Cursor;
@@ -87,9 +92,18 @@ private
       Name   : String (1 .. Name_Length);
       Value  : Wiki.Strings.WString (1 .. Value_Length);
    end record;
-   type Attribute_Access is access all Attribute;
+   type Attribute_Access is access all Attribute'Class;
 
-   package Attribute_Refs is new Util.Refs.Indefinite_References (Attribute, Attribute_Access);
+   --  Special type to differentiate an empty value from no value at all
+   --  Example: <input hidden>
+   --  Since this is a common case we don't want to optimize this case, just have
+   --  a way to identify it from <input hidden="">
+   type Attribute_No_Value (Name_Length : Natural) is limited
+   new Attribute (Name_Length, 0) with null record;
+   type Attribute_No_Value_Access is access all Attribute_No_Value'Class;
+
+   package Attribute_Refs is
+     new Util.Refs.Indefinite_References (Attribute'Class, Attribute_Access);
 
    use Attribute_Refs;
 

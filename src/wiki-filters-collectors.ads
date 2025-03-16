@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-collectors -- Wiki word and link collectors
---  Copyright (C) 2016, 2020, 2022 Stephane Carrez
+--  Copyright (C) 2016, 2020, 2022, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -73,17 +73,20 @@ package Wiki.Filters.Collectors is
 
    --  Add a link.
    overriding
-   procedure Add_Link (Filter     : in out Word_Collector_Type;
-                       Document   : in out Wiki.Documents.Document;
-                       Name       : in Wiki.Strings.WString;
-                       Attributes : in out Wiki.Attributes.Attribute_List);
+   procedure Add_Link (Filter        : in out Word_Collector_Type;
+                       Document      : in out Wiki.Documents.Document;
+                       Name          : in Wiki.Strings.WString;
+                       Attributes    : in out Wiki.Attributes.Attribute_List;
+                       Reference     : in Boolean;
+                       With_Children : in Boolean := False);
 
    --  Add an image.
    overriding
    procedure Add_Image (Filter     : in out Word_Collector_Type;
                         Document   : in out Wiki.Documents.Document;
                         Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List);
+                        Attributes : in out Wiki.Attributes.Attribute_List;
+                        Reference  : in Boolean);
 
    --  Add a quote.
    overriding
@@ -107,10 +110,12 @@ package Wiki.Filters.Collectors is
 
    --  Add a link.
    overriding
-   procedure Add_Link (Filter     : in out Link_Collector_Type;
-                       Document   : in out Wiki.Documents.Document;
-                       Name       : in Wiki.Strings.WString;
-                       Attributes : in out Wiki.Attributes.Attribute_List);
+   procedure Add_Link (Filter        : in out Link_Collector_Type;
+                       Document      : in out Wiki.Documents.Document;
+                       Name          : in Wiki.Strings.WString;
+                       Attributes    : in out Wiki.Attributes.Attribute_List;
+                       Reference     : in Boolean;
+                       With_Children : in Boolean := False);
 
    --  Push a HTML node with the given tag to the document.
    overriding
@@ -130,7 +135,8 @@ package Wiki.Filters.Collectors is
    procedure Add_Image (Filter     : in out Image_Collector_Type;
                         Document   : in out Wiki.Documents.Document;
                         Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List);
+                        Attributes : in out Wiki.Attributes.Attribute_List;
+                        Reference  : in Boolean);
 
    --  Push a HTML node with the given tag to the document.
    overriding

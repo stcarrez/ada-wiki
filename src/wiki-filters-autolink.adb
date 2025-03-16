@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-autolink -- Autolink filter to identify links in wiki
---  Copyright (C) 2016 Stephane Carrez
+--  Copyright (C) 2016, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -62,7 +62,7 @@ package body Wiki.Filters.Autolink is
                begin
                   Wiki.Attributes.Append (Attr, String '("href"), Text (Pos .. Last));
                   Autolink_Filter'Class (Filter).Add_Link (Document, Text (Pos .. Last),
-                                                           Attr);
+                                                           Attr, False);
                end;
                Start := Last + 1;
                Pos := Start;

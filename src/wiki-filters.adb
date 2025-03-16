@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters -- Wiki filters
---  Copyright (C) 2015, 2016, 2020, 2022 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020, 2022, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -135,31 +135,19 @@ package body Wiki.Filters is
    --  ------------------------------
    --  Add a link.
    --  ------------------------------
-   procedure Add_Link (Filter     : in out Filter_Type;
-                       Document   : in out Wiki.Documents.Document;
-                       Name       : in Wiki.Strings.WString;
-                       Attributes : in out Wiki.Attributes.Attribute_List) is
+   procedure Add_Link (Filter        : in out Filter_Type;
+                       Document      : in out Wiki.Documents.Document;
+                       Name          : in Wiki.Strings.WString;
+                       Attributes    : in out Wiki.Attributes.Attribute_List;
+                       Reference     : in Boolean;
+                       With_Children : in Boolean := False) is
    begin
       if Filter.Next /= null then
-         Filter.Next.Add_Link (Document, Name, Attributes);
+         Filter.Next.Add_Link (Document, Name, Attributes, Reference, With_Children);
       else
-         Document.Add_Link (Name, Attributes);
+         Document.Add_Link (Name, Attributes, Reference, With_Children);
       end if;
    end Add_Link;
-
-   --  ------------------------------
-   --  Add a link reference with the given label.
-   --  ------------------------------
-   procedure Add_Link_Ref (Filter     : in out Filter_Type;
-                           Document   : in out Wiki.Documents.Document;
-                           Label      : in Wiki.Strings.WString) is
-   begin
-      if Filter.Next /= null then
-         Filter.Next.Add_Link_Ref (Document, Label);
-      else
-         Document.Add_Link_Ref (Label);
-      end if;
-   end Add_Link_Ref;
 
    --  ------------------------------
    --  Add an image.
@@ -167,12 +155,13 @@ package body Wiki.Filters is
    procedure Add_Image (Filter     : in out Filter_Type;
                         Document   : in out Wiki.Documents.Document;
                         Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List) is
+                        Attributes : in out Wiki.Attributes.Attribute_List;
+                        Reference  : in Boolean) is
    begin
       if Filter.Next /= null then
-         Filter.Next.Add_Image (Document, Name, Attributes);
+         Filter.Next.Add_Image (Document, Name, Attributes, Reference);
       else
-         Document.Add_Image (Name, Attributes);
+         Document.Add_Image (Name, Attributes, Reference);
       end if;
    end Add_Image;
 
@@ -207,15 +196,30 @@ package body Wiki.Filters is
    end Add_Preformatted;
 
    --  ------------------------------
+   --  Add a new table in the document with the column styles.
+   --  ------------------------------
+   procedure Add_Table (Filter   : in out Filter_Type;
+                        Document : in out Wiki.Documents.Document;
+                        Columns  : in Nodes.Column_Array_Style) is
+   begin
+      if Filter.Next /= null then
+         Filter.Next.Add_Table (Document, Columns);
+      else
+         Document.Add_Table (Columns);
+      end if;
+   end Add_Table;
+
+   --  ------------------------------
    --  Add a new row to the current table.
    --  ------------------------------
    procedure Add_Row (Filter   : in out Filter_Type;
-                      Document : in out Wiki.Documents.Document) is
+                      Document : in out Wiki.Documents.Document;
+                      Kind     : in Nodes.Row_Kind) is
    begin
       if Filter.Next /= null then
-         Filter.Next.Add_Row (Document);
+         Filter.Next.Add_Row (Document, Kind);
       else
-         Document.Add_Row;
+         Document.Add_Row (Kind);
       end if;
    end Add_Row;
 
@@ -246,6 +250,19 @@ package body Wiki.Filters is
          Document.Finish_Table;
       end if;
    end Finish_Table;
+
+   --  ------------------------------
+   --  Finish the creation of the list.
+   --  ------------------------------
+   procedure Finish_List (Filter   : in out Filter_Type;
+                          Document : in out Wiki.Documents.Document) is
+   begin
+      if Filter.Next /= null then
+         Filter.Next.Finish_List (Document);
+      else
+         Document.Finish_List;
+      end if;
+   end Finish_List;
 
    --  ------------------------------
    --  Finish the document after complete wiki text has been parsed.

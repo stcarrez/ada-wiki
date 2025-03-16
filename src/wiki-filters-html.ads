@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-html -- Wiki HTML filters
---  Copyright (C) 2015, 2016, 2020 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -74,17 +74,20 @@ package Wiki.Filters.Html is
 
    --  Add a link.
    overriding
-   procedure Add_Link (Filter     : in out Html_Filter_Type;
-                       Document   : in out Wiki.Documents.Document;
-                       Name       : in Wiki.Strings.WString;
-                       Attributes : in out Wiki.Attributes.Attribute_List);
+   procedure Add_Link (Filter        : in out Html_Filter_Type;
+                       Document      : in out Wiki.Documents.Document;
+                       Name          : in Wiki.Strings.WString;
+                       Attributes    : in out Wiki.Attributes.Attribute_List;
+                       Reference     : in Boolean;
+                       With_Children : in Boolean := False);
 
    --  Add an image.
    overriding
    procedure Add_Image (Filter     : in out Html_Filter_Type;
                         Document   : in out Wiki.Documents.Document;
                         Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List);
+                        Attributes : in out Wiki.Attributes.Attribute_List;
+                        Reference  : in Boolean);
 
    --  Finish the document after complete wiki text has been parsed.
    overriding

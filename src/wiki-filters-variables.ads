@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-variables -- Expand variables in text and links
---  Copyright (C) 2020, 2022 Stephane Carrez
+--  Copyright (C) 2020, 2022, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -51,10 +51,12 @@ package Wiki.Filters.Variables is
 
    --  Add a link.
    overriding
-   procedure Add_Link (Filter     : in out Variable_Filter;
-                       Document   : in out Wiki.Documents.Document;
-                       Name       : in Wiki.Strings.WString;
-                       Attributes : in out Wiki.Attributes.Attribute_List);
+   procedure Add_Link (Filter        : in out Variable_Filter;
+                       Document      : in out Wiki.Documents.Document;
+                       Name          : in Wiki.Strings.WString;
+                       Attributes    : in out Wiki.Attributes.Attribute_List;
+                       Reference     : in Boolean;
+                       With_Children : in Boolean := False);
 
    --  Add a quote.
    overriding

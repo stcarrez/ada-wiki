@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-html -- Wiki HTML filters
---  Copyright (C) 2015, 2019, 2020, 2022 Stephane Carrez
+--  Copyright (C) 2015, 2019, 2020, 2022, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -29,8 +29,7 @@ package body Wiki.Filters.Html is
          when N_TOC_DISPLAY | N_NONE =>
             return;
 
-         when N_NEWLINE | N_LIST_END | N_LIST_ITEM_END | N_NUM_LIST_END
-           | N_LIST_ITEM | N_END_DEFINITION =>
+         when N_NEWLINE | N_LIST_ITEM | N_END_DEFINITION =>
             Filter_Type (Filter).Add_Node (Document, Kind);
             return;
 
@@ -125,13 +124,17 @@ package body Wiki.Filters.Html is
    --  Add a link.
    --  ------------------------------
    overriding
-   procedure Add_Link (Filter     : in out Html_Filter_Type;
-                       Document   : in out Wiki.Documents.Document;
-                       Name       : in Wiki.Strings.WString;
-                       Attributes : in out Wiki.Attributes.Attribute_List) is
+   procedure Add_Link (Filter        : in out Html_Filter_Type;
+                       Document      : in out Wiki.Documents.Document;
+                       Name          : in Wiki.Strings.WString;
+                       Attributes    : in out Wiki.Attributes.Attribute_List;
+                       Reference     : in Boolean;
+                       With_Children : in Boolean := False) is
    begin
       if Filter.Allowed (A_TAG) then
-         Filter_Type (Filter).Add_Link (Document, Name, Attributes);
+         Filter_Type (Filter).Add_Link (Document, Name, Attributes,
+                                        Reference, With_Children);
+         Filter.Stack.Append (A_TAG);
       end if;
    end Add_Link;
 
@@ -142,10 +145,11 @@ package body Wiki.Filters.Html is
    procedure Add_Image (Filter     : in out Html_Filter_Type;
                         Document   : in out Wiki.Documents.Document;
                         Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List) is
+                        Attributes : in out Wiki.Attributes.Attribute_List;
+                        Reference  : in Boolean) is
    begin
       if Filter.Allowed (IMG_TAG) then
-         Filter_Type (Filter).Add_Image (Document, Name, Attributes);
+         Filter_Type (Filter).Add_Image (Document, Name, Attributes, Reference);
       end if;
    end Add_Image;
 

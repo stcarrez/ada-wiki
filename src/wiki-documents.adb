@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-nodes -- Wiki Document Internal representation
---  Copyright (C) 2016, 2019, 2020, 2022, 2024 Stephane Carrez
+--  Copyright (C) 2016, 2019, 2020, 2022, 2024, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -23,6 +23,7 @@ package body Wiki.Documents is
             Node := new Node_Type '(Kind       => N_HEADER,
                                     Len        => 0,
                                     Level      => Level,
+                                    Loose      => False,
                                     Children   => null,
                                     Parent     => Into.Current);
 
@@ -30,6 +31,7 @@ package body Wiki.Documents is
             Node := new Node_Type '(Kind       => N_DEFINITION_TERM,
                                     Len        => 0,
                                     Level      => Level,
+                                    Loose      => False,
                                     Children   => null,
                                     Parent     => Into.Current);
 
@@ -37,6 +39,13 @@ package body Wiki.Documents is
             Node := new Node_Type '(Kind       => N_DEFINITION,
                                     Len        => 0,
                                     Level      => Level,
+                                    Loose      => False,
+                                    Children   => null,
+                                    Parent     => Into.Current);
+
+         when N_LIST_ITEM =>
+            Node := new Node_Type '(Kind       => N_LIST_ITEM,
+                                    Len        => 0,
                                     Children   => null,
                                     Parent     => Into.Current);
 
@@ -44,8 +53,7 @@ package body Wiki.Documents is
             return;
 
       end case;
-      Append (Into, Node);
-      Into.Current := Node;
+      Append_Push (Into, Node);
    end Start_Block;
 
    procedure End_Block (From : in out Document;
@@ -63,16 +71,23 @@ package body Wiki.Documents is
    procedure Push_Node (Into       : in out Document;
                         Tag        : in Html_Tag;
                         Attributes : in Wiki.Attributes.Attribute_List) is
-
-      Node : constant Node_Type_Access := new Node_Type '(Kind       => N_TAG_START,
-                                                          Len        => 0,
-                                                          Tag_Start  => Tag,
-                                                          Attributes => Attributes,
-                                                          Children   => null,
-                                                          Parent     => Into.Current);
+      Node : Node_Type_Access;
    begin
-      Append (Into, Node);
-      Into.Current := Node;
+      if Tag = A_TAG then
+         Node := new Node_Type '(Kind => N_LINK, Len => 0,
+                                 Children => null,
+                                 Link_Attr => Attributes,
+                                 Title => "",
+                                 Parent => Into.Current);
+      else
+         Node := new Node_Type '(Kind       => N_TAG_START,
+                                 Len        => 0,
+                                 Tag_Start  => Tag,
+                                 Attributes => Attributes,
+                                 Children   => null,
+                                 Parent     => Into.Current);
+      end if;
+      Append_Push (Into, Node);
    end Push_Node;
 
    --  ------------------------------
@@ -109,6 +124,20 @@ package body Wiki.Documents is
    end Append;
 
    --  ------------------------------
+   --  Append and push the node to the document.
+   --  ------------------------------
+   procedure Append_Push (Into : in out Document;
+                          Node : in Wiki.Nodes.Node_Type_Access) is
+   begin
+      if Into.Current = null then
+         Append (Into.Nodes, Node);
+      else
+         Append (Into.Current, Node);
+      end if;
+      Into.Current := Node;
+   end Append_Push;
+
+   --  ------------------------------
    --  Append a simple node such as N_LINE_BREAK, N_HORIZONTAL_RULE or N_PARAGRAPH.
    --  ------------------------------
    procedure Append (Into : in out Document;
@@ -132,21 +161,6 @@ package body Wiki.Documents is
 
          when N_LIST_ITEM =>
             Append (Into, new Node_Type '(Kind => N_LIST_ITEM, Len => 0,
-                                          Children => null,
-                                          Parent => Into.Current));
-
-         when N_LIST_END =>
-            Append (Into, new Node_Type '(Kind => N_LIST_END, Len => 0,
-                                          Children => null,
-                                          Parent => Into.Current));
-
-         when N_NUM_LIST_END =>
-            Append (Into, new Node_Type '(Kind => N_NUM_LIST_END, Len => 0,
-                                          Children => null,
-                                          Parent => Into.Current));
-
-         when N_LIST_ITEM_END =>
-            Append (Into, new Node_Type '(Kind => N_LIST_ITEM_END, Len => 0,
                                           Children => null,
                                           Parent => Into.Current));
 
@@ -202,39 +216,49 @@ package body Wiki.Documents is
    --  ------------------------------
    --  Add a link.
    --  ------------------------------
-   procedure Add_Link (Into       : in out Document;
-                       Name       : in Wiki.Strings.WString;
-                       Attributes : in out Wiki.Attributes.Attribute_List) is
+   procedure Add_Link (Into          : in out Document;
+                       Name          : in Wiki.Strings.WString;
+                       Attributes    : in out Wiki.Attributes.Attribute_List;
+                       Reference     : in Boolean;
+                       With_Children : in Boolean) is
+      Node : Wiki.Nodes.Node_Type_Access;
    begin
-      Append (Into, new Node_Type '(Kind => N_LINK, Len => Name'Length,
-                                    Parent => Into.Current,
-                                    Children => null,
-                                    Title => Name, Link_Attr => Attributes));
+      if Reference then
+         Node := new Node_Type '(Kind => N_LINK_REF, Len => Name'Length,
+                                 Parent => Into.Current,
+                                 Children => null,
+                                 Title => Name, Link_Attr => Attributes);
+      else
+         Node := new Node_Type '(Kind => N_LINK, Len => Name'Length,
+                                 Parent => Into.Current,
+                                 Children => null,
+                                 Title => Name, Link_Attr => Attributes);
+      end if;
+      Append (Into, Node);
+      if With_Children then
+         Into.Current := Node;
+      end if;
    end Add_Link;
-
-   --  ------------------------------
-   --  Add a link reference with the given label.
-   --  ------------------------------
-   procedure Add_Link_Ref (Into   : in out Document;
-                           Label  : in Wiki.Strings.WString) is
-   begin
-      Append (Into, new Node_Type '(Kind => N_LINK_REF, Len => Label'Length,
-                                    Parent => Into.Current,
-                                    Children => null,
-                                    Title => Label, others => <>));
-   end Add_Link_Ref;
 
    --  ------------------------------
    --  Add an image.
    --  ------------------------------
    procedure Add_Image (Into       : in out Document;
                         Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List) is
+                        Attributes : in out Wiki.Attributes.Attribute_List;
+                        Reference  : in Boolean) is
    begin
-      Append (Into, new Node_Type '(Kind => N_IMAGE, Len => Name'Length,
-                                    Parent => Into.Current,
-                                    Children => null,
-                                    Title => Name, Link_Attr => Attributes));
+      if Reference then
+         Append (Into, new Node_Type '(Kind => N_IMAGE_REF, Len => Name'Length,
+                                       Parent => Into.Current,
+                                       Children => null,
+                                       Title => Name, Link_Attr => Attributes));
+      else
+         Append (Into, new Node_Type '(Kind => N_IMAGE, Len => Name'Length,
+                                       Parent => Into.Current,
+                                       Children => null,
+                                       Title => Name, Link_Attr => Attributes));
+      end if;
    end Add_Image;
 
    --  ------------------------------
@@ -256,18 +280,22 @@ package body Wiki.Documents is
    procedure Add_List (Into     : in out Document;
                        Level    : in Natural;
                        Ordered  : in Boolean) is
+      List : Node_Type_Access;
    begin
       if Ordered then
-         Append (Into, new Node_Type '(Kind => N_NUM_LIST_START, Len => 0,
-                                       Parent => Into.Current,
-                                       Children => null,
-                                       Level => Level));
+         List := new Node_Type '(Kind => N_NUM_LIST_START, Len => 0,
+                                 Parent => Into.Current,
+                                 Children => null,
+                                 Level => Level,
+                                 Loose => False);
       else
-         Append (Into, new Node_Type '(Kind => N_LIST_START, Len => 0,
-                                       Parent => Into.Current,
-                                       Children => null,
-                                       Level => Level));
+         List := new Node_Type '(Kind => N_LIST_START, Len => 0,
+                                 Parent => Into.Current,
+                                 Children => null,
+                                 Level => Level,
+                                 Loose => False);
       end if;
+      Append_Push (Into, List);
    end Add_List;
 
    --  ------------------------------
@@ -280,7 +308,8 @@ package body Wiki.Documents is
       Append (Into, new Node_Type '(Kind => N_BLOCKQUOTE, Len => 0,
                                     Parent => Into.Current,
                                     Children => null,
-                                    Level => Level));
+                                    Level => Level,
+                                    Loose => False));
    end Add_Blockquote;
 
    --  ------------------------------
@@ -298,9 +327,26 @@ package body Wiki.Documents is
    end Add_Preformatted;
 
    --  ------------------------------
-   --  Add a new row to the current table.
+   --  Add a new table in the document with the column styles.
    --  ------------------------------
-   procedure Add_Row (Into : in out Document) is
+   procedure Add_Table (Into    : in out Document;
+                        Columns : in Column_Array_Style) is
+      Table : Node_Type_Access;
+   begin
+      Table := new Node_Type '(Kind       => N_TABLE,
+                               Len        => Columns'Length,
+                               Children   => null,
+                               Parent     => Into.Current,
+                               Columns    => Columns);
+      Append (Into, Table);
+      Into.Current := Table;
+   end Add_Table;
+
+   --  ------------------------------
+   --  Add a new header/body/footer row to the current table.
+   --  ------------------------------
+   procedure Add_Row (Into : in out Document;
+                      Kind  : in Nodes.Row_Kind) is
       Table : Node_Type_Access;
       Row   : Node_Type_Access;
    begin
@@ -314,7 +360,6 @@ package body Wiki.Documents is
       if Table = null then
          Table := new Node_Type '(Kind       => N_TABLE,
                                   Len        => 0,
-                                  Tag_Start  => TABLE_TAG,
                                   Children   => null,
                                   Parent     => Into.Current,
                                   others     => <>);
@@ -322,12 +367,33 @@ package body Wiki.Documents is
       end if;
 
       --  Add the row.
-      Row := new Node_Type '(Kind       => N_ROW,
-                             Len        => 0,
-                             Tag_Start  => TR_TAG,
-                             Children   => null,
-                             Parent     => Table,
-                             others     => <>);
+      case Kind is
+         when N_ROW_HEADER =>
+            Row := new Node_Type '(Kind       => N_ROW_HEADER,
+                                   Len        => 0,
+                                   Tag_Start  => TR_TAG,
+                                   Children   => null,
+                                   Parent     => Table,
+                                   others     => <>);
+
+         when N_ROW =>
+            Row := new Node_Type '(Kind       => N_ROW,
+                                   Len        => 0,
+                                   Tag_Start  => TR_TAG,
+                                   Children   => null,
+                                   Parent     => Table,
+                                   others     => <>);
+
+         when N_ROW_FOOTER =>
+            Row := new Node_Type '(Kind       => N_ROW_FOOTER,
+                                   Len        => 0,
+                                   Tag_Start  => TR_TAG,
+                                   Children   => null,
+                                   Parent     => Table,
+                                   others     => <>);
+
+      end case;
+
       Append (Table, Row);
       Into.Current := Row;
    end Add_Row;
@@ -343,17 +409,26 @@ package body Wiki.Documents is
    begin
       --  Identify the current row.
       Row := Into.Current;
-      while Row /= null and then Row.Kind /= N_ROW loop
+      while Row /= null and then not (Row.Kind in N_ROW | N_ROW_HEADER) loop
          Row := Row.Parent;
       end loop;
 
       --  Add the new column.
-      Col := new Node_Type '(Kind       => N_COLUMN,
-                             Len        => 0,
-                             Tag_Start  => TD_TAG,
-                             Children   => null,
-                             Parent     => Row,
-                             Attributes => Attributes);
+      if Row /= null and then Row.Kind = N_ROW_HEADER then
+         Col := new Node_Type '(Kind       => N_COLUMN,
+                                Len        => 0,
+                                Tag_Start  => TH_TAG,
+                                Children   => null,
+                                Parent     => Row,
+                                Attributes => Attributes);
+      else
+         Col := new Node_Type '(Kind       => N_COLUMN,
+                                Len        => 0,
+                                Tag_Start  => TD_TAG,
+                                Children   => null,
+                                Parent     => Row,
+                                Attributes => Attributes);
+      end if;
       Append (Row, Col);
       Into.Current := Col;
    end Add_Column;
@@ -375,6 +450,38 @@ package body Wiki.Documents is
          Into.Current := null;
       end if;
    end Finish_Table;
+
+   --  ------------------------------
+   --  Finish the creation of the list.
+   --  ------------------------------
+   procedure Finish_List (Into : in out Document) is
+      List : Node_Type_Access;
+   begin
+      --  Identify the current list.
+      List := Into.Current;
+      while List /= null and then not (List.Kind in N_LIST_START | N_NUM_LIST_START) loop
+         List := List.Parent;
+      end loop;
+      if List /= null then
+         Into.Current := List.Parent;
+      else
+         Into.Current := null;
+      end if;
+   end Finish_List;
+
+   --  ------------------------------
+   --  Set the current list as loose list (items enclosed by <p>).
+   --  ------------------------------
+   procedure Set_Loose (Doc : in Document) is
+      List : Node_Type_Access := Doc.Current;
+   begin
+      while List /= null and then not (List.Kind in N_LIST_START | N_NUM_LIST_START) loop
+         List := List.Parent;
+      end loop;
+      if List /= null then
+         List.Loose := True;
+      end if;
+   end Set_Loose;
 
    --  ------------------------------
    --  Iterate over the nodes of the list and call the <tt>Process</tt> procedure with
@@ -487,5 +594,14 @@ package body Wiki.Documents is
          return "";
       end if;
    end Get_Link_Title;
+
+   function Has_Link (Doc   : in Document;
+                      Label : in Wiki.Strings.WString) return Boolean is
+      Upper : constant Wiki.Strings.WString
+        := Ada.Wide_Wide_Characters.Handling.To_Upper (Label);
+      Pos : constant Wiki.Strings.Maps.Cursor := Doc.Links.Find (Upper);
+   begin
+      return Wiki.Strings.Maps.Has_Element (Pos);
+   end Has_Link;
 
 end Wiki.Documents;

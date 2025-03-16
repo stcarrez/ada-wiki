@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters -- Wiki filters
---  Copyright (C) 2015, 2016, 2020, 2022 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020, 2022, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -91,21 +91,19 @@ package Wiki.Filters is
                        Ordered  : in Boolean);
 
    --  Add a link.
-   procedure Add_Link (Filter     : in out Filter_Type;
-                       Document   : in out Wiki.Documents.Document;
-                       Name       : in Wiki.Strings.WString;
-                       Attributes : in out Wiki.Attributes.Attribute_List);
-
-   --  Add a link reference with the given label.
-   procedure Add_Link_Ref (Filter     : in out Filter_Type;
-                           Document   : in out Wiki.Documents.Document;
-                           Label      : in Wiki.Strings.WString);
+   procedure Add_Link (Filter        : in out Filter_Type;
+                       Document      : in out Wiki.Documents.Document;
+                       Name          : in Wiki.Strings.WString;
+                       Attributes    : in out Wiki.Attributes.Attribute_List;
+                       Reference     : in Boolean;
+                       With_Children : in Boolean := False);
 
    --  Add an image.
    procedure Add_Image (Filter     : in out Filter_Type;
                         Document   : in out Wiki.Documents.Document;
                         Name       : in Wiki.Strings.WString;
-                        Attributes : in out Wiki.Attributes.Attribute_List);
+                        Attributes : in out Wiki.Attributes.Attribute_List;
+                        Reference  : in Boolean);
 
    --  Add a quote.
    procedure Add_Quote (Filter     : in out Filter_Type;
@@ -119,9 +117,15 @@ package Wiki.Filters is
                                Text     : in Wiki.Strings.WString;
                                Format   : in Wiki.Strings.WString);
 
+   --  Add a new table in the document with the column styles.
+   procedure Add_Table (Filter   : in out Filter_Type;
+                        Document : in out Wiki.Documents.Document;
+                        Columns  : in Nodes.Column_Array_Style);
+
    --  Add a new row to the current table.
    procedure Add_Row (Filter   : in out Filter_Type;
-                      Document : in out Wiki.Documents.Document);
+                      Document : in out Wiki.Documents.Document;
+                      Kind     : in Nodes.Row_Kind);
 
    --  Add a column to the current table row.  The column is configured with the
    --  given attributes.  The column content is provided through calls to Append.
@@ -132,6 +136,10 @@ package Wiki.Filters is
    --  Finish the creation of the table.
    procedure Finish_Table (Filter   : in out Filter_Type;
                            Document : in out Wiki.Documents.Document);
+
+   --  Finish the creation of the list.
+   procedure Finish_List (Filter   : in out Filter_Type;
+                          Document : in out Wiki.Documents.Document);
 
    --  Finish the document after complete wiki text has been parsed.
    procedure Finish (Filter   : in out Filter_Type;
