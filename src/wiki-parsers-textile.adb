@@ -71,7 +71,7 @@ package body Wiki.Parsers.Textile is
       Flush_Text (Parser, Trim => Right);
       Pop_Block (Parser);
       Parser.Header_Level := Level;
-      Push_Block (Parser, Nodes.N_HEADER);
+      Push_Block (Parser, Nodes.N_HEADER, Level);
 
       declare
          Pos    : Natural := From;
@@ -156,7 +156,7 @@ package body Wiki.Parsers.Textile is
             Wiki.Attributes.Append (Parser.Attributes, "src", Link);
             Parser.Context.Filters.Add_Image (Parser.Document,
                                               Strings.To_WString (Title),
-                                              Parser.Attributes);
+                                              Parser.Attributes, False);
          end if;
       end;
    end Parse_Image;
@@ -225,7 +225,7 @@ package body Wiki.Parsers.Textile is
             Wiki.Attributes.Append (Parser.Attributes, HREF_ATTR, Link);
             Parser.Context.Filters.Add_Link (Parser.Document,
                                              Wiki.Strings.To_WString (Title),
-                                             Parser.Attributes);
+                                             Parser.Attributes, False);
          end if;
       end;
    end Parse_Link;

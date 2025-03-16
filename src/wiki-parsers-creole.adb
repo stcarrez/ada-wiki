@@ -97,7 +97,7 @@ package body Wiki.Parsers.Creole is
          Wiki.Attributes.Append (Parser.Attributes, "src", Link);
          Parser.Context.Filters.Add_Image (Parser.Document,
                                            Wiki.Strings.To_WString (Alt),
-                                           Parser.Attributes);
+                                           Parser.Attributes, False);
       end if;
    end Parse_Image_Or_Preformatted;
 

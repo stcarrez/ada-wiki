@@ -120,7 +120,7 @@ package body Wiki.Parsers.MediaWiki is
                Pos := Pos + 1;
                Common.Parse_List (Parser, Buffer, Pos);
             end if;
-            if not Parser.In_Html then
+            if Parser.In_Html = HTML_NONE then
                Parser.Preformat_Indent := 1;
                Parser.Preformat_Fence := ' ';
                Parser.Preformat_Fcount := 1;

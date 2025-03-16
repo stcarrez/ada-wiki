@@ -157,7 +157,7 @@ package body Wiki.Parsers.Dotclear is
          Wiki.Attributes.Append (Parser.Attributes, "longdesc", Desc);
          Parser.Context.Filters.Add_Image (Parser.Document,
                                            Strings.To_WString (Alt),
-                                           Parser.Attributes);
+                                           Parser.Attributes, False);
       end if;
    end Parse_Image;
 
@@ -171,6 +171,7 @@ package body Wiki.Parsers.Dotclear is
       if Parser.In_Blockquote then
          Count := Count_Occurence (Buffer, 1, '>');
          if Count = 0 then
+            Parser.Quote_Level := 0;
             loop
                Pop_Block (Parser);
                exit when Parser.Current_Node = Nodes.N_NONE;
@@ -209,6 +210,7 @@ package body Wiki.Parsers.Dotclear is
       C := Buffer.Content (Pos);
       if C = '>' then
          Count := Count_Occurence (Buffer, Pos, '>');
+         Parser.Quote_Level := Count;
          Push_Block (Parser, Nodes.N_BLOCKQUOTE, Count);
          Buffers.Next (Buffer, Pos, Count);
          Buffers.Skip_Optional_Space (Buffer, Pos);

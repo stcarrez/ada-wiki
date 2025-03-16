@@ -434,12 +434,12 @@ package body Wiki.Parsers.Common is
             else
                Wiki.Attributes.Append (Attr, String '("alt"), Value);
                if Pos = Len then
-                  Parser.Context.Filters.Add_Image (Parser.Document, Value, Attr);
+                  Parser.Context.Filters.Add_Image (Parser.Document, Value, Attr, False);
                end if;
                return;
             end if;
             if Pos = Len then
-               Parser.Context.Filters.Add_Image (Parser.Document, Link, Attr);
+               Parser.Context.Filters.Add_Image (Parser.Document, Link, Attr, False);
             end if;
          end Collect_Attribute;
 
@@ -522,9 +522,9 @@ package body Wiki.Parsers.Common is
                   Wiki.Attributes.Append (Parser.Attributes, HREF_ATTR, Name);
                end if;
                if not Parser.Link_Title_First and then Name'Length = 0 then
-                  Parser.Context.Filters.Add_Link (Parser.Document, Link, Parser.Attributes);
+                  Parser.Context.Filters.Add_Link (Parser.Document, Link, Parser.Attributes, False);
                else
-                  Parser.Context.Filters.Add_Link (Parser.Document, Name, Parser.Attributes);
+                  Parser.Context.Filters.Add_Link (Parser.Document, Name, Parser.Attributes, False);
                end if;
             end if;
          end;
@@ -603,7 +603,11 @@ package body Wiki.Parsers.Common is
                                             Pos + 1, Process'Access, Pos);
 
          else
-            Append (Parser.Text, C);
+            --if Parser.Parse_Inline /= null then
+            --   Append (Parser.Text_Buffer, C);
+            --else
+               Append (Parser.Text, C);
+            --end if;
             Pos := Pos + 1;
          end if;
          if Pos > Buffer.Last then
@@ -711,13 +715,13 @@ package body Wiki.Parsers.Common is
 
          if Parser.Current_Node in N_LIST_START | N_NUM_LIST_START then
             Push_Block (Parser, Nodes.N_LIST_ITEM, Level, C);
-         end if;
-         if C = '#' then
+         elsif C = '#' then
             Push_Block (Parser, Nodes.N_NUM_LIST_START, Level, C, 1);
+            Push_Block (Parser, Nodes.N_LIST_ITEM, Level, C);
          else
             Push_Block (Parser, Nodes.N_LIST_START, Level, C);
+            Push_Block (Parser, Nodes.N_LIST_ITEM, Level, C);
          end if;
-         Push_Block (Parser, Nodes.N_LIST_ITEM, Level, C);
          Pos := Pos + 1;
          Level := Level + 1;
       end loop;
@@ -905,7 +909,7 @@ package body Wiki.Parsers.Common is
                Next (Block, Pos);
             end if;
          else
-            Common.Parse_Token (Block, Pos, Parser.Escape_Char, CR, LF,
+            Common.Parse_Token (Block, Pos, Parser.Escape_Char, Marker, LF,
                                 Parser.Preformat_Format);
          end if;
          if Block /= null then
@@ -950,9 +954,9 @@ package body Wiki.Parsers.Common is
       end if;
 
       Flush_Text (Parser, Trim => Right);
-      Pop_Block (Parser);
+      --  Pop_Block (Parser);
       Parser.Header_Level := Level;
-      Push_Block (Parser, Nodes.N_HEADER);
+      Push_Block (Parser, Nodes.N_HEADER, Level);
       declare
          Pos    : Natural := From + Count;
          Buffer : Wiki.Buffers.Buffer_Access := Text;
