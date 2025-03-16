@@ -17,6 +17,8 @@ with Wiki.Filters.TOC;
 with Wiki.Filters.Html;
 with Wiki.Filters.Autolink;
 with Wiki.Plugins.Templates;
+with Wiki.Plugins.Conditions;
+with Wiki.Plugins.Variables;
 with Wiki.Render.Html;
 with Wiki.Render.Text;
 with Wiki.Streams.Text_IO;
@@ -42,22 +44,26 @@ procedure Render is
    Style     : Unbounded_String;
    Indent    : Natural := 3;
    Dump_Tree : Boolean := False;
+   Auto_Link : Boolean := True;
+   Html_Filter : Boolean := True;
 
    procedure Usage is
    begin
       Ada.Text_IO.Put_Line ("Render a wiki text file into HTML (default) or text");
       Ada.Text_IO.Put_Line ("Usage: render [options] {wiki-file}");
-      Ada.Text_IO.Put_Line ("  -0, -1, -2  Controls the indentation level");
-      Ada.Text_IO.Put_Line ("  -t          Render to text only");
-      Ada.Text_IO.Put_Line ("  -m          Render a Markdown wiki content");
-      Ada.Text_IO.Put_Line ("  -M          Render a Mediawiki wiki content");
-      Ada.Text_IO.Put_Line ("  -T          Render a Textile wiki content");
-      Ada.Text_IO.Put_Line ("  -H          Render a HTML wiki content");
-      Ada.Text_IO.Put_Line ("  -d          Render a Dotclear wiki content");
-      Ada.Text_IO.Put_Line ("  -g          Render a Google wiki content");
-      Ada.Text_IO.Put_Line ("  -c          Render a Creole wiki content");
-      Ada.Text_IO.Put_Line ("  -s style    Use the CSS style file");
-      Ada.Text_IO.Put_Line ("  -dump       Dump the document tree");
+      Ada.Text_IO.Put_Line ("  -0, -1, -2   Controls the indentation level");
+      Ada.Text_IO.Put_Line ("  -t           Render to text only");
+      Ada.Text_IO.Put_Line ("  -m           Render a Markdown wiki content");
+      Ada.Text_IO.Put_Line ("  -M           Render a Mediawiki wiki content");
+      Ada.Text_IO.Put_Line ("  -T           Render a Textile wiki content");
+      Ada.Text_IO.Put_Line ("  -H           Render a HTML wiki content");
+      Ada.Text_IO.Put_Line ("  -d           Render a Dotclear wiki content");
+      Ada.Text_IO.Put_Line ("  -g           Render a Google wiki content");
+      Ada.Text_IO.Put_Line ("  -c           Render a Creole wiki content");
+      Ada.Text_IO.Put_Line ("  -s style     Use the CSS style file");
+      Ada.Text_IO.Put_Line ("  -dump        Dump the document tree");
+      Ada.Text_IO.Put_Line ("  -no-autolink No autolink filter");
+      Ada.Text_IO.Put_Line ("  -no-filter   No HTML filter");
       Ada.Command_Line.Set_Exit_Status (Ada.Command_Line.Failure);
    end Usage;
 
@@ -92,6 +98,7 @@ procedure Render is
       Renderer : aliased Wiki.Render.Text.Text_Renderer;
    begin
       Renderer.Set_Output_Stream (Output'Unchecked_Access);
+      Renderer.Set_Line_Length (80);
       Renderer.Render (Doc);
    end Render_Text;
 
@@ -117,10 +124,34 @@ procedure Render is
       Input    : aliased Wiki.Streams.Text_IO.File_Input_Stream;
       Filter   : aliased Wiki.Filters.Html.Html_Filter_Type;
       Autolink : aliased Wiki.Filters.Autolink.Autolink_Filter;
+      Condition : aliased Wiki.Plugins.Conditions.Condition_Plugin;
+      Variables : aliased Wiki.Plugins.Variables.Variable_Plugin;
       Template : aliased Wiki.Plugins.Templates.File_Template_Plugin;
       TOC      : aliased Wiki.Filters.TOC.TOC_Filter;
       Doc      : Wiki.Documents.Document;
       Engine   : Wiki.Parsers.Parser;
+
+      type Test_Factory is new Wiki.Plugins.Plugin_Factory with null record;
+
+      --  Find a plugin knowing its name.
+      overriding
+      function Find (Factory : in Test_Factory;
+                     Name    : in String) return Wiki.Plugins.Wiki_Plugin_Access;
+
+      overriding
+      function Find (Factory : in Test_Factory;
+                     Name    : in String) return Wiki.Plugins.Wiki_Plugin_Access is
+         pragma Unreferenced (Factory);
+      begin
+         if Name in "if" | "else" | "elsif" | "end" then
+            return Condition'Unchecked_Access;
+         elsif Name = "set" then
+            return Variables'Unchecked_Access;
+         else
+            return Template.Find (Name);
+         end if;
+      end Find;
+      Local_Factory : aliased Test_Factory;
    begin
       Count := Count + 1;
 
@@ -130,10 +161,14 @@ procedure Render is
       if Name /= "--" then
          Input.Open (Name, "WCEM=8");
       end if;
-      Engine.Set_Plugin_Factory (Template'Unchecked_Access);
+      Engine.Set_Plugin_Factory (Local_Factory'Unchecked_Access);
       Engine.Add_Filter (TOC'Unchecked_Access);
-      Engine.Add_Filter (Autolink'Unchecked_Access);
-      Engine.Add_Filter (Filter'Unchecked_Access);
+      if Auto_Link then
+         Engine.Add_Filter (Autolink'Unchecked_Access);
+      end if;
+      if Html_Filter then
+         Engine.Add_Filter (Filter'Unchecked_Access);
+      end if;
       Engine.Set_Syntax (Syntax);
       Engine.Parse (Input'Unchecked_Access, Doc);
 
@@ -188,6 +223,10 @@ begin
             Indent := 2;
          elsif Param = "-dump" then
             Dump_Tree := True;
+         elsif Param = "-no-autolink" then
+            Auto_Link := False;
+         elsif Param = "-no-filter" then
+            Html_Filter := False;
          elsif Param (Param'First) = '-' then
             Usage;
             return;

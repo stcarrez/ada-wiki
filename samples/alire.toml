@@ -12,8 +12,8 @@ website = "https://gitlab.com/stcarrez/ada-wiki"
 [[depends-on]]
 wikiada = "*"
 
-[configuration]
-disabled = true
+# [configuration]
+# disabled = true
 
 [[pins]]
 wikiada = { path = '..' }
