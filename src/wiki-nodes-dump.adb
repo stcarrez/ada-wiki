@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-nodes-dump -- Dump the wiki nodes
---  Copyright (C) 2022 Stephane Carrez
+--  Copyright (C) 2022, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -69,13 +69,33 @@ procedure Wiki.Nodes.Dump (Node : in Wiki.Nodes.Node_Type) is
             Strings.Append_String (Result, " ");
             Strings.Append_String (Result, Node.Text);
 
-         when N_IMAGE | N_LINK | N_QUOTE =>
+         when N_IMAGE | N_IMAGE_REF | N_LINK | N_LINK_REF | N_QUOTE | N_LIST_ITEM =>
             Strings.Append_String (Result, " ");
-            Strings.Append_String (Result, Node.Title);
-            Attributes.Iterate (Node.Link_Attr, Print'Access);
+            if Node.Kind /= N_LIST_ITEM then
+               Strings.Append_String (Result, Node.Title);
+               Attributes.Iterate (Node.Link_Attr, Print'Access);
+               Write (Level, Wiki.Strings.To_WString (Result));
+            else
+               Write (Level, Wiki.Strings.To_WString (Result));
+            end if;
+            if Node.Children /= null then
+               Level := Level + 1;
+               Lists.Iterate (Node.Children, Dump_Node'Access);
+               Level := Level - 1;
+            end if;
+            return;
 
-         when N_TAG_START | N_TABLE | N_ROW | N_COLUMN =>
+         when N_TAG_START | N_ROW | N_ROW_HEADER | N_ROW_FOOTER | N_COLUMN =>
             Attributes.Iterate (Node.Attributes, Print'Access);
+            Write (Level, Wiki.Strings.To_WString (Result));
+            if Node.Children /= null then
+               Level := Level + 1;
+               Lists.Iterate (Node.Children, Dump_Node'Access);
+               Level := Level - 1;
+            end if;
+            return;
+
+         when N_TABLE =>
             Write (Level, Wiki.Strings.To_WString (Result));
             if Node.Children /= null then
                Level := Level + 1;

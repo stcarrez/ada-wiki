@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-nodes -- Wiki Document Internal representation
---  Copyright (C) 2016, 2019, 2023, 2024 Stephane Carrez
+--  Copyright (C) 2016, 2019, 2023, 2024, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -36,6 +36,42 @@ package body Wiki.Nodes is
       Block.List (Block.Last) := Node;
       Into.Length := Into.Length + 1;
    end Append;
+
+   --  ------------------------------
+   --  Find the closest row or header rom from a leaf node.
+   --  ------------------------------
+   function Find_Row (From : in Node_Type) return Node_Type_Access is
+      Row : Node_Type_Access := From.Parent;
+   begin
+      while Row /= null and then not (Row.Kind in N_ROW | N_ROW_HEADER) loop
+         Row := Row.Parent;
+      end loop;
+      return Row;
+   end Find_Row;
+
+   --  ------------------------------
+   --  Find the closest table node from a leaf node.
+   --  ------------------------------
+   function Find_Table (From : in Node_Type) return Node_Type_Access is
+      Table : Node_Type_Access := From.Parent;
+   begin
+      while Table /= null and then Table.Kind /= N_TABLE loop
+         Table := Table.Parent;
+      end loop;
+      return Table;
+   end Find_Table;
+
+   --  ------------------------------
+   --  Find the closest list node from a leaf node.
+   --  ------------------------------
+   function Find_List (From : in Node_Type) return Node_Type_Access is
+      List : Node_Type_Access := From.Parent;
+   begin
+      while List /= null and then not (List.Kind in N_LIST_START | N_NUM_LIST_START) loop
+         List := List.Parent;
+      end loop;
+      return List;
+   end Find_List;
 
    --  ------------------------------
    --  Finalize the node list to release the allocated memory.

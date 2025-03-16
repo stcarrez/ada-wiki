@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-nodes -- Wiki Document Internal representation
---  Copyright (C) 2016 - 2024 Stephane Carrez
+--  Copyright (C) 2016 - 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -15,9 +15,6 @@ package Wiki.Nodes is
                       N_HORIZONTAL_RULE,
                       N_TOC_DISPLAY,
                       N_PARAGRAPH,
-                      N_LIST_ITEM_END,
-                      N_LIST_END,
-                      N_NUM_LIST_END,
                       N_LIST_ITEM,
                       N_END_DEFINITION,
                       N_NEWLINE,
@@ -35,7 +32,9 @@ package Wiki.Nodes is
                       --  Nodes with children and attributes.
                       N_TAG_START,
                       N_TABLE,
+                      N_ROW_HEADER,
                       N_ROW,
+                      N_ROW_FOOTER,
                       N_COLUMN,
 
                       N_TOC,
@@ -44,11 +43,22 @@ package Wiki.Nodes is
                       N_TEXT,
                       N_LINK,
                       N_LINK_REF,
-                      N_LINK_REF_END,
+                      N_IMAGE_REF,
                       N_IMAGE);
 
    --  Node kinds which are simple markers in the document.
    subtype Simple_Node_Kind is Node_Kind range N_NONE .. N_NEWLINE;
+
+   subtype Row_Kind is Node_Kind range N_ROW_HEADER .. N_ROW_FOOTER;
+
+   type Align_Style is (ALIGN_DEFAULT, ALIGN_LEFT, ALIGN_RIGHT, ALIGN_CENTER);
+
+   type Column_Style is record
+      Format : Align_Style := ALIGN_DEFAULT;
+      Width  : Natural := 0;
+   end record;
+
+   type Column_Array_Style is array (Positive range <>) of Column_Style;
 
    type Node_List is limited private;
    type Node_List_Access is access all Node_List;
@@ -63,16 +73,17 @@ package Wiki.Nodes is
          when N_HEADER | N_BLOCKQUOTE | N_INDENT
             | N_NUM_LIST_START | N_LIST_START | N_DEFINITION | N_DEFINITION_TERM =>
             Level  : Natural := 0;
+            Loose  : Boolean := False;
 
          when N_TEXT =>
             Format : Format_Map;
             Text   : Wiki.Strings.WString (1 .. Len);
 
-         when N_LINK | N_IMAGE | N_QUOTE | N_LINK_REF =>
+         when N_LINK | N_IMAGE | N_QUOTE | N_LINK_REF | N_IMAGE_REF =>
             Link_Attr  : Wiki.Attributes.Attribute_List;
             Title      : Wiki.Strings.WString (1 .. Len);
 
-         when N_TAG_START | N_TABLE | N_ROW | N_COLUMN =>
+         when N_TAG_START | N_ROW_HEADER | N_ROW | N_ROW_FOOTER | N_COLUMN =>
             Tag_Start  : Html_Tag;
             Attributes : Wiki.Attributes.Attribute_List;
 
@@ -83,6 +94,9 @@ package Wiki.Nodes is
          when N_TOC_ENTRY =>
             Header    : Wiki.Strings.WString (1 .. Len);
             Toc_Level : Natural := 0;
+
+         when N_TABLE =>
+            Columns   : Column_Array_Style (1 .. Len);
 
          when others =>
             null;
@@ -100,6 +114,15 @@ package Wiki.Nodes is
 
    --  Finalize the node list to release the allocated memory.
    procedure Finalize (List : in out Node_List);
+
+   --  Find the closest row or header rom from a leaf node.
+   function Find_Row (From : in Node_Type) return Node_Type_Access;
+
+   --  Find the closest table node from a leaf node.
+   function Find_Table (From : in Node_Type) return Node_Type_Access;
+
+   --  Find the closest list node from a leaf node.
+   function Find_List (From : in Node_Type) return Node_Type_Access;
 
 private
 
