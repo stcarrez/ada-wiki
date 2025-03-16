@@ -10,6 +10,10 @@ with Wiki.Helpers;
 with Wiki.Nodes.Lists;
 package body Wiki.Render.Html is
 
+   use type Wiki.Nodes.Node_List_Access;
+   use type Wiki.Nodes.Node_Kind;
+   use type Wiki.Nodes.Node_Type_Access;
+
    procedure Close_Paragraph (Engine : in out Html_Renderer);
    procedure Open_Paragraph (Engine : in out Html_Renderer);
 
@@ -30,16 +34,14 @@ package body Wiki.Render.Html is
    --  Render a link.
    procedure Render_Link (Engine : in out Html_Renderer;
                           Doc    : in Wiki.Documents.Document;
+                          Node   : in Wiki.Nodes.Node_Type;
                           Title  : in Wiki.Strings.WString;
                           Attr   : in Wiki.Attributes.Attribute_List);
-
-   procedure Render_Link_Ref (Engine : in out Html_Renderer;
-                              Doc    : in Wiki.Documents.Document;
-                              Label  : in Wiki.Strings.WString);
 
    --  Render an image.
    procedure Render_Image (Engine : in out Html_Renderer;
                            Doc    : in Wiki.Documents.Document;
+                           Node   : in Wiki.Nodes.Node_Type;
                            Title  : in Wiki.Strings.WString;
                            Attr   : in Wiki.Attributes.Attribute_List);
 
@@ -104,7 +106,7 @@ package body Wiki.Render.Html is
 
    --  ------------------------------
    --  Returns true if the HTML element being included is already contained in a paragraph.
-   --  This include: a, em, strong, small, b, i, u, s, span, ins, del, sub, sup.
+   --  This include: a, em, strong, small, b, i, u, s, span, sub, sup.
    --  ------------------------------
    function Has_Html_Paragraph (Engine : in Html_Renderer) return Boolean is
    begin
@@ -112,7 +114,7 @@ package body Wiki.Render.Html is
         | Wiki.A_TAG | Wiki.EM_TAG | Wiki.STRONG_TAG
         | Wiki.SMALL_TAG | Wiki.B_TAG | Wiki.I_TAG
         | Wiki.U_TAG | Wiki.S_TAG | Wiki.SUB_TAG
-        | Wiki.SUP_TAG | Wiki.INS_TAG | Wiki.DEL_TAG;
+        | Wiki.SUP_TAG;
    end Has_Html_Paragraph;
 
    --  ------------------------------
@@ -168,11 +170,13 @@ package body Wiki.Render.Html is
             end if;
 
          when Wiki.Nodes.N_HORIZONTAL_RULE =>
-            if Engine.Html_Level = 0 or else not Engine.Has_Html_Paragraph then
-               Engine.Close_Paragraph;
-               Engine.Add_Blockquote (0);
-            end if;
-            Engine.Output.Write ("<hr>");
+            --  if Engine.Html_Level = 0 or else not Engine.Has_Html_Paragraph then
+            --
+            --   Engine.Add_Blockquote (0);
+            --  end if;
+            Engine.Close_Paragraph;
+            Engine.Output.Start_Element ("hr");
+            Engine.Output.End_Element ("hr");
 
          when Wiki.Nodes.N_PARAGRAPH =>
             --  Close the paragraph and start a new one except if the current HTML
@@ -189,23 +193,18 @@ package body Wiki.Render.Html is
          when Wiki.Nodes.N_INDENT =>
             null;
 
-         when Wiki.Nodes.N_LIST_END =>
-            Engine.Render_List_End ("ul");
-
-         when Wiki.Nodes.N_NUM_LIST_END =>
-            Engine.Render_List_End ("ol");
-
-         when Wiki.Nodes.N_LIST_ITEM_END =>
-            Engine.Render_List_End ("li");
-
          when Wiki.Nodes.N_LIST_START =>
             Engine.Render_List_Start ("ul", Node.Level);
+            Engine.Render (Doc, Node.Children);
+            Engine.Render_List_End ("ul");
 
          when Wiki.Nodes.N_NUM_LIST_START =>
             Engine.Render_List_Start ("ol", Node.Level);
+            Engine.Render (Doc, Node.Children);
+            Engine.Render_List_End ("ol");
 
          when Wiki.Nodes.N_LIST_ITEM =>
-            Engine.Render_List_Item;
+            Engine.Render_List_Item (Doc, Node);
 
          when Wiki.Nodes.N_TEXT =>
             Engine.Add_Text (Text   => Node.Text,
@@ -214,17 +213,11 @@ package body Wiki.Render.Html is
          when Wiki.Nodes.N_QUOTE =>
             Engine.Render_Quote (Doc, Node.Title, Node.Link_Attr);
 
-         when Wiki.Nodes.N_LINK =>
-            Engine.Render_Link (Doc, Node.Title, Node.Link_Attr);
+         when Wiki.Nodes.N_LINK | Wiki.Nodes.N_LINK_REF =>
+            Engine.Render_Link (Doc, Node, Node.Title, Node.Link_Attr);
 
-         when Wiki.Nodes.N_LINK_REF =>
-            Engine.Render_Link_Ref (Doc, Node.Title);
-
-         when Wiki.Nodes.N_LINK_REF_END =>
-            Engine.Output.End_Element ("a");
-
-         when Wiki.Nodes.N_IMAGE =>
-            Engine.Render_Image (Doc, Node.Title, Node.Link_Attr);
+         when Wiki.Nodes.N_IMAGE | Wiki.Nodes.N_IMAGE_REF =>
+            Engine.Render_Image (Doc, Node, Node.Title, Node.Link_Attr);
 
          when Wiki.Nodes.N_BLOCKQUOTE =>
             Engine.Add_Blockquote (Node.Level);
@@ -244,11 +237,16 @@ package body Wiki.Render.Html is
          when Wiki.Nodes.N_TABLE =>
             Engine.Render_Table (Doc, Node, "table", "wiki-table");
 
-         when Wiki.Nodes.N_ROW =>
+         when Wiki.Nodes.N_ROW | Wiki.Nodes.N_ROW_HEADER | Wiki.Nodes.N_ROW_FOOTER =>
+            Engine.Row_Kind := Node.Kind;
+            Engine.Column := 0;
             Engine.Render_Table (Doc, Node, "tr", "");
 
          when Wiki.Nodes.N_COLUMN =>
-            Engine.Render_Table (Doc, Node, "td", "");
+            Engine.Column := Engine.Column + 1;
+            Engine.Render_Table (Doc, Node,
+                                 (if Engine.Row_Kind = Wiki.Nodes.N_ROW_HEADER
+                                  then "th" else "td"), "");
 
       end case;
    end Render;
@@ -260,7 +258,7 @@ package body Wiki.Render.Html is
       Iter         : Wiki.Attributes.Cursor := Wiki.Attributes.First (Node.Attributes);
       Previous_Tag : constant Wiki.Html_Tag := Engine.Html_Tag;
       Prev_Para    : Boolean := Engine.Has_Paragraph;
-      Format       : constant Wiki.Format_Map := Engine.Format;
+      Format       : constant Wiki.Format_Map := Engine.Current_Format;
    begin
       if Node.Tag_Start = Wiki.P_TAG then
          Engine.Has_Paragraph := True;
@@ -281,12 +279,17 @@ package body Wiki.Render.Html is
       then
          Engine.Open_Paragraph;
          Prev_Para := Engine.Has_Paragraph;
-      elsif Node.Tag_Start = Wiki.BR_TAG then
-         Engine.Output.Write ("<br>");
-         return;
-      elsif Node.Tag_Start = Wiki.HR_TAG then
-         Engine.Output.Write ("<hr>");
-         return;
+      --  elsif Node.Tag_Start = Wiki.BR_TAG then
+      --   Engine.Output.Write ("<br>");
+      --   return;
+      --  elsif Node.Tag_Start = Wiki.HR_TAG then
+      --   Engine.Output.Write ("<hr>");
+      --   return;
+      elsif Node.Tag_Start = Wiki.PRE_TAG then
+         Engine.Has_Paragraph := False;
+         Engine.Need_Paragraph := False;
+         Engine.Open_Paragraph;
+         Engine.Output.Set_Enable_Indent (False);
       else
          Engine.Has_Paragraph := False;
          Engine.Need_Paragraph := False;
@@ -303,17 +306,18 @@ package body Wiki.Render.Html is
       Engine.Render (Doc, Node.Children);
       Engine.Html_Tag := Previous_Tag;
       Engine.Html_Level := Engine.Html_Level - 1;
+      Engine.Set_Format (Format);
       if Node.Tag_Start = Wiki.P_TAG then
-         Engine.Set_Format (Format);
          Engine.Has_Paragraph := False;
          Engine.Need_Paragraph := True;
       elsif Node.Tag_Start in Wiki.UL_TAG | Wiki.OL_TAG | Wiki.DL_TAG
         | Wiki.DT_TAG | Wiki.DD_TAG | Wiki.LI_TAG
         | Wiki.H1_TAG | Wiki.H2_TAG | Wiki.H3_TAG
         | Wiki.H4_TAG | Wiki.H5_TAG
-        | Wiki.H6_TAG | Wiki.DIV_TAG | Wiki.TABLE_TAG
+              | Wiki.H6_TAG | Wiki.DIV_TAG | Wiki.TABLE_TAG
+                | Wiki.INS_TAG | Wiki.DEL_TAG
       then
-         Engine.Set_Format (Format);
+         --  Engine.Set_Format (Format);
          Engine.Close_Paragraph;
          Engine.Has_Paragraph := False;
          Engine.Need_Paragraph := True;
@@ -321,10 +325,13 @@ package body Wiki.Render.Html is
          --  Leaving the HTML text-element, restore the previous paragraph state.
          Engine.Has_Paragraph := Prev_Para;
       end if;
-      if Node.Tag_Start = Wiki.A_TAG then
-         Engine.Set_Format (Format);
-      end if;
+      --  if Node.Tag_Start = Wiki.A_TAG then
+      --   Engine.Set_Format (Format);
+      --  end if;
       Engine.Output.End_Element (Name.all);
+      if Node.Tag_Start = Wiki.PRE_TAG then
+         Engine.Output.Set_Enable_Indent (True);
+      end if;
    end Render_Tag;
 
    --  ------------------------------
@@ -333,8 +340,9 @@ package body Wiki.Render.Html is
    procedure Render_Header (Engine : in out Html_Renderer;
                             Doc    : in Wiki.Documents.Document;
                             Node   : in Wiki.Nodes.Node_Type) is
-      Level : constant List_Index_Type := List_Index_Type (Node.Level);
-      Tag   : String_Access;
+      Level  : constant List_Index_Type := List_Index_Type (Node.Level);
+      Format : constant Format_Map := Engine.Current_Format;
+      Tag    : String_Access;
    begin
       if Engine.Enable_Render_TOC
         and then not Engine.TOC_Rendered
@@ -375,6 +383,7 @@ package body Wiki.Render.Html is
       end if;
       Engine.Need_Paragraph := False;
       Engine.Render (Doc, Node.Children);
+      Engine.Set_Format (Format);
       Engine.Output.End_Element (Tag.all);
       Engine.Newline;
    end Render_Header;
@@ -517,7 +526,11 @@ package body Wiki.Render.Html is
    --  Render a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
    --  ------------------------------
-   procedure Render_List_Item (Engine   : in out Html_Renderer) is
+   procedure Render_List_Item (Engine : in out Html_Renderer;
+                               Doc    : in Wiki.Documents.Document;
+                               Node   : in Wiki.Nodes.Node_Type) is
+      Prev_Loose_List : constant Boolean := Engine.Loose_List;
+      List : Wiki.Nodes.Node_Type_Access := Wiki.Nodes.Find_List (Node);
    begin
       if Engine.Has_Paragraph then
          Engine.Output.End_Element ("p");
@@ -525,6 +538,15 @@ package body Wiki.Render.Html is
       end if;
       Engine.Output.Start_Element ("li");
       Engine.Has_Item := False;
+      if Node.Children /= null then
+         Engine.Loose_List := List /= null and then List.Loose;
+         if Engine.Loose_List then
+            Engine.Need_Paragraph := True;
+         end if;
+         Engine.Render (Doc, Node.Children);
+      end if;
+      Engine.Render_List_End ("li");
+      Engine.Loose_List := Prev_Loose_List;
    end Render_List_Item;
 
    procedure Newline (Engine : in out Html_Renderer) is
@@ -569,12 +591,14 @@ package body Wiki.Render.Html is
    begin
       if Engine.Need_Paragraph then
          Engine.Output.Start_Element ("p");
+         Engine.Html_Stack.Push (P_TAG);
          Engine.Has_Paragraph  := True;
          Engine.Need_Paragraph := False;
       end if;
       if Engine.Current_Level > 0 and then not Engine.Has_Item then
          Engine.Output.Start_Element ("li");
          Engine.Has_Item := True;
+         Engine.Html_Stack.Push (LI_TAG);
       end if;
    end Open_Paragraph;
 
@@ -583,6 +607,7 @@ package body Wiki.Render.Html is
    --  ------------------------------
    procedure Render_Link (Engine : in out Html_Renderer;
                           Doc    : in Wiki.Documents.Document;
+                          Node   : in Wiki.Nodes.Node_Type;
                           Title  : in Wiki.Strings.WString;
                           Attr   : in Wiki.Attributes.Attribute_List) is
 
@@ -616,34 +641,47 @@ package body Wiki.Render.Html is
            Wiki.Attributes.Get_Attribute (Attr, "label");
    begin
       Engine.Open_Paragraph;
-      if Label'Length = 0 then
+      if Node.Kind = Nodes.N_LINK then
          Engine.Output.Start_Element ("a");
          Wiki.Attributes.Iterate (Attr, Render_Attribute'Access);
-         Engine.Output.Write_Wide_Text (Title);
+         if Node.Children /= null then
+            Engine.Render (Doc, Node.Children);
+         elsif Title'Length > 0 then
+            --  Print the title only when it is not empty to avoid <a> </a>.
+            Engine.Output.Write_Wide_Text (Title);
+         end if;
          Engine.Output.End_Element ("a");
       else
          declare
             Link : constant Wiki.Strings.WString
-              := Doc.Get_Link (Label);
+              := Doc.Get_Link (Title);
          begin
-            if Link'Length = 0 then
+            if not Doc.Has_Link (Title) then
                Engine.Output.Write_Wide_Text ("[");
-               Engine.Output.Write_Wide_Text (Label);
+               if Node.Children /= null then
+                  Engine.Render (Doc, Node.Children);
+               else
+                  Engine.Output.Write_Wide_Text (Title);
+               end if;
                Engine.Output.Write_Wide_Text ("]");
             else
                Engine.Output.Start_Element ("a");
                declare
-                  URI    : Wiki.Strings.UString;
-                  Exists : Boolean;
-                  Title  : constant Wiki.Strings.WString := Doc.Get_Link_Title (Label);
+                  URI       : Wiki.Strings.UString;
+                  Exists    : Boolean;
+                  Ref_Title : constant Wiki.Strings.WString := Doc.Get_Link_Title (Title);
                begin
                   Engine.Links.Make_Page_Link (Link, URI, Exists);
                   Engine.Output.Write_Wide_Attribute ("href", URI);
-                  if Title'Length > 0 then
-                     Engine.Output.Write_Wide_Attribute ("title", Title);
+                  if Ref_Title'Length > 0 then
+                     Engine.Output.Write_Wide_Attribute ("title", Ref_Title);
+                  end if;
+                  if Node.Children /= null then
+                     Engine.Render (Doc, Node.Children);
+                  else
+                     Engine.Output.Write_Wide_Text (Title);
                   end if;
                end;
-               Engine.Output.Write_Wide_Text (Title);
                Engine.Output.End_Element ("a");
             end if;
          end;
@@ -651,45 +689,13 @@ package body Wiki.Render.Html is
    end Render_Link;
 
    --  ------------------------------
-   --  Render a link.
-   --  ------------------------------
-   procedure Render_Link_Ref (Engine : in out Html_Renderer;
-                              Doc    : in Wiki.Documents.Document;
-                              Label  : in Wiki.Strings.WString) is
-      Link : constant Wiki.Strings.WString := Doc.Get_Link (Label);
-   begin
-      Engine.Open_Paragraph;
-      if Link'Length = 0 then
-         Engine.Output.Write_Wide_Text ("[");
-         Engine.Output.Write_Wide_Text (Label);
-         Engine.Output.Write_Wide_Text ("]");
-      else
-         Engine.Output.Start_Element ("a");
-         declare
-            URI    : Wiki.Strings.UString;
-            Exists : Boolean;
-            Title  : constant Wiki.Strings.WString := Doc.Get_Link_Title (Label);
-         begin
-            Engine.Links.Make_Page_Link (Link, URI, Exists);
-            Engine.Output.Write_Wide_Attribute ("href", URI);
-            if Title'Length > 0 then
-               Engine.Output.Write_Wide_Attribute ("title", Title);
-            end if;
-         end;
-         Engine.Output.Write_Wide_Text (Label);
-         Engine.Output.End_Element ("a");
-      end if;
-   end Render_Link_Ref;
-
-   --  ------------------------------
    --  Render an image.
    --  ------------------------------
    procedure Render_Image (Engine : in out Html_Renderer;
                            Doc    : in Wiki.Documents.Document;
+                           Node   : in Wiki.Nodes.Node_Type;
                            Title  : in Wiki.Strings.WString;
                            Attr   : in Wiki.Attributes.Attribute_List) is
-      pragma Unreferenced (Doc);
-
       Src        : constant Strings.WString := Attributes.Get_Attribute (Attr, "src");
       Alt        : constant Strings.WString := Attributes.Get_Attribute (Attr, "alt");
       Desc       : constant Strings.WString := Attributes.Get_Attribute (Attr, "longdesc");
@@ -735,8 +741,26 @@ package body Wiki.Render.Html is
          Wiki.Helpers.Get_Sizes (Size, Width, Height);
       end if;
       Engine.Output.Start_Element ("img");
-      Engine.Links.Make_Image_Link (Src, URI, Width, Height);
-      Engine.Output.Write_Wide_Attribute ("src", URI);
+      if Node.Kind = Nodes.N_IMAGE then
+         Engine.Links.Make_Image_Link (Src, URI, Width, Height);
+         Engine.Output.Write_Wide_Attribute ("src", URI);
+         if Title_Attr'Length > 0 then
+            Engine.Output.Write_Wide_Attribute ("title", Title_Attr);
+         end if;
+      else
+         declare
+            Link : constant Wiki.Strings.WString
+              := Doc.Get_Link (Title);
+            Img_Title : constant Wiki.Strings.WString
+              := Doc.Get_Link_Title (Title);
+         begin
+            Engine.Links.Make_Image_Link (Link, URI, Width, Height);
+            Engine.Output.Write_Wide_Attribute ("src", URI);
+            if Img_Title'Length > 0 then
+               Engine.Output.Write_Wide_Attribute ("title", Img_Title);
+            end if;
+         end;
+      end if;
       if Width > 0 then
          Engine.Output.Write_Attribute ("width", Util.Strings.Image (Width));
       end if;
@@ -756,9 +780,6 @@ package body Wiki.Render.Html is
          Engine.Output.Write_Wide_Attribute ("alt", Title);
       elsif Alt'Length > 0 then
          Engine.Output.Write_Wide_Attribute ("alt", Alt);
-      end if;
-      if Title_Attr'Length > 0 then
-         Engine.Output.Write_Wide_Attribute ("title", Title_Attr);
       end if;
 
       Engine.Output.End_Element ("img");
@@ -860,15 +881,31 @@ package body Wiki.Render.Html is
    --  ------------------------------
    procedure Set_Format (Engine : in out Html_Renderer;
                          Format : in Wiki.Format_Map) is
+
+      procedure Pop (Fmt : in Format_Type) is
+      begin
+         for I in 1 .. Engine.Fmt_Stack_Size loop
+            if Engine.Fmt_Stack (I) = Fmt then
+               while Engine.Fmt_Stack_Size >= I loop
+                  Engine.Output.End_Element (HTML_ELEMENT (Engine.Fmt_Stack (Engine.Fmt_Stack_Size)).all);
+                  Engine.Fmt_Stack_Size := Engine.Fmt_Stack_Size - 1;
+               end loop;
+               return;
+            end if;
+         end loop;
+      end Pop;
+
    begin
       for I in reverse Format'Range loop
          if not Format (I) and then Engine.Current_Format (I) then
-            Engine.Output.End_Element (HTML_ELEMENT (I).all);
+            Pop (I);
          end if;
       end loop;
       for I in Format'Range loop
          if Format (I) and then not Engine.Current_Format (I) then
             Engine.Output.Start_Element (HTML_ELEMENT (I).all);
+            Engine.Fmt_Stack_Size := Engine.Fmt_Stack_Size + 1;
+            Engine.Fmt_Stack (Engine.Fmt_Stack_Size) := I;
          end if;
       end loop;
       Engine.Current_Format := Format;
@@ -886,17 +923,26 @@ package body Wiki.Render.Html is
          Engine.Output.Write (Text);
       else
          Engine.Output.Start_Element ("pre");
+         Engine.Output.Set_Enable_Indent (False);
          if Format'Length > 0 then
             Engine.Output.Start_Element ("code");
-            Engine.Output.Write_Attribute ("class", "lang-" & Strings.To_String (Format));
-            Engine.Output.Write_Wide_Text (Text);
+            Engine.Output.Write_Attribute ("class", "language-" & Strings.To_String (Format));
+            if Text'Length > 0 then
+               Engine.Output.Write_Wide_Text (Text);
+            end if;
             Engine.Output.End_Element ("code");
          else
             Engine.Output.Start_Element ("code");
-            Engine.Output.Write_Wide_Text (Text);
+            if Text'Length > 0 then
+               Engine.Output.Write_Wide_Text (Text);
+            end if;
             Engine.Output.End_Element ("code");
          end if;
          Engine.Output.End_Element ("pre");
+         Engine.Output.Set_Enable_Indent (True);
+      end if;
+      if Engine.Loose_List then
+         Engine.Need_Paragraph := True;
       end if;
    end Render_Preformatted;
 
@@ -908,22 +954,43 @@ package body Wiki.Render.Html is
                            Node   : in Wiki.Nodes.Node_Type;
                            Tag    : in String;
                            Class  : in String) is
-      Iter         : Wiki.Attributes.Cursor := Wiki.Attributes.First (Node.Attributes);
+
+      function Get_Class (Style : in Nodes.Align_Style) return String is
+      begin
+         case Style is
+            when Nodes.ALIGN_LEFT =>
+               return "wiki-left" & (if Class /= "" then " " & Class else "");
+            when Nodes.ALIGN_RIGHT =>
+               return "wiki-right" & (if Class /= "" then " " & Class else "");
+            when Nodes.ALIGN_CENTER =>
+               return "wiki-center" & (if Class /= "" then " " & Class else "");
+            when others =>
+               return Class;
+         end case;
+      end Get_Class;
+
+      Table : constant Nodes.Node_Type_Access := Wiki.Nodes.Find_Table (Node);
+      Style : Wiki.Nodes.Column_Style;
    begin
       Engine.Close_Paragraph;
       Engine.Need_Paragraph := False;
       Engine.Has_Paragraph := False;
       Engine.Open_Paragraph;
 
-      Engine.Output.Start_Element (Tag);
-      if Class'Length > 0 then
-         Engine.Output.Write_Attribute ("class", Class);
+      if Table /= null
+        and then Engine.Column >= 1
+        and then Engine.Column <= Table.Columns'Last
+      then
+         Style := Table.Columns (Engine.Column);
       end if;
-      while Wiki.Attributes.Has_Element (Iter) loop
-         Engine.Output.Write_Wide_Attribute (Name    => Wiki.Attributes.Get_Name (Iter),
-                                             Content => Wiki.Attributes.Get_Wide_Value (Iter));
-         Wiki.Attributes.Next (Iter);
-      end loop;
+      Engine.Output.Start_Element (Tag);
+      declare
+         Value : constant String := Get_Class (Style.Format);
+      begin
+         if Value'Length > 0 then
+            Engine.Output.Write_Attribute ("class", Value);
+         end if;
+      end;
       Engine.Render (Doc, Node.Children);
 
       Engine.Close_Paragraph;

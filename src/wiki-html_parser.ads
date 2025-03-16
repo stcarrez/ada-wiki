@@ -27,7 +27,9 @@ private package Wiki.Html_Parser is
    function Is_Empty (Parser : in Parser_Type) return Boolean;
 
    --  Parse a HTML element `<XXX attributes>` or parse an end of HTML element </XXX>
-   --  The first '<' is assumed to have been already verified.
+   --  The first '<' is assumed to have been already verified.  When the HTML element
+   --  is scanned, the `Process` procedure is call with the element name and the
+   --  attributes (if any).
    procedure Parse_Element (Parser  : in out Parser_Type;
                             Text    : in Wiki.Strings.WString;
                             From    : in Positive;

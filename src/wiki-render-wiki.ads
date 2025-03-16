@@ -68,8 +68,10 @@ package Wiki.Render.Wiki is
 
    --  Render a link.
    procedure Render_Link (Engine : in out Wiki_Renderer;
-                          Name     : in Strings.WString;
-                          Attrs    : in Attributes.Attribute_List);
+                          Doc    : in Documents.Document;
+                          Node   : in Nodes.Node_Type;
+                          Name   : in Strings.WString;
+                          Attrs  : in Attributes.Attribute_List);
 
    --  Render an image.
    procedure Render_Image (Engine : in out Wiki_Renderer;

@@ -7,6 +7,7 @@
 with Wiki.Streams.Html;
 with Wiki.Strings;
 with Wiki.Render.Links;
+private with Wiki.Stacks;
 
 --  === HTML Renderer ===
 --  The `Html_Renderer` allows to render a wiki document into an HTML content.
@@ -16,7 +17,7 @@ package Wiki.Render.Html is
    --  ------------------------------
    --  Wiki to HTML renderer
    --  ------------------------------
-   type Html_Renderer is new Renderer with private;
+   type Html_Renderer is limited new Renderer with private;
 
    --  Set the output stream.
    procedure Set_Output_Stream (Engine : in out Html_Renderer;
@@ -56,7 +57,9 @@ package Wiki.Render.Html is
 
    --  Render a list item (<li>).  Close the previous paragraph and list item if any.
    --  The list item will be closed at the next list item, next paragraph or next header.
-   procedure Render_List_Item (Engine   : in out Html_Renderer);
+   procedure Render_List_Item (Engine : in out Html_Renderer;
+                               Doc    : in Wiki.Documents.Document;
+                               Node   : in Wiki.Nodes.Node_Type);
 
    --  Render a list item end (</ul> or </ol>).
    --  Close the previous paragraph and list item if any.
@@ -91,13 +94,24 @@ package Wiki.Render.Html is
 
 private
 
+   type Html_Tag_Access is access all Html_Tag;
+
    type List_Style_Array is array (1 .. 32) of Boolean;
+
+   type Format_Stack is array (Positive range 1 .. Format_Map'Length) of Format_Type;
+
+   package Tag_Stacks is
+     new Wiki.Stacks (Element_Type        => Html_Tag,
+                      Element_Type_Access => Html_Tag_Access);
 
    Default_Links : aliased Wiki.Render.Links.Default_Link_Renderer;
 
-   type Html_Renderer is new Renderer with record
+   type Html_Renderer is limited new Renderer with record
       Output            : Wiki.Streams.Html.Html_Output_Stream_Access := null;
       Format            : Wiki.Format_Map := (others => False);
+      Current_Format    : Format_Map := (others => False);
+      Fmt_Stack         : Format_Stack;
+      Fmt_Stack_Size    : Natural := 0;
       Links             : Wiki.Render.Links.Link_Renderer_Access := Default_Links'Access;
       Has_Paragraph     : Boolean := False;
       Need_Paragraph    : Boolean := False;
@@ -105,8 +119,10 @@ private
       Enable_Render_TOC : Boolean := False;
       TOC_Rendered      : Boolean := False;
       No_Newline        : Boolean := False;
+      Loose_List        : Boolean := False;
       Current_Level     : Natural := 0;
       Html_Tag          : Wiki.Html_Tag := BODY_TAG;
+      Html_Stack        : Tag_Stacks.Stack;
       List_Styles       : List_Style_Array := (others => False);
       Quote_Level       : Natural := 0;
       Html_Level        : Natural := 0;
@@ -114,7 +130,7 @@ private
       Section_Level     : List_Index_Type := 0;
       Column            : Natural := 0;
       In_Definition     : Boolean := False;
-      Current_Format    : Format_Map := (others => False);
+      Row_Kind          : Nodes.Row_Kind;
    end record;
 
 end Wiki.Render.Html;

@@ -1,10 +1,11 @@
 -----------------------------------------------------------------------
 --  wiki-plugins-variables -- Variables plugin
---  Copyright (C) 2020, 2021 Stephane Carrez
+--  Copyright (C) 2020, 2021, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
 with Wiki.Filters.Variables;
+with Wiki.Nodes;
 package body Wiki.Plugins.Variables is
 
    --  ------------------------------
@@ -51,8 +52,13 @@ package body Wiki.Plugins.Variables is
       procedure Print_Variable (Name  : in Wiki.Strings.WString;
                                 Value : in Wiki.Strings.WString) is
       begin
+         if not Has_Table then
+            Context.Filters.Add_Table (Document,
+                                       (1 => (Width => 40, others =><>),
+                                        2 => (Width => 60, others => <>)));
+         end if;
          Has_Table := True;
-         Context.Filters.Add_Row (Document);
+         Context.Filters.Add_Row (Document, Nodes.N_ROW);
          Context.Filters.Add_Column (Document, Attributes);
          Context.Filters.Add_Text (Document, Name, Format);
          Context.Filters.Add_Column (Document, Attributes);

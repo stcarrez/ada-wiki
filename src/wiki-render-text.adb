@@ -4,11 +4,16 @@
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
+with Ada.Unchecked_Deallocation;
 with Wiki.Helpers;
 with Util.Strings;
+with Wiki.Nodes.Lists;
 package body Wiki.Render.Text is
 
    use type Wiki.Nodes.Node_Kind;
+   use type wiki.Nodes.Align_Style;
+   use type Nodes.Node_List_Access;
+   use type Wiki.Nodes.Node_Type_Access;
 
    Empty_Formats : constant Format_Map := (others => False);
 
@@ -79,6 +84,7 @@ package body Wiki.Render.Text is
       Document.Empty_Line := True;
       Document.Current_Indent := 0;
       Document.Has_Space := False;
+      Document.Need_Space := False;
    end New_Line;
 
    procedure Close_Paragraph (Document : in out Text_Renderer) is
@@ -125,27 +131,31 @@ package body Wiki.Render.Text is
       end loop;
    end Render_Blockquote;
 
-   procedure Render_List_Start (Engine   : in out Text_Renderer;
-                                Tag      : in String;
-                                Level    : in Natural) is
+   procedure Render_List (Engine   : in out Text_Renderer;
+                          Doc      : in Wiki.Documents.Document;
+                          Node     : in Nodes.Node_Type;
+                          Tag      : in String;
+                          Level    : in Natural) is
       pragma Unreferenced (Tag);
+      List : Wiki.Nodes.Node_Type_Access := Wiki.Nodes.Find_List (Node);
    begin
-      Engine.New_Line;
-      Engine.Need_Paragraph := False;
-      Engine.Open_Paragraph;
+      if List = null or else List.Loose then
+         Engine.New_Line;
+         Engine.Need_Paragraph := False;
+         Engine.Open_Paragraph;
+      else
+         Engine.Close_Paragraph;
+      end if;
       Engine.List_Index := Engine.List_Index + 1;
       Engine.List_Levels (Engine.List_Index) := Level;
       Engine.Indent_Level := Engine.Indent_Level + 2;
       Engine.Current_Indent := 0;
-   end Render_List_Start;
-
-   procedure Render_List_End (Engine   : in out Text_Renderer) is
-   begin
+      Engine.Render (Doc, Node.Children);
       Engine.Need_Paragraph := False;
       Engine.Close_Paragraph;
       Engine.List_Index := Engine.List_Index - 1;
       Engine.Indent_Level := Engine.Indent_Level - 2;
-   end Render_List_End;
+   end Render_List;
 
    --  ------------------------------
    --  Render a list item (<li>).  Close the previous paragraph and list item if any.
@@ -155,6 +165,9 @@ package body Wiki.Render.Text is
    begin
       Engine.Need_Paragraph := False;
       Engine.Open_Paragraph;
+      if Engine.Separate_Items and then not Engine.Empty_Line then
+         Engine.New_Line;
+      end if;
 
       if Engine.List_Index > 0 and then Engine.List_Levels (Engine.List_Index) > 0 then
          Engine.Render_Paragraph (Nodes.N_LIST_ITEM,
@@ -188,40 +201,48 @@ package body Wiki.Render.Text is
    --  Render a link.
    --  ------------------------------
    procedure Render_Link (Engine : in out Text_Renderer;
+                          Doc    : in Wiki.Documents.Document;
+                          Node   : in Nodes.Node_Type;
                           Title  : in Wiki.Strings.WString;
                           Attr   : in Wiki.Attributes.Attribute_List) is
-      Href : constant Wiki.Strings.WString := Wiki.Attributes.Get_Attribute (Attr, "href");
+      Href  : constant Wiki.Strings.WString := Wiki.Attributes.Get_Attribute (Attr, "href");
+      Previous_Mode : constant Nodes.Node_Kind := Engine.Current_Mode;
    begin
-      if Title'Length /= 0 then
-         Engine.Render_Paragraph (Nodes.N_LINK, Title, (others => False));
-      end if;
-      if Title /= Href and then Href'Length /= 0 and then Engine.Display_Links then
-         if Title'Length /= 0 then
-            Engine.Render_Paragraph (Nodes.N_LINK, " (", (others => False));
+      if Node.Kind = Nodes.N_LINK then
+         if Node.Children /= null then
+            Engine.Current_Mode := Nodes.N_LINK;
+            Engine.Render (Doc, Node.Children);
+            Engine.Current_Mode := Previous_Mode;
+         else
+            if Title'Length /= 0 then
+               Engine.Render_Paragraph (Nodes.N_LINK, Title, (others => False));
+            end if;
+            if Href'Length /= 0 and then Engine.Display_Links then
+               if Title'Length /= 0 then
+                  Engine.Render_Paragraph (Nodes.N_LINK, " (", (others => False));
+               end if;
+               Engine.Render_Paragraph (Nodes.N_LINK, Href, (others => False));
+               if Title'Length /= 0 then
+                  Engine.Render_Paragraph (Nodes.N_LINK, ")", (others => False));
+               end if;
+            end if;
          end if;
-         Engine.Output.Write (Href);
-         if Title'Length /= 0 then
-            Engine.Render_Paragraph (Nodes.N_LINK, ")", (others => False));
+      else
+         if not Doc.Has_Link (Title) then
+            Engine.Render_Paragraph (Nodes.N_TEXT, "[", (others => False));
+            Engine.Current_Mode := Nodes.N_LINK;
+            Engine.Render (Doc, Node.Children);
+            Engine.Current_Mode := Previous_Mode;
+            Engine.Render_Paragraph (Nodes.N_TEXT, "]", (others => False));
+         else
+            declare
+               Link_Title : constant Wiki.Strings.WString := Doc.Get_Link_Title (Title);
+            begin
+               Engine.Render_Paragraph (Nodes.N_LINK, Link_Title, (others => False));
+            end;
          end if;
       end if;
    end Render_Link;
-
-   --  ------------------------------
-   --  Render a link reference.
-   --  ------------------------------
-   procedure Render_Link_Ref (Engine : in out Text_Renderer;
-                              Doc    : in Wiki.Documents.Document;
-                              Label  : in Wiki.Strings.WString) is
-      Title  : constant Wiki.Strings.WString := Doc.Get_Link_Title (Label);
-   begin
-      if Title'Length = 0 then
-         Engine.Render_Paragraph (Nodes.N_TEXT, "[", (others => False));
-         Engine.Render_Paragraph (Nodes.N_TEXT, Label, (others => False));
-         Engine.Render_Paragraph (Nodes.N_TEXT, "]", (others => False));
-      else
-         Engine.Render_Paragraph (Nodes.N_LINK, Title, (others => False));
-      end if;
-   end Render_Link_Ref;
 
    --  ------------------------------
    --  Render an image.
@@ -240,6 +261,7 @@ package body Wiki.Render.Text is
       if Desc'Length > 0 then
          Engine.Render_Paragraph (Nodes.N_IMAGE, Desc);
       end if;
+      Engine.Need_Space := True;
    end Render_Image;
 
    --  ------------------------------
@@ -252,9 +274,9 @@ package body Wiki.Render.Text is
    begin
       Engine.Close_Paragraph;
       Text_Renderer'Class (Engine).New_Line;
-      if Engine.Indent_Preformatted = 0 then
-         Text_Renderer'Class (Engine).Write_Text (Nodes.N_PREFORMAT, Text, (others => False));
-      elsif Text'Length > 0 then
+      -- if Engine.Indent_Preformatted = 0 then
+      --   Text_Renderer'Class (Engine).Write_Text (Nodes.N_PREFORMAT, Text, (others => False));
+      if Text'Length > 0 then
          declare
             First : Natural := Text'First;
             Pos   : Natural;
@@ -274,12 +296,16 @@ package body Wiki.Render.Text is
                                                         (others => False));
                Engine.Current_Indent := 1;
                Engine.Add_Line_Break;
+               Engine.Empty_Line := Last >= First;
                exit when Pos >= Text'Last;
                First := Pos + 1;
             end loop;
          end;
-         Engine.Empty_Line := False;
          Engine.New_Line;
+      end if;
+      if Engine.Current_Mode /= Nodes.N_PREFORMAT then
+         Engine.Need_Paragraph := True;
+         Engine.Empty_Line := False;
       end if;
    end Render_Preformatted;
 
@@ -289,9 +315,105 @@ package body Wiki.Render.Text is
    procedure Render_Table (Engine : in out Text_Renderer;
                            Doc    : in Wiki.Documents.Document;
                            Node   : in Wiki.Nodes.Node_Type) is
+      Old_Line_Length : constant Natural := Engine.Line_Length;
+
+      Styles  : Wiki.Nodes.Column_Array_Style := Node.Columns;
+      Columns : Diverter_Array (1 .. Node.Len);
+      Total_W : Natural := 0;
+      Table_W : Natural := Engine.Line_Length;
+      Col_Num : Natural;
+      Previous_Row_Is_Header : Boolean := False;
+
+      procedure Write_Separator is
+      begin
+         Engine.Output.Write ('+');
+         for I in Columns'Range loop
+            for J in 1 .. Styles (I).Width loop
+               Engine.Output.Write ('-');
+            end loop;
+            Engine.Output.Write ('+');
+         end loop;
+         Engine.Output.Write (Helpers.LF);
+      end Write_Separator;
+
+      procedure Process_Column (Column : in Wiki.Nodes.Node_Type) is
+      begin
+         Col_Num := Col_Num + 1;
+         if Col_Num <= Columns'Last then
+            Engine.Diverter := Columns (Col_Num);
+            Engine.Diverter.Clear;
+            Engine.Render (Doc, Column.Children);
+         end if;
+      end Process_Column;
+
+      procedure Process_Row (Row : in Wiki.Nodes.Node_Type) is
+         Line : Natural := 0;
+         More : Boolean := True;
+      begin
+         if Previous_Row_Is_Header then
+            Write_Separator;
+         end if;
+         Previous_Row_Is_Header := Row.Kind in Wiki.Nodes.N_ROW_HEADER | Wiki.Nodes.N_ROW_FOOTER;
+         Col_Num := 0;
+         Nodes.Lists.Iterate (Row.Children, Process_Column'Access);
+
+         while More loop
+            Line := Line + 1;
+            More := False;
+            Engine.Output.Write ('|');
+            for I in Columns'Range loop
+               declare
+                  Is_Last : Boolean;
+               begin
+                  Columns (I).Flush_Line (Engine.Output.all, Line,
+                                          Styles (I).Format, Styles (I).Width,
+                                          Is_Last);
+                  Engine.Output.Write ('|');
+                  if not Is_Last then
+                     More := True;
+                  end if;
+               end;
+            end loop;
+            Engine.Output.Write (Helpers.LF);
+         end loop;
+      end Process_Row;
+
    begin
       Engine.Close_Paragraph;
+      if Table_W = 0 then
+         Table_W := 80;
+      end if;
+      for S of Styles loop
+         Total_W := Total_W + S.Width;
+      end loop;
+      for I in Styles'Range loop
+         Styles (I).Width := (Table_W * Styles (I).Width) / Total_W;
+      end loop;
+      for I in Columns'Range loop
+         Columns (I) := Text_Renderer'Class (Engine).Create_Text_Diverter (Styles (I).Width);
+      end loop;
+      Write_Separator;
+      Nodes.Lists.Iterate (Node.Children, Process_Row'Access);
+      Write_Separator;
+      Engine.Line_Length := Old_Line_Length;
+      Engine.Diverter := null;
+      Release (Columns);
+
+   exception
+      when others =>
+         Release (Columns);
+         Engine.Diverter := null;
+         raise;
    end Render_Table;
+
+   procedure Release (Columns : in out Diverter_Array) is
+      procedure Free is
+        new Ada.Unchecked_Deallocation (Object => Text_Diverter'Class, Name => Text_Diverter_Access);
+   begin
+      for I in Columns'Range loop
+         Free (Columns (I));
+      end loop;
+   end Release;
 
    --  ------------------------------
    --  Render a text block indenting the text if necessary.
@@ -308,6 +430,7 @@ package body Wiki.Render.Text is
          C := Text (I);
          if C = Helpers.LF then
             Engine.Current_Indent := 0;
+            Engine.Need_Space := False;
             Text_Renderer'Class (Engine).Write_Newline;
          elsif C = ' ' and then Engine.Has_Space then
             null;
@@ -316,6 +439,7 @@ package body Wiki.Render.Text is
            and then Wiki.Helpers.Is_Space (C)
          then
             Engine.Current_Indent := 0;
+            Engine.Need_Space := False;
             Text_Renderer'Class (Engine).Write_Newline;
          elsif Engine.Current_Indent /= 0
            or else not Wiki.Helpers.Is_Space (C)
@@ -325,6 +449,13 @@ package body Wiki.Render.Text is
                Engine.Current_Indent := Engine.Current_Indent + 1;
             end loop;
 
+            if Engine.Need_Space then
+               if C /= ' ' then
+                  Engine.Output.Write (' ');
+                  Engine.Current_Indent := Engine.Current_Indent + 1;
+               end if;
+               Engine.Need_Space := False;
+            end if;
             Text_Renderer'Class (Engine).Write_Text (Kind, C & "", Format);
 
             Engine.Has_Space := C = ' ';
@@ -341,7 +472,11 @@ package body Wiki.Render.Text is
                          Text   : in Strings.WString;
                          Format : in Format_Map) is
    begin
-      Engine.Output.Write (Text);
+      if Engine.Diverter /= null then
+         Engine.Diverter.Write_Text (Kind, Text, Format);
+      else
+         Engine.Output.Write (Text);
+      end if;
    end Write_Text;
 
    procedure Write_Newline (Engine : in out Text_Renderer) is
@@ -364,11 +499,16 @@ package body Wiki.Render.Text is
 
          when Wiki.Nodes.N_HORIZONTAL_RULE =>
             Engine.Close_Paragraph;
+            Engine.New_Line;
             Engine.Output.Write ("---------------------------------------------------------");
+            Engine.Empty_Line := False;
             Engine.Add_Line_Break;
 
          when Wiki.Nodes.N_PARAGRAPH =>
-            Engine.New_Line;
+            if not Engine.Has_Paragraph or else Engine.Current_Indent > Engine.Indent_Level then
+               Engine.New_Line;
+               Engine.Has_Paragraph := True;
+            end if;
 
          when Wiki.Nodes.N_NEWLINE =>
             if not Engine.No_Newline then
@@ -384,18 +524,14 @@ package body Wiki.Render.Text is
             Engine.Render_Blockquote (Node.Level);
 
          when Wiki.Nodes.N_LIST_START =>
-            Engine.Render_List_Start ("o", 0);
+            Engine.Render_List (Doc, Node, "o", 0);
 
          when Wiki.Nodes.N_NUM_LIST_START =>
-            Engine.Render_List_Start (".", Node.Level);
-
-         when Wiki.Nodes.N_LIST_END | Wiki.Nodes.N_NUM_LIST_END =>
-            Engine.Render_List_End;
+            Engine.Render_List (Doc, Node, ".", Node.Level);
 
          when Wiki.Nodes.N_LIST_ITEM =>
             Engine.Render_List_Item_Start;
-
-         when Wiki.Nodes.N_LIST_ITEM_END =>
+            Engine.Render (Doc, Node.Children);
             Engine.Render_List_Item_End;
 
          when Wiki.Nodes.N_TEXT =>
@@ -412,11 +548,8 @@ package body Wiki.Render.Text is
          when Wiki.Nodes.N_QUOTE =>
             Engine.Render_Paragraph (Nodes.N_QUOTE, Node.Title, Engine.Format);
 
-         when Wiki.Nodes.N_LINK =>
-            Text_Renderer'Class (Engine).Render_Link (Node.Title, Node.Link_Attr);
-
-         when Wiki.Nodes.N_LINK_REF =>
-            Engine.Render_Link_Ref (Doc, Node.Title);
+         when Wiki.Nodes.N_LINK | Wiki.Nodes.N_LINK_REF =>
+            Text_Renderer'Class (Engine).Render_Link (Doc, Node, Node.Title, Node.Link_Attr);
 
          when Wiki.Nodes.N_IMAGE =>
             Engine.Render_Image (Node.Title, Node.Link_Attr);
@@ -429,6 +562,7 @@ package body Wiki.Render.Text is
 
          when Wiki.Nodes.N_END_DEFINITION =>
             Engine.In_Definition := False;
+            Engine.Has_Paragraph := False;
 
          when Wiki.Nodes.N_TAG_START =>
             Engine.Render_Tag (Doc, Node);
@@ -555,10 +689,12 @@ package body Wiki.Render.Text is
             return;
 
          when UL_TAG =>
-            Engine.Render_List_Start ("", 0);
+            Engine.Render_List (Doc, Node, "", 0);
+            return;
 
          when OL_TAG =>
-            Engine.Render_List_Start ("", 1);
+            Engine.Render_List (Doc, Node, "", 1);
+            return;
 
          when LI_TAG =>
             Engine.Render_List_Item_Start;
@@ -577,11 +713,12 @@ package body Wiki.Render.Text is
       case Node.Tag_Start is
 
          when A_TAG | Q_TAG =>
-            null;
+            Engine.Has_Space := False;
 
          when P_TAG =>
             Engine.Set_Format (Empty_Formats);
             Engine.New_Line;
+            Engine.Has_Space := False;
 
          when B_TAG | EM_TAG | STRONG_TAG =>
             Engine.Format (BOLD) := False;
@@ -599,18 +736,21 @@ package body Wiki.Render.Text is
             Engine.Format (SUBSCRIPT) := False;
 
          when UL_TAG | OL_TAG =>
-            Engine.Render_List_End;
+            Engine.Has_Space := False;
 
          when LI_TAG =>
             Engine.Render_List_Item_End;
+            Engine.Has_Space := False;
 
          when BLOCKQUOTE_TAG =>
             Engine.Set_Format (Empty_Formats);
             Engine.Quote_Level := Engine.Quote_Level - 1;
             Engine.Need_Space := False;
+            Engine.Has_Space := False;
 
          when others =>
             Engine.Need_Space := True;
+            Engine.Has_Space := False;
 
       end case;
    end Render_Tag;
@@ -658,10 +798,16 @@ package body Wiki.Render.Text is
                                     Numbers : in List_Level_Array) is
    begin
       for Number of Numbers loop
-         Engine.Output.Write (Strings.To_WString (Util.Strings.Image (Number)));
-         Engine.Output.Write (".");
+         declare
+            Num : constant String := Util.Strings.Image (Number);
+         begin
+            Engine.Output.Write (Strings.To_WString (Num));
+            Engine.Output.Write (".");
+            Engine.Current_Indent := Engine.Current_Indent + Num'Length + 1;
+         end;
       end loop;
       Engine.Output.Write (" ");
+      Engine.Current_Indent := Engine.Current_Indent + 1;
    end Render_Section_Number;
 
    --  ------------------------------
@@ -674,5 +820,135 @@ package body Wiki.Render.Text is
    begin
       Engine.Close_Paragraph;
    end Finish;
+
+   function Create_Text_Diverter (Engine     : in Text_Renderer;
+                                  Max_Length : in Natural) return Text_Diverter_Access is
+      use Ada.Finalization;
+
+      Diverter : Default_Text_Diverter_Access
+        := new Default_Text_Diverter '(Limited_Controlled with Len => Max_Length, others => <>);
+   begin
+      return Diverter.all'Access;
+   end Create_Text_Diverter;
+
+   overriding
+   procedure Clear (Diverter : in out Default_Text_Diverter) is
+      procedure Free is
+        new Ada.Unchecked_Deallocation (Object => Text_Line, Name => Text_Line_Access);
+      Current, Next : Text_Line_Access;
+   begin
+      Current := Diverter.Line.Next;
+      Diverter.Line.Next := null;
+      while Current /= null loop
+         Next := Current.Next;
+         Free (Current);
+         Current := Next;
+      end loop;
+      Diverter.Line.Last := 0;
+      Diverter.Current := Diverter.Line'Unchecked_Access;
+   end Clear;
+
+   overriding
+   procedure Write_Text (Diverter : in out Default_Text_Diverter;
+                         Kind     : in Wiki.Nodes.Node_Kind;
+                         Text     : in Strings.WString;
+                         Format   : in Format_Map) is
+      Pos : Natural := Text'First;
+      Current : Text_Line_Access := Diverter.Current;
+   begin
+      while Pos <= Text'Last loop
+         declare
+            Start : constant Natural := Current.Last;
+            Avail : constant Natural := Diverter.Len - Current.Last;
+            Len   : constant Natural := Text'Last - Pos + 1;
+         begin
+            if Avail > Len then
+               Current.Content (Start + 1 .. Start + Len) := Text (Pos .. Text'Last);
+               Current.Last := Start + Len;
+               return;
+            end if;
+            if Avail > 0 then
+               Current.Content (Start + 1 .. Start + Avail) := Text (Pos .. Pos + Avail - 1);
+               Pos := Pos + Avail;
+               Current.Last := Start + Avail;
+            end if;
+            Current.Next := new Text_Line '(Len => Diverter.Len, Last => 0, others => <>);
+            Diverter.Current := Current.Next;
+            Current := Current.Next;
+         end;
+      end loop;
+   end Write_Text;
+
+   overriding
+   procedure Write_Newline (Diverter : in out Default_Text_Diverter) is
+      Current : Text_Line_Access := Diverter.Current;
+   begin
+      Current.Next := new Text_Line '(Len => Diverter.Len, Last => 0, others => <>);
+      Diverter.Current := Current.Next;
+   end Write_Newline;
+
+   overriding
+   function Get_Line_Count (Diverter : in Default_Text_Diverter) return Natural is
+      Count : Natural := 1;
+      Next  : Text_Line_Access := Diverter.Line.Next;
+   begin
+      while Next /= null loop
+         Count := Count + 1;
+         Next := Next.Next;
+      end loop;
+      return Count;
+   end Get_Line_Count;
+
+   overriding
+   procedure Flush_Line (Diverter : in out Default_Text_Diverter;
+                         Stream   : in out Streams.Output_Stream'Class;
+                         Line     : in Natural;
+                         Align    : in Wiki.Nodes.Align_Style;
+                         Width    : in Natural;
+                         Last     : out Boolean) is
+      Content : Text_Line_Access := Diverter.Line'Unchecked_Access;
+      Size    : Natural;
+   begin
+      for I in 1 .. Line - 1 loop
+         Content := Content.Next;
+         exit when Content = null;
+      end loop;
+      if Content /= null then
+         if Align = Nodes.ALIGN_CENTER then
+            Size := (Width - Content.Last) / 2;
+            for I in 1 .. Size loop
+               Stream.Write (' ');
+            end loop;
+         elsif Align = Nodes.ALIGN_RIGHT then
+            Size := Width - Content.Last;
+            for I in 1 .. Size loop
+               Stream.Write (' ');
+            end loop;
+         else
+            Size := 0;
+         end if;
+         Size := Size + Content.Last;
+         Stream.Write (Content.Content (1 .. Content.Last));
+      else
+         Size := 0;
+      end if;
+      while Size < Width loop
+         Stream.Write (' ');
+         Size := Size + 1;
+      end loop;
+      Last := Content = null or else Content.Next = null;
+   end Flush_Line;
+
+   overriding
+   procedure Initialize (Diverter : in out Default_Text_Diverter) is
+   begin
+      Diverter.Current := Diverter.Line'Unchecked_Access;
+   end Initialize;
+
+   overriding
+   procedure Finalize (Diverter : in out Default_Text_Diverter) is
+   begin
+      Diverter.Clear;
+   end Finalize;
 
 end Wiki.Render.Text;

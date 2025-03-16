@@ -12,6 +12,7 @@ package body Wiki.Render.Wiki is
 
    use Helpers;
    use type Nodes.Node_List_Access;
+   use type Nodes.Node_Kind;
 
    Regular_Map : constant Ada.Strings.Wide_Wide_Maps.Wide_Wide_Character_Mapping
      := Ada.Strings.Wide_Wide_Maps.To_Mapping
@@ -56,6 +57,7 @@ package body Wiki.Render.Wiki is
 
    BOLD_MARKDOWN             : aliased constant Strings.WString := "**";
    ITALIC_MARKDOWN           : aliased constant Strings.WString := "__";
+   STRONG_MARKDOWN           : aliased constant Strings.WString := "**";
    CODE_MARKDOWN             : aliased constant Strings.WString := "`";
    HEADER_MARKDOWN           : aliased constant Strings.WString := "#";
    ESCAPE_MARKDOWN           : aliased constant Strings.WString := "\";
@@ -115,6 +117,8 @@ package body Wiki.Render.Wiki is
          when SYNTAX_DOTCLEAR =>
             Engine.Style_Start_Tags (BOLD)   := BOLD_DOTCLEAR'Access;
             Engine.Style_End_Tags (BOLD)     := BOLD_DOTCLEAR'Access;
+            Engine.Style_Start_Tags (STRONG) := BOLD_DOTCLEAR'Access;
+            Engine.Style_End_Tags (STRONG)   := BOLD_DOTCLEAR'Access;
             Engine.Style_Start_Tags (ITALIC) := ITALIC_DOTCLEAR'Access;
             Engine.Style_End_Tags (ITALIC)   := ITALIC_DOTCLEAR'Access;
             Engine.Style_Start_Tags (STRIKEOUT) := DELETE_DOTCLEAR'Access;
@@ -147,6 +151,8 @@ package body Wiki.Render.Wiki is
          when SYNTAX_MEDIA_WIKI =>
             Engine.Style_Start_Tags (BOLD)   := BOLD_MEDIAWIKI'Access;
             Engine.Style_End_Tags (BOLD)     := BOLD_MEDIAWIKI'Access;
+            Engine.Style_Start_Tags (STRONG) := BOLD_MEDIAWIKI'Access;
+            Engine.Style_End_Tags (STRONG)   := BOLD_MEDIAWIKI'Access;
             Engine.Style_Start_Tags (ITALIC) := ITALIC_MEDIAWIKI'Access;
             Engine.Style_End_Tags (ITALIC)   := ITALIC_MEDIAWIKI'Access;
             Engine.Tags (Header_Start) := HEADER_CREOLE'Access;
@@ -175,6 +181,8 @@ package body Wiki.Render.Wiki is
             Engine.Style_End_Tags (ITALIC)   := ITALIC_MARKDOWN'Access;
             Engine.Style_Start_Tags (CODE)   := CODE_MARKDOWN'Access;
             Engine.Style_End_Tags (CODE)     := CODE_MARKDOWN'Access;
+            Engine.Style_Start_Tags (STRONG) := STRONG_MARKDOWN'Access;
+            Engine.Style_End_Tags (STRONG)   := STRONG_MARKDOWN'Access;
             Engine.Tags (Header_Start)       := HEADER_MARKDOWN'Access;
             Engine.Tags (Line_Break)         := LINE_BREAK_MARKDOWN'Access;
             Engine.Tags (Img_Start)          := IMG_START_MARKDOWN'Access;
@@ -198,6 +206,8 @@ package body Wiki.Render.Wiki is
          when SYNTAX_TEXTILE =>
             Engine.Style_Start_Tags (BOLD)   := BOLD_TEXTILE'Access;
             Engine.Style_End_Tags (BOLD)     := BOLD_TEXTILE'Access;
+            Engine.Style_Start_Tags (STRONG) := BOLD_TEXTILE'Access;
+            Engine.Style_End_Tags (STRONG)   := BOLD_TEXTILE'Access;
             Engine.Style_Start_Tags (ITALIC) := ITALIC_TEXTILE'Access;
             Engine.Style_End_Tags (ITALIC)   := ITALIC_TEXTILE'Access;
             Engine.Style_Start_Tags (CODE)   := CODE_TEXTILE'Access;
@@ -229,6 +239,8 @@ package body Wiki.Render.Wiki is
          when others =>
             Engine.Style_Start_Tags (BOLD)   := BOLD_CREOLE'Access;
             Engine.Style_End_Tags (BOLD)     := BOLD_CREOLE'Access;
+            Engine.Style_Start_Tags (STRONG) := BOLD_CREOLE'Access;
+            Engine.Style_End_Tags (STRONG)     := BOLD_CREOLE'Access;
             Engine.Style_Start_Tags (ITALIC) := ITALIC_CREOLE'Access;
             Engine.Style_End_Tags (ITALIC)   := ITALIC_CREOLE'Access;
             Engine.Style_Start_Tags (SUPERSCRIPT) := SUPERSCRIPT_CREOLE'Access;
@@ -335,20 +347,17 @@ package body Wiki.Render.Wiki is
 
          when Nodes.N_LIST_START =>
             Engine.Render_List_Start (False, 0);
+            Engine.Render (Doc, Node.Children);
+            Engine.Render_List_End ("");
 
          when Nodes.N_NUM_LIST_START =>
             Engine.Render_List_Start (True, Node.Level);
-
-         when Nodes.N_LIST_END =>
-            Engine.Render_List_End ("");
-
-         when Nodes.N_NUM_LIST_END =>
+            Engine.Render (Doc, Node.Children);
             Engine.Render_List_End ("");
 
          when Nodes.N_LIST_ITEM =>
             Engine.Render_List_Item_Start;
-
-         when Nodes.N_LIST_ITEM_END =>
+            Engine.Render (Doc, Node.Children);
             Engine.Render_List_Item_End;
 
          when Nodes.N_TEXT =>
@@ -361,10 +370,10 @@ package body Wiki.Render.Wiki is
                Engine.Render_Text (Node.Text, F);
             end;
 
-         when Nodes.N_LINK =>
-            Engine.Render_Link (Node.Title, Node.Link_Attr);
+         when Nodes.N_LINK | Nodes.N_LINK_REF =>
+            Engine.Render_Link (Doc, Node, Node.Title, Node.Link_Attr);
 
-         when Nodes.N_IMAGE =>
+         when Nodes.N_IMAGE | Nodes.N_IMAGE_REF =>
             Engine.Render_Image (Node.Title, Node.Link_Attr);
 
          when Nodes.N_QUOTE =>
@@ -499,6 +508,7 @@ package body Wiki.Render.Wiki is
          end if;
       end loop;
       Engine.Output.Write (' ');
+      Engine.Line_Count := 0;
    end Add_List_Item;
 
    procedure Render_List_Start (Engine   : in out Wiki_Renderer;
@@ -511,7 +521,7 @@ package body Wiki.Render.Wiki is
       Engine.New_Line (False);
       Engine.List_Index := Engine.List_Index + 1;
       Engine.List_Levels (Engine.List_Index) := Level;
-      Engine.Indent_Level := Engine.Indent_Level + 2;
+      --  Engine.Indent_Level := Engine.Indent_Level + 2;
    end Render_List_Start;
 
    procedure Render_List_End (Engine   : in out Wiki_Renderer;
@@ -521,7 +531,7 @@ package body Wiki.Render.Wiki is
       Engine.Need_Paragraph := False;
       Engine.Close_Paragraph;
       Engine.List_Index := Engine.List_Index - 1;
-      Engine.Indent_Level := Engine.Indent_Level - 2;
+      --  Engine.Indent_Level := Engine.Indent_Level - 2;
    end Render_List_End;
 
    --  ------------------------------
@@ -544,6 +554,7 @@ package body Wiki.Render.Wiki is
          Engine.Output.Write (" ");
          Engine.Indent_Level := Engine.Indent_Level + 2;
       end if;
+      Engine.Line_Count := 0;
    end Render_List_Item_Start;
 
    procedure Render_List_Item_End (Engine   : in out Wiki_Renderer) is
@@ -570,10 +581,39 @@ package body Wiki.Render.Wiki is
    --  Render a link.
    --  ------------------------------
    procedure Render_Link (Engine   : in out Wiki_Renderer;
+                          Doc      : in Documents.Document;
+                          Node     : in Nodes.Node_Type;
                           Name     : in Strings.WString;
                           Attrs    : in Attributes.Attribute_List) is
 
-      Link : constant Strings.WString := Attributes.Get_Attribute (Attrs, "href");
+      function Get_Link return Strings.WString is
+      begin
+         if Node.Kind = Nodes.N_LINK_REF then
+            return Doc.Get_Link (Node.Title);
+         else
+            return Attributes.Get_Attribute (Attrs, "href");
+         end if;
+      end Get_Link;
+
+      procedure Write_Label is
+      begin
+         if Node.Children /= null then
+            Engine.Output.Write (Strings.To_WString (Engine.Content));
+         else
+            Engine.Output.Write (Name);
+         end if;
+      end Write_Label;
+
+      function Has_Label return Boolean is
+      begin
+         if Node.Children /= null then
+            return Length (Engine.Content) > 0;
+         else
+            return Name'Length > 0;
+         end if;
+      end Has_Label;
+
+      Link : constant Strings.WString := Get_Link;
       Lang : constant Strings.WString := Attributes.Get_Attribute (Attrs, "lang");
 
    begin
@@ -588,23 +628,29 @@ package body Wiki.Render.Wiki is
          Engine.In_List := False;
       end if;
       Engine.Write_Optional_Space;
+      if Node.Children /= null then
+         Engine.Start_Keep_Content;
+         Engine.Render (Doc, Node.Children);
+         Engine.Keep_Content := Engine.Keep_Content - 1;
+      end if;
       if Engine.Syntax = SYNTAX_DOTCLEAR and then Engine.In_Header then
-         Engine.Output.Write (Name);
+         Write_Label;
          return;
       end if;
+
       Engine.Output.Write (Engine.Tags (Link_Start).all);
       if Engine.Link_First then
          Engine.Write_Link (Link);
-         if Name'Length > 0 then
+         if Has_Label then
             Engine.Output.Write (Engine.Tags (Link_Separator).all);
-            Engine.Output.Write (Name);
+            Write_Label;
          end if;
          if Engine.Allow_Link_Language and then Lang'Length > 0 then
             Engine.Output.Write (Engine.Tags (Link_Separator).all);
             Engine.Output.Write (Lang);
          end if;
       else
-         Engine.Output.Write (Name);
+         Write_Label;
          Engine.Output.Write (Engine.Tags (Link_Separator).all);
          Engine.Write_Link (Link);
       end if;
@@ -770,6 +816,9 @@ package body Wiki.Render.Wiki is
       Col           : Natural := 2;
    begin
       Engine.New_Line;
+      for I in 1 .. Engine.Indent_Level loop
+         Engine.Output.Write (' ');
+      end loop;
       Engine.Output.Write (Engine.Tags (Preformat_Start).all);
       for I in Text'Range loop
          if Helpers.Is_Newline (Text (I)) then
@@ -780,14 +829,20 @@ package body Wiki.Render.Wiki is
          if I = Text'First and then Col > 0 then
             Engine.New_Line (False);
             Col := 0;
+            for I in 1 .. Engine.Indent_Level loop
+               Engine.Output.Write (' ');
+            end loop;
          end if;
          Engine.Output.Write (Text (I));
       end loop;
       if Col /= 0 then
          Engine.New_Line;
       end if;
+      for I in 1 .. Engine.Indent_Level loop
+         Engine.Output.Write (' ');
+      end loop;
       Engine.Output.Write (Engine.Tags (Preformat_End).all);
-      Engine.New_Line;
+      --  Engine.New_Line;
    end Render_Preformatted;
 
    procedure Start_Keep_Content (Engine : in out Wiki_Renderer) is
@@ -852,7 +907,14 @@ package body Wiki.Render.Wiki is
             Engine.Render_Image (Title => Get_Attribute (Node.Attributes, "alt"),
                                  Attrs => Node.Attributes);
 
-         when A_TAG | Q_TAG =>
+         when A_TAG =>
+            Engine.Render_Link (Doc      => Doc,
+                                Node     => Node,
+                                Name     => Strings.To_WString (Engine.Content),
+                                Attrs    => Node.Attributes);
+            return;
+
+         when Q_TAG =>
             Engine.Start_Keep_Content;
 
          when B_TAG | EM_TAG | STRONG_TAG =>
@@ -933,7 +995,9 @@ package body Wiki.Render.Wiki is
          when A_TAG =>
             if Engine.Keep_Content = 1 then
                Engine.Need_Space := False;
-               Engine.Render_Link (Name     => Strings.To_WString (Engine.Content),
+               Engine.Render_Link (Doc      => Doc,
+                                   Node     => Node,
+                                   Name     => Strings.To_WString (Engine.Content),
                                    Attrs    => Node.Attributes);
             end if;
             Engine.Keep_Content := Engine.Keep_Content - 1;
@@ -1126,7 +1190,9 @@ package body Wiki.Render.Wiki is
       end if;
       Engine.Col_Index := Engine.Col_Index + 1;
       Engine.Render (Doc, Node.Children);
-
+      if Engine.Format /= Empty_Formats then
+         Engine.Set_Format (Empty_Formats);
+      end if;
       if Engine.Html_Table then
          Engine.Output.Write ("</td>");
       end if;
