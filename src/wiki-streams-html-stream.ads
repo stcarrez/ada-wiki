@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-streams-html-stream -- Generic Wiki HTML output stream
---  Copyright (C) 2016, 2020, 2022 Stephane Carrez
+--  Copyright (C) 2016, 2020, 2022, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -17,6 +17,17 @@ package Wiki.Streams.Html.Stream is
    overriding
    procedure Set_Indent_Level (Writer : in out Html_Output_Stream;
                                Indent : in Natural);
+
+   --  Enable/disable strict XML generation.  When disabled, the <br>, <hr>,
+   --  <img> elements are not closed.
+   overriding
+   procedure Set_Strict_XML (Writer : in out Html_Output_Stream;
+                             Strict : in Boolean);
+
+   --  Enable/disable indentation temporarily.
+   overriding
+   procedure Set_Enable_Indent (Writer : in out Html_Output_Stream;
+                                Enable : in Boolean);
 
    --  Write an XML attribute within an XML element.
    --  The attribute value is escaped according to the XML escape rules.
@@ -56,11 +67,13 @@ private
    type Html_Output_Stream is limited new Output_Stream
      and Html.Html_Output_Stream with record
       --  Whether an XML element must be closed (that is a '>' is necessary)
-      Close_Start  : Boolean := False;
-      Empty_Line   : Boolean := True;
-      Indent_Level : Natural := 0;
-      Indent_Pos   : Natural := 0;
-      Text_Length  : Natural := 0;
+      Close_Start   : Boolean := False;
+      Empty_Line    : Boolean := True;
+      Strict        : Boolean := True;
+      Enable_Indent : Boolean := True;
+      Indent_Level  : Natural := 0;
+      Indent_Pos    : Natural := 0;
+      Text_Length   : Natural := 0;
    end record;
 
 end Wiki.Streams.Html.Stream;

@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-streams-html-stream -- Generic Wiki HTML output stream
---  Copyright (C) 2016, 2020, 2022 Stephane Carrez
+--  Copyright (C) 2016, 2020, 2022, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -23,6 +23,27 @@ package body Wiki.Streams.Html.Stream is
    begin
       Writer.Indent_Level := Indent;
    end Set_Indent_Level;
+
+   --  ------------------------------
+   --  Enable/disable strict XML generation.  When disabled, the <br>, <hr>,
+   --  <img> elements are not closed.
+   --  ------------------------------
+   overriding
+   procedure Set_Strict_XML (Writer : in out Html_Output_Stream;
+                             Strict : in Boolean) is
+   begin
+      Writer.Strict := Strict;
+   end Set_Strict_XML;
+
+   --  ------------------------------
+   --  Enable/disable indentation temporarily.
+   --  ------------------------------
+   overriding
+   procedure Set_Enable_Indent (Writer : in out Html_Output_Stream;
+                                Enable : in Boolean) is
+   begin
+      Writer.Enable_Indent := Enable;
+   end Set_Enable_Indent;
 
    --  ------------------------------
    --  Write an optional newline or space.
@@ -100,7 +121,7 @@ package body Wiki.Streams.Html.Stream is
                             Name   : in String) is
    begin
       Close_Current (Stream);
-      if Stream.Indent_Pos > 1 then
+      if Stream.Enable_Indent and then Stream.Indent_Pos > 1 then
          if not Stream.Empty_Line then
             Stream.Write (Helpers.LF);
          end if;
@@ -128,11 +149,14 @@ package body Wiki.Streams.Html.Stream is
          Stream.Indent_Pos := Stream.Indent_Pos - Stream.Indent_Level;
       end if;
       if Close_Start and then (Name in "br" | "img" | "hr") then
-         Stream.Write (" />");
+         if Stream.Strict then
+            Stream.Write (" /");
+         end if;
+         Stream.Write ('>');
          Stream.Close_Start := False;
       else
          Close_Current (Stream);
-         if Stream.Text_Length = 0 and then not Close_Start then
+         if Stream.Enable_Indent and then Stream.Text_Length = 0 and then not Close_Start then
             if not Stream.Empty_Line and then Stream.Indent_Level > 0 then
                Stream.Write (Wiki.Helpers.LF);
             end if;
@@ -147,7 +171,7 @@ package body Wiki.Streams.Html.Stream is
          Stream.Write_String (Name);
          Stream.Write ('>');
       end if;
-      if Stream.Indent_Level > 0 then
+      if Stream.Enable_Indent and then Stream.Indent_Level > 0 then
          Stream.Write (Wiki.Helpers.LF);
          Stream.Empty_Line := True;
       end if;
