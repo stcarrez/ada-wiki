@@ -82,7 +82,7 @@ private package Wiki.Buffers with Preelaborate is
 
    --  Move forward and return the next character or NUL.
    function Next (Content : in out Buffer_Access;
-                  Pos     : in out Positive) return Strings.WChar with Inline_Always;
+                  Pos     : in out Natural) return Strings.WChar with Inline_Always;
 
    --  Get the length of the item builder.
    function Length (Source : in Builder) return Natural;
@@ -111,12 +111,26 @@ private package Wiki.Buffers with Preelaborate is
                      Buffer   : in Buffer_Access;
                      From     : in Positive);
 
+   --  Append in `Into` builder the `Content` builder starting at `From` position
+   --  until the condition is met or the end of buffer is reached.
+   generic
+      with function Condition (Buffer : in Buffer_Access;
+                               Pos    : in Positive) return Boolean;
+   procedure Append_Until (Into   : in out Builder;
+                           Buffer : in Buffer_Access;
+                           From   : in Positive);
+
    generic
       with procedure Process (Content : in out Wiki.Strings.WString; Last : out Natural);
    procedure Inline_Append (Source  : in out Builder);
 
    --  Clear the source freeing any storage allocated for the buffer.
    procedure Clear (Source : in out Builder);
+
+   --  Truncate the current buffer at the given block and position.
+   procedure Truncate (Source : in out Builder;
+                       Block  : in Buffer_Access;
+                       Pos    : in Positive);
 
    --  Iterate over the buffer content calling the <tt>Process</tt> procedure with each
    --  chunk.
@@ -148,9 +162,18 @@ private package Wiki.Buffers with Preelaborate is
 
    --  Skip spaces and tabs starting at the given position in the buffer
    --  and return the number of spaces skipped.
-   procedure Skip_Spaces (Buffer : in out Buffer_Access;
-                          From   : in out Positive;
-                          Count  : out Natural);
+   procedure Skip_Spaces (Buffer       : in out Buffer_Access;
+                          From         : in out Positive;
+                          Count        : out Natural);
+   procedure Skip_Spaces (Buffer       : in out Buffer_Access;
+                          From         : in out Positive;
+                          Space_Count  : out Natural;
+                          Line_Count   : out Natural);
+
+   --  Skip only ascii space and tab.
+   procedure Skip_Ascii_Spaces (Buffer       : in out Buffer_Access;
+                                From         : in out Positive;
+                                Count        : out Natural);
 
    --  Skip one optional space or tab.
    procedure Skip_Optional_Space (Buffer : in out Buffer_Access;
@@ -159,5 +182,9 @@ private package Wiki.Buffers with Preelaborate is
    procedure Find (Buffer : in out Buffer_Access;
                    From   : in out Positive;
                    Item   : in Wiki.Strings.WChar);
+
+   generic
+      with function Trim_Character (C : in Wiki.Strings.WChar) return Boolean;
+   procedure Trim (Source : in out Builder);
 
 end Wiki.Buffers;

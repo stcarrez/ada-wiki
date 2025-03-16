@@ -45,9 +45,11 @@ package body Wiki.Buffers is
    --  Move forward and return the next character or NUL.
    --  ------------------------------
    function Next (Content : in out Buffer_Access;
-                  Pos     : in out Positive) return Strings.WChar is
+                  Pos     : in out Natural) return Strings.WChar is
    begin
-      if Pos + 1 > Content.Last then
+      if Content = null then
+         return Helpers.NUL;
+      elsif Pos + 1 > Content.Last then
          Content := Content.Next_Block;
          Pos := 1;
          return (if Content /= null then Content.Content (1) else Helpers.NUL);
@@ -180,6 +182,46 @@ package body Wiki.Buffers is
       end loop;
    end Append;
 
+   procedure Append_Until (Into     : in out Builder;
+                           Buffer   : in Buffer_Access;
+                           From     : in Positive) is
+      Block : Buffer_Access := Buffer;
+      Pos   : Positive := From;
+   begin
+      while Block /= null and then not Condition (Block, Pos) loop
+         Append (Into, Block.Content (Pos));
+         Next (Block, Pos);
+      end loop;
+   end Append_Until;
+
+   procedure Trim (Source : in out Builder) is
+
+      procedure Trim_Buffer (Buffer : in Buffer_Access;
+                             Done   : out Boolean) is
+      begin
+         if Buffer.Next_Block /= null then
+            Trim_Buffer (Buffer.Next_Block, Done);
+            if Done then
+               return;
+            end if;
+         end if;
+         Done := False;
+         while Buffer.Last > 0 loop
+            if Trim_Character (Buffer.Content (Buffer.Last)) then
+               Buffer.Last := Buffer.Last - 1;
+               Source.Length := Source.Length - 1;
+            else
+               Done := True;
+               return;
+            end if;
+         end loop;
+      end Trim_Buffer;
+
+      Done : Boolean := False;
+   begin
+      Trim_Buffer (Source.First'Unchecked_Access, Done);
+   end Trim;
+
    --  ------------------------------
    --  Clear the source freeing any storage allocated for the buffer.
    --  ------------------------------
@@ -199,6 +241,35 @@ package body Wiki.Buffers is
       Source.Current          := Source.First'Unchecked_Access;
       Source.Length           := 0;
    end Clear;
+
+   --  ------------------------------
+   --  Truncate the current buffer at the given block and position.
+   --  ------------------------------
+   procedure Truncate (Source : in out Builder;
+                       Block  : in Buffer_Access;
+                       Pos    : in Positive) is
+      procedure Free is
+        new Ada.Unchecked_Deallocation (Object => Buffer, Name => Buffer_Access);
+      Current, Next : Block_Access;
+      Length : Natural := 0;
+   begin
+      Next := Source.First'Unchecked_Access;
+      while Next /= null and then Next /= Block loop
+         Length := Length + Next.Last;
+         Next := Next.Next_Block;
+      end loop;
+      if Next = Block then
+         Length := Length + Pos - 1;
+         Next.Last := Pos - 1;
+         Source.Length := Length;
+         Current := Next;
+         while Current /= null loop
+            Next := Current.Next_Block;
+            Free (Current.Next_Block);
+            Current := Next;
+         end loop;
+      end if;
+   end Truncate;
 
    procedure Inline_Iterate (Source  : in Builder) is
    begin
@@ -362,6 +433,64 @@ package body Wiki.Buffers is
                Count := Count + 1;
             end loop;
             exit Main_Loop when Pos <= Last;
+         end;
+         Block := Block.Next_Block;
+         Pos := 1;
+      end loop Main_Loop;
+      Buffer := Block;
+      From := Pos;
+   end Skip_Spaces;
+
+   procedure Skip_Ascii_Spaces (Buffer : in out Buffer_Access;
+                                From   : in out Positive;
+                                Count  : out Natural) is
+      Block : Wiki.Buffers.Buffer_Access := Buffer;
+      Pos   : Positive := From;
+   begin
+      Count := 0;
+      Main_Loop :
+      while Block /= null loop
+         declare
+            Last : constant Natural := Block.Last;
+         begin
+            while Pos <= Last and then Helpers.Is_Space_Or_Tab (Block.Content (Pos)) loop
+               Pos := Pos + 1;
+               Count := Count + 1;
+            end loop;
+            exit Main_Loop when Pos <= Last;
+         end;
+         Block := Block.Next_Block;
+         Pos := 1;
+      end loop Main_Loop;
+      Buffer := Block;
+      From := Pos;
+   end Skip_Ascii_Spaces;
+
+   procedure Skip_Spaces (Buffer      : in out Buffer_Access;
+                          From        : in out Positive;
+                          Space_Count : out Natural;
+                          Line_Count  : out Natural) is
+      Block : Wiki.Buffers.Buffer_Access := Buffer;
+      Pos   : Positive := From;
+   begin
+      Space_Count := 0;
+      Line_Count := 0;
+      Main_Loop :
+      while Block /= null loop
+         declare
+            Last : constant Natural := Block.Last;
+            C    : Wiki.Strings.WChar;
+         begin
+            while Pos <= Last loop
+               C := Block.Content (Pos);
+               if C in Helpers.LF | Helpers.CR then
+                  Line_Count := Line_Count + 1;
+               else
+                  exit Main_Loop when not Helpers.Is_Space (C);
+               end if;
+               Pos := Pos + 1;
+               Space_Count := Space_Count + 1;
+            end loop;
          end;
          Block := Block.Next_Block;
          Pos := 1;
