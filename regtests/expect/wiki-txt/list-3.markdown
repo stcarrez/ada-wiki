@@ -1,6 +1,4 @@
-  - 
+  - foo
 
-    foo
-
-bar
+    bar
 

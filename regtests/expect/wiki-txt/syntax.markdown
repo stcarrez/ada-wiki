@@ -12,19 +12,18 @@ Second paragraph.
 
 1.1.1.1.1. Section h5
 
----------------------------------------------------------  - item 1
-
-  - * item 1.1
-  - * item 1.2
+---------------------------------------------------------
+  - item 1
+      - item 1.1
+      - item 1.2
   - item 2
   - item 3
-  - - item 3.1
-  - - item 3.2
+      - item 3.1
+      - item 3.2
 
   - item 1
-
-  - * item 1.1
-  - * item 1.2
+      - item 1.1
+      - item 1.2
   - item 2
   - item 3
 
@@ -46,8 +45,9 @@ underline
 A link
 
   Some code
-
+  
   Pre-formatted
+
 P1
   
 A quote 1 A quote 2 A quote 3

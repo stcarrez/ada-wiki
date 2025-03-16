@@ -1,8 +1,8 @@
 Call Template with parameter:
 
-  - No param: 
-  - One param: 
-  - Two params: 
+  - No param: 1@@ 2@@ 3@@
+  - One param: 1@This is first parameter@ 2@@ 3@@
+  - Two params: 1@First@ 2@This is second parameter@ 3@@
 
 End
 

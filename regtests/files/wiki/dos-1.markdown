@@ -58,6 +58,8 @@ P2
 
 # Table
 
+| H1:Col1 | H1:Col2 | H1:Col3 |
+|-------|----|-----|
 | R1:Col1 | R1:Col2 | R1:Col3 |
 | R2:Col1 | R2:Col2 | R2:Col3 |
 

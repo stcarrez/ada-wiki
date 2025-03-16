@@ -3,7 +3,7 @@
 
 Description
 
-  - Link1
-  - Link2
+  - Link1 (Link1)
+  - Link2 (Link2)
 
 

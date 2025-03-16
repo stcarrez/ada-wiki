@@ -6,4 +6,3 @@ procedure Test is
      null;
   end Test;
 </pre>
-

@@ -12,18 +12,12 @@ Second paragraph.
 
 1.1.1.1.1. Section h5
 
----------------------------------------------------------  - item 1
-
+---------------------------------------------------------
+  - item 1
       - item 1.1
       - item 1.2
-  - 
-
-      - item 2
-  - 
-
-      - item 3
-  - 
-
+  - item 2
+  - item 3
       1)  item 3.1
       2)  item 3.2
 
@@ -35,6 +29,7 @@ Section bloc:
 L1: line 1
 L2: line 2
 L3: line 3
+
 Formatting
 
 emphasis
@@ -43,14 +38,14 @@ strong
 
 strong and emphasis
 
-Strike text
+<strike>Strike text<strike>
 
 Line
 break
 
-InsertUnderline Strike Delete
+Insert Underline Strike Delete
 
-A link title (A link) rectifier (http://en.wikipedia.org/wiki/Rectifier) Sun Microsystems (http://www.sun.com)
+A link (A link) title (A link) rectifier (http://en.wikipedia.org/wiki/Rectifier) Sun Microsystems (http://www.sun.com)
 
 item 1
     definition item 1

@@ -16,18 +16,12 @@ Second paragraph.
 
 1.1.2. **not** //parsed//
 
----------------------------------------------------------  - item 1
-
+---------------------------------------------------------
+  - item 1
       - item 1.1
       - item 1.2
-  - 
-
-      - item 2
-  - 
-
-      - item 3
-  - 
-
+  - item 2
+  - item 3
       1)  item 3.1
       2)  item 3.2
 
@@ -49,12 +43,13 @@ bold italics also bold italics
 Line
 break
 
-A link title (A link)
+A link (A link) title (A link)
 
 Alt text
 
 //A// **pre**-formatted section 
 == [[Nowiki]]
+
 |=Heading Col 1 |=Heading Col 2 | |Cell 1.1 |Two lines
 in Cell 1.2 | |Cell 2.1 |Cell 2.2 |
 
@@ -66,12 +61,8 @@ Escape **not bold**
 
   - bold item
   - italic item
-  - 
-
-      1)  item about a certain page
-  - 
-
-      1)  this is not processed 
+  - item about a certain page (certain page)
+  - this is not processed (processed) 
 
 1.2. Creole Additions
 

@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  Render Tests - Unit tests for AWA Wiki rendering
---  Copyright (C) 2013, 2016, 2020, 2021, 2022 Stephane Carrez
+--  Copyright (C) 2013, 2016, 2020, 2021, 2022, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -148,7 +148,7 @@ package body Wiki.Tests is
       Util.Tests.Assert_Equal_Files (T       => T,
                                      Expect  => To_String (T.Expect),
                                      Test    => Result_File,
-                                     Message => "Render");
+                                     Message => "Render " & To_String (T.Expect));
 
       if Has_Collector then
          declare

@@ -13,17 +13,10 @@ Second paragraph.
 1.1.1.1.1. Section h5
 
   - item 1
-
       - item 1.1
       - item 1.2
-  - 
-
-      - item 2
-  - 
-
-      - item 3
-  - 
-
+  - item 2
+  - item 3
       1)  item 3.1
       2)  item 3.2
 
@@ -60,7 +53,7 @@ Superscript: a 2 + b 2 = c 2
 
 Subscript: log ~2~ x
 
-A link title (A link)
+A link (A link) title (A link)
 
 I searched Google (http://google.com.)
 
