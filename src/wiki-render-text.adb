@@ -116,6 +116,7 @@ package body Wiki.Render.Text is
       end if;
       Document.Current_Indent := 0;
       Document.Has_Space := False;
+      Document.Need_Space := False;
    end Add_Line_Break;
 
    --  ------------------------------
@@ -261,7 +262,7 @@ package body Wiki.Render.Text is
       if Desc'Length > 0 then
          Engine.Render_Paragraph (Nodes.N_IMAGE, Desc);
       end if;
-      Engine.Need_Space := True;
+      Engine.Need_Space := Engine.Current_Indent > 0;
    end Render_Image;
 
    --  ------------------------------
@@ -283,7 +284,7 @@ package body Wiki.Render.Text is
             Last  : Natural;
          begin
             loop
-               for I in 1 .. Engine.Indent_Preformatted loop
+               for I in 1 .. Engine.Indent_Level + Engine.Indent_Preformatted loop
                   Engine.Output.Write (' ');
                end loop;
                Pos := First;
@@ -303,10 +304,10 @@ package body Wiki.Render.Text is
          end;
          Engine.New_Line;
       end if;
-      if Engine.Current_Mode /= Nodes.N_PREFORMAT then
+      --  if Engine.Current_Mode /= Nodes.N_PREFORMAT then
          Engine.Need_Paragraph := True;
          Engine.Empty_Line := False;
-      end if;
+      --  end if;
    end Render_Preformatted;
 
    --  ------------------------------
@@ -317,6 +318,7 @@ package body Wiki.Render.Text is
                            Node   : in Wiki.Nodes.Node_Type) is
       Old_Line_Length : constant Natural := Engine.Line_Length;
 
+      Indent  : constant Natural := Engine.Indent_Level;
       Styles  : Wiki.Nodes.Column_Array_Style := Node.Columns;
       Columns : Diverter_Array (1 .. Node.Len);
       Total_W : Natural := 0;
@@ -326,6 +328,9 @@ package body Wiki.Render.Text is
 
       procedure Write_Separator is
       begin
+         for I in 1 .. Indent loop
+            Engine.Output.Write (' ');
+         end loop;
          Engine.Output.Write ('+');
          for I in Columns'Range loop
             for J in 1 .. Styles (I).Width loop
@@ -357,6 +362,9 @@ package body Wiki.Render.Text is
          Col_Num := 0;
          Nodes.Lists.Iterate (Row.Children, Process_Column'Access);
 
+         for I in 1 .. Indent loop
+            Engine.Output.Write (' ');
+         end loop;
          while More loop
             Line := Line + 1;
             More := False;
@@ -380,6 +388,7 @@ package body Wiki.Render.Text is
 
    begin
       Engine.Close_Paragraph;
+      Engine.Indent_Level := 0;
       if Table_W = 0 then
          Table_W := 80;
       end if;
@@ -397,12 +406,14 @@ package body Wiki.Render.Text is
       Write_Separator;
       Engine.Line_Length := Old_Line_Length;
       Engine.Diverter := null;
+      Engine.Indent_Level := Indent;
       Release (Columns);
 
    exception
       when others =>
          Release (Columns);
          Engine.Diverter := null;
+         Engine.Indent_Level := Indent;
          raise;
    end Render_Table;
 
