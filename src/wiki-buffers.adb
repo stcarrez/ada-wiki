@@ -26,6 +26,18 @@ package body Wiki.Buffers is
       end if;
    end Next;
 
+   procedure Next (Pos : in out Cursor) is
+   begin
+      if Pos.Block /= null then
+         if Pos.Pos >= Pos.Block.Last then
+            Pos.Block := Pos.Block.Next_Block;
+            Pos.Pos := 1;
+         else
+            Pos.Pos := Pos.Pos + 1;
+         end if;
+      end if;
+   end Next;
+
    procedure Next (Content : in out Buffer_Access;
                    Pos     : in out Positive;
                    Count   : in Natural) is
@@ -44,18 +56,17 @@ package body Wiki.Buffers is
    --  ------------------------------
    --  Move forward and return the next character or NUL.
    --  ------------------------------
-   function Next (Content : in out Buffer_Access;
-                  Pos     : in out Natural) return Strings.WChar is
+   function Next (Text : in out Cursor) return Strings.WChar is
    begin
-      if Content = null then
+      if Text.Block = null then
          return Helpers.NUL;
-      elsif Pos + 1 > Content.Last then
-         Content := Content.Next_Block;
-         Pos := 1;
-         return (if Content /= null then Content.Content (1) else Helpers.NUL);
+      elsif Text.Pos >= Text.Block.Last then
+         Text.Block := Text.Block.Next_Block;
+         Text.Pos := 1;
+         return (if Text.Block /= null then Text.Block.Content (1) else Helpers.NUL);
       else
-         Pos := Pos + 1;
-         return Content.Content (Pos);
+         Text.Pos := Text.Pos + 1;
+         return Text.Block.Content (Text.Pos);
       end if;
    end Next;
 
@@ -153,6 +164,7 @@ package body Wiki.Buffers is
    procedure Inline_Append (Source   : in out Builder) is
       B     : Block_Access := Source.Current;
       Last  : Natural;
+      Done  : Boolean;
    begin
       loop
          if B.Len = B.Last then
@@ -161,11 +173,11 @@ package body Wiki.Buffers is
             B := B.Next_Block;
             Source.Current := B;
          end if;
-         Process (B.Content (B.Last + 1 .. B.Len), Last);
+         Process (B.Content (B.Last + 1 .. B.Len), Last, Done);
          exit when Last > B.Len or else Last <= B.Last;
          Source.Length := Source.Length + Last - B.Last;
          B.Last := Last;
-         exit when Last < B.Len;
+         exit when Last < B.Len or else Done;
       end loop;
    end Inline_Append;
 
@@ -262,10 +274,12 @@ package body Wiki.Buffers is
          Length := Length + Pos - 1;
          Next.Last := Pos - 1;
          Source.Length := Length;
-         Current := Next;
+         Source.Current := Next;
+         Current := Next.Next_Block;
+         Next.Next_Block := null;
          while Current /= null loop
             Next := Current.Next_Block;
-            Free (Current.Next_Block);
+            Free (Current);
             Current := Next;
          end loop;
       end if;
@@ -384,32 +398,15 @@ package body Wiki.Buffers is
       return Count;
    end Count_Occurence;
 
-   procedure Count_Occurence (Buffer : in out Buffer_Access;
-                              From   : in out Positive;
+   procedure Count_Occurence (From   : in out Cursor;
                               Item   : in Wiki.Strings.WChar;
                               Count  : out Natural) is
-      Current : Buffer_Access := Buffer;
-      Pos     : Positive := From;
    begin
       Count := 0;
-      while Current /= null loop
-         declare
-            First : constant Positive := From;
-            Last  : constant Natural := Current.Last;
-         begin
-            while Pos <= Last and then Current.Content (Pos) = Item loop
-               Pos := Pos + 1;
-            end loop;
-            if Pos > First then
-               Count := Count + Pos - First;
-            end if;
-            exit when Pos <= Last;
-         end;
-         Current := Current.Next_Block;
-         Pos := 1;
+      while Is_Valid (From) and then Char_At (From) = Item loop
+         Count := Count + 1;
+         Next (From);
       end loop;
-      Buffer := Current;
-      From := Pos;
    end Count_Occurence;
 
    --  ------------------------------
@@ -441,29 +438,36 @@ package body Wiki.Buffers is
       From := Pos;
    end Skip_Spaces;
 
-   procedure Skip_Ascii_Spaces (Buffer : in out Buffer_Access;
-                                From   : in out Positive;
-                                Count  : out Natural) is
-      Block : Wiki.Buffers.Buffer_Access := Buffer;
-      Pos   : Positive := From;
+   procedure Skip_Spaces (From   : in out Cursor;
+                          Count  : out Natural) is
    begin
       Count := 0;
       Main_Loop :
-      while Block /= null loop
+      while From.Block /= null loop
          declare
-            Last : constant Natural := Block.Last;
+            Last : constant Natural := From.Block.Last;
          begin
-            while Pos <= Last and then Helpers.Is_Space_Or_Tab (Block.Content (Pos)) loop
-               Pos := Pos + 1;
+            while From.Pos <= Last
+              and then Helpers.Is_Space_Or_Newline (Char_At (From))
+            loop
+               From.Pos := From.Pos + 1;
                Count := Count + 1;
             end loop;
-            exit Main_Loop when Pos <= Last;
+            exit Main_Loop when From.Pos <= Last;
          end;
-         Block := Block.Next_Block;
-         Pos := 1;
+         From.Block := From.Block.Next_Block;
+         From.Pos := 1;
       end loop Main_Loop;
-      Buffer := Block;
-      From := Pos;
+   end Skip_Spaces;
+
+   procedure Skip_Ascii_Spaces (From   : in out Cursor;
+                                Count  : out Natural) is
+   begin
+      Count := 0;
+      while Is_Valid (From) and then Is_Space_Or_Tab (From) loop
+         Count := Count + 1;
+         Next (From);
+      end loop;
    end Skip_Ascii_Spaces;
 
    procedure Skip_Spaces (Buffer      : in out Buffer_Access;
@@ -497,6 +501,47 @@ package body Wiki.Buffers is
       end loop Main_Loop;
       Buffer := Block;
       From := Pos;
+   end Skip_Spaces;
+
+   procedure Skip_Spaces (From        : in out Cursor;
+                          Space_Count : out Natural;
+                          Line_Count  : out Natural) is
+   begin
+      Space_Count := 0;
+      Line_Count := 0;
+      while Is_Valid (From) loop
+         declare
+            C : constant Wiki.Strings.WChar := Char_At (From);
+         begin
+            if C in Helpers.LF | Helpers.CR then
+               Line_Count := Line_Count + 1;
+            else
+               exit when not Helpers.Is_Space (C);
+            end if;
+            Space_Count := Space_Count + 1;
+            Next (From);
+         end;
+      end loop;
+      Main_Loop :
+      while From.Block /= null loop
+         declare
+            Last : constant Natural := From.Block.Last;
+            C    : Wiki.Strings.WChar;
+         begin
+            while From.Pos <= Last loop
+               C := Char_At (From);
+               if C in Helpers.LF | Helpers.CR then
+                  Line_Count := Line_Count + 1;
+               else
+                  exit Main_Loop when not Helpers.Is_Space (C);
+               end if;
+               From.Pos := From.Pos + 1;
+               Space_Count := Space_Count + 1;
+            end loop;
+         end;
+         From.Block := From.Block.Next_Block;
+         From.Pos := 1;
+      end loop Main_Loop;
    end Skip_Spaces;
 
    --  ------------------------------

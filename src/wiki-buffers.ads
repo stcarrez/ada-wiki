@@ -1,11 +1,12 @@
 -----------------------------------------------------------------------
 --  util-texts-builders -- Text builder
---  Copyright (C) 2013, 2017, 2021, 2022, 2024 Stephane Carrez
+--  Copyright (C) 2013, 2017, 2021, 2022, 2024, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
-with Wiki.Strings;
 with Ada.Finalization;
+with Wiki.Strings;
+with Wiki.Helpers;
 
 --  == Text Builders ==
 --  The `Util.Texts.Builders` generic package was designed to provide string builders.
@@ -64,6 +65,28 @@ private package Wiki.Buffers with Preelaborate is
    end record;
    pragma Finalize_Storage_Only (Builder);
 
+   type Cursor is record
+      Block : Buffer_Access;
+      Pos   : Natural;
+   end record;
+
+   function Is_Valid (C : in Cursor) return Boolean is
+     (C.Block /= null and then C.Pos <= C.Block.Last);
+
+   function Has_Next (C : in Cursor) return Boolean is
+     (C.Block /= null
+      and then (C.Pos < C.Block.Last or else C.Block.Next_Block /= null));
+
+   function Char_At (C : in Cursor) return Wiki.Strings.WChar is
+      (C.Block.Content (C.Pos));
+
+   function Next_At (C : in Cursor) return Wiki.Strings.WChar is
+     (if C.Pos < C.Block.Last then C.Block.Content (C.Pos + 1)
+      else C.Block.Next_Block.Content (1));
+
+   function Is_Space_Or_Tab (C : in Cursor) return Boolean is
+      (Helpers.Is_Space_Or_Tab (C.Block.Content (C.Pos)));
+
    --  Setup the builder.
    overriding
    procedure Initialize (Source : in out Builder);
@@ -75,14 +98,14 @@ private package Wiki.Buffers with Preelaborate is
    --  Move forward to skip a number of items.
    procedure Next (Content : in out Buffer_Access;
                    Pos     : in out Positive) with Inline_Always;
+   procedure Next (Pos : in out Cursor) with Inline_Always;
 
    procedure Next (Content : in out Buffer_Access;
                    Pos     : in out Positive;
                    Count   : in Natural);
 
    --  Move forward and return the next character or NUL.
-   function Next (Content : in out Buffer_Access;
-                  Pos     : in out Natural) return Strings.WChar with Inline_Always;
+   function Next (Text  : in out Cursor) return Strings.WChar with Inline_Always;
 
    --  Get the length of the item builder.
    function Length (Source : in Builder) return Natural;
@@ -121,7 +144,9 @@ private package Wiki.Buffers with Preelaborate is
                            From   : in Positive);
 
    generic
-      with procedure Process (Content : in out Wiki.Strings.WString; Last : out Natural);
+      with procedure Process (Content : in out Wiki.Strings.WString;
+                              Last    : out Natural;
+                              Done    : out Boolean);
    procedure Inline_Append (Source  : in out Builder);
 
    --  Clear the source freeing any storage allocated for the buffer.
@@ -155,8 +180,7 @@ private package Wiki.Buffers with Preelaborate is
                              From   : in Positive;
                              Item   : in Wiki.Strings.WChar) return Natural;
 
-   procedure Count_Occurence (Buffer : in out Buffer_Access;
-                              From   : in out Positive;
+   procedure Count_Occurence (From   : in out Cursor;
                               Item   : in Wiki.Strings.WChar;
                               Count  : out Natural);
 
@@ -165,14 +189,18 @@ private package Wiki.Buffers with Preelaborate is
    procedure Skip_Spaces (Buffer       : in out Buffer_Access;
                           From         : in out Positive;
                           Count        : out Natural);
+   procedure Skip_Spaces (From  : in out Cursor;
+                          Count : out Natural);
    procedure Skip_Spaces (Buffer       : in out Buffer_Access;
                           From         : in out Positive;
                           Space_Count  : out Natural;
                           Line_Count   : out Natural);
+   procedure Skip_Spaces (From         : in out Cursor;
+                          Space_Count  : out Natural;
+                          Line_Count   : out Natural);
 
    --  Skip only ascii space and tab.
-   procedure Skip_Ascii_Spaces (Buffer       : in out Buffer_Access;
-                                From         : in out Positive;
+   procedure Skip_Ascii_Spaces (From         : in out Cursor;
                                 Count        : out Natural);
 
    --  Skip one optional space or tab.
