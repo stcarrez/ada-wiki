@@ -828,7 +828,7 @@ package body Wiki.Render.Wiki is
          end if;
          if I = Text'First and then Col > 0 then
             Engine.New_Line (False);
-            Col := 0;
+            Col := 2;
             for I in 1 .. Engine.Indent_Level loop
                Engine.Output.Write (' ');
             end loop;
