@@ -91,8 +91,8 @@ package body Wiki.Parsers.Html is
    end Parse_Line_Fragment;
 
    procedure Parse_Line (Parser : in out Parser_Type;
-                         Text   : in Wiki.Buffers.Buffer_Access) is
-      Buffer : Wiki.Buffers.Buffer_Access := Text;
+                         Text   : in Wiki.Buffers.Cursor) is
+      Buffer : Wiki.Buffers.Buffer_Access := Text.Block;
    begin
       while Buffer /= null loop
          Parse_Line_Fragment (Parser, Buffer.Content (1 .. Buffer.Last));

@@ -747,9 +747,8 @@ package body Wiki.Parsers.Common is
                                Text    : in out Wiki.Buffers.Buffer_Access;
                                From    : in out Positive;
                                Is_Term : in Boolean) is
-      Buffer : Wiki.Buffers.Buffer_Access := Text;
-      Pos    : Positive := From;
-      C      : constant Wiki.Strings.WChar := Next (Buffer, Pos);
+      Pos    : Wiki.Buffers.Cursor := (Text, From);
+      C      : constant Wiki.Strings.WChar := Next (Pos);
       Count  : Natural;
    begin
       if C = Helpers.NUL or else Wiki.Helpers.Is_Newline (C) then
@@ -773,9 +772,9 @@ package body Wiki.Parsers.Common is
          Push_Block (Parser, Nodes.N_DEFINITION);
          Parser.Context.Filters.Start_Block (Parser.Document, Nodes.N_DEFINITION, 0);
       end if;
-      Buffers.Skip_Spaces (Buffer, Pos, Count);
-      Text := Buffer;
-      From := Pos;
+      Buffers.Skip_Spaces (Pos, Count);
+      Text := Pos.Block;
+      From := Pos.Pos;
    end Parse_Definition;
 
    --  ------------------------------
@@ -1077,6 +1076,12 @@ package body Wiki.Parsers.Common is
    end Parse_Template;
 
    procedure Parse_Entity (Parser : in out Parser_Type;
+                           From   : in out Wiki.Buffers.Cursor) is
+   begin
+      Parse_Entity (Parser, From.Block, From.Pos);
+   end Parse_Entity;
+
+   procedure Parse_Entity (Parser : in out Parser_Type;
                            Text   : in out Wiki.Buffers.Buffer_Access;
                            From   : in out Positive;
                            Status : out Wiki.Html_Parser.Entity_State_Type;
@@ -1095,8 +1100,13 @@ package body Wiki.Parsers.Common is
                                         Pos, Status, Entity, Pos);
          case Status is
             when Wiki.Html_Parser.ENTITY_VALID =>
-               Text := Block;
-               From := Pos;
+               if Pos > Block.Last then
+                  Text := Block.Next_Block;
+                  From := 1;
+               else
+                  Text := Block;
+                  From := Pos;
+               end if;
                return;
 
             when Wiki.Html_Parser.ENTITY_NONE =>

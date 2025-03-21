@@ -60,10 +60,10 @@ package body Wiki.Parsers.MediaWiki is
    end Parse_Bold_Italic;
 
    procedure Parse_Line (Parser : in out Parser_Type;
-                         Text   : in Wiki.Buffers.Buffer_Access) is
-      Pos    : Natural := 1;
+                         Text   : in Wiki.Buffers.Cursor) is
+      Pos    : Natural := Text.Pos;
       C      : Wiki.Strings.WChar;
-      Buffer : Wiki.Buffers.Buffer_Access := Text;
+      Buffer : Wiki.Buffers.Buffer_Access := Text.Block;
    begin
       --  Feed the HTML parser if there are some pending state.
       if not Wiki.Html_Parser.Is_Empty (Parser.Html) then

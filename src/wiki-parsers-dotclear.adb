@@ -162,11 +162,11 @@ package body Wiki.Parsers.Dotclear is
    end Parse_Image;
 
    procedure Parse_Line (Parser : in out Parser_Type;
-                         Text   : in Wiki.Buffers.Buffer_Access) is
-      Pos    : Natural := 1;
+                         Text   : in Wiki.Buffers.Cursor) is
+      Pos    : Natural := Text.Pos;
       C      : Wiki.Strings.WChar;
       Count  : Natural;
-      Buffer : Wiki.Buffers.Buffer_Access := Text;
+      Buffer : Wiki.Buffers.Buffer_Access := Text.Block;
    begin
       if Parser.In_Blockquote then
          Count := Count_Occurence (Buffer, 1, '>');

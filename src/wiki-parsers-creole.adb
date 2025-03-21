@@ -130,11 +130,11 @@ package body Wiki.Parsers.Creole is
    end Parse_End_Preformatted;
 
    procedure Parse_Line (Parser : in out Parser_Type;
-                         Text   : in Wiki.Buffers.Buffer_Access) is
-      Pos    : Natural := 1;
+                         Text   : in Wiki.Buffers.Cursor) is
+      Pos    : Natural := Text.Pos;
       C      : Wiki.Strings.WChar;
       Count  : Natural;
-      Buffer : Wiki.Buffers.Buffer_Access := Text;
+      Buffer : Wiki.Buffers.Buffer_Access := Text.Block;
    begin
       if Parser.Current_Node = Nodes.N_PREFORMAT then
          Count := Count_Occurence (Buffer, 1, '}');
@@ -192,7 +192,7 @@ package body Wiki.Parsers.Creole is
          declare
             Last : Natural := Buffer.Last;
          begin
-            while Pos <= Last loop
+            while Pos <= Buffer.Last loop
                C := Buffer.Content (Pos);
                case C is
                   when '*' =>

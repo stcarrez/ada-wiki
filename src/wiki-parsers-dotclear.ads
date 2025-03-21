@@ -7,6 +7,6 @@
 private package Wiki.Parsers.Dotclear with Preelaborate is
 
    procedure Parse_Line (Parser : in out Parser_Type;
-                         Text   : in Wiki.Buffers.Buffer_Access);
+                         Text   : in Wiki.Buffers.Cursor);
 
 end Wiki.Parsers.Dotclear;

@@ -231,10 +231,10 @@ package body Wiki.Parsers.Textile is
    end Parse_Link;
 
    procedure Parse_Line (Parser : in out Parser_Type;
-                         Text   : in Wiki.Buffers.Buffer_Access) is
-      Pos    : Natural := 1;
+                         Text   : in Wiki.Buffers.Cursor) is
+      Pos    : Natural := Text.Pos;
       C      : Wiki.Strings.WChar;
-      Buffer : Wiki.Buffers.Buffer_Access := Text;
+      Buffer : Wiki.Buffers.Buffer_Access := Text.Block;
       Level  : Natural;
    begin
       --  Feed the HTML parser if there are some pending state.
@@ -302,7 +302,7 @@ package body Wiki.Parsers.Textile is
          declare
             Last : constant Natural := Buffer.Last;
          begin
-            while Pos <= Last loop
+            while Pos <= Buffer.Last loop
                C := Buffer.Content (Pos);
                case C is
                   when '*' =>

@@ -66,13 +66,12 @@ package body Wiki.Parsers is
 
    --  Find first non space and update column and information in the parser.
    procedure First_Nonspace (Parser : in out Parser_Type;
-                             Block  : in out Wiki.Buffers.Buffer_Access;
-                             Pos    : in out Natural;
+                             Text   : in out Wiki.Buffers.Cursor;
                              C      : out Wiki.Strings.WChar) is
       Column : constant Natural := Parser.Column;
    begin
       loop
-         C := Buffers.Next (Block, Pos);
+         C := Buffers.Next (Text);
          if C = ' ' then
             Parser.Column := Parser.Column + 1;
          elsif C = Helpers.HT then
@@ -169,7 +168,7 @@ package body Wiki.Parsers is
       if not Parser.Context.Is_Hidden then
          if Parser.Parse_Inline /= null then
             --  Parser.Context.Filters.Start_Block (Parser.Document, Nodes.N_HEADER, Level);
-            Parser.Parse_Inline (Parser, Parser.Text_Buffer.First'Unchecked_Access);
+            Parser.Parse_Inline (Parser, (Parser.Text_Buffer.First'Unchecked_Access, 1));
             Buffers.Clear (Parser.Text_Buffer);
          else
             Add_Header (Parser.Text);
@@ -203,14 +202,14 @@ package body Wiki.Parsers is
             Append_Preformatted (Parser, Strings.To_WString (Parser.Preformat_Format));
          elsif Top.Kind in Nodes.N_NONE | Nodes.N_PARAGRAPH | Nodes.N_BLOCKQUOTE then
             if Parser.Parse_Inline /= null then
-               Parser.Parse_Inline (Parser, Parser.Text_Buffer.First'Unchecked_Access);
+               Parser.Parse_Inline (Parser, (Parser.Text_Buffer.First'Unchecked_Access, 1));
                Parser.Text_Buffer.Clear;
             else
                Flush_Text (Parser, Trim);
             end if;
          elsif Top.Kind in Nodes.N_LIST_ITEM | Nodes.N_TABLE then
             if Parser.Parse_Inline /= null then
-               Parser.Parse_Inline (Parser, Parser.Text_Buffer.First'Unchecked_Access);
+               Parser.Parse_Inline (Parser, (Parser.Text_Buffer.First'Unchecked_Access, 1));
                Parser.Text_Buffer.Clear;
             else
                Flush_Text (Parser, Trim);
@@ -223,7 +222,7 @@ package body Wiki.Parsers is
          end if;
       else
          if Parser.Parse_Inline /= null then
-            Parser.Parse_Inline (Parser, Parser.Text_Buffer.First'Unchecked_Access);
+            Parser.Parse_Inline (Parser, (Parser.Text_Buffer.First'Unchecked_Access, 1));
             Parser.Text_Buffer.Clear;
          end if;
          Clear (Parser.Text);
@@ -257,7 +256,7 @@ package body Wiki.Parsers is
             Flush_Text (P, Trim => Right);
          end if;
          if P.Parse_Inline /= null and then P.Text_Buffer.Length > 0 then
-            P.Parse_Inline (P, P.Text_Buffer.First'Unchecked_Access);
+            P.Parse_Inline (P, (P.Text_Buffer.First'Unchecked_Access, 1));
             Buffers.Clear (P.Text_Buffer);
          end if;
          P.Line_Count := 0;
@@ -389,13 +388,15 @@ package body Wiki.Parsers is
    procedure Read_Line (Parser : in out Parser_Type'Class;
                         Buffer : out Wiki.Buffers.Buffer_Access) is
       procedure Read (Into : in out Wiki.Strings.WString;
-                      Last : out Natural);
+                      Last : out Natural;
+                      Done : out Boolean);
 
       procedure Read (Into : in out Wiki.Strings.WString;
-                      Last : out Natural) is
+                      Last : out Natural;
+                      Done : out Boolean) is
       begin
          Parser.Reader.Read (Into, Last, Parser.Is_Last_Line);
-         if Last < Into'Last then
+         if Last <= Into'Last then
             while Last > Into'First
               and then Into (Last) in Wiki.Helpers.CR | Wiki.Helpers.LF
               and then Into (Last - 1) in Wiki.Helpers.CR | Wiki.Helpers.LF
@@ -403,6 +404,9 @@ package body Wiki.Parsers is
                Last := Last - 1;
                Into (Last) := Wiki.Helpers.LF;
             end loop;
+            Done := Last < Into'First or else Into (Last) = Wiki.Helpers.LF;
+         else
+            Done := False;
          end if;
       end Read;
 
@@ -483,7 +487,7 @@ package body Wiki.Parsers is
                                 Trim   : in Trim_End := None) is
    begin
       if Parser.Parse_Inline /= null then
-         Parser.Parse_Inline (Parser, Parser.Text_Buffer.First'Unchecked_Access);
+         Parser.Parse_Inline (Parser, (Parser.Text_Buffer.First'Unchecked_Access, 1));
          Buffers.Clear (Parser.Text_Buffer);
       else
          Flush_Text (Parser, Trim);
@@ -839,7 +843,7 @@ package body Wiki.Parsers is
       end if;
 
       P.Last_Closing_Tag := Tag;
-      if P.In_Html = HTML_BLOCK_PRE and then Tag = P.Pre_Tag and then Tag /= UNKNOWN_TAG then
+      if P.In_Html in HTML_BLOCK_PRE | HTML_BLOCK and then Tag = P.Pre_Tag and then Tag /= UNKNOWN_TAG then
          if P.Pre_Tag_Counter > 0 then
             P.Pre_Tag_Counter := P.Pre_Tag_Counter - 1;
          end if;
@@ -1097,7 +1101,7 @@ package body Wiki.Parsers is
          loop
             Read_Line (Engine, Buffer);
             exit when Buffer = null;
-            Engine.Parse_Block (Engine, Buffer);
+            Engine.Parse_Block (Engine, (Buffer, 1));
          end loop;
          while not Block_Stack.Is_Empty (Engine.Blocks) loop
             if Engine.Current_Node in Nodes.N_PARAGRAPH | Nodes.N_LIST_ITEM | Nodes.N_DEFINITION | Nodes.N_DEFINITION_TERM then
@@ -1107,7 +1111,7 @@ package body Wiki.Parsers is
             Pop_Block (Engine);
          end loop;
          if Engine.Parse_Inline /= null then
-            Engine.Parse_Inline (Engine, Engine.Text_Buffer.First'Unchecked_Access);
+            Engine.Parse_Inline (Engine, (Engine.Text_Buffer.First'Unchecked_Access, 1));
          end if;
          --  Flush and trim on the right in case we have only spaces.
          Flush_Text (Engine, Trim => Right);

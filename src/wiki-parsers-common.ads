@@ -81,6 +81,8 @@ private package Wiki.Parsers.Common with Preelaborate is
    procedure Parse_Entity (Parser : in out Parser_Type;
                            Text   : in out Wiki.Buffers.Buffer_Access;
                            From   : in out Positive);
+   procedure Parse_Entity (Parser : in out Parser_Type;
+                           From   : in out Wiki.Buffers.Cursor);
 
    --  Parse a quote.
    --  Example:

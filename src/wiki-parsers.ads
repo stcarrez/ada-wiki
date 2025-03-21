@@ -123,7 +123,7 @@ private
                                            Element_Type_Access => Block_Access);
 
    type Parser_Handler is access procedure (Parser : in out Parser_Type;
-                                            Text   : in Wiki.Buffers.Buffer_Access);
+                                            Text   : in Wiki.Buffers.Cursor);
 
    type Parser is tagged limited record
       Context             : aliased Wiki.Plugins.Plugin_Context;
@@ -279,8 +279,7 @@ private
 
    --  Find first non space and update column and information in the parser.
    procedure First_Nonspace (Parser : in out Parser_Type;
-                             Block  : in out Wiki.Buffers.Buffer_Access;
-                             Pos    : in out Natural;
+                             Text   : in out Wiki.Buffers.Cursor;
                              C      : out Wiki.Strings.WChar);
 
    NAME_ATTR  : aliased constant String := "name";

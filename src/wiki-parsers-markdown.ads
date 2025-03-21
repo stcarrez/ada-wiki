@@ -7,13 +7,12 @@
 private package Wiki.Parsers.Markdown with Preelaborate is
 
    procedure Parse_Line (Parser : in out Parser_Type;
-                         Text   : in Wiki.Buffers.Buffer_Access);
+                         Text   : in Wiki.Buffers.Cursor);
 
    procedure Parse_Inline_Text (Parser : in out Parser_Type;
-                                Text   : in Wiki.Buffers.Buffer_Access);
+                                Text   : in Wiki.Buffers.Cursor);
 
    function Get_Setext_Heading (Parser : in out Parser_Type;
-                                Text   : in Wiki.Buffers.Buffer_Access;
-                                From   : in Positive) return Natural;
+                                Text   : in Wiki.Buffers.Cursor) return Natural;
 
 end Wiki.Parsers.Markdown;
