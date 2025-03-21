@@ -313,14 +313,15 @@ package body Wiki.Render.Text is
    --  ------------------------------
    --  Render a table component such as N_TABLE, N_ROW or N_COLUMN.
    --  ------------------------------
-   procedure Render_Table (Engine : in out Text_Renderer;
-                           Doc    : in Wiki.Documents.Document;
-                           Node   : in Wiki.Nodes.Node_Type) is
+   procedure Render_Table (Engine  : in out Text_Renderer;
+                           Doc     : in Wiki.Documents.Document;
+                           Node    : in Wiki.Nodes.Node_Type;
+                           Column_Styles : in Wiki.Nodes.Column_Array_Style) is
       Old_Line_Length : constant Natural := Engine.Line_Length;
 
       Indent  : constant Natural := Engine.Indent_Level;
-      Styles  : Wiki.Nodes.Column_Array_Style := Node.Columns;
-      Columns : Diverter_Array (1 .. Node.Len);
+      Styles  : Wiki.Nodes.Column_Array_Style := Column_Styles;
+      Columns : Diverter_Array (1 .. Column_Styles'Length);
       Total_W : Natural := 0;
       Table_W : Natural := Engine.Line_Length;
       Col_Num : Natural;
@@ -343,6 +344,9 @@ package body Wiki.Render.Text is
 
       procedure Process_Column (Column : in Wiki.Nodes.Node_Type) is
       begin
+         if Column.Kind = Wiki.Nodes.N_TAG_START and then Column.Tag_Start = TH_TAG then
+            Previous_Row_Is_Header := True;
+         end if;
          Col_Num := Col_Num + 1;
          if Col_Num <= Columns'Last then
             Engine.Diverter := Columns (Col_Num);
@@ -395,6 +399,12 @@ package body Wiki.Render.Text is
       for S of Styles loop
          Total_W := Total_W + S.Width;
       end loop;
+      if Total_W = 0 then
+         for I in Styles'Range loop
+            Styles (I).Width := (80 / Styles'Length) + 1;
+            Total_W := Total_W + Styles (I).Width;
+         end loop;
+      end if;
       for I in Styles'Range loop
          Styles (I).Width := (Table_W * Styles (I).Width) / Total_W;
       end loop;
@@ -416,6 +426,53 @@ package body Wiki.Render.Text is
          Engine.Indent_Level := Indent;
          raise;
    end Render_Table;
+
+   --  ------------------------------
+   --  Render a table component such as N_TABLE, N_ROW or N_COLUMN.
+   --  ------------------------------
+   procedure Render_Table (Engine : in out Text_Renderer;
+                           Doc    : in Wiki.Documents.Document;
+                           Node   : in Wiki.Nodes.Node_Type) is
+   begin
+      Engine.Render_Table (Doc, Node, Node.Columns);
+   end Render_Table;
+
+   procedure Render_Html_Table (Engine : in out Text_Renderer;
+                                Doc    : in Wiki.Documents.Document;
+                                Node   : in Wiki.Nodes.Node_Type) is
+      Max_Column_Count : Natural := 0;
+      Column_Count : Natural := 0;
+
+      procedure Count_Cols (Node : in Wiki.Nodes.Node_Type) is
+      begin
+         if Node.Kind = Nodes.N_TAG_START and then Node.Tag_Start in TD_TAG | TH_TAG then
+            Column_Count := Column_Count + 1;
+         end if;
+      end Count_Cols;
+
+      procedure Count_Rows (Node : in Wiki.Nodes.Node_Type) is
+      begin
+         Column_Count := 0;
+         if Node.Kind = Nodes.N_TAG_START and then Node.Tag_Start in TH_TAG | TR_TAG then
+            Wiki.Nodes.Lists.Iterate (Node.Children, Count_Cols'Access);
+            if Column_Count > Max_Column_Count then
+               Max_Column_Count := Column_Count;
+            end if;
+         end if;
+      end Count_Rows;
+
+   begin
+      Wiki.Nodes.Lists.Iterate (Node.Children, Count_Rows'Access);
+      if Max_Column_Count = 0 then
+         return;
+      end if;
+
+      declare
+         Columns : Wiki.Nodes.Column_Array_Style (1 .. Max_Column_Count);
+      begin
+         Engine.Render_Table (Doc, Node, Columns);
+      end;
+   end Render_Html_Table;
 
    procedure Release (Columns : in out Diverter_Array) is
       procedure Free is
@@ -714,6 +771,10 @@ package body Wiki.Render.Text is
             Engine.Set_Format (Empty_Formats);
             Engine.Close_Paragraph;
             Engine.Quote_Level := Engine.Quote_Level + 1;
+
+         when TABLE_TAG =>
+            Engine.Render_Html_Table (Doc, Node);
+            return;
 
          when others =>
             null;
