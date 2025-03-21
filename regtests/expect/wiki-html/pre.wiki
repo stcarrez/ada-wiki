@@ -1,0 +1,2 @@
+<pre><code>dynamo create-project [-l {apache|gpl|proprietary}] [--web] [--tool] [--ado] name author email
+</code></pre>

@@ -2,15 +2,6 @@ C'D
 
     {
 
-
 1.1.1. Euro €
-
-
-Copyright: ©
-Trademark: ®
-
-Math: ⫆
-Emoticon: 😃
-
-No: &#12fr;
+Copyright: © Trademark: ® Math: ⫆ Emoticon: 😃 No: &#12fr;
 

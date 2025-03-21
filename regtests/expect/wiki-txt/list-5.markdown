@@ -1,7 +1,6 @@
   1)  foo
 
-bar
-
+      bar
       baz
   
       bam
