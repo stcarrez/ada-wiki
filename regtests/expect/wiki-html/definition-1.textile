@@ -1,1 +1,1 @@
-<dl><dt>HTML</dt><dd>HyperText Markup Language, based on SGML.</dd></dd><dt>XHTML</dt><dd>HTML 4.0 rewritten to be compliant with XML rules.</dd></dd><dt>HTML5</dt><dd>The latest revision of the HTML standard. : Still under development.</dd></dl>
+<dl><dt>HTML</dt><dd>HyperText Markup Language, based on SGML.</dd><dt>XHTML</dt><dd>HTML 4.0 rewritten to be compliant with XML rules.</dd><dt>HTML5</dt><dd>The latest revision of the HTML standard. : Still under development.</dd></dl>

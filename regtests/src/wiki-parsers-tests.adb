@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-tests -- Unit tests for wiki parsing
---  Copyright (C) 2011 - 2024 Stephane Carrez
+--  Copyright (C) 2011 - 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -281,7 +281,7 @@ package body Wiki.Parsers.Tests is
       Util.Tests.Assert_Equals (T, "code" & ASCII.LF,
                                 Wiki.Utils.To_Text ("`code`", SYNTAX_MARKDOWN),
                                 "Preformat rendering invalid");
-      Util.Tests.Assert_Equals (T, "bold item my_title" & ASCII.LF,
+      Util.Tests.Assert_Equals (T, "bold item my_title (my_title)" & ASCII.LF,
                                 Wiki.Utils.To_Text ("_bold_ __item__ [my_title]", SYNTAX_GOOGLE),
                                 "Preformat rendering invalid");
 
@@ -345,7 +345,7 @@ package body Wiki.Parsers.Tests is
    begin
       Wiki.Buffers.Append (B, "   hello   ");
       declare
-         R : Wiki.Strings.WString :=  Wiki.Buffers.To_Array (B);
+         R : constant Wiki.Strings.WString :=  Wiki.Buffers.To_Array (B);
       begin
          T.Assert ("   hello   " = R, "Invalid buffer");
       end;

@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-html_parsers-tests -- Unit tests for the HTML parser
---  Copyright (C) 2022 Stephane Carrez
+--  Copyright (C) 2022, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -284,8 +284,8 @@ package body Wiki.Html_Parser.Tests is
       Assert_Equals (T, ENTITY_NONE, Status, "Invalid status");
 
       Parse_Entity (P, "#x000000;", 1, Status, Entity, Last);
-      Util.Tests.Assert_Equals (T, 10, Last, "Invalid last index");
-      Assert_Equals (T, Wiki.Strings.WChar'Val (16#0FFFD#), Entity, "Invalid parsed entity");
+      Util.Tests.Assert_Equals (T, 1, Last, "Invalid last index");
+      Assert_Equals (T, ENTITY_NONE, Status, "Invalid status");
 
       Parse_Entity (P, "#000000;", 1, Status, Entity, Last);
       Util.Tests.Assert_Equals (T, 9, Last, "Invalid last index");
