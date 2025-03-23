@@ -45,6 +45,7 @@ package body Wiki.Parsers.Markdown is
    subtype Delimiter_Vector is Delimiter_Vectors.Vector;
 
    function Check_Trailing_Header (Text : in Wiki.Buffers.Cursor) return Boolean;
+   function Maybe_Lazy (Parser : in out Parser_Type) return Boolean;
 
    function Get_Header_Level (Text   : in out Wiki.Buffers.Cursor) return Natural;
    function Is_Thematic_Break (Text      : in Wiki.Buffers.Cursor;
@@ -62,6 +63,8 @@ package body Wiki.Parsers.Markdown is
                               Expect : in Wiki.Strings.WChar;
                               Link   : in out Wiki.Strings.BString;
                               Title  : in out Wiki.Strings.BString);
+   procedure Append_Header (Parser : in out Parser_Type;
+                            Text   : in out Wiki.Buffers.Cursor);
    procedure Add_Header (Parser : in out Parser_Type;
                          Level  : in Positive;
                          C      : in out Wiki.Strings.WChar);
@@ -104,8 +107,7 @@ package body Wiki.Parsers.Markdown is
    procedure Scan_Linebreak (Text   : in out Wiki.Buffers.Cursor;
                              Delim  : in out Delimiter_Type);
    procedure Parse_Html (Parser : in out Parser_Type;
-                         Text   : in out Wiki.Buffers.Cursor;
-                         C      : in out Wiki.Strings.WChar);
+                         Text   : in out Wiki.Buffers.Cursor);
    procedure Open_New_Blocks (Parser : in out Parser_Type;
                               Text   : in out Wiki.Buffers.Cursor;
                               C      : in out Wiki.Strings.WChar);
@@ -203,8 +205,7 @@ package body Wiki.Parsers.Markdown is
    --    ```
    procedure Parse_Preformatted (Parser : in out Parser_Type;
                                  Text   : in out Wiki.Buffers.Cursor;
-                                 Marker : in Wiki.Strings.WChar;
-                                 Keep_Block : in Boolean := False) is
+                                 Marker : in Wiki.Strings.WChar) is
       Pos   : Wiki.Buffers.Cursor := Text;
       Count : Natural;
    begin
@@ -266,9 +267,6 @@ package body Wiki.Parsers.Markdown is
       Parser.Preformat_Fence := Marker;
       Parser.Preformat_Fcount := Count;
       Flush_Block (Parser, Trim => Right);
-      if not Keep_Block then
-         Pop_Block (Parser);
-      end if;
       Push_Block (Parser, N_PREFORMAT, Parser.Indent);
       Parser.Previous_Line_Empty := 0;
    end Parse_Preformatted;
@@ -395,8 +393,7 @@ package body Wiki.Parsers.Markdown is
       end if;
    end Add_Horizontal_Rule;
 
-   procedure Parse_Columns (Parser  : in out Parser_Type;
-                            Text    : in Wiki.Buffers.Cursor;
+   procedure Parse_Columns (Text    : in Wiki.Buffers.Cursor;
                             Columns : in out Nodes.Column_Array_Style;
                             Count   : out Natural) is
       Pos   : Wiki.Buffers.Cursor := Text;
@@ -509,7 +506,7 @@ package body Wiki.Parsers.Markdown is
       Count   : Natural;
       Empty   : Nodes.Column_Array_Style (1 .. 0);
    begin
-      Parse_Columns (Parser, Text, Empty, Count);
+      Parse_Columns (Text, Empty, Count);
       if Count = 0 then
          return;
       end if;
@@ -554,13 +551,12 @@ package body Wiki.Parsers.Markdown is
          end if;
 
          Buffers.Truncate (Parser.Text_Buffer, Truncate_Pos.Block, Truncate_Pos.Pos);
-         --  Buffers.Clear (Parser.Text_Buffer);
 
          --  Get the column layout and create the table.
          declare
             Columns : Nodes.Column_Array_Style (1 .. Count);
          begin
-            Parse_Columns (Parser, Text, Columns, Count);
+            Parse_Columns (Text, Columns, Count);
             Push_Block (Parser, Nodes.N_TABLE);
             Parser.Context.Filters.Add_Table (Parser.Document, Columns);
          end;
@@ -863,11 +859,6 @@ package body Wiki.Parsers.Markdown is
                        Text   : in out Wiki.Buffers.Cursor;
                        C      : in out Wiki.Strings.WChar) is
    begin
-      if Parser.Current_Node = N_PREFORMAT then
-         Common.Append (Parser.Text, Text);
-         return;
-      end if;
-
       if C in '*' | '-' and then Is_Thematic_Break (Text, C)
         and then Parser.Indent = 0
       then
@@ -958,7 +949,7 @@ package body Wiki.Parsers.Markdown is
       if Count = 0 then
          return False;
       end if;
-      Buffers.Skip_Spaces (Pos.Block, Pos.Pos, Space_Count, Line_Count);
+      Buffers.Skip_Spaces (Pos, Space_Count, Line_Count);
       return Pos.Block = null or else Line_Count > 0;
    end Check_Trailing_Header;
 
@@ -980,8 +971,7 @@ package body Wiki.Parsers.Markdown is
    end Append_Header;
 
    procedure Parse_Html (Parser : in out Parser_Type;
-                         Text   : in out Wiki.Buffers.Cursor;
-                         C      : in out Wiki.Strings.WChar) is
+                         Text   : in out Wiki.Buffers.Cursor) is
       use type Wiki.Html_Parser.State_Type;
 
       procedure Process (Kind : in Wiki.Html_Parser.State_Type;
@@ -1237,7 +1227,7 @@ package body Wiki.Parsers.Markdown is
                   end;
 
                when '~' | '`' =>
-                  Parse_Preformatted (Parser, Text, C, True);
+                  Parse_Preformatted (Parser, Text, C);
                   if Parser.Current_Node = Nodes.N_PREFORMAT then
                      Common.Append (Parser.Text, Text);
                      C := Helpers.NUL;
@@ -1263,7 +1253,7 @@ package body Wiki.Parsers.Markdown is
                      Count     : Natural;
                   begin
                      loop
-                        Parse_Html (Parser, Pos, C);
+                        Parse_Html (Parser, Pos);
                         if not Buffers.Is_Valid (Pos) then
                            C := Helpers.NUL;
                            return;
@@ -1560,11 +1550,7 @@ package body Wiki.Parsers.Markdown is
                   Status : Wiki.Html_Parser.Entity_State_Type;
                begin
                   Common.Parse_Entity (Parser, Pos, Status, C);
-                  if Status = Wiki.Html_Parser.ENTITY_VALID then
-                     Append (Link, C);
-                  else
-                     Append (Link, C);
-                  end if;
+                  Append (Link, C);
                end;
             else
                Buffers.Next (Pos);
@@ -2124,7 +2110,9 @@ package body Wiki.Parsers.Markdown is
                            else
                               Wiki.Attributes.Append (Parser.Attributes, HREF_ATTR,
                                                       To_WString (Util.Encoders.URI.Encode
-                                                        (Wiki.Strings.To_String (Wiki.Strings.To_WString (Link)), HREF_LOOSE)));
+                                                        (Wiki.Strings.To_String
+                                                           (Wiki.Strings.To_WString (Link)),
+                                                           HREF_LOOSE)));
                               if Wiki.Strings.Length (Title) > 0 then
                                  Wiki.Attributes.Append (Parser.Attributes, TITLE_ATTR, Title);
                               end if;

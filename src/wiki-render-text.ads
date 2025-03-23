@@ -114,6 +114,13 @@ package Wiki.Render.Text is
    procedure Render_Table (Engine : in out Text_Renderer;
                            Doc    : in Wiki.Documents.Document;
                            Node   : in Wiki.Nodes.Node_Type);
+   procedure Render_Table (Engine  : in out Text_Renderer;
+                           Doc     : in Wiki.Documents.Document;
+                           Node    : in Wiki.Nodes.Node_Type;
+                           Column_Styles : in Wiki.Nodes.Column_Array_Style);
+   procedure Render_Html_Table (Engine : in out Text_Renderer;
+                                Doc    : in Wiki.Documents.Document;
+                                Node   : in Wiki.Nodes.Node_Type);
 
    --  Render a section header in the document.
    procedure Render_Header (Engine : in out Text_Renderer;

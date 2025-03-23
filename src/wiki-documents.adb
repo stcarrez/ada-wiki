@@ -159,16 +159,6 @@ package body Wiki.Documents is
                                           Children => null,
                                           Parent => Into.Current));
 
-         when N_LIST_ITEM =>
-            Append (Into, new Node_Type '(Kind => N_LIST_ITEM, Len => 0,
-                                          Children => null,
-                                          Parent => Into.Current));
-
-         when N_NEWLINE =>
-            Append (Into, new Node_Type '(Kind => N_NEWLINE, Len => 0,
-                                          Children => null,
-                                          Parent => Into.Current));
-
          when N_END_DEFINITION =>
             Append (Into, new Node_Type '(Kind => N_END_DEFINITION, Len => 0,
                                           Children => null,
@@ -198,20 +188,6 @@ package body Wiki.Documents is
                                     Children => null,
                                     Text => Text, Format => Format));
    end Append;
-
-   --  ------------------------------
-   --  Add a definition item at end of the document.
-   --  ------------------------------
-   procedure Add_Definition (Into       : in out Document;
-                             Definition : in Wiki.Strings.WString) is
-   begin
-   --   Append (Into, new Node_Type '(Kind   => N_DEFINITION,
-   --                                 Len    => Definition'Length,
-   --                                 Parent => Into.Current,
-   --                                 Header => Definition,
-   --                                 Level  => 0));
-      null;
-   end Add_Definition;
 
    --  ------------------------------
    --  Add a link.

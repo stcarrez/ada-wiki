@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render -- Wiki renderer
---  Copyright (C) 2015, 2016, 2019, 2024 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2019, 2024, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -49,9 +49,9 @@ package body Wiki.Render is
    --  ------------------------------
    function Format_Section_Number (List      : in List_Level_Array;
                                    Prefix    : in Wiki.Strings.WString;
-                                   Separator : in Wiki.Strings.WChar) return Wiki.Strings.WString is
+                                   Separator : in Wiki.Strings.WChar)
+                                   return Wiki.Strings.WString is
       Result : Wiki.Strings.UString;
-      Value  : Natural;
       Empty  : Boolean := True;
    begin
       if List'Length = 0 then

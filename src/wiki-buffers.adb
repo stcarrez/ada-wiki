@@ -1,12 +1,11 @@
 -----------------------------------------------------------------------
 --  util-texts-builders -- Text builder
---  Copyright (C) 2013, 2016, 2017, 2021, 2022, 2024 Stephane Carrez
+--  Copyright (C) 2013, 2016, 2017, 2021, 2022, 2024, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
 with Ada.Unchecked_Deallocation;
 
-with Wiki.Helpers;
 package body Wiki.Buffers is
 
    subtype Input is Wiki.Strings.WString;
@@ -217,6 +216,9 @@ package body Wiki.Buffers is
    procedure Trim (Source : in out Builder) is
 
       procedure Trim_Buffer (Buffer : in Buffer_Access;
+                             Done   : out Boolean);
+
+      procedure Trim_Buffer (Buffer : in Buffer_Access;
                              Done   : out Boolean) is
       begin
          if Buffer.Next_Block /= null then
@@ -421,31 +423,6 @@ package body Wiki.Buffers is
    --  Skip spaces and tabs starting at the given position in the buffer
    --  and return the number of spaces skipped.
    --  ------------------------------
-   procedure Skip_Spaces (Buffer : in out Buffer_Access;
-                          From   : in out Positive;
-                          Count  : out Natural) is
-      Block : Wiki.Buffers.Buffer_Access := Buffer;
-      Pos   : Positive := From;
-   begin
-      Count := 0;
-      Main_Loop :
-      while Block /= null loop
-         declare
-            Last : constant Natural := Block.Last;
-         begin
-            while Pos <= Last and then Helpers.Is_Space_Or_Newline (Block.Content (Pos)) loop
-               Pos := Pos + 1;
-               Count := Count + 1;
-            end loop;
-            exit Main_Loop when Pos <= Last;
-         end;
-         Block := Block.Next_Block;
-         Pos := 1;
-      end loop Main_Loop;
-      Buffer := Block;
-      From := Pos;
-   end Skip_Spaces;
-
    procedure Skip_Spaces (From   : in out Cursor;
                           Count  : out Natural) is
    begin
@@ -478,39 +455,6 @@ package body Wiki.Buffers is
       end loop;
    end Skip_Ascii_Spaces;
 
-   procedure Skip_Spaces (Buffer      : in out Buffer_Access;
-                          From        : in out Positive;
-                          Space_Count : out Natural;
-                          Line_Count  : out Natural) is
-      Block : Wiki.Buffers.Buffer_Access := Buffer;
-      Pos   : Positive := From;
-   begin
-      Space_Count := 0;
-      Line_Count := 0;
-      Main_Loop :
-      while Block /= null loop
-         declare
-            Last : constant Natural := Block.Last;
-            C    : Wiki.Strings.WChar;
-         begin
-            while Pos <= Last loop
-               C := Block.Content (Pos);
-               if C in Helpers.LF | Helpers.CR then
-                  Line_Count := Line_Count + 1;
-               else
-                  exit Main_Loop when not Helpers.Is_Space (C);
-               end if;
-               Pos := Pos + 1;
-               Space_Count := Space_Count + 1;
-            end loop;
-         end;
-         Block := Block.Next_Block;
-         Pos := 1;
-      end loop Main_Loop;
-      Buffer := Block;
-      From := Pos;
-   end Skip_Spaces;
-
    procedure Skip_Spaces (From        : in out Cursor;
                           Space_Count : out Natural;
                           Line_Count  : out Natural) is
@@ -530,26 +474,6 @@ package body Wiki.Buffers is
             Next (From);
          end;
       end loop;
-      Main_Loop :
-      while From.Block /= null loop
-         declare
-            Last : constant Natural := From.Block.Last;
-            C    : Wiki.Strings.WChar;
-         begin
-            while From.Pos <= Last loop
-               C := Char_At (From);
-               if C in Helpers.LF | Helpers.CR then
-                  Line_Count := Line_Count + 1;
-               else
-                  exit Main_Loop when not Helpers.Is_Space (C);
-               end if;
-               From.Pos := From.Pos + 1;
-               Space_Count := Space_Count + 1;
-            end loop;
-         end;
-         From.Block := From.Block.Next_Block;
-         From.Pos := 1;
-      end loop Main_Loop;
    end Skip_Spaces;
 
    --  ------------------------------

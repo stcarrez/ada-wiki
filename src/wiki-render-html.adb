@@ -164,10 +164,7 @@ package body Wiki.Render.Html is
             Engine.Output.Write ("<br>");
             Engine.Output.Newline;
 
-         when Wiki.Nodes.N_NEWLINE =>
-            Engine.Newline;
-
-         when Wiki.Nodes.N_DEFINITION_TERM | Wiki.Nodes.N_DEFINITION=>
+         when Wiki.Nodes.N_DEFINITION_TERM | Wiki.Nodes.N_DEFINITION =>
             Engine.Render_Definition (Doc, Node);
 
          when Wiki.Nodes.N_END_DEFINITION =>
@@ -179,10 +176,6 @@ package body Wiki.Render.Html is
             end if;
 
          when Wiki.Nodes.N_HORIZONTAL_RULE =>
-            --  if Engine.Html_Level = 0 or else not Engine.Has_Html_Paragraph then
-            --
-            --   Engine.Add_Blockquote (0);
-            --  end if;
             Engine.Close_Paragraph;
             Engine.Output.Start_Element ("hr");
             Engine.Output.End_Element ("hr");
@@ -288,12 +281,6 @@ package body Wiki.Render.Html is
       then
          Engine.Open_Paragraph;
          Prev_Para := Engine.Has_Paragraph;
-      --  elsif Node.Tag_Start = Wiki.BR_TAG then
-      --   Engine.Output.Write ("<br>");
-      --   return;
-      --  elsif Node.Tag_Start = Wiki.HR_TAG then
-      --   Engine.Output.Write ("<hr>");
-      --   return;
       elsif Node.Tag_Start = Wiki.PRE_TAG then
          Engine.Has_Paragraph := False;
          Engine.Need_Paragraph := False;
@@ -539,7 +526,7 @@ package body Wiki.Render.Html is
                                Doc    : in Wiki.Documents.Document;
                                Node   : in Wiki.Nodes.Node_Type) is
       Prev_Loose_List : constant Boolean := Engine.Loose_List;
-      List : Wiki.Nodes.Node_Type_Access := Wiki.Nodes.Find_List (Node);
+      List : constant Wiki.Nodes.Node_Type_Access := Wiki.Nodes.Find_List (Node);
    begin
       if Engine.Has_Paragraph then
          Engine.Output.End_Element ("p");
@@ -646,8 +633,6 @@ package body Wiki.Render.Html is
          end if;
       end Render_Attribute;
 
-      Label : constant Wiki.Strings.WString :=
-           Wiki.Attributes.Get_Attribute (Attr, "label");
    begin
       Engine.Open_Paragraph;
       if Node.Kind = Nodes.N_LINK then
@@ -890,13 +875,15 @@ package body Wiki.Render.Html is
    --  ------------------------------
    procedure Set_Format (Engine : in out Html_Renderer;
                          Format : in Wiki.Format_Map) is
+      procedure Pop (Fmt : in Format_Type);
 
       procedure Pop (Fmt : in Format_Type) is
       begin
          for I in 1 .. Engine.Fmt_Stack_Size loop
             if Engine.Fmt_Stack (I) = Fmt then
                while Engine.Fmt_Stack_Size >= I loop
-                  Engine.Output.End_Element (HTML_ELEMENT (Engine.Fmt_Stack (Engine.Fmt_Stack_Size)).all);
+                  Engine.Output.End_Element (HTML_ELEMENT
+                                             (Engine.Fmt_Stack (Engine.Fmt_Stack_Size)).all);
                   Engine.Fmt_Stack_Size := Engine.Fmt_Stack_Size - 1;
                end loop;
                return;
@@ -963,6 +950,7 @@ package body Wiki.Render.Html is
                            Node   : in Wiki.Nodes.Node_Type;
                            Tag    : in String;
                            Class  : in String) is
+      function Get_Class (Style : in Nodes.Align_Style) return String;
 
       function Get_Class (Style : in Nodes.Align_Style) return String is
       begin

@@ -585,6 +585,9 @@ package body Wiki.Render.Wiki is
                           Node     : in Nodes.Node_Type;
                           Name     : in Strings.WString;
                           Attrs    : in Attributes.Attribute_List) is
+      function Get_Link return Strings.WString;
+      function Has_Label return Boolean;
+      procedure Write_Label;
 
       function Get_Link return Strings.WString is
       begin

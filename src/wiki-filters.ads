@@ -53,11 +53,6 @@ package Wiki.Filters is
                        Text      : in Wiki.Strings.WString;
                        Format    : in Wiki.Format_Map);
 
-   --  Add a definition item at end of the document.
-   procedure Add_Definition (Filter     : in out Filter_Type;
-                             Document   : in out Wiki.Documents.Document;
-                             Definition : in Wiki.Strings.WString);
-
    procedure Start_Block (Filter   : in out Filter_Type;
                           Document : in out Wiki.Documents.Document;
                           Kind     : in Wiki.Nodes.Node_Kind;

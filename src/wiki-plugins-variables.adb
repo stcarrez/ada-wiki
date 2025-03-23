@@ -54,7 +54,7 @@ package body Wiki.Plugins.Variables is
       begin
          if not Has_Table then
             Context.Filters.Add_Table (Document,
-                                       (1 => (Width => 40, others =><>),
+                                       (1 => (Width => 40, others => <>),
                                         2 => (Width => 60, others => <>)));
          end if;
          Has_Table := True;

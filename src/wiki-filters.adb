@@ -36,20 +36,6 @@ package body Wiki.Filters is
       end if;
    end Add_Text;
 
-   --  ------------------------------
-   --  Add a definition item at end of the document.
-   --  ------------------------------
-   procedure Add_Definition (Filter     : in out Filter_Type;
-                             Document   : in out Wiki.Documents.Document;
-                             Definition : in Wiki.Strings.WString) is
-   begin
-      if Filter.Next /= null then
-         Filter.Next.Add_Definition (Document, Definition);
-      else
-         Wiki.Documents.Add_Definition (Document, Definition);
-      end if;
-   end Add_Definition;
-
    procedure Start_Block (Filter   : in out Filter_Type;
                           Document : in out Wiki.Documents.Document;
                           Kind     : in Wiki.Nodes.Node_Kind;

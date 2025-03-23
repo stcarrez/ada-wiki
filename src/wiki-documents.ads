@@ -64,10 +64,6 @@ package Wiki.Documents is
                      Text   : in Wiki.Strings.WString;
                      Format : in Format_Map);
 
-   --  Add a definition item at end of the document.
-   procedure Add_Definition (Into       : in out Document;
-                             Definition : in Wiki.Strings.WString);
-
    --  Add a link.
    procedure Add_Link (Into          : in out Document;
                        Name          : in Wiki.Strings.WString;

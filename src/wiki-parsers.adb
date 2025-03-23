@@ -22,6 +22,12 @@ package body Wiki.Parsers is
    use Wiki.Buffers;
    use type Wiki.Nodes.Node_Kind;
 
+   procedure Append (Parser : in out Parser_Type;
+                     C      : in Wiki.Strings.WChar);
+   procedure Append (Parser  : in out Parser_Type;
+                     Content : in Wiki.Strings.WString);
+   procedure Append (Parser  : in out Parser_Type;
+                     Content : in String);
    procedure Append_Preformatted (P      : in out Parser;
                                   Format : in Wiki.Strings.WString);
 
@@ -250,7 +256,9 @@ package body Wiki.Parsers is
          if Top.Quote_Level = P.Quote_Level then
             return;
          end if;
-         if Top.Quote_Level = 0 and then not (Top.Kind in Nodes.N_PARAGRAPH | Nodes.N_LIST_ITEM) then
+         if Top.Quote_Level = 0
+           and then not (Top.Kind in Nodes.N_PARAGRAPH | Nodes.N_LIST_ITEM)
+         then
             Pop_Block (P, Trim => Right);
          else
             Flush_Text (P, Trim => Right);
@@ -283,7 +291,10 @@ package body Wiki.Parsers is
                   Top := Current (P);
                end loop;
             elsif Kind = Nodes.N_PREFORMAT then
-               while Top /= null and then Top.Kind in Nodes.N_PARAGRAPH | Nodes.N_LIST_START | Nodes.N_NUM_LIST_START loop
+               while Top /= null
+                 and then Top.Kind in Nodes.N_PARAGRAPH
+                   | Nodes.N_LIST_START | Nodes.N_NUM_LIST_START
+               loop
                   Pop_Block (P);
                   Top := Current (P);
                end loop;
@@ -674,6 +685,7 @@ package body Wiki.Parsers is
          Append (Parser.Text, C);
       end if;
    end Append;
+
    procedure Append (Parser  : in out Parser_Type;
                      Content : in Wiki.Strings.WString) is
    begin
@@ -683,6 +695,7 @@ package body Wiki.Parsers is
          Append (Parser.Text, Content);
       end if;
    end Append;
+
    procedure Append (Parser  : in out Parser_Type;
                      Content : in String) is
    begin
@@ -700,7 +713,8 @@ package body Wiki.Parsers is
       if Tag = Wiki.UNKNOWN_TAG then
          if Name = "noinclude" then
             Flush_Text (Parser, Trim => None);
-            Parser.Context.Is_Hidden := Kind = Html_Parser.HTML_START and then Parser.Context.Is_Included;
+            Parser.Context.Is_Hidden := Kind = Html_Parser.HTML_START
+              and then Parser.Context.Is_Included;
          elsif Name = "includeonly" then
             Flush_Text (Parser, Trim => None);
             Parser.Context.Is_Hidden := not (Kind = Html_Parser.HTML_START
@@ -818,7 +832,9 @@ package body Wiki.Parsers is
       end if;
 
       P.Last_Closing_Tag := Tag;
-      if P.In_Html in HTML_BLOCK_PRE | HTML_BLOCK and then Tag = P.Pre_Tag and then Tag /= UNKNOWN_TAG then
+      if P.In_Html in HTML_BLOCK_PRE | HTML_BLOCK
+        and then Tag = P.Pre_Tag and then Tag /= UNKNOWN_TAG
+      then
          if P.Pre_Tag_Counter > 0 then
             P.Pre_Tag_Counter := P.Pre_Tag_Counter - 1;
          end if;
@@ -1079,9 +1095,10 @@ package body Wiki.Parsers is
             Engine.Parse_Block (Engine, (Buffer, 1));
          end loop;
          while not Block_Stack.Is_Empty (Engine.Blocks) loop
-            if Engine.Current_Node in Nodes.N_PARAGRAPH | Nodes.N_LIST_ITEM | Nodes.N_DEFINITION | Nodes.N_DEFINITION_TERM then
+            if Engine.Current_Node in Nodes.N_PARAGRAPH | Nodes.N_LIST_ITEM
+              | Nodes.N_DEFINITION | Nodes.N_DEFINITION_TERM
+            then
                Flush_List (Engine);
-               --  Flush_Text (Engine, Trim => Right);
             end if;
             Pop_Block (Engine);
          end loop;

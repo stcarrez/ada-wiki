@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-text -- Wiki Text renderer
---  Copyright (C) 2011 - 2024 Stephane Carrez
+--  Copyright (C) 2011 - 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -11,7 +11,7 @@ with Wiki.Nodes.Lists;
 package body Wiki.Render.Text is
 
    use type Wiki.Nodes.Node_Kind;
-   use type wiki.Nodes.Align_Style;
+   use type Wiki.Nodes.Align_Style;
    use type Nodes.Node_List_Access;
    use type Wiki.Nodes.Node_Type_Access;
 
@@ -138,7 +138,8 @@ package body Wiki.Render.Text is
                           Tag      : in String;
                           Level    : in Natural) is
       pragma Unreferenced (Tag);
-      List : Wiki.Nodes.Node_Type_Access := Wiki.Nodes.Find_List (Node);
+
+      List : constant Wiki.Nodes.Node_Type_Access := Wiki.Nodes.Find_List (Node);
    begin
       if List = null or else List.Loose then
          Engine.New_Line;
@@ -172,7 +173,8 @@ package body Wiki.Render.Text is
 
       if Engine.List_Index > 0 and then Engine.List_Levels (Engine.List_Index) > 0 then
          Engine.Render_Paragraph (Nodes.N_LIST_ITEM,
-                                  Format_Section_Number (Engine.List_Levels (1 .. Engine.List_Index),
+                                  Format_Section_Number
+                                    (Engine.List_Levels (1 .. Engine.List_Index),
                                     "", '.'));
          Engine.List_Levels (Engine.List_Index) := Engine.List_Levels (Engine.List_Index) + 1;
          Engine.Render_Paragraph (Nodes.N_LIST_ITEM, ") ");
@@ -275,8 +277,6 @@ package body Wiki.Render.Text is
    begin
       Engine.Close_Paragraph;
       Text_Renderer'Class (Engine).New_Line;
-      -- if Engine.Indent_Preformatted = 0 then
-      --   Text_Renderer'Class (Engine).Write_Text (Nodes.N_PREFORMAT, Text, (others => False));
       if Text'Length > 0 then
          declare
             First : Natural := Text'First;
@@ -304,10 +304,8 @@ package body Wiki.Render.Text is
          end;
          Engine.New_Line;
       end if;
-      --  if Engine.Current_Mode /= Nodes.N_PREFORMAT then
-         Engine.Need_Paragraph := True;
-         Engine.Empty_Line := False;
-      --  end if;
+      Engine.Need_Paragraph := True;
+      Engine.Empty_Line := False;
    end Render_Preformatted;
 
    --  ------------------------------
@@ -317,6 +315,10 @@ package body Wiki.Render.Text is
                            Doc     : in Wiki.Documents.Document;
                            Node    : in Wiki.Nodes.Node_Type;
                            Column_Styles : in Wiki.Nodes.Column_Array_Style) is
+      procedure Process_Row (Row : in Wiki.Nodes.Node_Type);
+      procedure Write_Separator;
+      procedure Process_Column (Column : in Wiki.Nodes.Node_Type);
+
       Old_Line_Length : constant Natural := Engine.Line_Length;
 
       Indent  : constant Natural := Engine.Indent_Level;
@@ -440,6 +442,9 @@ package body Wiki.Render.Text is
    procedure Render_Html_Table (Engine : in out Text_Renderer;
                                 Doc    : in Wiki.Documents.Document;
                                 Node   : in Wiki.Nodes.Node_Type) is
+      procedure Count_Cols (Node : in Wiki.Nodes.Node_Type);
+      procedure Count_Rows (Node : in Wiki.Nodes.Node_Type);
+
       Max_Column_Count : Natural := 0;
       Column_Count : Natural := 0;
 
@@ -476,7 +481,8 @@ package body Wiki.Render.Text is
 
    procedure Release (Columns : in out Diverter_Array) is
       procedure Free is
-        new Ada.Unchecked_Deallocation (Object => Text_Diverter'Class, Name => Text_Diverter_Access);
+        new Ada.Unchecked_Deallocation (Object => Text_Diverter'Class,
+                                        Name   => Text_Diverter_Access);
    begin
       for I in Columns'Range loop
          Free (Columns (I));
@@ -576,13 +582,6 @@ package body Wiki.Render.Text is
             if not Engine.Has_Paragraph or else Engine.Current_Indent > Engine.Indent_Level then
                Engine.New_Line;
                Engine.Has_Paragraph := True;
-            end if;
-
-         when Wiki.Nodes.N_NEWLINE =>
-            if not Engine.No_Newline then
-               Text_Renderer'Class (Engine).Write_Newline;
-            else
-               Engine.Output.Write (' ');
             end if;
 
          when Wiki.Nodes.N_INDENT =>
@@ -897,7 +896,7 @@ package body Wiki.Render.Text is
                                   Max_Length : in Natural) return Text_Diverter_Access is
       use Ada.Finalization;
 
-      Diverter : Default_Text_Diverter_Access
+      Diverter : constant Default_Text_Diverter_Access
         := new Default_Text_Diverter '(Limited_Controlled with Len => Max_Length, others => <>);
    begin
       return Diverter.all'Access;
@@ -953,7 +952,7 @@ package body Wiki.Render.Text is
 
    overriding
    procedure Write_Newline (Diverter : in out Default_Text_Diverter) is
-      Current : Text_Line_Access := Diverter.Current;
+      Current : constant Text_Line_Access := Diverter.Current;
    begin
       Current.Next := new Text_Line '(Len => Diverter.Len, Last => 0, others => <>);
       Diverter.Current := Current.Next;

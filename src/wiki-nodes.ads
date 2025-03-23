@@ -15,10 +15,10 @@ package Wiki.Nodes is
                       N_HORIZONTAL_RULE,
                       N_TOC_DISPLAY,
                       N_PARAGRAPH,
-                      N_LIST_ITEM,
                       N_END_DEFINITION,
-                      N_NEWLINE,
+
                       N_TOC_ENTRY,
+                      N_LIST_ITEM,
 
                       --  Nodes with level and content.
                       N_HEADER,
@@ -47,7 +47,7 @@ package Wiki.Nodes is
                       N_IMAGE);
 
    --  Node kinds which are simple markers in the document.
-   subtype Simple_Node_Kind is Node_Kind range N_NONE .. N_NEWLINE;
+   subtype Simple_Node_Kind is Node_Kind range N_NONE .. N_END_DEFINITION;
 
    subtype Row_Kind is Node_Kind range N_ROW_HEADER .. N_ROW_FOOTER;
 

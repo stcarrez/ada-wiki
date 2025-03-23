@@ -29,7 +29,7 @@ package body Wiki.Filters.Html is
          when N_TOC_DISPLAY | N_NONE =>
             return;
 
-         when N_NEWLINE | N_LIST_ITEM | N_END_DEFINITION =>
+         when N_END_DEFINITION =>
             Filter_Type (Filter).Add_Node (Document, Kind);
             return;
 

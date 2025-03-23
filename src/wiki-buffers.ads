@@ -188,15 +188,8 @@ private package Wiki.Buffers with Preelaborate is
 
    --  Skip spaces and tabs starting at the given position in the buffer
    --  and return the number of spaces skipped.
-   procedure Skip_Spaces (Buffer       : in out Buffer_Access;
-                          From         : in out Positive;
-                          Count        : out Natural);
    procedure Skip_Spaces (From  : in out Cursor;
                           Count : out Natural);
-   procedure Skip_Spaces (Buffer       : in out Buffer_Access;
-                          From         : in out Positive;
-                          Space_Count  : out Natural;
-                          Line_Count   : out Natural);
    procedure Skip_Spaces (From         : in out Cursor;
                           Space_Count  : out Natural;
                           Line_Count   : out Natural);
