@@ -22,6 +22,7 @@ item 15
 line 3
 num 2
 paragraph 2
+strike 2
 strong 2
 text 1
 == Links ==

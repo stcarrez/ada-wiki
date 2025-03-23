@@ -1,7 +1,7 @@
 == Words ==
-Col1 2
-Col2 2
-Col3 2
+Col1 3
+Col2 3
+Col3 3
 End 1
 First 1
 Formatting 1
