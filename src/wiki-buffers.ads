@@ -103,6 +103,8 @@ private package Wiki.Buffers with Preelaborate is
    procedure Next (Content : in out Buffer_Access;
                    Pos     : in out Positive;
                    Count   : in Natural);
+   procedure Next (Pos   : in out Cursor;
+                   Count : in Natural);
 
    --  Move forward and return the next character or NUL.
    function Next (Text  : in out Cursor) return Strings.WChar with Inline_Always;

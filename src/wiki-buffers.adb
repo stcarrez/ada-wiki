@@ -53,6 +53,14 @@ package body Wiki.Buffers is
       end loop;
    end Next;
 
+   procedure Next (Pos   : in out Cursor;
+                   Count : in Natural) is
+   begin
+      for I in 1 .. Count loop
+         Next (Pos);
+      end loop;
+   end Next;
+
    --  ------------------------------
    --  Move forward and return the next character or NUL.
    --  ------------------------------
