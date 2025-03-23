@@ -14,8 +14,7 @@ package body Wiki.Parsers.MediaWiki is
    use type Wiki.Nodes.Node_Kind;
 
    procedure Parse_Bold_Italic (Parser  : in out Parser_Type;
-                                Text    : in out Wiki.Buffers.Buffer_Access;
-                                From    : in out Positive);
+                                Text    : in out Wiki.Buffers.Cursor);
 
    --  ------------------------------
    --  Parse an italic, bold or bold + italic sequence.
@@ -25,13 +24,13 @@ package body Wiki.Parsers.MediaWiki is
    --    '''''name'''''   (bold+italic)
    --  ------------------------------
    procedure Parse_Bold_Italic (Parser  : in out Parser_Type;
-                                Text    : in out Wiki.Buffers.Buffer_Access;
-                                From    : in out Positive) is
-      Count : Natural := Count_Occurence (Text, From, ''');
+                                Text    : in out Wiki.Buffers.Cursor) is
+      Count : Natural;
    begin
+      Count_Occurence (Text, ''', Count);
       case Count is
          when 1 =>
-            Common.Parse_Text (Parser, Text, From);
+            Common.Parse_Text (Parser, Text);
             return;
 
          when 2 =>
@@ -42,7 +41,7 @@ package body Wiki.Parsers.MediaWiki is
 
          when 4 =>
             Toggle_Format (Parser, BOLD);
-            Common.Parse_Text (Parser, Text, From);
+            Common.Parse_Text (Parser, Text);
             Count := 3;
 
          when 5 =>
@@ -50,39 +49,37 @@ package body Wiki.Parsers.MediaWiki is
             Toggle_Format (Parser, ITALIC);
 
          when others =>
-            Common.Parse_Text (Parser, Text, From);
+            Common.Parse_Text (Parser, Text);
             return;
 
       end case;
-      for I in 1 .. Count loop
-         Next (Text, From);
-      end loop;
+      --  Buffers.Next (Text, Count);
    end Parse_Bold_Italic;
 
    procedure Parse_Line (Parser : in out Parser_Type;
                          Text   : in Wiki.Buffers.Cursor) is
-      Pos    : Natural := Text.Pos;
+      Pos    : Wiki.Buffers.Cursor := Text;
       C      : Wiki.Strings.WChar;
-      Buffer : Wiki.Buffers.Buffer_Access := Text.Block;
    begin
       --  Feed the HTML parser if there are some pending state.
       if not Wiki.Html_Parser.Is_Empty (Parser.Html) then
-         Common.Parse_Html_Element (Parser, Buffer, Pos, Start => False);
-         if Buffer = null then
+         Common.Parse_Html_Element (Parser, Pos, Start => False);
+         if not Buffers.Is_Valid (Pos) then
             return;
          end if;
       end if;
 
       if Parser.Pre_Tag_Counter > 0 then
-         Common.Parse_Html_Preformatted (Parser, Buffer, Pos);
-         if Buffer = null then
+         Common.Parse_Html_Preformatted (Parser, Pos);
+         if not Buffers.Is_Valid (Pos) then
             return;
          end if;
       end if;
 
       if Parser.Current_Node = Nodes.N_PREFORMAT then
-         if Buffer.Content (Pos) = ' ' then
-            Common.Append (Parser.Text, Buffer, Pos + 1);
+         if Buffers.Char_At (Pos) = ' ' then
+            Buffers.Next (Pos);
+            Common.Append (Parser.Text, Pos);
             return;
          end if;
          Pop_Block (Parser);
@@ -92,34 +89,39 @@ package body Wiki.Parsers.MediaWiki is
          Pop_Block (Parser);
       end if;
 
-      C := Buffer.Content (Pos);
+      C := Buffers.Char_At (Pos);
       case C is
          when CR | LF =>
-            Common.Parse_Paragraph (Parser, Buffer, Pos);
+            Common.Parse_Paragraph (Parser, Pos);
             return;
 
          when '=' =>
-            Common.Parse_Header (Parser, Buffer, Pos, '=');
-            if Buffer = null then
+            Common.Parse_Header (Parser, Pos, '=');
+            if not Buffers.Is_Valid (Pos) then
                return;
             end if;
 
          when '-' =>
-            Common.Parse_Horizontal_Rule (Parser, Buffer, Pos, '-');
-            if Buffer = null then
+            Common.Parse_Horizontal_Rule (Parser, Pos, '-');
+            if not Buffers.Is_Valid (Pos) then
                return;
             end if;
 
          when '*' | '#' =>
-            if Common.Is_List (Buffer, Pos) then
-               Common.Parse_List (Parser, Buffer, Pos);
+            if Common.Is_List (Pos) then
+               Common.Parse_List (Parser, Pos);
             end if;
 
          when ' ' =>
-            if Common.Is_List (Buffer, Pos + 1) then
-               Pos := Pos + 1;
-               Common.Parse_List (Parser, Buffer, Pos);
-            end if;
+            declare
+               Next_Pos : Wiki.Buffers.Cursor := Pos;
+            begin
+               Buffers.Next (Next_Pos);
+               if Common.Is_List (Next_Pos) then
+                  Pos := Next_Pos;
+                  Common.Parse_List (Parser, Pos);
+               end if;
+            end;
             if Parser.In_Html = HTML_NONE then
                Parser.Preformat_Indent := 1;
                Parser.Preformat_Fence := ' ';
@@ -127,16 +129,17 @@ package body Wiki.Parsers.MediaWiki is
                Flush_Text (Parser, Trim => Right);
                Pop_Block (Parser);
                Push_Block (Parser, Nodes.N_PREFORMAT);
-               Common.Append (Parser.Text, Buffer, Pos + 1);
+               Buffers.Next (Pos);
+               Common.Append (Parser.Text, Pos);
                return;
             end if;
 
          when ';' =>
-            Common.Parse_Definition (Parser, Buffer, Pos, True);
+            Common.Parse_Definition (Parser, Pos, True);
 
          when ':' =>
             if Parser.Current_Node = Nodes.N_DEFINITION_TERM then
-               Common.Parse_Definition (Parser, Buffer, Pos, False);
+               Common.Parse_Definition (Parser, Pos, False);
             end if;
 
          when others =>
@@ -147,52 +150,41 @@ package body Wiki.Parsers.MediaWiki is
 
       end case;
 
-      Main :
-      while Buffer /= null loop
-         while Pos <= Buffer.Last loop
-            C := Buffer.Content (Pos);
-            case C is
-               when ''' =>
-                  Parse_Bold_Italic (Parser, Buffer, Pos);
-                  exit Main when Buffer = null;
+      while Buffers.Is_Valid (Pos) loop
+         C := Buffers.Char_At (Pos);
+         case C is
+            when ''' =>
+               Parse_Bold_Italic (Parser, Pos);
 
-               when '/' =>
-                  Parse_Format_Double (Parser, Buffer, Pos, '/', Wiki.EMPHASIS);
-                  exit Main when Buffer = null;
+            when '/' =>
+               Parse_Format_Double (Parser, Pos, '/', Wiki.EMPHASIS);
 
-               when '[' =>
-                  Common.Parse_Link (Parser, Buffer, Pos);
-                  exit Main when Buffer = null;
+            when '[' =>
+               Common.Parse_Link (Parser, Pos);
 
-               when '{' =>
-                  Common.Parse_Template (Parser, Buffer, Pos, '{');
-                  exit Main when Buffer = null;
+            when '{' =>
+               Common.Parse_Template (Parser, Pos, '{');
 
-               when CR | LF =>
-                  Append (Parser.Text, ' ');
-                  Pos := Pos + 1;
+            when CR | LF =>
+               Append (Parser.Text, ' ');
+               Buffers.Next (Pos);
 
-               when '<' =>
-                  Common.Parse_Html_Element (Parser, Buffer, Pos, Start => True);
-                  exit Main when Buffer = null;
+            when '<' =>
+               Common.Parse_Html_Element (Parser, Pos, Start => True);
 
-               when '&' =>
-                  Common.Parse_Entity (Parser, Buffer, Pos);
-                  exit Main when Buffer = null;
+            when '&' =>
+               Common.Parse_Entity (Parser, Pos);
 
-               when others =>
-                  if C = ':' and then Parser.Current_Node = Nodes.N_DEFINITION_TERM then
-                     Common.Parse_Definition (Parser, Buffer, Pos, False);
-                  else
-                     Append (Parser.Text, C);
-                     Pos := Pos + 1;
-                  end if;
+            when others =>
+               if C = ':' and then Parser.Current_Node = Nodes.N_DEFINITION_TERM then
+                  Common.Parse_Definition (Parser, Pos, False);
+               else
+                  Append (Parser.Text, C);
+                  Buffers.Next (Pos);
+               end if;
 
-            end case;
-         end loop;
-         Buffer := Buffer.Next_Block;
-         Pos := 1;
-      end loop Main;
+         end case;
+      end loop;
    end Parse_Line;
 
 end Wiki.Parsers.MediaWiki;

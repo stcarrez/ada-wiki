@@ -20,14 +20,14 @@ package body Wiki.Parsers.Google is
    begin
       --  Feed the HTML parser if there are some pending state.
       if not Wiki.Html_Parser.Is_Empty (Parser.Html) then
-         Common.Parse_Html_Element (Parser, Pos.Block, Pos.Pos, Start => False);
+         Common.Parse_Html_Element (Parser, Pos, Start => False);
          if not Buffers.Is_Valid (Pos) then
             return;
          end if;
       end if;
 
       if Parser.Pre_Tag_Counter > 0 then
-         Common.Parse_Html_Preformatted (Parser, Pos.Block, Pos.Pos);
+         Common.Parse_Html_Preformatted (Parser, Pos);
          if not Buffers.Is_Valid (Pos) then
             return;
          end if;
@@ -36,7 +36,7 @@ package body Wiki.Parsers.Google is
       if Parser.Current_Node = Nodes.N_PREFORMAT then
          Count := Buffers.Count_Occurence (Pos.Block, Pos.Pos, '}');
          if Count /= 3 then
-            Common.Append (Parser.Text, Pos.Block, Pos.Pos);
+            Common.Append (Parser.Text, Pos);
             return;
          end if;
          Pop_Block (Parser);
@@ -54,18 +54,18 @@ package body Wiki.Parsers.Google is
       C := Buffers.Char_At (Pos);
       case C is
          when CR | LF =>
-            Common.Parse_Paragraph (Parser, Pos.Block, Pos.Pos);
+            Common.Parse_Paragraph (Parser, Pos);
             return;
 
          when '=' =>
-            Common.Parse_Header (Parser, Pos.Block, Pos.Pos, '=');
+            Common.Parse_Header (Parser, Pos, '=');
             if not Buffers.Is_Valid (Pos) then
                return;
             end if;
 
          when '*' | '#' =>
-            if Common.Is_List (Pos.Block, Pos.Pos) then
-               Common.Parse_List (Parser, Pos.Block, Pos.Pos);
+            if Common.Is_List (Pos) then
+               Common.Parse_List (Parser, Pos);
             end if;
 
          when others =>
@@ -80,38 +80,38 @@ package body Wiki.Parsers.Google is
          C := Buffers.Char_At (Pos);
          case C is
             when '_' =>
-               Parse_Format (Parser, Pos.Block, Pos.Pos, '_', Wiki.ITALIC);
+               Parse_Format (Parser, Pos, '_', Wiki.ITALIC);
 
             when '*' =>
-               Parse_Format (Parser, Pos.Block, Pos.Pos, '*', Wiki.BOLD);
+               Parse_Format (Parser, Pos, '*', Wiki.BOLD);
 
             when '^' =>
-               Parse_Format (Parser, Pos.Block, Pos.Pos, '^', Wiki.SUPERSCRIPT);
+               Parse_Format (Parser, Pos, '^', Wiki.SUPERSCRIPT);
 
             when '`' =>
-               Parse_Format (Parser, Pos.Block, Pos.Pos, '`', Wiki.CODE);
+               Parse_Format (Parser, Pos, '`', Wiki.CODE);
 
             when ',' =>
-               Parse_Format_Double (Parser, Pos.Block, Pos.Pos, ',', Wiki.SUBSCRIPT);
+               Parse_Format_Double (Parser, Pos, ',', Wiki.SUBSCRIPT);
 
             when '~' =>
-               Parse_Format_Double (Parser, Pos.Block, Pos.Pos, '~', Wiki.STRIKEOUT);
+               Parse_Format_Double (Parser, Pos, '~', Wiki.STRIKEOUT);
 
             when '[' =>
-               Common.Parse_Link (Parser, Pos.Block, Pos.Pos);
+               Common.Parse_Link (Parser, Pos);
 
             when '{' =>
-               Common.Parse_Preformatted (Parser, Pos.Block, Pos.Pos, '{');
+               Common.Parse_Preformatted (Parser, Pos, '{');
 
             when CR | LF =>
                Append (Parser.Text, ' ');
                Buffers.Next (Pos);
 
             when '<' =>
-               Common.Parse_Html_Element (Parser, Pos.Block, Pos.Pos, Start => True);
+               Common.Parse_Html_Element (Parser, Pos, Start => True);
 
             when '&' =>
-               Common.Parse_Entity (Parser, Pos.Block, Pos.Pos);
+               Common.Parse_Entity (Parser, Pos);
 
             when others =>
                Append (Parser.Text, C);

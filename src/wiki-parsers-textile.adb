@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-textile -- Textile parser operations
---  Copyright (C) 2022 - 2024 Stephane Carrez
+--  Copyright (C) 2022 - 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -16,17 +16,14 @@ package body Wiki.Parsers.Textile is
    function Get_Header_Level (Text : in Wiki.Strings.WString) return Natural;
 
    procedure Parse_Header (Parser  : in out Parser_Type;
-                           Text    : in out Wiki.Buffers.Buffer_Access;
-                           From    : in out Positive;
+                           Text    : in out Wiki.Buffers.Cursor;
                            Level   : in Positive);
 
    procedure Parse_Image (Parser  : in out Parser_Type;
-                          Text    : in out Wiki.Buffers.Buffer_Access;
-                          From    : in out Positive);
+                          Text    : in out Wiki.Buffers.Cursor);
 
    procedure Parse_Link (Parser  : in out Parser_Type;
-                         Text    : in out Wiki.Buffers.Buffer_Access;
-                         From    : in out Positive);
+                         Text    : in out Wiki.Buffers.Cursor);
 
    function Get_Header_Level (Text : in Wiki.Strings.WString) return Natural is
    begin
@@ -64,37 +61,23 @@ package body Wiki.Parsers.Textile is
    --    h2. Level 2
    --  ------------------------------
    procedure Parse_Header (Parser  : in out Parser_Type;
-                           Text    : in out Wiki.Buffers.Buffer_Access;
-                           From    : in out Positive;
+                           Text    : in out Wiki.Buffers.Cursor;
                            Level   : in Positive) is
+      Pos : Wiki.Buffers.Cursor := Text;
    begin
       Flush_Text (Parser, Trim => Right);
       Pop_Block (Parser);
       Parser.Header_Level := Level;
       Push_Block (Parser, Nodes.N_HEADER, Level);
 
-      declare
-         Pos    : Natural := From;
-         Buffer : Wiki.Buffers.Buffer_Access := Text;
-      begin
-         while Buffer /= null loop
-            declare
-               Last : constant Natural := Buffer.Last;
-            begin
-               while Pos <= Last loop
-                  if not Wiki.Helpers.Is_Space_Or_Newline (Buffer.Content (Pos)) then
-                     Common.Append (Parser.Text, Buffer, Pos);
-                     Text := null;
-                     From := 1;
-                     return;
-                  end if;
-                  Pos := Pos + 1;
-               end loop;
-            end;
-            Buffer := Buffer.Next_Block;
-            Pos := 1;
-         end loop;
-      end;
+      while Buffers.Is_Valid (Pos) loop
+         if not Wiki.Helpers.Is_Space_Or_Newline (Buffers.Char_At (Pos)) then
+            Common.Append (Parser.Text, Pos);
+            Text := (null, 1);
+            return;
+         end if;
+         Buffers.Next (Pos);
+      end loop;
    end Parse_Header;
 
    --  ------------------------------
@@ -105,15 +88,13 @@ package body Wiki.Parsers.Textile is
    --    !image-path!:http-link
    --  ------------------------------
    procedure Parse_Image (Parser  : in out Parser_Type;
-                          Text    : in out Wiki.Buffers.Buffer_Access;
-                          From    : in out Positive) is
-      Block : Wiki.Buffers.Buffer_Access := Text;
-      Pos   : Positive := From;
+                          Text    : in out Wiki.Buffers.Cursor) is
+      Pos   : Wiki.Buffers.Cursor := Text;
    begin
-      Next (Block, Pos);
-      Find (Block, Pos, '!');
-      if Block = null then
-         Common.Parse_Text (Parser, Text, From);
+      Next (Pos);
+      Find (Pos.Block, Pos.Pos, '!');
+      if not Buffers.Is_Valid (Pos) then
+         Common.Parse_Text (Parser, Text);
          return;
       end if;
 
@@ -122,33 +103,31 @@ package body Wiki.Parsers.Textile is
          Title     : Wiki.Strings.BString (128);
          C         : Wiki.Strings.WChar := Wiki.Html_Parser.NUL;
       begin
-         Block := Text;
-         Pos := From;
-         Next (Block, Pos);
-         while Block /= null loop
-            C := Block.Content (Pos);
+         Pos := Text;
+         Next (Pos);
+         while Buffers.Is_Valid (Pos) loop
+            C := Buffers.Char_At (Pos);
             exit when C in '(' | '!';
             Append (Link, C);
-            Next (Block, Pos);
+            Next (Pos);
          end loop;
 
          if C = '(' then
-            Next (Block, Pos);
-            while Block /= null loop
-               C := Block.Content (Pos);
+            Next (Pos);
+            while Buffers.Is_Valid (Pos) loop
+               C := Buffers.Char_At (Pos);
                exit when C in ')' | '!';
                Append (Title, C);
-               Next (Block, Pos);
+               Next (Pos);
             end loop;
             if C /= ')' then
-               Common.Parse_Text (Parser, Text, From);
+               Common.Parse_Text (Parser, Text);
                return;
             end if;
-            Next (Block, Pos);
+            Next (Pos);
          end if;
-         Next (Block, Pos);
-         Text := Block;
-         From := Pos;
+         Next (Pos);
+         Text := Pos;
 
          Flush_Text (Parser);
          if not Parser.Context.Is_Hidden then
@@ -167,26 +146,24 @@ package body Wiki.Parsers.Textile is
    --    "title":http-link
    --  ------------------------------
    procedure Parse_Link (Parser  : in out Parser_Type;
-                         Text    : in out Wiki.Buffers.Buffer_Access;
-                         From    : in out Positive) is
-      Block : Wiki.Buffers.Buffer_Access := Text;
-      Pos   : Positive := From;
+                         Text    : in out Wiki.Buffers.Cursor) is
+      Pos  : Wiki.Buffers.Cursor := Text;
       Http : constant Wiki.Strings.WString := ":http";
    begin
-      Next (Block, Pos);
-      Find (Block, Pos, '"');
-      if Block = null then
-         Common.Parse_Text (Parser, Text, From);
+      Next (Pos);
+      Find (Pos.Block, Pos.Pos, '"');
+      if not Buffers.Is_Valid (Pos) then
+         Common.Parse_Text (Parser, Text);
          return;
       end if;
 
-      Next (Block, Pos);
+      Next (Pos);
       for Expect of Http loop
-         if Block = null or else Block.Content (Pos) /= Expect then
-            Common.Parse_Text (Parser, Text, From);
+         if not Buffers.Is_Valid (Pos) or else Buffers.Char_At (Pos) /= Expect then
+            Common.Parse_Text (Parser, Text);
             return;
          end if;
-         Next (Block, Pos);
+         Next (Pos);
       end loop;
 
       declare
@@ -194,27 +171,25 @@ package body Wiki.Parsers.Textile is
          Link  : Wiki.Strings.BString (128);
          C     : Wiki.Strings.WChar;
       begin
-         Block := Text;
-         Pos := From;
-         Next (Block, Pos);
-         while Block.Content (Pos) /= '"' loop
-            Append (Title, Block.Content (Pos));
-            Next (Block, Pos);
+         Pos := Text;
+         Next (Pos);
+         while Buffers.Is_Valid (Pos) and then Buffers.Char_At (Pos) /= '"' loop
+            Append (Title, Buffers.Char_At (Pos));
+            Next (Pos);
          end loop;
 
          --  Skip the ":
-         Next (Block, Pos);
-         Next (Block, Pos);
+         Next (Pos);
+         Next (Pos);
 
-         while Block /= null loop
-            C := Block.Content (Pos);
+         while Buffers.Is_Valid (Pos) loop
+            C := Buffers.Char_At (Pos);
             exit when Wiki.Helpers.Is_Space_Or_Newline (C);
             Append (Link, C);
-            Next (Block, Pos);
+            Next (Pos);
          end loop;
 
-         Text := Block;
-         From := Pos;
+         Text := Pos;
 
          Flush_Text (Parser);
          Wiki.Attributes.Clear (Parser.Attributes);
@@ -232,22 +207,21 @@ package body Wiki.Parsers.Textile is
 
    procedure Parse_Line (Parser : in out Parser_Type;
                          Text   : in Wiki.Buffers.Cursor) is
-      Pos    : Natural := Text.Pos;
+      Pos    : Wiki.Buffers.Cursor := Text;
       C      : Wiki.Strings.WChar;
-      Buffer : Wiki.Buffers.Buffer_Access := Text.Block;
       Level  : Natural;
    begin
       --  Feed the HTML parser if there are some pending state.
       if not Wiki.Html_Parser.Is_Empty (Parser.Html) then
-         Common.Parse_Html_Element (Parser, Buffer, Pos, Start => False);
-         if Buffer = null then
+         Common.Parse_Html_Element (Parser, Pos, Start => False);
+         if not Buffers.Is_Valid (Pos) then
             return;
          end if;
       end if;
 
       if Parser.Pre_Tag_Counter > 0 then
-         Common.Parse_Html_Preformatted (Parser, Buffer, Pos);
-         if Buffer = null then
+         Common.Parse_Html_Preformatted (Parser, Pos);
+         if not Buffers.Is_Valid (Pos) then
             return;
          end if;
       end if;
@@ -256,37 +230,37 @@ package body Wiki.Parsers.Textile is
          Pop_Block (Parser);
       end if;
 
-      C := Buffer.Content (Pos);
+      C := Buffers.Char_At (Pos);
       case C is
          when CR | LF =>
-            Common.Parse_Paragraph (Parser, Buffer, Pos);
+            Common.Parse_Paragraph (Parser, Pos);
             return;
 
          when 'h' =>
-            Level := Get_Header_Level (Buffer.Content (1 .. Buffer.Last));
+            Level := Get_Header_Level (Pos.Block.Content (1 .. Pos.Block.Last));
             if Level > 0 and then Level <= 6 then
-               Pos := 4;
-               Parse_Header (Parser, Buffer, Pos, Level);
+               Pos.Pos := 4;
+               Parse_Header (Parser, Pos, Level);
                return;
             end if;
 
          when '-' =>
-            Common.Parse_Horizontal_Rule (Parser, Buffer, Pos, '-');
-            if Buffer = null then
+            Common.Parse_Horizontal_Rule (Parser, Pos, '-');
+            if not Buffers.Is_Valid (Pos) then
                return;
             end if;
 
          when '*' | '#' =>
-            if Common.Is_List (Buffer, Pos) then
-               Common.Parse_List (Parser, Buffer, Pos);
+            if Common.Is_List (Pos) then
+               Common.Parse_List (Parser, Pos);
             end if;
 
          when ';' =>
-            Common.Parse_Definition (Parser, Buffer, Pos, True);
+            Common.Parse_Definition (Parser, Pos, True);
 
          when ':' =>
             if Parser.Current_Node = Nodes.N_DEFINITION_TERM then
-               Common.Parse_Definition (Parser, Buffer, Pos, False);
+               Common.Parse_Definition (Parser, Pos, False);
             end if;
 
          when others =>
@@ -297,90 +271,70 @@ package body Wiki.Parsers.Textile is
 
       end case;
 
-      Main :
-      while Buffer /= null loop
-         declare
-            Last : constant Natural := Buffer.Last;
-         begin
-            while Pos <= Buffer.Last loop
-               C := Buffer.Content (Pos);
-               case C is
-                  when '*' =>
-                     if Parser.Format (CODE) then
-                        Append (Parser.Text, C);
-                        Pos := Pos + 1;
-                     else
-                        Parse_Format (Parser, Buffer, Pos, '*', Wiki.BOLD);
-                        exit Main when Buffer = null;
-                     end if;
+      while Buffers.Is_Valid (Pos) loop
+         C := Buffers.Char_At (Pos);
+         case C is
+            when '*' =>
+               if Parser.Format (CODE) then
+                  Append (Parser.Text, C);
+                  Buffers.Next (Pos);
+               else
+                  Parse_Format (Parser, Pos, '*', Wiki.BOLD);
+               end if;
 
-                  when '@' =>
-                     Parse_Format (Parser, Buffer, Pos, '@', Wiki.CODE);
-                     exit Main when Buffer = null;
+            when '@' =>
+               Parse_Format (Parser, Pos, '@', Wiki.CODE);
 
-                  when '_' =>
-                     if Parser.Format (CODE) then
-                        Append (Parser.Text, C);
-                        Pos := Pos + 1;
-                     else
-                        Parse_Format (Parser, Buffer, Pos, '_', Wiki.EMPHASIS);
-                        exit Main when Buffer = null;
-                     end if;
+            when '_' =>
+               if Parser.Format (CODE) then
+                  Append (Parser.Text, C);
+                  Buffers.Next (Pos);
+               else
+                  Parse_Format (Parser, Pos, '_', Wiki.EMPHASIS);
+               end if;
 
-                  when '^' =>
-                     Parse_Format (Parser, Buffer, Pos, '^', Wiki.SUPERSCRIPT);
-                     exit Main when Buffer = null;
+            when '^' =>
+               Parse_Format (Parser, Pos, '^', Wiki.SUPERSCRIPT);
 
-                  when '[' =>
-                     Common.Parse_Link (Parser, Buffer, Pos);
-                     exit Main when Buffer = null;
+            when '[' =>
+               Common.Parse_Link (Parser, Pos);
 
-                  when '?' =>
-                     Parse_Format_Double (Parser, Buffer, Pos, '?', Wiki.CITE);
-                     exit Main when Buffer = null;
+            when '?' =>
+               Parse_Format_Double (Parser, Pos, '?', Wiki.CITE);
 
-                  when '{' =>
-                     Common.Parse_Template (Parser, Buffer, Pos, '{');
-                     exit Main when Buffer = null;
+            when '{' =>
+               Common.Parse_Template (Parser, Pos, '{');
 
-                  when '"' =>
-                     Parse_Link (Parser, Buffer, Pos);
-                     exit Main when Buffer = null;
+            when '"' =>
+               Parse_Link (Parser, Pos);
 
-                  when '!' =>
-                     Parse_Image (Parser, Buffer, Pos);
-                     exit Main when Buffer = null;
+            when '!' =>
+               Parse_Image (Parser, Pos);
 
-                  when CR | LF =>
-                     Append (Parser.Text, ' ');
-                     Pos := Pos + 1;
+            when CR | LF =>
+               Append (Parser.Text, ' ');
+               Buffers.Next (Pos);
 
-                  when '<' =>
-                     Common.Parse_Html_Element (Parser, Buffer, Pos, Start => True);
-                     exit Main when Buffer = null;
+            when '<' =>
+               Common.Parse_Html_Element (Parser, Pos, Start => True);
 
-                  when '&' =>
-                     Common.Parse_Entity (Parser, Buffer, Pos);
-                     exit Main when Buffer = null;
+            when '&' =>
+               Common.Parse_Entity (Parser, Pos);
 
-                  when ':' =>
-                     if Parser.Current_Node = Nodes.N_DEFINITION_TERM then
-                        Common.Parse_Definition (Parser, Buffer, Pos, False);
-                     else
-                        Append (Parser.Text, C);
-                        Pos := Pos + 1;
-                     end if;
+            when ':' =>
+               if Parser.Current_Node = Nodes.N_DEFINITION_TERM then
+                  Common.Parse_Definition (Parser, Pos, False);
+               else
+                  Append (Parser.Text, C);
+                  Buffers.Next (Pos);
+               end if;
 
-                  when others =>
-                     Append (Parser.Text, C);
-                     Pos := Pos + 1;
+            when others =>
+               Append (Parser.Text, C);
+               Buffers.Next (Pos);
 
-               end case;
-            end loop;
-         end;
-         Buffer := Buffer.Next_Block;
-         Pos := 1;
-      end loop Main;
+         end case;
+      end loop;
    end Parse_Line;
 
 end Wiki.Parsers.Textile;

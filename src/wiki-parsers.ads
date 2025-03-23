@@ -185,8 +185,7 @@ private
    function Is_List_Item (P     : in Parser;
                           Level : in Natural) return Boolean;
 
-   function Is_Single_Token (Text : in Wiki.Buffers.Buffer_Access;
-                             From : in Positive;
+   function Is_Single_Token (Text  : in Wiki.Buffers.Cursor;
                              Token : in Wiki.Strings.WChar) return Boolean;
 
    --  Flush the wiki text that was collected in the text buffer.
@@ -242,8 +241,7 @@ private
    --  Example:
    --    _name_    *bold*   `code`
    procedure Parse_Format (P      : in out Parser;
-                           Text   : in out Wiki.Buffers.Buffer_Access;
-                           From   : in out Positive;
+                           Text   : in out Wiki.Buffers.Cursor;
                            Expect : in Wiki.Strings.WChar;
                            Format : in Format_Type);
 
@@ -251,8 +249,7 @@ private
    --  Example:
    --    --name--  **bold** ~~strike~~
    procedure Parse_Format_Double (P      : in out Parser;
-                                  Text   : in out Wiki.Buffers.Buffer_Access;
-                                  From   : in out Positive;
+                                  Text   : in out Wiki.Buffers.Cursor;
                                   Expect : in Wiki.Strings.WChar;
                                   Format : in Format_Type);
 

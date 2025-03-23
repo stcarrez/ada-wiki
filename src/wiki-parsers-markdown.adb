@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-markdown -- Markdown parser operations
---  Copyright (C) 2016 - 2024 Stephane Carrez
+--  Copyright (C) 2016 - 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -43,6 +43,8 @@ package body Wiki.Parsers.Markdown is
       new Ada.Containers.Vectors (Delimiter_Index, Delimiter_Type);
 
    subtype Delimiter_Vector is Delimiter_Vectors.Vector;
+
+   function Check_Trailing_Header (Text : in Wiki.Buffers.Cursor) return Boolean;
 
    function Get_Header_Level (Text   : in out Wiki.Buffers.Cursor) return Natural;
    function Is_Thematic_Break (Text      : in Wiki.Buffers.Cursor;
@@ -97,9 +99,16 @@ package body Wiki.Parsers.Markdown is
                         Valid  : out Boolean);
 
    procedure Scan_Title (Text   : in out Wiki.Buffers.Cursor;
-                         Expect : in Wiki.Strings.WChar;
                          Title  : in out Wiki.Strings.BString;
                          Valid  : out Boolean);
+   procedure Scan_Linebreak (Text   : in out Wiki.Buffers.Cursor;
+                             Delim  : in out Delimiter_Type);
+   procedure Parse_Html (Parser : in out Parser_Type;
+                         Text   : in out Wiki.Buffers.Cursor;
+                         C      : in out Wiki.Strings.WChar);
+   procedure Open_New_Blocks (Parser : in out Parser_Type;
+                              Text   : in out Wiki.Buffers.Cursor;
+                              C      : in out Wiki.Strings.WChar);
 
    function Is_Escapable (C : in Wiki.Strings.WChar) return Boolean is
      (C in '!' .. '/' | ':' .. '@' | '{' .. '~' | '[' .. '`');
@@ -663,7 +672,7 @@ package body Wiki.Parsers.Markdown is
          if not Buffers.Is_Valid (Pos) or else not Is_Valid then
             return;
          end if;
-         Scan_Title (Pos, ' ', Title, Is_Valid);
+         Scan_Title (Pos, Title, Is_Valid);
          exit when not Is_Valid;
          Parser.Document.Set_Link (Strings.To_WString (Label),
                                    Helpers.Encode_URI (Link),
@@ -743,7 +752,6 @@ package body Wiki.Parsers.Markdown is
                      if I + 1 <= Nodes'Last and then Nodes (I + 1).Kind = N_LIST_ITEM then
                         Indent := Nodes (I + 1).Level;
                         if not Parser.Is_Blank
-                          --  and then Parser.Indent > 0
                           and then Parser.Indent < Nodes (I + 1).Level
                           and then (Parser.Text_Buffer.Length = 0
                                     or else Parser.Previous_Line_Empty > 0)
@@ -755,11 +763,6 @@ package body Wiki.Parsers.Markdown is
                               Documents.Set_Loose (Parser.Document);
                               Parser.Need_Paragraph := False;
                            end if;
-                           --if Parser.Need_Paragraph and then Parser.Previous_Line_Empty > 0
-                           --then
-                           --   Documents.Set_Loose (Parser.Document);
-                              --  Parser.Need_Paragraph := Nodes (I).Line_Count > 1;
-                           --end if;
                         else
                            I := I + 1;
                         end if;
@@ -810,7 +813,7 @@ package body Wiki.Parsers.Markdown is
                            Strings.Append_Char (Parser.Text, ' ');
                         end loop;
                      end if;
-                     Common.Append (Parser.Text, Text.Block, Text.Pos);
+                     Common.Append (Parser.Text, Text);
                      C := Helpers.NUL;
                      Need_Char := False;
                   end if;
@@ -861,7 +864,7 @@ package body Wiki.Parsers.Markdown is
                        C      : in out Wiki.Strings.WChar) is
    begin
       if Parser.Current_Node = N_PREFORMAT then
-         Common.Append (Parser.Text, Text.Block, Text.Pos);
+         Common.Append (Parser.Text, Text);
          return;
       end if;
 
@@ -894,7 +897,6 @@ package body Wiki.Parsers.Markdown is
             while Parser.Current_Node = N_BLOCKQUOTE loop
                Pop_Block (Parser);
             end loop;
-            --  Parser.Quote_Level := 0;
          elsif Parser.Text_Buffer.Length = 0 then
             Push_Block (Parser, N_PARAGRAPH);
          end if;
@@ -905,21 +907,18 @@ package body Wiki.Parsers.Markdown is
          if Parser.Is_Blank then
             if Parser.Text_Buffer.Length > 0
               and then (Parser.Current_Node /= N_LIST_ITEM
-                        or else (Top /= null and then Top.Line_Count > 0)) then
+                        or else (Top /= null and then Top.Line_Count > 0))
+            then
                Parser.Need_Paragraph := True;
             end if;
             Parser.Line_Count := 0;
             Parser.Previous_Line_Empty := Parser.Previous_Line_Empty + 1;
-            --  Documents.Set_Loose (Parser.Document);
             if Parser.Column = 0 then
                while Parser.In_Blockquote loop
                   Pop_Block (Parser);
                end loop;
             end if;
          else
-            --if Parser.Previous_Line_Empty > 0 then
-            --   Documents.Set_Loose (Parser.Document);
-            --end if;
             if Parser.Previous_Line_Empty > 0
               and then Parser.Text_Buffer.Length > 0
             then
@@ -928,9 +927,6 @@ package body Wiki.Parsers.Markdown is
                Documents.Set_Loose (Parser.Document);
             end if;
 
-            --if Top /= null then
-            --   Top.Line_Count := Top.Line_Count + 1;
-            --end if;
             Parser.Previous_Line_Empty := 0;
             Buffers.Append (Parser.Text_Buffer, Text.Block, Text.Pos);
             Parser.Line_Count := Parser.Line_Count + 1;
@@ -1028,7 +1024,6 @@ package body Wiki.Parsers.Markdown is
    ---------------------
    -- Open_New_Blocks --
    ---------------------
-
    procedure Open_New_Blocks (Parser : in out Parser_Type;
                               Text   : in out Wiki.Buffers.Cursor;
                               C      : in out Wiki.Strings.WChar) is
@@ -1119,8 +1114,10 @@ package body Wiki.Parsers.Markdown is
                      end;
                   end if;
 
-                  if (Buffers.Has_Next (Text) and then Helpers.Is_Space_Or_Tab (Buffers.Next_At (Text)))
-                    or else (Buffers.Has_Next (Text) and then Helpers.Is_Newline (Buffers.Next_At (Text))
+                  if (Buffers.Has_Next (Text)
+                      and then Helpers.Is_Space_Or_Tab (Buffers.Next_At (Text)))
+                    or else (Buffers.Has_Next (Text)
+                             and then Helpers.Is_Newline (Buffers.Next_At (Text))
                              and then Parser.Text_Buffer.Length = 0)
                   then
                      declare
@@ -1141,13 +1138,15 @@ package body Wiki.Parsers.Markdown is
                         Level := Parser.Column + Count;
                         if Top /= null and then Top.Kind /= N_BLOCKQUOTE then
                            if Top.Kind = N_LIST_START then
-                              if top.Level + 1 > Parser.Column
+                              if Top.Level + 1 > Parser.Column
                                 or else (Top.Marker /= C and then Top.Level + 1 >= Parser.Column)
                               then
                                  Pop_List (Parser, Parser.Column, C, 0);
                                  Top := Current (Parser);
                               end if;
-                           elsif Top.Level + 1 <= Parser.Column and then Top.Kind /= N_LIST_START then
+                           elsif Top.Level + 1 <= Parser.Column
+                             and then Top.Kind /= N_LIST_START
+                           then
                               Push_Block (Parser, Nodes.N_LIST_START, Parser.Column - 1, C);
                            else
                               if Top.Kind = N_LIST_ITEM then
@@ -1200,12 +1199,15 @@ package body Wiki.Parsers.Markdown is
                         end if;
                         Level := Parser.Column;
                         if Top /= null then
-                           if Top.Level > Indent or else (Top.Marker /= Marker and then Top.Level >= Level) then
+                           if Top.Level > Indent
+                             or else (Top.Marker /= Marker and then Top.Level >= Level)
+                           then
                               Pop_List (Parser, Parser.Column, C, 0);
                               Top := Current (Parser);
                            elsif Top.Level < Indent and then Top.Kind /= N_NUM_LIST_START then
                               Push_Block (Parser, Nodes.N_NUM_LIST_START,
-                                          Level => Parser.Column - 1, Marker => Marker, Number => Number);
+                                          Level => Parser.Column - 1, Marker => Marker,
+                                          Number => Number);
                            else
                               if Top.Kind = N_LIST_ITEM then
                                  Pop_Block (Parser, Trim => Right);
@@ -1214,7 +1216,8 @@ package body Wiki.Parsers.Markdown is
                         end if;
                         if Top = null or else Top.Kind not in N_LIST_ITEM | N_NUM_LIST_START then
                            Push_Block (Parser, Nodes.N_NUM_LIST_START,
-                                       Level => Parser.Column - 1, Marker => Marker, Number => Number);
+                                       Level => Parser.Column - 1, Marker => Marker,
+                                       Number => Number);
                         end if;
                         Push_Block (Parser, Nodes.N_LIST_ITEM,
                                     Level => Indent, Marker => Marker, Number => Number);
@@ -1236,7 +1239,7 @@ package body Wiki.Parsers.Markdown is
                when '~' | '`' =>
                   Parse_Preformatted (Parser, Text, C, True);
                   if Parser.Current_Node = Nodes.N_PREFORMAT then
-                     Common.Append (Parser.Text, Text.Block, Text.Pos);
+                     Common.Append (Parser.Text, Text);
                      C := Helpers.NUL;
                   end if;
                   return;
@@ -1313,7 +1316,7 @@ package body Wiki.Parsers.Markdown is
                   Strings.Append_Char (Parser.Text, ' ');
                end loop;
             end if;
-            Common.Append (Parser.Text, Text.Block, Text.Pos);
+            Common.Append (Parser.Text, Text);
             C := Helpers.NUL;
             return;
          else
@@ -1340,12 +1343,12 @@ package body Wiki.Parsers.Markdown is
       --  Feed the HTML parser if there are some pending state.
       if not Wiki.Html_Parser.Is_Empty (Parser.Html) then
          Pos := Text;
-         Common.Parse_Html_Element (Parser, Pos.Block, Pos.Pos, Start => False);
+         Common.Parse_Html_Element (Parser, Pos, Start => False);
          if not Buffers.Is_Valid (Pos) then
             return;
          end if;
          if Parser.In_Html /= HTML_NONE then
-            Common.Parse_Html_Preformatted (Parser, Pos.Block, Pos.Pos);
+            Common.Parse_Html_Preformatted (Parser, Pos);
             return;
          end if;
       elsif Parser.In_Html /= HTML_NONE then
@@ -1360,7 +1363,7 @@ package body Wiki.Parsers.Markdown is
             Parser.Previous_Line_Empty := 1;
             return;
          end if;
-         Common.Parse_Html_Preformatted (Parser, Pos.Block, Pos.Pos);
+         Common.Parse_Html_Preformatted (Parser, Pos);
          return;
       else
          Pos := (Text.Block, Text.Pos - 1);
@@ -1442,7 +1445,6 @@ package body Wiki.Parsers.Markdown is
    end Scan_Link;
 
    procedure Scan_Title (Text   : in out Wiki.Buffers.Cursor;
-                         Expect : in Wiki.Strings.WChar;
                          Title  : in out Wiki.Strings.BString;
                          Valid  : out Boolean) is
       Pos    : Wiki.Buffers.Cursor := Text;
@@ -1450,7 +1452,6 @@ package body Wiki.Parsers.Markdown is
       Sep    : Wiki.Strings.WChar;
       Space_Count : Natural;
       Line_Count  : Natural;
-      Paren_Count : Integer := 0;
    begin
       Wiki.Strings.Clear (Title);
       Buffers.Skip_Spaces (Pos, Space_Count, Line_Count);
@@ -1558,7 +1559,7 @@ package body Wiki.Parsers.Markdown is
                declare
                   Status : Wiki.Html_Parser.Entity_State_Type;
                begin
-                  Common.Parse_Entity (Parser, Pos.Block, Pos.Pos, Status, C);
+                  Common.Parse_Entity (Parser, Pos, Status, C);
                   if Status = Wiki.Html_Parser.ENTITY_VALID then
                      Append (Link, C);
                   else
@@ -1754,7 +1755,7 @@ package body Wiki.Parsers.Markdown is
       Count    : Natural;
       C        : Wiki.Strings.WChar;
       Prev     : Wiki.Strings.WChar := Helpers.NUL;
-      Prev_Pos : Wiki.Buffers.Cursor;
+      Prev_Pos : Wiki.Buffers.Cursor := Text;
       Total    : Natural := 0;
    begin
       Start.Cursor := Pos;
@@ -1804,8 +1805,7 @@ package body Wiki.Parsers.Markdown is
       Start.Count := 0;
    end Scan_Backtick;
 
-   procedure Scan_Linebreak (Parser : in out Parser_Type;
-                             Text   : in out Wiki.Buffers.Cursor;
+   procedure Scan_Linebreak (Text   : in out Wiki.Buffers.Cursor;
                              Delim  : in out Delimiter_Type) is
       Pos    : Wiki.Buffers.Cursor := Text;
       C      : Wiki.Strings.WChar;
@@ -1843,8 +1843,7 @@ package body Wiki.Parsers.Markdown is
       end if;
    end Scan_Linebreak;
 
-   procedure Scan_Autolink (Parser : in out Parser_Type;
-                            Text   : in out Wiki.Buffers.Cursor;
+   procedure Scan_Autolink (Text   : in out Wiki.Buffers.Cursor;
                             Delim  : in out Delimiter_Type);
 
    --  Scan the markdown autolink and setup the delimiter if there is a valid one.
@@ -1852,8 +1851,7 @@ package body Wiki.Parsers.Markdown is
    --    <scheme:link>
    --  where `scheme` must start with a letter and must be between 2..32 characters.
    --  The autolink cannot contain spaces.
-   procedure Scan_Autolink (Parser : in out Parser_Type;
-                            Text   : in out Wiki.Buffers.Cursor;
+   procedure Scan_Autolink (Text   : in out Wiki.Buffers.Cursor;
                             Delim  : in out Delimiter_Type) is
       Pos    : Wiki.Buffers.Cursor := Text;
       Count  : Natural;
@@ -1928,6 +1926,23 @@ package body Wiki.Parsers.Markdown is
                                 Text   : in Wiki.Buffers.Cursor) is
       use Delimiter_Vectors;
 
+      procedure Add_Image (Parser       : in out Parser_Type;
+                           Text         : in out Wiki.Buffers.Cursor;
+                           First        : in Delimiter_Index_Type;
+                           To           : in Delimiter_Index_Type;
+                           Is_Reference : in Boolean);
+      procedure Parse_Link (Text   : in out Wiki.Buffers.Cursor;
+                            Prev_C : in out WChar);
+      procedure Process_Emphasis (Text  : in out Wiki.Buffers.Cursor;
+                                  First : in Delimiter_Index_Type;
+                                  To    : in Delimiter_Index_Type);
+      procedure Process_Emphasis (From, To : in Delimiter_Index_Type);
+      function Find_Closing (Starting : in Delimiter_Index_Type;
+                             Last     : in Delimiter_Index_Type;
+                             Opening  : in Delimiter_Type) return Delimiter_Index_Type;
+      function Find_Previous_Bracket return Delimiter_Index_Type;
+      procedure Clear_Brackets;
+
       C          : Wiki.Strings.WChar;
       Prev       : Wiki.Strings.WChar := ' ';
       Delimiters : Delimiter_Vector;
@@ -1937,6 +1952,8 @@ package body Wiki.Parsers.Markdown is
                            First        : in Delimiter_Index_Type;
                            To           : in Delimiter_Index_Type;
                            Is_Reference : in Boolean) is
+         procedure Add_Text (Limit : in Wiki.Buffers.Cursor);
+
          Pos    : Wiki.Buffers.Cursor := Text;
          Alt    : Wiki.Strings.BString (128);
          Ref    : Wiki.Strings.BString (128);
@@ -1953,7 +1970,6 @@ package body Wiki.Parsers.Markdown is
                   return;
                end if;
                C := Buffers.Char_At (Pos);
-               --  exit Scan_Alt when C = ']';
                Append (Alt, C);
                Append (Ref, C);
                Buffers.Next (Pos);
@@ -1992,7 +2008,10 @@ package body Wiki.Parsers.Markdown is
             if Buffers.Is_Valid (Pos) and then Buffers.Char_At (Pos) = ')' then
                Buffers.Next (Pos);
             end if;
-         elsif Is_Reference and then Buffers.Is_Valid (Pos) and then Buffers.Char_At (Pos) = '[' then
+         elsif Is_Reference
+           and then Buffers.Is_Valid (Pos)
+           and then Buffers.Char_At (Pos) = '['
+         then
             Buffers.Next (Pos);
             Parse_Link_Label (Parser, Pos, Link, True);
             if Buffers.Is_Valid (Pos) and then Buffers.Char_At (Pos) = ']' then
@@ -2246,7 +2265,7 @@ package body Wiki.Parsers.Markdown is
          end loop;
       end Clear_Brackets;
 
-      function Find_Previous_Bracket (Next_Char : Strings.WChar) return Delimiter_Index_Type is
+      function Find_Previous_Bracket return Delimiter_Index_Type is
       begin
          for I in reverse 1 .. Delimiters.Last_Index loop
             declare
@@ -2339,7 +2358,7 @@ package body Wiki.Parsers.Markdown is
          C      : Wiki.Strings.WChar;
       begin
          C := Buffers.Next (Pos);
-         First := Find_Previous_Bracket (C);
+         First := Find_Previous_Bracket;
          if First = 0 then
             Buffers.Next (Text);
             return;
@@ -2432,15 +2451,17 @@ package body Wiki.Parsers.Markdown is
             Bracket : constant Delimiter_Vectors.Reference_Type
               := Delimiters.Reference (First);
          begin
-            if Buffers.Is_Valid (Pos) and then Bracket.Marker in M_BRACKET | M_BRACKET_IMAGE then
-               Text := Pos;
-               Bracket.Marker := (if Bracket.Marker = M_BRACKET then M_LINK_REF else M_IMAGE_REF);
-               return;
-            elsif Buffers.Is_Valid (Pos) and then Bracket.Marker in M_IMAGE | M_LINK | M_IMAGE_REF then
-               return;
-            else
-               Bracket.Marker := M_TEXT;
+            if Buffers.Is_Valid (Pos) then
+               if Bracket.Marker in M_BRACKET | M_BRACKET_IMAGE then
+                  Text := Pos;
+                  Bracket.Marker := (if Bracket.Marker = M_BRACKET
+                                     then M_LINK_REF else M_IMAGE_REF);
+                  return;
+               elsif Bracket.Marker in M_IMAGE | M_LINK | M_IMAGE_REF then
+                  return;
+               end if;
             end if;
+            Bracket.Marker := M_TEXT;
          end;
          Clear_Brackets;
       end Parse_Link;
@@ -2465,13 +2486,12 @@ package body Wiki.Parsers.Markdown is
          C := Buffers.Char_At (Pos);
          case C is
             when '\' =>
-               Scan_Linebreak (Parser, Pos, Delim);
+               Scan_Linebreak (Pos, Delim);
                if Delim.Count > 0 then
                   Delimiters.Append (Delim);
                else
                   Buffers.Next (Pos);
                   Buffers.Next (Pos);
-                  --  exit Main when Block = null;
                   Prev := C;
                end if;
 
@@ -2484,7 +2504,6 @@ package body Wiki.Parsers.Markdown is
                      Delimiters.Append (Delim);
                      Delimiters.Append (End_Marker);
                   end if;
-                  --  exit Main when Block = null;
                end;
                Prev := C;
 
@@ -2495,7 +2514,6 @@ package body Wiki.Parsers.Markdown is
                   Delimiters.Append (Delim);
                end if;
                Prev := C;
-               --  exit Main when Block = null;
 
             when '_' =>
                Get_Delimiter (Pos, Prev, C, Delim);
@@ -2504,7 +2522,6 @@ package body Wiki.Parsers.Markdown is
                   Delimiters.Append (Delim);
                end if;
                Prev := C;
-               --  exit Main when Block = null;
 
             when '~' =>
                Get_Delimiter (Pos, Prev, C, Delim);
@@ -2513,7 +2530,6 @@ package body Wiki.Parsers.Markdown is
                   Delimiters.Append (Delim);
                end if;
                Prev := C;
-               --  exit Main when Block = null;
 
             when '[' =>
                Delim.Marker := M_BRACKET;
@@ -2531,7 +2547,6 @@ package body Wiki.Parsers.Markdown is
             when ']' =>
                Prev := C;
                Parse_Link (Pos, Prev);
-               --  xit Main when Block = null;
 
             when '!' =>
                Delim.Cursor := Pos;
@@ -2553,7 +2568,7 @@ package body Wiki.Parsers.Markdown is
                   Status : Wiki.Html_Parser.Entity_State_Type;
                begin
                   Delim.Cursor := Pos;
-                  Common.Parse_Entity (Parser, Pos.Block, Pos.Pos, Status, C);
+                  Common.Parse_Entity (Parser, Pos, Status, C);
 
                   if Status = Wiki.Html_Parser.ENTITY_VALID then
                      Delim.Cursor.Block.Content (Delim.Cursor.Pos) := C;
@@ -2566,11 +2581,10 @@ package body Wiki.Parsers.Markdown is
                   else
                      Buffers.Next (Pos);
                   end if;
-                  --  exit Main when Block = null;
                end;
 
             when ' ' =>
-               Scan_Linebreak (Parser, Pos, Delim);
+               Scan_Linebreak (Pos, Delim);
                if Delim.Count > 0 then
                   Delimiters.Append (Delim);
                else
@@ -2579,7 +2593,7 @@ package body Wiki.Parsers.Markdown is
                Prev := C;
 
             when '<' =>
-               Scan_Autolink (Parser, Pos, Delim);
+               Scan_Autolink (Pos, Delim);
                if Delim.Count > 0 then
                   Delimiters.Append (Delim);
                   Prev := '>';

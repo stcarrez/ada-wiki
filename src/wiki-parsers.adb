@@ -585,53 +585,42 @@ package body Wiki.Parsers is
    --    _name_    *bold*   `code`
    --  ------------------------------
    procedure Parse_Format (P      : in out Parser;
-                           Text   : in out Wiki.Buffers.Buffer_Access;
-                           From   : in out Positive;
+                           Text   : in out Wiki.Buffers.Cursor;
                            Expect : in Wiki.Strings.WChar;
                            Format : in Format_Type) is
-      Block : Wiki.Buffers.Buffer_Access := Text;
-      Pos   : Positive := From;
+      Pos : Wiki.Buffers.Cursor := Text;
    begin
       if P.Format (Format) then
          Toggle_Format (P, Format);
-         Next (Text, From);
+         Next (Text);
          return;
       end if;
 
-      Next (Block, Pos);
-      while Block /= null loop
-         declare
-            Last : constant Natural := Block.Last;
-         begin
-            while Pos <= Last loop
-               if Block.Content (Pos) = Expect then
-                  Toggle_Format (P, Format);
-                  Next (Text, From);
-                  return;
-               end if;
-               Pos := Pos + 1;
-            end loop;
-         end;
-         Next (Block, Pos);
+      Next (Pos);
+      while Buffers.Is_Valid (Pos) loop
+         if Buffers.Char_At (Pos) = Expect then
+            Toggle_Format (P, Format);
+            Next (Text);
+            return;
+         end if;
+         Buffers.Next (Pos);
       end loop;
-      Append (P.Text, Text.Content (From));
-      Next (Text, From);
+      Append (P.Text, Buffers.Char_At (Text));
+      Next (Text);
    end Parse_Format;
 
-   function Is_Single_Token (Text : in Wiki.Buffers.Buffer_Access;
-                             From : in Positive;
+   function Is_Single_Token (Text  : in Wiki.Buffers.Cursor;
                              Token : in Wiki.Strings.WChar) return Boolean is
-      Block : Wiki.Buffers.Buffer_Access := Text;
-      Pos   : Positive := From;
+      Pos : Wiki.Buffers.Cursor := Text;
    begin
-      if Block = null then
+      if not Buffers.Is_Valid (Pos) then
          return False;
       end if;
-      if Block.Content (Pos) /= Token then
+      if Buffers.Char_At (Pos) /= Token then
          return False;
       end if;
-      Next (Block, Pos);
-      return Block = null or else Block.Content (Pos) /= Token;
+      Next (Pos);
+      return not Buffers.Is_Valid (Pos) or else Buffers.Char_At (Pos) /= Token;
    end Is_Single_Token;
 
    --  ------------------------------
@@ -640,54 +629,40 @@ package body Wiki.Parsers is
    --    _name_    *bold*   `code`
    --  ------------------------------
    procedure Parse_Format_Double (P      : in out Parser;
-                           Text   : in out Wiki.Buffers.Buffer_Access;
-                           From   : in out Positive;
-                           Expect : in Wiki.Strings.WChar;
-                           Format : in Format_Type) is
-      Block : Wiki.Buffers.Buffer_Access := Text;
-      Pos   : Positive := From;
+                                  Text   : in out Wiki.Buffers.Cursor;
+                                  Expect : in Wiki.Strings.WChar;
+                                  Format : in Format_Type) is
+      Pos   : Wiki.Buffers.Cursor := Text;
    begin
-      Next (Block, Pos);
-      if Is_Single_Token (Block, Pos, Expect) then
+      Next (Pos);
+      if Is_Single_Token (Pos, Expect) then
          if P.Format (Format) then
             Toggle_Format (P, Format);
-            Next (Block, Pos);
-            Text := Block;
-            From := Pos;
+            Next (Pos);
+            Text := Pos;
             return;
          end if;
 
-         while Block /= null loop
-            declare
-               Last : constant Natural := Block.Last;
-            begin
-               while Pos <= Last loop
-                  if Block.Content (Pos) = Expect then
-                     Pos := Pos + 1;
-                     if Pos > Last then
-                        Block := Block.Next_Block;
-                        if Block = null then
-                           Append (P.Text, Text.Content (From));
-                           Next (Text, From);
-                           return;
-                        end if;
-                        Pos := 1;
-                     end if;
-                     if Block.Content (Pos) = Expect then
-                        Toggle_Format (P, Format);
-                        Next (Text, From);
-                        Next (Text, From);
-                        return;
-                     end if;
-                  end if;
-                  Pos := Pos + 1;
-               end loop;
-            end;
-            Next (Block, Pos);
+         while Buffers.Is_Valid (Pos) loop
+            if Buffers.Char_At (Pos) = Expect then
+               Buffers.Next (Pos);
+               if not Buffers.Is_Valid (Pos) then
+                  Append (P.Text, Buffers.Char_At (Text));
+                  Buffers.Next (Text);
+                  return;
+               end if;
+               if Buffers.Char_At (Pos) = Expect then
+                  Toggle_Format (P, Format);
+                  Buffers.Next (Text);
+                  Buffers.Next (Text);
+                  return;
+               end if;
+            end if;
+            Next (Pos);
          end loop;
       end if;
-      Append (P.Text, Text.Content (From));
-      Next (Text, From);
+      Append (P.Text, Buffers.Char_At (Text));
+      Next (Text);
    end Parse_Format_Double;
 
    procedure Append (Parser : in out Parser_Type;

@@ -16,8 +16,7 @@ package body Wiki.Parsers.Creole is
    --  Example:
    --    {{{text}}}
    procedure Parse_End_Preformatted (Parser : in out Parser_Type;
-                                     Text   : in out Wiki.Buffers.Buffer_Access;
-                                     From   : in out Positive);
+                                     Text   : in out Wiki.Buffers.Cursor);
 
    --  Parse an image or a pre-formatted section.
    --  Example:
@@ -27,8 +26,7 @@ package body Wiki.Parsers.Creole is
    --    pre-formatted
    --    }}}
    procedure Parse_Image_Or_Preformatted (Parser : in out Parser_Type;
-                                          Text   : in out Wiki.Buffers.Buffer_Access;
-                                          From   : in out Positive);
+                                          Text   : in out Wiki.Buffers.Cursor);
 
    --  ------------------------------
    --  Parse an image or a pre-formatted section.
@@ -40,56 +38,52 @@ package body Wiki.Parsers.Creole is
    --    }}}
    --  ------------------------------
    procedure Parse_Image_Or_Preformatted (Parser : in out Parser_Type;
-                                          Text   : in out Wiki.Buffers.Buffer_Access;
-                                          From   : in out Positive) is
+                                          Text   : in out Wiki.Buffers.Cursor) is
       Link  : Wiki.Strings.BString (128);
       Alt   : Wiki.Strings.BString (128);
-      Block : Wiki.Buffers.Buffer_Access := Text;
-      Pos   : Positive := From;
+      Pos   : Wiki.Buffers.Cursor := Text;
    begin
-      Next (Block, Pos);
+      Next (Pos);
 
       --  Check second marker.
-      if Block = null or else Block.Content (Pos) /= '{' then
-         Common.Parse_Text (Parser, Text, From);
+      if not Buffers.Is_Valid (Pos) or else Buffers.Char_At (Pos) /= '{' then
+         Common.Parse_Text (Parser, Text);
          return;
       end if;
 
       --  Check third marker: this is a inline code block.
-      Next (Block, Pos);
-      if Block /= null and then Block.Content (Pos) = '{' then
+      Next (Pos);
+      if Buffers.Is_Valid (Pos) and then Buffers.Char_At (Pos) = '{' then
          Flush_Text (Parser);
          Parser.Format (CODE) := True;
-         Next (Block, Pos);
-         Text := Block;
-         From := Pos;
+         Next (Pos);
+         Text := Pos;
          return;
       end if;
 
-      if Block = null then
-         Common.Parse_Text (Parser, Text, From, Count => 2);
+      if not Buffers.Is_Valid (Pos) then
+         Common.Parse_Text (Parser, Text, Count => 2);
          return;
       end if;
 
-      Common.Parse_Token (Block, Pos, Parser.Escape_Char, '|', '}', Link);
-      if Block /= null and then Block.Content (Pos) = '|' then
-         Next (Block, Pos);
-         if Block /= null then
-            Common.Parse_Token (Block, Pos, Parser.Escape_Char, '}', '}', Alt);
+      Common.Parse_Token (Pos.Block, Pos.Pos, Parser.Escape_Char, '|', '}', Link);
+      if Buffers.Is_Valid (Pos) and then Buffers.Char_At (Pos) = '|' then
+         Next (Pos);
+         if Buffers.Is_Valid (Pos) then
+            Common.Parse_Token (Pos.Block, Pos.Pos, Parser.Escape_Char, '}', '}', Alt);
          end if;
       end if;
 
-      if Block /= null and then Block.Content (Pos) = '}' then
-         Next (Block, Pos);
+      if Buffers.Is_Valid (Pos) and then Buffers.Char_At (Pos) = '}' then
+         Buffers.Next (Pos);
       end if;
 
-      if Block = null or else Block.Content (Pos) /= '}' then
-         Common.Parse_Text (Parser, Text, From, Count => 2);
+      if not Buffers.Is_Valid (Pos) or else Buffers.Char_At (Pos) /= '}' then
+         Common.Parse_Text (Parser, Text, Count => 2);
          return;
       end if;
-      Next (Block, Pos);
-      Text := Block;
-      From := Pos;
+      Next (Pos);
+      Text := Pos;
 
       Flush_Text (Parser);
       if not Parser.Context.Is_Hidden then
@@ -107,23 +101,20 @@ package body Wiki.Parsers.Creole is
    --    {{{text}}}
    --  ------------------------------
    procedure Parse_End_Preformatted (Parser : in out Parser_Type;
-                                     Text   : in out Wiki.Buffers.Buffer_Access;
-                                     From   : in out Positive) is
+                                     Text   : in out Wiki.Buffers.Cursor) is
    begin
       if not Parser.Format (CODE) then
-         Common.Parse_Text (Parser, Text, From);
+         Common.Parse_Text (Parser, Text);
       else
          declare
-            Count : constant Natural := Count_Occurence (Text, From, '}');
+            Count : constant Natural := Count_Occurence (Text.Block, Text.Pos, '}');
          begin
             if Count < 3 then
-               Common.Parse_Text (Parser, Text, From);
+               Common.Parse_Text (Parser, Text);
             else
                Flush_Text (Parser);
                Parser.Format (CODE) := False;
-               for I in 1 .. 3 loop
-                  Next (Text, From);
-               end loop;
+               Buffers.Next (Text, 3);
             end if;
          end;
       end if;
@@ -131,15 +122,14 @@ package body Wiki.Parsers.Creole is
 
    procedure Parse_Line (Parser : in out Parser_Type;
                          Text   : in Wiki.Buffers.Cursor) is
-      Pos    : Natural := Text.Pos;
+      Pos    : Wiki.Buffers.Cursor := Text;
       C      : Wiki.Strings.WChar;
       Count  : Natural;
-      Buffer : Wiki.Buffers.Buffer_Access := Text.Block;
    begin
       if Parser.Current_Node = Nodes.N_PREFORMAT then
-         Count := Count_Occurence (Buffer, 1, '}');
+         Count := Count_Occurence (Pos.Block, Pos.Pos, '}');
          if Count /= 3 then
-            Common.Append (Parser.Text, Buffer, 1);
+            Common.Append (Parser.Text, Pos);
             return;
          end if;
          Pop_Block (Parser);
@@ -150,32 +140,36 @@ package body Wiki.Parsers.Creole is
          Pop_Block (Parser);
       end if;
 
-      C := Buffer.Content (Pos);
+      if not Buffers.Is_Valid (Pos) then
+         return;
+      end if;
+
+      C := Buffers.Char_At (Pos);
       case C is
          when CR | LF =>
-            Common.Parse_Paragraph (Parser, Buffer, Pos);
+            Common.Parse_Paragraph (Parser, Pos);
             return;
 
          when '=' =>
-            Common.Parse_Header (Parser, Buffer, Pos, '=');
-            if Buffer = null then
+            Common.Parse_Header (Parser, Pos, '=');
+            if not Buffers.Is_Valid (Pos) then
                return;
             end if;
 
          when '-' =>
-            Common.Parse_Horizontal_Rule (Parser, Buffer, Pos, '-');
-            if Buffer = null then
+            Common.Parse_Horizontal_Rule (Parser, Pos, '-');
+            if not Buffers.Is_Valid (Pos) then
                return;
             end if;
 
          when '*' | '#' =>
-            if Common.Is_List (Buffer, Pos) then
-               Common.Parse_List (Parser, Buffer, Pos);
+            if Common.Is_List (Pos) then
+               Common.Parse_List (Parser, Pos);
             end if;
 
          when '{' =>
-            Common.Parse_Preformatted (Parser, Buffer, Pos, '{');
-            if Buffer = null then
+            Common.Parse_Preformatted (Parser, Pos, '{');
+            if not Buffers.Is_Valid (Pos) then
                return;
             end if;
 
@@ -187,101 +181,76 @@ package body Wiki.Parsers.Creole is
 
       end case;
 
-      Main :
-      while Buffer /= null loop
-         declare
-            Last : Natural := Buffer.Last;
-         begin
-            while Pos <= Buffer.Last loop
-               C := Buffer.Content (Pos);
-               case C is
-                  when '*' =>
-                     Parse_Format_Double (Parser, Buffer, Pos, '*', Wiki.STRONG);
-                     exit Main when Buffer = null;
+      while Buffers.Is_Valid (Pos) loop
+         C := Buffers.Char_At (Pos);
+         case C is
+            when '*' =>
+               Parse_Format_Double (Parser, Pos, '*', Wiki.STRONG);
 
-                  when '/' =>
-                     Parse_Format_Double (Parser, Buffer, Pos, '/', Wiki.EMPHASIS);
-                     exit Main when Buffer = null;
+            when '/' =>
+               Parse_Format_Double (Parser, Pos, '/', Wiki.EMPHASIS);
 
-                  when '-' =>
-                     Parse_Format_Double (Parser, Buffer, Pos, '-', Wiki.STRIKEOUT);
-                     exit Main when Buffer = null;
+            when '-' =>
+               Parse_Format_Double (Parser, Pos, '-', Wiki.STRIKEOUT);
 
-                  when '_' =>
-                     Parse_Format_Double (Parser, Buffer, Pos, '/', Wiki.UNDERLINE);
-                     exit Main when Buffer = null;
+            when '_' =>
+               Parse_Format_Double (Parser, Pos, '/', Wiki.UNDERLINE);
 
-                  when '#' =>
-                     Parse_Format_Double (Parser, Buffer, Pos, '#', Wiki.CODE);
-                     exit Main when Buffer = null;
+            when '#' =>
+               Parse_Format_Double (Parser, Pos, '#', Wiki.CODE);
 
-                  when ',' =>
-                     Parse_Format_Double (Parser, Buffer, Pos, ',', Wiki.SUBSCRIPT);
-                     exit Main when Buffer = null;
+            when ',' =>
+               Parse_Format_Double (Parser, Pos, ',', Wiki.SUBSCRIPT);
 
-                  when '^' =>
-                     Parse_Format (Parser, Buffer, Pos, '^', Wiki.SUPERSCRIPT);
-                     exit Main when Buffer = null;
+            when '^' =>
+               Parse_Format (Parser, Pos, '^', Wiki.SUPERSCRIPT);
 
-                  when '[' =>
-                     Common.Parse_Link (Parser, Buffer, Pos);
-                     exit Main when Buffer = null;
+            when '[' =>
+               Common.Parse_Link (Parser, Pos);
 
-                  when '<' =>
-                     Common.Parse_Template (Parser, Buffer, Pos, '<');
-                     exit Main when Buffer = null;
+            when '<' =>
+               Common.Parse_Template (Parser, Pos, '<');
 
-                  when '{' =>
-                     Parse_Image_Or_Preformatted (Parser, Buffer, Pos);
-                     exit Main when Buffer = null;
+            when '{' =>
+               Parse_Image_Or_Preformatted (Parser, Pos);
 
-                  when '}' =>
-                     Parse_End_Preformatted (Parser, Buffer, Pos);
-                     exit Main when Buffer = null;
+            when '}' =>
+               Parse_End_Preformatted (Parser, Pos);
 
-                  when CR | LF =>
-                     --  if Wiki.Strings.Length (Parser.Text) > 0 then
-                        Append (Parser.Text, ' ');
-                     --  end if;
-                     Pos := Pos + 1;
+            when CR | LF =>
+               Append (Parser.Text, ' ');
+               Buffers.Next (Pos);
 
-                  when '\' =>
-                     Next (Buffer, Pos);
-                     if Buffer = null then
-                        Append (Parser.Text, C);
-                     elsif Buffer.Content (Pos) /= '\' then
-                        Append (Parser.Text, C);
-                        Last := Buffer.Last;
-                     else
-                        Parser.Empty_Line := True;
-                        Flush_Text (Parser, Trim => Right);
-                        if not Parser.Context.Is_Hidden then
-                           Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_LINE_BREAK);
-                        end if;
-                        Pos := Pos + 1;
-                        Last := Buffer.Last;
-                     end if;
+            when '\' =>
+               Buffers.Next (Pos);
+               if not Buffers.Is_Valid (Pos) then
+                  Append (Parser.Text, C);
+               elsif Buffers.Char_At (Pos) /= '\' then
+                  Append (Parser.Text, C);
+               else
+                  Parser.Empty_Line := True;
+                  Flush_Text (Parser, Trim => Right);
+                  if not Parser.Context.Is_Hidden then
+                     Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_LINE_BREAK);
+                  end if;
+                  Buffers.Next (Pos);
+               end if;
 
-                  when '~' =>
-                     Next (Buffer, Pos);
-                     if Buffer = null then
-                        Append (Parser.Text, C);
-                     else
-                        Append (Parser.Text, Buffer.Content (Pos));
-                        Pos := Pos + 1;
-                        Last := Buffer.Last;
-                     end if;
+            when '~' =>
+               Buffers.Next (Pos);
+               if not Buffers.Is_Valid (Pos) then
+                  Append (Parser.Text, C);
+               else
+                  Append (Parser.Text, Buffers.Char_At (Pos));
+                  Buffers.Next (Pos);
+               end if;
 
-                  when others =>
-                     Append (Parser.Text, C);
-                     Pos := Pos + 1;
+            when others =>
+               Append (Parser.Text, C);
+               Buffers.Next (Pos);
 
-               end case;
-            end loop;
-         end;
-         Buffer := Buffer.Next_Block;
-         Pos := 1;
-      end loop Main;
+         end case;
+      end loop;
    end Parse_Line;
 
 end Wiki.Parsers.Creole;

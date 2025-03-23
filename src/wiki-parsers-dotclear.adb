@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-dotclear -- Dotclear parser operations
---  Copyright (C) 2011 - 2022 Stephane Carrez
+--  Copyright (C) 2011 - 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -20,17 +20,14 @@ package body Wiki.Parsers.Dotclear is
    --    ((url|alt text|position))
    --    ((url|alt text|position||description))
    procedure Parse_Image (Parser  : in out Parser_Type;
-                          Text    : in out Wiki.Buffers.Buffer_Access;
-                          From    : in out Positive);
+                          Text    : in out Wiki.Buffers.Cursor);
 
    procedure Parse_Preformatted (Parser : in out Parser_Type;
-                                 Text   : in out Wiki.Buffers.Buffer_Access;
-                                 From   : in out Positive);
+                                 Text   : in out Wiki.Buffers.Cursor);
 
    procedure Parse_Preformatted (Parser : in out Parser_Type;
-                                 Text   : in out Wiki.Buffers.Buffer_Access;
-                                 From   : in out Positive) is
-      Count : constant Natural := Count_Occurence (Text, From, '/');
+                                 Text   : in out Wiki.Buffers.Cursor) is
+      Count : constant Natural := Count_Occurence (Text.Block, Text.Pos, '/');
    begin
       if Count /= 3 then
          return;
@@ -38,28 +35,25 @@ package body Wiki.Parsers.Dotclear is
 
       --  Extract the format either 'Ada' or '[Ada]'
       declare
-         Pos    : Natural := Count + 1;
-         Buffer : Wiki.Buffers.Buffer_Access := Text;
+         Pos  : Wiki.Buffers.Cursor := Text;
          Space_Count : Natural;
       begin
+         Buffers.Next (Pos, Count);
          Wiki.Strings.Clear (Parser.Preformat_Format);
-         Buffers.Skip_Spaces (Buffer, Pos, Space_Count);
-         if Buffer /= null and then Pos <= Buffer.Last and then Buffer.Content (Pos) = '[' then
-            Next (Buffer, Pos);
-            Common.Parse_Token (Buffer, Pos, Parser.Escape_Char, ']', ']',
+         Buffers.Skip_Spaces (Pos, Space_Count);
+         if Buffers.Is_Valid (Pos) and then Buffers.Char_At (Pos) = '[' then
+            Buffers.Next (Pos);
+            Common.Parse_Token (Pos.Block, Pos.Pos, Parser.Escape_Char, ']', ']',
                                 Parser.Preformat_Format);
-            if Buffer /= null then
-               Next (Buffer, Pos);
-            end if;
+            Buffers.Next (Pos);
          else
-            Common.Parse_Token (Buffer, Pos, Parser.Escape_Char, CR, LF,
+            Common.Parse_Token (Pos.Block, Pos.Pos, Parser.Escape_Char, CR, LF,
                                 Parser.Preformat_Format);
          end if;
-         if Buffer /= null then
-            Buffers.Skip_Spaces (Buffer, Pos, Space_Count);
+         if Buffers.Is_Valid (Pos) then
+            Buffers.Skip_Spaces (Pos, Space_Count);
          end if;
-         Text := Buffer;
-         From := Pos;
+         Text := Pos;
       end;
 
       Parser.Preformat_Indent := 0;
@@ -78,8 +72,7 @@ package body Wiki.Parsers.Dotclear is
    --    ((url|alt text|position||description))
    --  ------------------------------
    procedure Parse_Image (Parser  : in out Parser_Type;
-                          Text    : in out Wiki.Buffers.Buffer_Access;
-                          From    : in out Positive) is
+                          Text    : in out Wiki.Buffers.Cursor) is
       procedure Append_Position (Position : in Wiki.Strings.WString);
 
       procedure Append_Position (Position : in Wiki.Strings.WString) is
@@ -100,54 +93,52 @@ package body Wiki.Parsers.Dotclear is
       Alt      : Wiki.Strings.BString (128);
       Position : Wiki.Strings.BString (128);
       Desc     : Wiki.Strings.BString (128);
-      Block    : Wiki.Buffers.Buffer_Access := Text;
-      Pos      : Positive := From;
+      Pos      : Wiki.Buffers.Cursor := Text;
    begin
-      Next (Block, Pos);
-      if Block = null or else Block.Content (Pos) /= '(' then
-         Common.Parse_Text (Parser, Text, From);
+      Next (Pos);
+      if not Buffers.Is_Valid (Pos) or else Buffers.Char_At (Pos) /= '(' then
+         Common.Parse_Text (Parser, Text);
          return;
       end if;
 
-      Next (Block, Pos);
-      if Block = null then
-         Common.Parse_Text (Parser, Text, From, Count => 2);
+      Next (Pos);
+      if not Buffers.Is_Valid (Pos) then
+         Common.Parse_Text (Parser, Pos, Count => 2);
          return;
       end if;
 
-      Common.Parse_Token (Block, Pos, Parser.Escape_Char, '|', ')', Link);
-      if Block /= null and then Block.Content (Pos) = '|' then
-         Next (Block, Pos);
-         if Block /= null then
-            Common.Parse_Token (Block, Pos, Parser.Escape_Char, '|', ')', Alt);
+      Common.Parse_Token (Pos.Block, Pos.Pos, Parser.Escape_Char, '|', ')', Link);
+      if Buffers.Is_Valid (Pos) and then Buffers.Char_At (Pos) = '|' then
+         Next (Pos);
+         if Buffers.Is_Valid (Pos) then
+            Common.Parse_Token (Pos.Block, Pos.Pos, Parser.Escape_Char, '|', ')', Alt);
          end if;
-         if Block /= null and then Block.Content (Pos) = '|' then
-            Next (Block, Pos);
-            if Block /= null then
-               Common.Parse_Token (Block, Pos, Parser.Escape_Char, '|', ')', Position);
+         if Buffers.Is_Valid (Pos) and then Buffers.Char_At (Pos) = '|' then
+            Next (Pos);
+            if Buffers.Is_Valid (Pos) then
+               Common.Parse_Token (Pos.Block, Pos.Pos, Parser.Escape_Char, '|', ')', Position);
             end if;
-            if Block /= null and then Block.Content (Pos) = '|' then
-               Next (Block, Pos);
-               if Block /= null then
-                  Common.Parse_Token (Block, Pos, Parser.Escape_Char, '|', ')', Desc);
+            if Buffers.Is_Valid (Pos) and then Buffers.Char_At (Pos) = '|' then
+               Next (Pos);
+               if Buffers.Is_Valid (Pos) then
+                  Common.Parse_Token (Pos.Block, Pos.Pos, Parser.Escape_Char, '|', ')', Desc);
                end if;
             end if;
          end if;
       end if;
 
       --  Check for the first ')'.
-      if Block /= null and then Block.Content (Pos) = ')' then
-         Next (Block, Pos);
+      if Buffers.Is_Valid (Pos) and then Buffers.Char_At (Pos) = ')' then
+         Next (Pos);
       end if;
 
       --  Check for the second ')', abort the image and emit the '((' if the '))' is missing.
-      if Block = null or else Block.Content (Pos) /= ')' then
-         Common.Parse_Text (Parser, Text, From, Count => 2);
+      if not Buffers.Is_Valid (Pos) or else Buffers.Char_At (Pos) /= ')' then
+         Common.Parse_Text (Parser, Text, Count => 2);
          return;
       end if;
-      Next (Block, Pos);
-      Text := Block;
-      From := Pos;
+      Next (Pos);
+      Text := Pos;
 
       Flush_Text (Parser);
       if not Parser.Context.Is_Hidden then
@@ -163,13 +154,12 @@ package body Wiki.Parsers.Dotclear is
 
    procedure Parse_Line (Parser : in out Parser_Type;
                          Text   : in Wiki.Buffers.Cursor) is
-      Pos    : Natural := Text.Pos;
+      Pos    : Wiki.Buffers.Cursor := Text;
       C      : Wiki.Strings.WChar;
       Count  : Natural;
-      Buffer : Wiki.Buffers.Buffer_Access := Text.Block;
    begin
       if Parser.In_Blockquote then
-         Count := Count_Occurence (Buffer, 1, '>');
+         Count := Count_Occurence (Pos.Block, Pos.Pos, '>');
          if Count = 0 then
             Parser.Quote_Level := 0;
             loop
@@ -177,9 +167,9 @@ package body Wiki.Parsers.Dotclear is
                exit when Parser.Current_Node = Nodes.N_NONE;
             end loop;
          else
-            Buffers.Next (Buffer, Pos, Count);
-            Buffers.Skip_Optional_Space (Buffer, Pos);
-            if Buffer = null then
+            Buffers.Next (Pos, Count);
+            Buffers.Skip_Optional_Space (Pos.Block, Pos.Pos);
+            if not Buffers.Is_Valid (Pos) then
                return;
             end if;
             Push_Block (Parser, Nodes.N_BLOCKQUOTE, Count);
@@ -188,16 +178,17 @@ package body Wiki.Parsers.Dotclear is
 
       if Parser.Current_Node = N_PREFORMAT then
          if Parser.Preformat_Fcount = 0 then
-            Count := Count_Occurence (Buffer, 1, '/');
+            Count := Count_Occurence (Pos.Block, Pos.Pos, '/');
             if Count /= 3 then
-               Common.Append (Parser.Text, Buffer, 1);
+               Common.Append (Parser.Text, Pos);
                return;
             end if;
             Pop_Block (Parser);
             return;
          end if;
-         if Buffer.Content (Pos) = ' ' then
-            Common.Append (Parser.Text, Buffer, Pos + 1);
+         if Buffers.Is_Valid (Pos) and then Buffers.Char_At (Pos) = ' ' then
+            Buffers.Next (Pos);
+            Common.Append (Parser.Text, Pos);
             return;
          end if;
          Pop_Block (Parser);
@@ -206,34 +197,37 @@ package body Wiki.Parsers.Dotclear is
       if Parser.Current_Node = N_HEADER then
          Pop_Block (Parser);
       end if;
+      if not Buffers.Is_Valid (Pos) then
+         return;
+      end if;
 
-      C := Buffer.Content (Pos);
+      C := Buffers.Char_At (Pos);
       if C = '>' then
-         Count := Count_Occurence (Buffer, Pos, '>');
+         Count := Count_Occurence (Pos.Block, Pos.Pos, '>');
          Parser.Quote_Level := Count;
          Push_Block (Parser, Nodes.N_BLOCKQUOTE, Count);
-         Buffers.Next (Buffer, Pos, Count);
-         Buffers.Skip_Optional_Space (Buffer, Pos);
-         if Buffer = null then
+         Buffers.Next (Pos, Count);
+         Buffers.Skip_Optional_Space (Pos.Block, Pos.Pos);
+         if not Buffers.Is_Valid (Pos) then
             return;
          end if;
-         C := Buffer.Content (Pos);
+         C := Buffers.Char_At (Pos);
       end if;
 
       case C is
          when CR | LF =>
-            Common.Parse_Paragraph (Parser, Buffer, Pos);
+            Common.Parse_Paragraph (Parser, Pos);
             return;
 
          when '!' =>
-            Common.Parse_Header (Parser, Buffer, Pos, '!');
-            if Buffer = null then
+            Common.Parse_Header (Parser, Pos, '!');
+            if not Buffers.Is_Valid (Pos) then
                return;
             end if;
 
          when '/' =>
-            Parse_Preformatted (Parser, Buffer, Pos);
-            if Buffer = null then
+            Parse_Preformatted (Parser, Pos);
+            if not Buffers.Is_Valid (Pos) then
                return;
             end if;
 
@@ -246,17 +240,18 @@ package body Wiki.Parsers.Dotclear is
                Pop_Block (Parser);
             end if;
             Push_Block (Parser, N_PREFORMAT);
-            Common.Append (Parser.Text, Buffer, Pos + 1);
+            Buffers.Next (Pos);
+            Common.Append (Parser.Text, Pos);
             return;
 
          when '-' =>
-            Common.Parse_Horizontal_Rule (Parser, Buffer, Pos, '-');
-            if Buffer = null then
+            Common.Parse_Horizontal_Rule (Parser, Pos, '-');
+            if not Buffers.Is_Valid (Pos) then
                return;
             end if;
 
          when '*' | '#' =>
-            Common.Parse_List (Parser, Buffer, Pos);
+            Common.Parse_List (Parser, Pos);
 
          when others =>
             if Parser.Current_Node not in N_PARAGRAPH | N_BLOCKQUOTE then
@@ -266,99 +261,84 @@ package body Wiki.Parsers.Dotclear is
 
       end case;
 
-      Main :
-      while Buffer /= null loop
-         while Pos <= Buffer.Last loop
-            C := Buffer.Content (Pos);
-            case C is
-               when '_' =>
-                  Parse_Format_Double (Parser, Buffer, Pos, '_', Wiki.BOLD);
-                  exit Main when Buffer = null;
+      while Buffers.Is_Valid (Pos) loop
+         C := Buffers.Char_At (Pos);
+         case C is
+            when '_' =>
+               Parse_Format_Double (Parser, Pos, '_', Wiki.BOLD);
 
-               when ''' =>
-                  Parse_Format_Double (Parser, Buffer, Pos, ''', Wiki.ITALIC);
-                  exit Main when Buffer = null;
+            when ''' =>
+               Parse_Format_Double (Parser, Pos, ''', Wiki.ITALIC);
 
-               when '-' =>
-                  Parse_Format_Double (Parser, Buffer, Pos, '-', Wiki.STRIKEOUT);
-                  exit Main when Buffer = null;
+            when '-' =>
+               Parse_Format_Double (Parser, Pos, '-', Wiki.STRIKEOUT);
 
-               when '+' =>
-                  Parse_Format_Double (Parser, Buffer, Pos, '+', Wiki.INS);
-                  exit Main when Buffer = null;
+            when '+' =>
+               Parse_Format_Double (Parser, Pos, '+', Wiki.INS);
 
-               when ',' =>
-                  Parse_Format_Double (Parser, Buffer, Pos, ',', Wiki.SUBSCRIPT);
-                  exit Main when Buffer = null;
+            when ',' =>
+               Parse_Format_Double (Parser, Pos, ',', Wiki.SUBSCRIPT);
 
-               when '@' =>
-                  Parse_Format_Double (Parser, Buffer, Pos, '@', Wiki.CODE);
-                  exit Main when Buffer = null;
+            when '@' =>
+               Parse_Format_Double (Parser, Pos, '@', Wiki.CODE);
 
-               when '^' =>
-                  Parse_Format (Parser, Buffer, Pos, '^', Wiki.SUPERSCRIPT);
-                  exit Main when Buffer = null;
+            when '^' =>
+               Parse_Format (Parser, Pos, '^', Wiki.SUPERSCRIPT);
 
-               when '{' =>
-                  Common.Parse_Quote (Parser, Buffer, Pos, '{');
-                  exit Main when Buffer = null;
+            when '{' =>
+               Common.Parse_Quote (Parser, Pos, '{');
 
-               when '(' =>
-                  Parse_Image (Parser, Buffer, Pos);
-                  exit Main when Buffer = null;
+            when '(' =>
+               Parse_Image (Parser, Pos);
 
-               when '[' =>
-                  Common.Parse_Link (Parser, Buffer, Pos);
-                  exit Main when Buffer = null;
+            when '[' =>
+               Common.Parse_Link (Parser, Pos);
 
-               when '<' =>
-                  Common.Parse_Template (Parser, Buffer, Pos, '<');
-                  exit Main when Buffer = null;
+            when '<' =>
+               Common.Parse_Template (Parser, Pos, '<');
 
-               when '%' =>
-                  Count := Count_Occurence (Buffer, Pos, '%');
-                  if Count >= 3 then
-                     Parser.Empty_Line := True;
-                     Flush_Text (Parser, Trim => Right);
-                     if not Parser.Context.Is_Hidden then
-                        Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_LINE_BREAK);
-                     end if;
-
-                     --  Skip 3 '%' characters.
-                     for I in 1 .. 3 loop
-                        Next (Buffer, Pos);
-                     end loop;
-                     if Buffer /= null and then Helpers.Is_Newline (Buffer.Content (Pos)) then
-                        Next (Buffer, Pos);
-                     end if;
-                     exit Main when Buffer = null;
-                  else
-                     Append (Parser.Text, C);
-                     Pos := Pos + 1;
+            when '%' =>
+               Count := Count_Occurence (Pos.Block, Pos.Pos, '%');
+               if Count >= 3 then
+                  Parser.Empty_Line := True;
+                  Flush_Text (Parser, Trim => Right);
+                  if not Parser.Context.Is_Hidden then
+                     Parser.Context.Filters.Add_Node (Parser.Document, Nodes.N_LINE_BREAK);
                   end if;
 
-               when CR | LF =>
-                  Append (Parser.Text, ' ');
-                  Pos := Pos + 1;
-
-               when '\' =>
-                  Next (Buffer, Pos);
-                  if Buffer = null then
-                     Append (Parser.Text, C);
-                  else
-                     Append (Parser.Text, Buffer.Content (Pos));
-                     Pos := Pos + 1;
+                  --  Skip 3 '%' characters.
+                  for I in 1 .. 3 loop
+                     Next (Pos);
+                  end loop;
+                  if Buffers.Is_Valid (Pos)
+                    and then Helpers.Is_Newline (Buffers.Char_At (Pos))
+                  then
+                     Next (Pos);
                   end if;
-
-               when others =>
+               else
                   Append (Parser.Text, C);
-                  Pos := Pos + 1;
+                  Buffers.Next (Pos);
+               end if;
 
-            end case;
-         end loop;
-         Buffer := Buffer.Next_Block;
-         Pos := 1;
-      end loop Main;
+            when CR | LF =>
+               Append (Parser.Text, ' ');
+               Buffers.Next (Pos);
+
+            when '\' =>
+               Next (Pos);
+               if not Buffers.Is_Valid (Pos) then
+                  Append (Parser.Text, C);
+               else
+                  Append (Parser.Text, Buffers.Char_At (Pos));
+                  Buffers.Next (Pos);
+               end if;
+
+            when others =>
+               Append (Parser.Text, C);
+               Buffers.Next (Pos);
+
+         end case;
+      end loop;
    end Parse_Line;
 
 end Wiki.Parsers.Dotclear;
