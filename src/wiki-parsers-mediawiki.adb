@@ -25,9 +25,8 @@ package body Wiki.Parsers.MediaWiki is
    --  ------------------------------
    procedure Parse_Bold_Italic (Parser  : in out Parser_Type;
                                 Text    : in out Wiki.Buffers.Cursor) is
-      Count : Natural;
+      Count : Natural := Count_Occurence (Text.Block, Text.Pos, ''');
    begin
-      Count_Occurence (Text, ''', Count);
       case Count is
          when 1 =>
             Common.Parse_Text (Parser, Text);
@@ -53,7 +52,7 @@ package body Wiki.Parsers.MediaWiki is
             return;
 
       end case;
-      --  Buffers.Next (Text, Count);
+      Buffers.Next (Text, Count);
    end Parse_Bold_Italic;
 
    procedure Parse_Line (Parser : in out Parser_Type;
