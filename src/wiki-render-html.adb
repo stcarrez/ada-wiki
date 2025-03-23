@@ -117,6 +117,35 @@ package body Wiki.Render.Html is
         | Wiki.SUP_TAG;
    end Has_Html_Paragraph;
 
+   procedure Render_Definition (Engine  : in out Html_Renderer;
+                                Doc     : in Wiki.Documents.Document;
+                                Node    : in Wiki.Nodes.Node_Type) is
+      Format       : constant Wiki.Format_Map := Engine.Current_Format;
+   begin
+      if Node.Kind = Wiki.Nodes.N_DEFINITION_TERM then
+         if not Engine.In_Definition then
+            Engine.Close_Paragraph;
+            Engine.In_Definition := True;
+            Engine.Output.Start_Element ("dl");
+         else
+            Engine.Output.End_Element ("dd");
+         end if;
+         Engine.Output.Start_Element ("dt");
+         Engine.Has_Paragraph := True;
+         Engine.Need_Paragraph := False;
+         Engine.Render (Doc, Node.Children);
+         Engine.Set_Format (Format);
+         Engine.Output.End_Element ("dt");
+      else
+         Engine.Output.Start_Element ("dd");
+         Engine.Has_Paragraph := True;
+         Engine.Need_Paragraph := False;
+         Engine.Render (Doc, Node.Children);
+         Engine.Set_Format (Format);
+         Engine.Output.End_Element ("dd");
+      end if;
+   end Render_Definition;
+
    --  ------------------------------
    --  Render the node instance from the document.
    --  ------------------------------
@@ -140,26 +169,8 @@ package body Wiki.Render.Html is
          when Wiki.Nodes.N_NEWLINE =>
             Engine.Newline;
 
-         when Wiki.Nodes.N_DEFINITION_TERM =>
-            if not Engine.In_Definition then
-               Engine.Close_Paragraph;
-               Engine.In_Definition := True;
-               Engine.Output.Start_Element ("dl");
-            else
-               Engine.Output.End_Element ("dd");
-            end if;
-            Engine.Output.Start_Element ("dt");
-            Engine.Has_Paragraph := True;
-            Engine.Need_Paragraph := False;
-            Engine.Render (Doc, Node.Children);
-            Engine.Output.End_Element ("dt");
-
-         when Wiki.Nodes.N_DEFINITION =>
-            Engine.Output.Start_Element ("dd");
-            Engine.Has_Paragraph := True;
-            Engine.Need_Paragraph := False;
-            Engine.Render (Doc, Node.Children);
-            Engine.Output.End_Element ("dd");
+         when Wiki.Nodes.N_DEFINITION_TERM | Wiki.Nodes.N_DEFINITION=>
+            Engine.Render_Definition (Doc, Node);
 
          when Wiki.Nodes.N_END_DEFINITION =>
             if Engine.In_Definition then
