@@ -127,8 +127,6 @@ package body Wiki.Render.Html is
             Engine.Close_Paragraph;
             Engine.In_Definition := True;
             Engine.Output.Start_Element ("dl");
-         else
-            Engine.Output.End_Element ("dd");
          end if;
          Engine.Output.Start_Element ("dt");
          Engine.Has_Paragraph := True;
