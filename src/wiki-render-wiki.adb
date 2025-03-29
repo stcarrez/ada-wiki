@@ -737,17 +737,21 @@ package body Wiki.Render.Wiki is
       Apply_Format : Boolean := True;
       Last_Char    : Strings.WChar;
    begin
-      if Engine.Keep_Content > 0 or else Engine.Empty_Line then
+      if Engine.Empty_Line or else (Engine.Keep_Content > 0 and then not Engine.Keep_Spaces) then
          while Start <= Text'Last and then Helpers.Is_Space_Or_Newline (Text (Start)) loop
             Start := Start + 1;
          end loop;
       end if;
       if Engine.Keep_Content > 0 then
-         while Last >= Start and then Helpers.Is_Space_Or_Newline (Text (Last)) loop
-            Last := Last - 1;
-         end loop;
+         if not Engine.Keep_Spaces then
+            while Last >= Start and then Helpers.Is_Space_Or_Newline (Text (Last)) loop
+               Last := Last - 1;
+            end loop;
+         end if;
          if Engine.Need_Space then
-            Append (Engine.Content, ' ');
+            if not Helpers.Is_Punctuation (Text (Start)) then
+               Append (Engine.Content, ' ');
+            end if;
             Engine.Need_Space := False;
          end if;
          Append (Engine.Content, Text (Start .. Last));
@@ -786,7 +790,7 @@ package body Wiki.Render.Wiki is
                if Apply_Format then
                   Engine.Set_Format (Format);
                   Apply_Format := False;
-                  if Is_Space (Last_Char) then
+                  if Is_Space (Last_Char) or else Helpers.Is_Punctuation (Last_Char) then
                      Engine.Need_Space := False;
                   else
                      Engine.Write_Optional_Space;
@@ -955,6 +959,8 @@ package body Wiki.Render.Wiki is
 
          when PRE_TAG =>
             Engine.Start_Keep_Content;
+            Engine.Keep_Spaces := True;
+            Engine.Empty_Line := False;
 
          when UL_TAG =>
             if Engine.UL_List_Level = 0 then
@@ -1045,6 +1051,7 @@ package body Wiki.Render.Wiki is
          when PRE_TAG =>
             if Engine.Keep_Content = 1 then
                Engine.Need_Space := False;
+               Engine.Keep_Spaces := False;
                Engine.Render_Preformatted (Strings.To_WString (Engine.Content), "");
             end if;
             Engine.Keep_Content := Engine.Keep_Content - 1;

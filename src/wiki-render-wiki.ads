@@ -156,6 +156,7 @@ private
       Empty_Line          : Boolean := True;
       Empty_Previous_Line : Boolean := True;
       Keep_Content        : Natural := 0;
+      Keep_Spaces         : Boolean := False;
       In_List             : Boolean := False;
       Invert_Header_Level : Boolean := False;
       Allow_Link_Language : Boolean := False;
