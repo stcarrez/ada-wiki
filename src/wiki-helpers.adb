@@ -30,7 +30,8 @@ package body Wiki.Helpers is
    --  ------------------------------
    function Is_Punctuation (C : in Wiki.Strings.WChar) return Boolean is
    begin
-      return Ada.Wide_Wide_Characters.Unicode.Is_Punctuation (C);
+      return C in '.' | ',' | ';' | ':'
+        or else Ada.Wide_Wide_Characters.Unicode.Is_Punctuation (C);
    end Is_Punctuation;
 
    --  ------------------------------
