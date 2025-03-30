@@ -36,7 +36,7 @@ build-test::	lib-setup
 	cd regtests && $(BUILD_COMMAND) $(GPRFLAGS) $(MAKE_ARGS) 
 
 # Build and run the unit tests
-test:	build-test
+test:	build-test samples
 	bin/wiki_harness -l $(NAME): -xml wiki-aunit.xml
 
 install-samples:
