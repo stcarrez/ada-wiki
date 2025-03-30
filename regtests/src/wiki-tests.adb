@@ -196,11 +196,11 @@ package body Wiki.Tests is
    function Name (T : in Test) return Util.Tests.Message_String is
    begin
       if T.Source = Wiki.SYNTAX_HTML then
-         return Util.Tests.Format ("Test IMPORT " & To_String (T.Name));
+         return Util.Tests.Format ("IMPORT." & To_String (T.Name));
       elsif T.Is_Html then
-         return Util.Tests.Format ("Test HTML " & To_String (T.Name));
+         return Util.Tests.Format ("HTML." & To_String (T.Name));
       else
-         return Util.Tests.Format ("Test TEXT " & To_String (T.Name));
+         return Util.Tests.Format ("TEXT." & To_String (T.Name));
       end if;
    end Name;
 
@@ -254,6 +254,13 @@ package body Wiki.Tests is
          end if;
          Tst.Format  := Format;
          Tst.Source  := Format;
+         if Format = Wiki.SYNTAX_HTML then
+            Tst.Set_Name ("IMPORT." & Name);
+         elsif Is_Html then
+            Tst.Set_Name ("HTML." & Name);
+         else
+            Tst.Set_Name ("TEXT." & Name);
+         end if;
          return Tst;
       end Create_Test;
 
