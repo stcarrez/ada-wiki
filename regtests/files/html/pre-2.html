@@ -1,0 +1,2 @@
+<pre><code>   for Url of Reply.Data loop      if not Url.Url.Is_Null then         Ada.Text_IO.Put_Line (OpenAPI.To_String (Url.Url.Value));      end if;   end loop;</code></pre>
+<pre><code>with Util.Http.Clients.Curl; --  replace Curl with AWS if neededwith OpenAPI.Credentials.OAuth;with OpenAI.Clients;with OpenAI.Models;</code></pre>

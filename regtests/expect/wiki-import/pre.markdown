@@ -1,7 +1,7 @@
 This is a pre\-formatted block:
 
 ```
-procedure Test is
+  procedure Test is
   begin
      null;
   end Test;
