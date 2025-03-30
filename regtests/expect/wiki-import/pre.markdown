@@ -1,4 +1,4 @@
-This is a pre\-formatted block:
+This is a pre-formatted block:
 
 ```
   procedure Test is

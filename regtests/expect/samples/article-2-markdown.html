@@ -82,7 +82,7 @@ with OpenAI.Models;
  client instance to access the API operations.  The 
    <a href="https://openai.com/">OpenAI</a>
  service uses an OAuth bearer API key to authenticate requests made on the server.  We will need an 
-   <code>OAuth2\_Credential\_Type</code>
+   <code>OAuth2_Credential_Type</code>
  instance represented by 
    <code>Cred</code>
  below.</p>
@@ -103,9 +103,9 @@ Client : OpenAI.Clients.Client_Type;
 <pre><code>  Client.Set_Server (&quot;https://api.openai.com/v1&quot;);
 </code></pre><h2>API for chat</h2>
 <p>The 
-   <code>Create\_Chat</code>
+   <code>Create_Chat</code>
  is the main operation for the conversation chat generation.  The request is represented by the 
-   <code>ChatRequest\_Type</code>
+   <code>ChatRequest_Type</code>
  type which describes the OpenAI chat model that must be used and the query parameters.  The request can be filled with a complete conversation chat which means it is possible to call it several times with previous queries and responses to proceed in the chat conversation.</p>
 <pre><code>C       : OpenAI.Clients.Client_Type;
 Req     : OpenAI.Models.ChatRequest_Type;
@@ -122,7 +122,7 @@ Reply   : OpenAI.Models.ChatResponse_Type;
    Req.Presence_Penalty := 0.0;
    C.Create_Chat (Req, Reply);
 </code></pre><p>Upon successful completion, we get a list of choices in the reply that contains the text of the conversation. You can iterate over the list with the following code extract.  Beware that the returned string is using UTF-8 encoding and it may need a conversion to a 
-   <code>Wide\_Wide\_String</code>
+   <code>Wide_Wide_String</code>
  if necessary.</p>
 <pre><code>   for Choice of Reply.Choices loop
       declare
@@ -145,7 +145,7 @@ Reply   : OpenAI.Models.ChatResponse_Type;
  and 
    <code>1024x1024</code>
 .  The image creation is represented by the 
-   <code>Create\_Image</code>
+   <code>Create_Image</code>
  procedure and we can call it with our request instance:</p>
 <pre><code>Req     : OpenAI.Models.CreateImagesRequest_Type;
 Reply   : OpenAI.Models.ImagesResponse_Type;

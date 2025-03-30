@@ -59,7 +59,7 @@ But if you want to use [https://github.com/AdaCore/aws|AWS], you will initialize
 Util.Http.Clients.AWS.Register;
 ///
 
-After the initialization is done, you will declare the @@OpenAI@@ client instance to access the API operations.  The [https://openai.com/|OpenAI] service uses an OAuth bearer API key to authenticate requests made on the server.  We will need an @@OAuth2\\\_Credential\\\_Type@@ instance represented by @@Cred@@ below.
+After the initialization is done, you will declare the @@OpenAI@@ client instance to access the API operations.  The [https://openai.com/|OpenAI] service uses an OAuth bearer API key to authenticate requests made on the server.  We will need an @@OAuth2\_Credential\_Type@@ instance represented by @@Cred@@ below.
 ///
 Cred   : aliased OpenAPI.Credentials.OAuth.OAuth2_Credential_Type;
 Client : OpenAI.Clients.Client_Type;
@@ -84,7 +84,7 @@ The last step necessary before you can make requests, is to setup the server bas
 
 !!!! API for chat
 
-The @@Create\\\_Chat@@ is the main operation for the conversation chat generation.  The request is represented by the @@ChatRequest\\\_Type@@ type which describes the OpenAI chat model that must be used and the query parameters.  The request can be filled with a complete conversation chat which means it is possible to call it several times with previous queries and responses to proceed in the chat conversation.
+The @@Create\_Chat@@ is the main operation for the conversation chat generation.  The request is represented by the @@ChatRequest\_Type@@ type which describes the OpenAI chat model that must be used and the query parameters.  The request can be filled with a complete conversation chat which means it is possible to call it several times with previous queries and responses to proceed in the chat conversation.
 ///
 C       : OpenAI.Clients.Client_Type;
 Req     : OpenAI.Models.ChatRequest_Type;
@@ -102,7 +102,7 @@ Reply   : OpenAI.Models.ChatResponse_Type;
    C.Create_Chat (Req, Reply);
 ///
 
-Upon successful completion, we get a list of choices in the reply that contains the text of the conversation. You can iterate over the list with the following code extract.  Beware that the returned string is using UTF\-8 encoding and it may need a conversion to a @@Wide\\\_Wide\\\_String@@ if necessary.
+Upon successful completion, we get a list of choices in the reply that contains the text of the conversation. You can iterate over the list with the following code extract.  Beware that the returned string is using UTF\-8 encoding and it may need a conversion to a @@Wide\_Wide\_String@@ if necessary.
 ///
    for Choice of Reply.Choices loop
       declare
@@ -120,7 +120,7 @@ The complete chat example is available at: [https://gitlab.com/stcarrez/openai-c
 
 The image generation is based on the [https://platform.openai.com/docs/models/dall-e|DALL.E] model generator. The creation is made by populating a request object, making the call (which is an HTTP POST) and getting the result in a response.  Both request and response are represented by full Ada types and are strongly typed:
 
-The request contains a prompt string which must be provided and is the textual description of the image to create.  An optional parameter allows to control the number of images which are created (from 1 to 10). Another optional parameter controls the dimension of the final image.  The OpenAI API limits the possible values to: @@256x256@@, @@512x512@@ and @@1024x1024@@.  The image creation is represented by the @@Create\\\_Image@@ procedure and we can call it with our request instance:
+The request contains a prompt string which must be provided and is the textual description of the image to create.  An optional parameter allows to control the number of images which are created (from 1 to 10). Another optional parameter controls the dimension of the final image.  The OpenAI API limits the possible values to: @@256x256@@, @@512x512@@ and @@1024x1024@@.  The image creation is represented by the @@Create\_Image@@ procedure and we can call it with our request instance:
 ///
 Req     : OpenAI.Models.CreateImagesRequest_Type;
 Reply   : OpenAI.Models.ImagesResponse_Type;
