@@ -13,6 +13,12 @@ package body Wiki.Samples_Tests is
 
    package Caller is new Util.Test_Caller (Test, "Samples." & Syntax);
 
+   procedure Test_Execute (T : in out Test;
+                           Command : in String;
+                           Name    : in String;
+                           Source  : String := GNAT.Source_Info.File;
+                           Line    : Natural := GNAT.Source_Info.Line);
+
    procedure Add_Tests (Suite : in Util.Tests.Access_Test_Suite) is
    begin
       Caller.Add_Test (Suite, "Test render",
