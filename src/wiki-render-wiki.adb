@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-wiki -- Wiki to Wiki renderer
---  Copyright (C) 2015 - 2024 Stephane Carrez
+--  Copyright (C) 2015 - 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -106,6 +106,34 @@ package body Wiki.Render.Wiki is
 
    Empty_Formats : constant Format_Map := (others => False);
 
+   function Default_Need_Escape (Engine : in Wiki_Renderer;
+                                 Text   : in Strings.WString) return Boolean is
+   begin
+      return Ada.Strings.Wide_Wide_Maps.Is_In (Text (Text'First), Engine.Escape_Set);
+   end Default_Need_Escape;
+
+   function Markdown_Need_Escape (Engine : in Wiki_Renderer;
+                                  Text   : in Strings.WString) return Boolean is
+   begin
+      --  There is no backslash escape within code span.
+      if Engine.Format (CODE) then
+         return False;
+      end if;
+      declare
+         C : constant Strings.WChar := Text (Text'First);
+      begin
+         if Engine.Current_Indent > 0 then
+            if C in '-' | '+' then
+               return False;
+            end if;
+            if C in '(' | ')' and then Engine.Prev_Char /= ']' then
+               return False;
+            end if;
+         end if;
+         return Ada.Strings.Wide_Wide_Maps.Is_In (Text (Text'First), Engine.Escape_Set);
+      end;
+   end Markdown_Need_Escape;
+
    --  Set the output writer.
    procedure Set_Output_Stream (Engine : in out Wiki_Renderer;
                                 Stream : in Streams.Output_Stream_Access;
@@ -113,6 +141,7 @@ package body Wiki.Render.Wiki is
    begin
       Engine.Output := Stream;
       Engine.Syntax := Format;
+      Engine.Need_Escape := Default_Need_Escape'Access;
       case Format is
          when SYNTAX_DOTCLEAR =>
             Engine.Style_Start_Tags (BOLD)   := BOLD_DOTCLEAR'Access;
@@ -202,6 +231,7 @@ package body Wiki.Render.Wiki is
             Engine.Html_Blockquote := False;
             Engine.Html_Table := False;
             Engine.Escape_Set := Ada.Strings.Wide_Wide_Maps.To_Set ("\`*_{}[]()#+-!");
+            Engine.Need_Escape := Markdown_Need_Escape'Access;
 
          when SYNTAX_TEXTILE =>
             Engine.Style_Start_Tags (BOLD)   := BOLD_TEXTILE'Access;
@@ -295,6 +325,8 @@ package body Wiki.Render.Wiki is
       Engine.Need_Newline := False;
       Engine.Need_Space := False;
       Engine.Line_Count := Engine.Line_Count + 1;
+      Engine.Current_Indent := 0;
+      Engine.Prev_Char := Helpers.LF;
    end New_Line;
 
    procedure Write_Optional_Space (Engine : in out Wiki_Renderer) is
@@ -302,6 +334,8 @@ package body Wiki.Render.Wiki is
       if Engine.Need_Space then
          Engine.Need_Space := False;
          Engine.Output.Write (' ');
+         Engine.Current_Indent := Engine.Current_Indent + 1;
+         Engine.Prev_Char := ' ';
       end if;
    end Write_Optional_Space;
 
@@ -313,6 +347,7 @@ package body Wiki.Render.Wiki is
          Engine.Output.Write (LF);
          Engine.Empty_Line := True;
          Engine.Line_Count := Engine.Line_Count + 1;
+         Engine.Current_Indent := 0;
       end if;
       Engine.Need_Newline := True;
    end Need_Separator_Line;
@@ -333,6 +368,7 @@ package body Wiki.Render.Wiki is
             Engine.Output.Write (Engine.Tags (Line_Break).all);
             Engine.Empty_Line := False;
             Engine.Need_Space := False;
+            Engine.Current_Indent := 0;
 
          when Nodes.N_HORIZONTAL_RULE =>
             Engine.Close_Paragraph;
@@ -425,6 +461,7 @@ package body Wiki.Render.Wiki is
       end if;
       Engine.Close_Paragraph;
       Engine.Output.Write (LF);
+      Engine.Current_Indent := 0;
       if Engine.Invert_Header_Level then
          if Count > 5 then
             Count := 5;
@@ -772,6 +809,7 @@ package body Wiki.Render.Wiki is
                   end if;
                   Engine.Write_Optional_Space;
                   Engine.New_Line;
+                  Engine.Current_Indent := 0;
                end if;
             elsif not Engine.Empty_Line or else not Helpers.Is_Space (Last_Char) then
                --  if Engine.Empty_Line and Engine.Quote_Level > 0 then
@@ -796,7 +834,7 @@ package body Wiki.Render.Wiki is
                      Engine.Write_Optional_Space;
                   end if;
                end if;
-               if Ada.Strings.Wide_Wide_Maps.Is_In (Last_Char, Engine.Escape_Set) then
+               if Engine.Need_Escape (Engine, Text (I .. Last)) then
                   Engine.Output.Write (Engine.Tags (Escape_Rule).all);
                end if;
                if Last_Char = NBSP then
@@ -804,6 +842,8 @@ package body Wiki.Render.Wiki is
                end if;
                Engine.Output.Write (Last_Char);
                Engine.Empty_Line := False;
+               Engine.Current_Indent := Engine.Current_Indent + 1;
+               Engine.Prev_Char := Last_Char;
             end if;
          end loop;
          if not Helpers.Is_Space_Or_Newline (Last_Char) and then not Engine.Empty_Line then

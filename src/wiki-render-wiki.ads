@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-wiki -- Wiki to Wiki renderer
---  Copyright (C) 2015, 2016, 2020, 2022, 2024 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020, 2022, 2024, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -136,6 +136,9 @@ private
    procedure Close_Paragraph (Engine : in out Wiki_Renderer);
    procedure Start_Keep_Content (Engine : in out Wiki_Renderer);
 
+   type Need_Escape_Handler is
+     access function (Engine : in Wiki_Renderer; Text : in Strings.WString) return Boolean;
+
    EMPTY_TAG : aliased constant Wide_Wide_String := "";
 
    type Wiki_Renderer is new Renderer with record
@@ -171,12 +174,15 @@ private
       Quote_Level         : Natural := 0;
       UL_List_Level       : Natural := 0;
       OL_List_Level       : Natural := 0;
+      Current_Indent      : Natural := 0;
       Current_Style       : Format_Map := (others => False);
       Content             : Unbounded_Wide_Wide_String;
       Link_Href           : Unbounded_Wide_Wide_String;
       Link_Title          : Unbounded_Wide_Wide_String;
       Link_Lang           : Unbounded_Wide_Wide_String;
       Indent_Level        : Natural := 0;
+      Need_Escape         : Need_Escape_Handler;
+      Prev_Char           : Strings.WChar := ' ';
    end record;
 
    procedure Write_Link (Engine : in out Wiki_Renderer;
@@ -201,5 +207,11 @@ private
    procedure Render_Column (Engine : in out Wiki_Renderer;
                             Doc    : in Documents.Document;
                             Node   : in Nodes.Node_Type);
+
+   function Default_Need_Escape (Engine : in Wiki_Renderer;
+                                 Text   : in Strings.WString) return Boolean;
+
+   function Markdown_Need_Escape (Engine : in Wiki_Renderer;
+                                  Text   : in Strings.WString) return Boolean;
 
 end Wiki.Render.Wiki;
