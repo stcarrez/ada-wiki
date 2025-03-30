@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  words -- Extract words and links from a Wiki or HTML document
---  Copyright (C) 2016 Stephane Carrez
+--  Copyright (C) 2016, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -27,11 +27,12 @@ procedure Words is
    procedure Usage is
    begin
       Ada.Text_IO.Put_Line ("Report list of words or links used in a wiki text file or HTML file");
-      Ada.Text_IO.Put_Line ("Usage: words [-l] [-i] [-m] [-H] [-M] [-d] [-c] {wiki-file}");
+      Ada.Text_IO.Put_Line ("Usage: words [-l] [-i] [-m] [-H] [-M] [-T] [-d] [-c] {wiki-file}");
       Ada.Text_IO.Put_Line ("  -l        Report links instead of words");
       Ada.Text_IO.Put_Line ("  -i        Report images instead of words");
       Ada.Text_IO.Put_Line ("  -m        Parse a Markdown wiki content");
       Ada.Text_IO.Put_Line ("  -M        Parse a Mediawiki wiki content");
+      Ada.Text_IO.Put_Line ("  -T        Parse a Textile wiki content");
       Ada.Text_IO.Put_Line ("  -d        Parse a Dotclear wiki content");
       Ada.Text_IO.Put_Line ("  -g        Parse a Google wiki content");
       Ada.Text_IO.Put_Line ("  -c        Parse a Creole wiki content");
@@ -55,7 +56,7 @@ procedure Words is
    Images     : aliased Wiki.Filters.Collectors.Image_Collector_Type;
 begin
    loop
-      case Getopt ("m M H d c g l i") is
+      case Getopt ("m M H T d c g l i") is
          when 'm' =>
             Syntax := Wiki.SYNTAX_MARKDOWN;
 
@@ -64,6 +65,9 @@ begin
 
          when 'H' =>
             Syntax := Wiki.SYNTAX_HTML;
+
+         when 'T' =>
+            Syntax := Wiki.SYNTAX_TEXTILE;
 
          when 'c' =>
             Syntax := Wiki.SYNTAX_CREOLE;
