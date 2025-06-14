@@ -62,6 +62,10 @@ package Wiki.Render.Text is
    procedure Set_Preformatted_Indentation (Engine : in out Text_Renderer;
                                            Level  : in Natural);
 
+   --  Returns True if the current text processed by Write_Text is currently
+   --  diverted and handled by the Text_Diverter class.
+   function Is_Diverted (Engine : in Text_Renderer) return Boolean;
+
    --  Render the node instance from the document.
    overriding
    procedure Render (Engine : in out Text_Renderer;

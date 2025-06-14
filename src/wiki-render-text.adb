@@ -69,6 +69,15 @@ package body Wiki.Render.Text is
    end Set_Format;
 
    --  ------------------------------
+   --  Returns True if the current text processed by Write_Text is currently
+   --  diverted and handled by the Text_Diverter class.
+   --  ------------------------------
+   function Is_Diverted (Engine : in Text_Renderer) return Boolean is
+   begin
+      return Engine.Diverter /= null;
+   end Is_Diverted;
+
+   --  ------------------------------
    --  Emit a new line.
    --  ------------------------------
    procedure New_Line (Document : in out Text_Renderer) is
@@ -341,7 +350,7 @@ package body Wiki.Render.Text is
             end loop;
             Engine.Output.Write ('+');
          end loop;
-         Engine.Output.Write (Helpers.LF);
+         Text_Renderer'Class (Engine).Write_Newline;
       end Write_Separator;
 
       procedure Process_Column (Column : in Wiki.Nodes.Node_Type) is
@@ -388,7 +397,7 @@ package body Wiki.Render.Text is
                   end if;
                end;
             end loop;
-            Engine.Output.Write (Helpers.LF);
+            Text_Renderer'Class (Engine).Write_Newline;
          end loop;
       end Process_Row;
 
@@ -505,7 +514,11 @@ package body Wiki.Render.Text is
          if C = Helpers.LF then
             Engine.Current_Indent := 0;
             Engine.Need_Space := False;
-            Text_Renderer'Class (Engine).Write_Newline;
+            if Engine.Diverter /= null then
+               Engine.Diverter.Write_Newline;
+            else
+               Text_Renderer'Class (Engine).Write_Newline;
+            end if;
          elsif C = ' ' and then Engine.Has_Space then
             null;
          elsif Max > 0
@@ -514,7 +527,11 @@ package body Wiki.Render.Text is
          then
             Engine.Current_Indent := 0;
             Engine.Need_Space := False;
-            Text_Renderer'Class (Engine).Write_Newline;
+            if Engine.Diverter /= null then
+               Engine.Diverter.Write_Newline;
+            else
+               Text_Renderer'Class (Engine).Write_Newline;
+            end if;
          elsif Engine.Current_Indent /= 0
            or else not Wiki.Helpers.Is_Space (C)
          then
