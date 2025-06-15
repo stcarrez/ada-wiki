@@ -58,6 +58,8 @@ package body Wiki.Parsers.Markdown is
    function Is_End_Preformat (Text   : in Wiki.Buffers.Cursor;
                               Expect : in WChar;
                               Length : in Positive) return Boolean;
+   function Is_List_Item (Text   : in Wiki.Buffers.Cursor;
+                          Marker : in Wiki.Strings.WChar) return Boolean;
    procedure Scan_Link_Title (Parser : in out Parser_Type;
                               Text   : in out Wiki.Buffers.Cursor;
                               Expect : in Wiki.Strings.WChar;
@@ -68,16 +70,28 @@ package body Wiki.Parsers.Markdown is
    procedure Add_Header (Parser : in out Parser_Type;
                          Level  : in Positive;
                          C      : in out Wiki.Strings.WChar);
+   procedure Add_Horizontal_Rule (Parser : in out Parser_Type);
    procedure Add_Text (Parser   : in out Parser_Type;
                        Text     : in out Wiki.Buffers.Cursor;
                        Limit    : in Wiki.Buffers.Cursor);
+   procedure Add_Text (Parser : in out Parser_Type;
+                       Text   : in out Wiki.Buffers.Cursor;
+                       C      : in out Wiki.Strings.WChar);
    procedure Add_Autolink (Parser : in out Parser_Type;
                            Text   : in out Wiki.Buffers.Cursor;
                            Length : in Natural);
-
+   procedure Parse_Preformatted (Parser : in out Parser_Type;
+                                 Text   : in out Wiki.Buffers.Cursor;
+                                 Marker : in Wiki.Strings.WChar);
    procedure Parse_Table (Parser : in out Parser_Type;
                           Text   : in out Wiki.Buffers.Cursor;
                           Kind   : in Nodes.Row_Kind);
+   procedure Parse_Table_Header (Parser : in out Parser_Type;
+                                 Text   : in out Wiki.Buffers.Cursor;
+                                 C      : in out Wiki.Strings.WChar);
+   procedure Parse_Columns (Text    : in Wiki.Buffers.Cursor;
+                            Columns : in out Nodes.Column_Array_Style;
+                            Count   : out Natural);
    procedure Get_Delimiter (Text        : in out Wiki.Buffers.Cursor;
                             Before_Char : Strings.WChar;
                             C           : in Strings.WChar;
@@ -111,6 +125,12 @@ package body Wiki.Parsers.Markdown is
    procedure Open_New_Blocks (Parser : in out Parser_Type;
                               Text   : in out Wiki.Buffers.Cursor;
                               C      : in out Wiki.Strings.WChar);
+   procedure Scan_Inline_Html (Parser : in out Parser_Type;
+                               Text   : in out Wiki.Buffers.Cursor;
+                               Delim  : in out Delimiter_Type);
+   procedure Parse_Block (Parser : in out Parser_Type;
+                          Text   : in out Wiki.Buffers.Cursor;
+                          C      : out Wiki.Strings.WChar);
 
    function Is_Escapable (C : in Wiki.Strings.WChar) return Boolean is
      (C in '!' .. '/' | ':' .. '@' | '{' .. '~' | '[' .. '`');
@@ -699,6 +719,7 @@ package body Wiki.Parsers.Markdown is
    procedure Parse_Block (Parser : in out Parser_Type;
                           Text   : in out Wiki.Buffers.Cursor;
                           C      : out Wiki.Strings.WChar) is
+      procedure Process (Nodes : in Block_Stack.Element_Type_Array);
 
       procedure Process (Nodes : in Block_Stack.Element_Type_Array) is
          Need_Char : Boolean := True;
@@ -1900,9 +1921,6 @@ package body Wiki.Parsers.Markdown is
                                Text   : in out Wiki.Buffers.Cursor;
                                Delim  : in out Delimiter_Type) is
       Pos    : Wiki.Buffers.Cursor := Text;
-      Count  : Natural;
-      Length : Natural;
-      C      : Wiki.Strings.WChar;
       Kind   : Wiki.Html_Parser.State_Type;
    begin
       Delim.Cursor := Text;
@@ -1954,6 +1972,7 @@ package body Wiki.Parsers.Markdown is
                              Opening  : in Delimiter_Type) return Delimiter_Index_Type;
       function Find_Previous_Bracket return Delimiter_Index_Type;
       procedure Clear_Brackets;
+      procedure Process_Inline_Html (Text : in out Wiki.Buffers.Cursor);
 
       C          : Wiki.Strings.WChar;
       Prev       : Wiki.Strings.WChar := ' ';

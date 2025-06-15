@@ -142,6 +142,7 @@ package body Wiki.Parsers is
 
    procedure Add_Header (Parser : in out Parser_Type;
                          Level  : in Natural) is
+      pragma Unreferenced (Level);
       procedure Add_Header (Content : in Wiki.Strings.WString);
 
       procedure Add_Header (Content : in Wiki.Strings.WString) is

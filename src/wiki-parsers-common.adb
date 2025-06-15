@@ -590,7 +590,6 @@ package body Wiki.Parsers.Common is
 
       Pos    : Wiki.Buffers.Cursor := Text;
       C      : Wiki.Strings.WChar;
-      Prev_C : Wiki.Strings.WChar;
       Level  : Natural := 0;
 
       function Is_List (Kind : in Wiki.Nodes.Node_Kind;
@@ -646,7 +645,6 @@ package body Wiki.Parsers.Common is
          Pop_Block (Parser);
       end if;
 
-      Prev_C := ' ';
       while Buffers.Is_Valid (Pos) loop
          C := Buffers.Char_At (Pos);
          exit when C not in '*' | '#';
@@ -660,13 +658,11 @@ package body Wiki.Parsers.Common is
             Push_Block (Parser, Nodes.N_LIST_START, Level, C);
             Push_Block (Parser, Nodes.N_LIST_ITEM, Level, C);
          end if;
-         Prev_C := C;
          Buffers.Next (Pos);
          Level := Level + 1;
       end loop;
 
       if Parser.Current_Node /= Nodes.N_LIST_ITEM then
-         --  C := Buffers.Block.Content (Pos - 1);
          Push_Block (Parser, Nodes.N_LIST_ITEM, Level, C);
       end if;
 
