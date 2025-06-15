@@ -63,29 +63,31 @@ package body Wiki.Html_Parser.Tests is
                            Source      : in String := GNAT.Source_Info.File;
                            Line        : in Natural := GNAT.Source_Info.Line) is
       procedure Process (Kind       : in State_Type;
-                         Name       : in Wiki.Strings.WString;
+                         Name       : in Wiki.Strings.BString;
                          Attributes : in out Wiki.Attributes.Attribute_List);
 
       P    : Parser_Type;
       Last : Natural;
 
       procedure Process (Kind       : in State_Type;
-                         Name       : in Wiki.Strings.WString;
+                         Name       : in Wiki.Strings.BString;
                          Attributes : in out Wiki.Attributes.Attribute_List) is
       begin
          Assert_Equals (T, Expect_Kind, Kind, "Invalid state type", Source, Line);
          if Kind /= HTML_ERROR then
-            T.Assert (Name = Expect, "Invalid name", Source, Line);
+            T.Assert (Wiki.Strings.To_WString (Name) = Expect, "Invalid name", Source, Line);
          end if;
          T.Attributes := Attributes;
       end Process;
-
+      Kind : State_Type;
    begin
-      Parse_Element (P, Content, Content'First, Process'Access, Last);
+      Parse_Element (P, Content, Content'First, Kind, Last);
+      Process (Kind, P.Elt_Name, P.Attributes);
       Util.Tests.Assert_Equals (T, Content'Last + 1, Last, "Invalid last index", Source, Line);
       Assert_Equals (T, P.State, State_None, "Invalid parser state", Source, Line);
 
-      Parse_Element (P, Content, Content'First, Process'Access, Last);
+      Parse_Element (P, Content, Content'First, Kind, Last);
+      Process (Kind, P.Elt_Name, P.Attributes);
       Util.Tests.Assert_Equals (T, Content'Last + 1, Last, "Invalid last index", Source, Line);
       Assert_Equals (T, P.State, State_None, "Invalid parser state", Source, Line);
 
@@ -96,7 +98,10 @@ package body Wiki.Html_Parser.Tests is
             Retry   : Natural := 0;
          begin
             loop
-               Parse_Element (P, Content (Content'First .. End_Pos), First, Process'Access, Last);
+               Parse_Element (P, Content (Content'First .. End_Pos), First, Kind, Last);
+               if Kind /= HTML_NONE then
+                  Process (Kind, P.Elt_Name, P.Attributes);
+               end if;
                exit when Last = Content'Last + 1;
                Retry := Retry + 1;
                First := Last;
@@ -116,24 +121,15 @@ package body Wiki.Html_Parser.Tests is
                           Content     : in Wiki.Strings.WString;
                           Source      : in String := GNAT.Source_Info.File;
                           Line        : in Natural := GNAT.Source_Info.Line) is
-      procedure Process (Kind       : in State_Type;
-                         Name       : in Wiki.Strings.WString;
-                         Attributes : in out Wiki.Attributes.Attribute_List);
-
       P    : Parser_Type;
       Last : Natural;
-
-      procedure Process (Kind       : in State_Type;
-                         Name       : in Wiki.Strings.WString;
-                         Attributes : in out Wiki.Attributes.Attribute_List) is
-         pragma Unreferenced (Name, Attributes);
-      begin
-         Assert_Equals (T, HTML_ERROR, Kind, "Invalid state type", Source, Line);
-      end Process;
-
+      Kind : State_Type;
    begin
-      Parse_Element (P, Content, Content'First, Process'Access, Last);
+      Parse_Element (P, Content, Content'First, Kind, Last);
       Util.Tests.Assert_Equals (T, Last_Pos, Last, "Invalid last index", Source, Line);
+      if Kind /= HTML_NONE then
+         Assert_Equals (T, HTML_ERROR, Kind, "Invalid state type", Source, Line);
+      end if;
    end Check_Error;
 
    --  ------------------------------
@@ -202,43 +198,39 @@ package body Wiki.Html_Parser.Tests is
    --  Test Parse_Doctype
    --  ------------------------------
    procedure Test_Parse_Doctype (T : in out Test) is
-      procedure Process (Kind       : in State_Type;
-                         Name       : in Wiki.Strings.WString;
-                         Attributes : in out Wiki.Attributes.Attribute_List);
-
       P    : Parser_Type;
       Last : Natural;
-
-      procedure Process (Kind       : in State_Type;
-                         Name       : in Wiki.Strings.WString;
-                         Attributes : in out Wiki.Attributes.Attribute_List) is
-         pragma Unreferenced (Kind, Name, Attributes);
-      begin
-         T.Fail ("Should not be called");
-      end Process;
+      Kind : State_Type;
    begin
-      Parse_Element (P, "!doctype html>", 1, Process'Access, Last);
+      Parse_Element (P, "!doctype html>", 1, Kind, Last);
+      T.Assert (Kind = HTML_NONE, "invalid state");
       Util.Tests.Assert_Equals (T, 15, Last, "Invalid last index");
 
-      Parse_Element (P, "!doctype html>  ", 1, Process'Access, Last);
+      Parse_Element (P, "!doctype html>  ", 1, Kind, Last);
+      T.Assert (Kind = HTML_NONE, "invalid state");
       Util.Tests.Assert_Equals (T, 15, Last, "Invalid last index");
 
-      Parse_Element (P, "!-- blq blq < > -->", 1, Process'Access, Last);
+      Parse_Element (P, "!-- blq blq < > -->", 1, Kind, Last);
+      T.Assert (Kind = HTML_NONE, "invalid state");
       Util.Tests.Assert_Equals (T, 20, Last, "Invalid last index");
 
-      Parse_Element (P, "!-- blq blq < > --", 1, Process'Access, Last);
+      Parse_Element (P, "!-- blq blq < > --", 1, Kind, Last);
+      T.Assert (Kind = HTML_NONE, "invalid state");
       Util.Tests.Assert_Equals (T, 19, Last, "Invalid last index");
       Assert_Equals (T, P.State, State_Comment, "Invalid parser state");
 
-      Parse_Element (P, "bla -- blq blq < > -->", 1, Process'Access, Last);
+      Parse_Element (P, "bla -- blq blq < > -->", 1, Kind, Last);
+      T.Assert (Kind = HTML_NONE, "invalid state");
       Util.Tests.Assert_Equals (T, 23, Last, "Invalid last index");
       Assert_Equals (T, P.State, State_None, "Invalid parser state");
 
-      Parse_Element (P, "!doctype html  ", 1, Process'Access, Last);
+      Parse_Element (P, "!doctype html  ", 1, Kind, Last);
+      T.Assert (Kind = HTML_NONE, "invalid state");
       Util.Tests.Assert_Equals (T, 16, Last, "Invalid last index");
       Assert_Equals (T, P.State, State_Doctype, "Invalid parser state");
 
-      Parse_Element (P, "bla -- blq blq < > --x", 1, Process'Access, Last);
+      Parse_Element (P, "bla -- blq blq < > --x", 1, Kind, Last);
+      T.Assert (Kind = HTML_NONE, "invalid state");
       Util.Tests.Assert_Equals (T, 19, Last, "Invalid last index");
       Assert_Equals (T, P.State, State_None, "Invalid parser state");
 
