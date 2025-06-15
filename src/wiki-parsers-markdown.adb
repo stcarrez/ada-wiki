@@ -20,7 +20,7 @@ package body Wiki.Parsers.Markdown is
 
    type Marker_Kind is (M_CODE, M_STAR, M_UNDERSCORE, M_LINK, M_TILDE, M_AUTOLINK,
                         M_LINK_REF, M_IMAGE, M_IMAGE_REF, M_END, M_BRACKET, M_BRACKET_IMAGE,
-                        M_ENTITY, M_TEXT, M_LINEBREAK);
+                        M_ENTITY, M_TEXT, M_LINEBREAK, M_INLINE_HTML);
 
    type Delimiter_Index_Type is new Natural;
    subtype Delimiter_Index is Delimiter_Index_Type range 1 .. Delimiter_Index_Type'Last;
@@ -974,29 +974,20 @@ package body Wiki.Parsers.Markdown is
                          Text   : in out Wiki.Buffers.Cursor) is
       use type Wiki.Html_Parser.State_Type;
 
-      procedure Process (Kind : in Wiki.Html_Parser.State_Type;
-                         Name : in Wiki.Strings.WString;
-                         Attributes : in out Wiki.Attributes.Attribute_List);
-
       Has_Error : Boolean := False;
-
-      procedure Process (Kind : in Wiki.Html_Parser.State_Type;
-                         Name : in Wiki.Strings.WString;
-                         Attributes : in out Wiki.Attributes.Attribute_List) is
-      begin
-         if Kind /= Wiki.Html_Parser.HTML_ERROR then
-            Process_Html (Parser, Kind, Name, Attributes);
-         else
-            Has_Error := True;
-         end if;
-      end Process;
-
-      Pos    : Wiki.Buffers.Cursor := Text;
+      Pos  : Wiki.Buffers.Cursor := Text;
+      Kind : Wiki.Html_Parser.State_Type;
    begin
       Buffers.Next (Pos);
       loop
          Wiki.Html_Parser.Parse_Element (Parser.Html, Pos.Block.Content (1 .. Pos.Block.Last),
-                                         Pos.Pos, Process'Access, Pos.Pos);
+                                         Pos.Pos, Kind, Pos.Pos);
+         if Kind = Wiki.Html_Parser.HTML_ERROR then
+            Has_Error := True;
+         elsif Kind /= Wiki.Html_Parser.HTML_NONE then
+            Process_Html (Parser, Kind, Wiki.Strings.To_WString (Parser.Html.Elt_Name),
+                          Parser.Html.Attributes);
+         end if;
          if Pos.Pos = Pos.Block.Last + 1 then
             Pos.Block := Pos.Block.Next_Block;
             exit when Pos.Block = null;
@@ -1655,20 +1646,27 @@ package body Wiki.Parsers.Markdown is
    procedure Add_Autolink (Parser : in out Parser_Type;
                            Text   : in out Wiki.Buffers.Cursor;
                            Length : in Natural) is
-      Pos    : Wiki.Buffers.Cursor := Text;
-      Link   : Wiki.Strings.BString (128);
-      C      : Wiki.Strings.WChar;
+      Pos     : Wiki.Buffers.Cursor := Text;
+      Link    : Wiki.Strings.BString (128);
+      C       : Wiki.Strings.WChar;
+      Is_Mail : Boolean := False;
    begin
       for I in 1 .. Length loop
          C := Buffers.Char_At (Pos);
+         Is_Mail := Is_Mail or else C = '@';
          Buffers.Next (Pos);
          Append_Char (Link, C);
       end loop;
       Flush_Text (Parser);
       if not Parser.Context.Is_Hidden then
          Wiki.Attributes.Clear (Parser.Attributes);
-         Wiki.Attributes.Append (Parser.Attributes, HREF_ATTR,
-                                 Helpers.Encode_URI (Link));
+         if Is_Mail then
+            Wiki.Attributes.Append (Parser.Attributes, HREF_ATTR,
+                                    "mailto:" & Helpers.Encode_URI (Link));
+         else
+            Wiki.Attributes.Append (Parser.Attributes, HREF_ATTR,
+                                    Helpers.Encode_URI (Link));
+         end if;
          Parser.Context.Filters.Add_Link (Parser.Document,
                                           Strings.To_WString (Link),
                                           Parser.Attributes, False);
@@ -1866,7 +1864,7 @@ package body Wiki.Parsers.Markdown is
          C := Buffers.Char_At (Pos);
          Buffers.Next (Pos);
          Length := Length + 1;
-         exit when C = ':';
+         exit when C = ':' or C = '@';
          if not (C in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '+' | '.' | '-') then
             return;
          end if;
@@ -1897,6 +1895,34 @@ package body Wiki.Parsers.Markdown is
          Length := Length + 1;
       end loop;
    end Scan_Autolink;
+
+   procedure Scan_Inline_Html (Parser : in out Parser_Type;
+                               Text   : in out Wiki.Buffers.Cursor;
+                               Delim  : in out Delimiter_Type) is
+      Pos    : Wiki.Buffers.Cursor := Text;
+      Count  : Natural;
+      Length : Natural;
+      C      : Wiki.Strings.WChar;
+      Kind   : Wiki.Html_Parser.State_Type;
+   begin
+      Delim.Cursor := Text;
+      Delim.Count := 0;
+      Buffers.Next (Pos);
+      if not Buffers.Is_Valid (Pos) then
+         return;
+      end if;
+      Wiki.Html_Parser.Parse_Element (Parser.Html,
+                                      Pos.Block.Content,
+                                      Pos.Pos,
+                                      Kind, Pos.Pos);
+      if not (Kind in Wiki.Html_Parser.HTML_NONE | Wiki.Html_Parser.HTML_ERROR) then
+         Delim.Count := 1;
+         Delim.Marker := M_INLINE_HTML;
+         Buffers.Next (Pos);
+         Text := Pos;
+         return;
+      end if;
+   end Scan_Inline_Html;
 
    HREF_LOOSE  : constant Util.Encoders.URI.Encoding_Array
      := ('0' .. '9' => False,
@@ -2049,6 +2075,57 @@ package body Wiki.Parsers.Markdown is
          return 0;
       end Find_Closing;
 
+      procedure Process_Inline_Html (Text : in out Wiki.Buffers.Cursor) is
+         use Wiki.Html_Parser;
+         Start : Wiki.Buffers.Cursor := Text;
+         Tag   : Wiki.Html_Tag;
+         Kind  : Wiki.Html_Parser.State_Type;
+      begin
+         Buffers.Next (Text);
+         Wiki.Html_Parser.Parse_Element
+           (Parser.Html, Text.Block.Content (Text.Pos .. Text.Block.Last),
+            Text.Pos, Kind, Text.Pos);
+
+         if Kind = Wiki.Html_Parser.HTML_START then
+            Flush_Text (Parser);
+            if Parser.Previous_Tag /= UNKNOWN_TAG and then No_End_Tag (Parser.Previous_Tag) then
+               if not Parser.Context.Is_Hidden then
+                  Parser.Context.Filters.Pop_Node (Parser.Document, Parser.Previous_Tag);
+               end if;
+               Parser.Previous_Tag := UNKNOWN_TAG;
+            end if;
+            Tag := Wiki.Find_Tag (Wiki.Strings.To_WString (Parser.Html.Elt_Name));
+            if Tag /= UNKNOWN_TAG then
+               Parser.Context.Filters.Push_Node (Parser.Document, Tag, Parser.Html.Attributes);
+            else
+               Add_Text (Parser, Start, Text);
+            end if;
+         elsif Kind = Wiki.Html_Parser.HTML_END then
+            Flush_Text (Parser);
+            declare
+               Previous_Tag : constant Wiki.Html_Tag := Parser.Previous_Tag;
+            begin
+               Tag := Wiki.Find_Tag (Wiki.Strings.To_WString (Parser.Html.Elt_Name));
+               Parser.Previous_Tag := UNKNOWN_TAG;
+               if Previous_Tag /= UNKNOWN_TAG
+                 and then Previous_Tag /= Tag
+                 and then No_End_Tag (Previous_Tag)
+               then
+                  if not Parser.Context.Is_Hidden then
+                     Parser.Context.Filters.Pop_Node (Parser.Document, Previous_Tag);
+                  end if;
+               end if;
+            end;
+            if Tag /= UNKNOWN_TAG then
+               Parser.Context.Filters.Pop_Node (Parser.Document, Tag);
+            else
+               Add_Text (Parser, Start, Text);
+            end if;
+         else
+            Add_Text (Parser, Start, Text);
+         end if;
+      end Process_Inline_Html;
+
       procedure Process_Emphasis (Text  : in out Wiki.Buffers.Cursor;
                                   First : in Delimiter_Index_Type;
                                   To    : in Delimiter_Index_Type) is
@@ -2158,6 +2235,11 @@ package body Wiki.Parsers.Markdown is
                      for I in 1 .. Delim.Count loop
                         Buffers.Next (Text);
                      end loop;
+
+                  elsif Delim.Marker = M_INLINE_HTML then
+                     Add_Text (Parser, Text, Delim.Cursor);
+                     Text := Delim.Cursor;
+                     Process_Inline_Html (Text);
 
                   elsif Delim.Count > 0 and then Delim.Can_Open
                     and then (Delim.Associate > I or else Delim.Marker = M_CODE)
@@ -2286,6 +2368,7 @@ package body Wiki.Parsers.Markdown is
                  and then Delim.Marker /= M_ENTITY
                  and then Delim.Marker /= M_LINEBREAK
                  and then Delim.Marker /= M_AUTOLINK
+                 and then Delim.Marker /= M_INLINE_HTML
                  and then Delim.Can_Open
                then
                   Delim.Associate := Find_Closing (I, To, Delim);
@@ -2320,6 +2403,7 @@ package body Wiki.Parsers.Markdown is
                  and then Delim.Marker /= M_ENTITY
                  and then Delim.Marker /= M_LINEBREAK
                  and then Delim.Marker /= M_AUTOLINK
+                 and then Delim.Marker /= M_INLINE_HTML
                  and then Delim.Associate = 0
                then
                   Delim.Marker := M_TEXT;
@@ -2586,7 +2670,13 @@ package body Wiki.Parsers.Markdown is
                   Delimiters.Append (Delim);
                   Prev := '>';
                else
-                  Buffers.Next (Pos);
+                  Scan_Inline_Html (Parser, Pos, Delim);
+                  if Delim.Count > 0 then
+                     Delimiters.Append (Delim);
+                     Prev := '>';
+                  else
+                     Buffers.Next (Pos);
+                  end if;
                end if;
                Prev := C;
 

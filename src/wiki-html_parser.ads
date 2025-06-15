@@ -18,25 +18,51 @@ private package Wiki.Html_Parser is
 
    pragma Preelaborate;
 
-   type State_Type is (HTML_START, HTML_END, HTML_START_END, HTML_ERROR);
+   MAX_ENTITY_LENGTH : constant := 32;
+
+   subtype Length_Type is Natural range 0 .. MAX_ENTITY_LENGTH;
+
+   type State_Type is (HTML_NONE, HTML_START, HTML_END, HTML_START_END, HTML_ERROR);
 
    type Entity_State_Type is (ENTITY_NONE, ENTITY_MIDDLE, ENTITY_VALID);
 
-   type Parser_Type is limited private;
+   type Html_Parser_State is (State_None,
+                              State_Start,
+                              State_Comment_Or_Doctype,
+                              State_Doctype,
+                              State_Comment,
+                              State_Element,
+                              State_Check_Attribute,
+                              State_Parse_Attribute,
+                              State_Check_Attribute_Value,
+                              State_Parse_Attribute_Value,
+                              State_Valid_Attribute_Value,
+                              State_No_Attribute_Value,
+                              State_Expect_Start_End_Element,
+                              State_Expect_End_Element,
+                              State_End_Element,
+                              State_Error);
+
+   type Parser_Type is limited record
+      State       : Html_Parser_State := State_None;
+      Elt_Name    : Wiki.Strings.BString (64);
+      Attr_Name   : Wiki.Strings.BString (64);
+      Attr_Value  : Wiki.Strings.BString (256);
+      Entity_Name : String (1 .. MAX_ENTITY_LENGTH);
+      Attributes  : Wiki.Attributes.Attribute_List;
+      Counter     : Length_Type := 0;
+      Separator   : Wiki.Strings.WChar;
+   end record;
 
    function Is_Empty (Parser : in Parser_Type) return Boolean;
 
    --  Parse a HTML element `<XXX attributes>` or parse an end of HTML element </XXX>
    --  The first '<' is assumed to have been already verified.  When the HTML element
-   --  is scanned, the `Process` procedure is call with the element name and the
-   --  attributes (if any).
+   --  is scanned, the `Result` value will indicate the value that was found.
    procedure Parse_Element (Parser  : in out Parser_Type;
                             Text    : in Wiki.Strings.WString;
                             From    : in Positive;
-                            Process : not null access
-                             procedure (Kind  : in State_Type;
-                                        Name  : in Wiki.Strings.WString;
-                                        Attr  : in out Wiki.Attributes.Attribute_List);
+                            Result  : out State_Type;
                             Last    : out Positive);
 
    --  Parse an HTML entity such as `&nbsp;` and return its value with the last position
@@ -59,37 +85,5 @@ private package Wiki.Html_Parser is
                                Last   : out Natural);
 
    NUL : constant Wiki.Strings.WChar := Wiki.Strings.WChar'Val (0);
-
-private
-
-   type Html_Parser_State is (State_None,
-                              State_Start,
-                              State_Comment_Or_Doctype,
-                              State_Doctype,
-                              State_Comment,
-                              State_Element,
-                              State_Check_Attribute,
-                              State_Parse_Attribute,
-                              State_Check_Attribute_Value,
-                              State_Parse_Attribute_Value,
-                              State_Valid_Attribute_Value,
-                              State_No_Attribute_Value,
-                              State_Expect_Start_End_Element,
-                              State_Expect_End_Element,
-                              State_End_Element,
-                              State_Error);
-
-   MAX_ENTITY_LENGTH : constant := 32;
-
-   type Parser_Type is limited record
-      State       : Html_Parser_State := State_None;
-      Elt_Name    : Wiki.Strings.BString (64);
-      Attr_Name   : Wiki.Strings.BString (64);
-      Attr_Value  : Wiki.Strings.BString (256);
-      Attributes  : Wiki.Attributes.Attribute_List;
-      Entity_Name : String (1 .. MAX_ENTITY_LENGTH);
-      Counter     : Natural := 0;
-      Separator   : Wiki.Strings.WChar;
-   end record;
 
 end Wiki.Html_Parser;

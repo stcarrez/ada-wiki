@@ -46,7 +46,7 @@ package body Wiki.Html_Parser is
 
    --  Check if the character is valid for a name attribute.
    function Is_Valid_For_Name (C : in Wiki.Strings.WChar) return Boolean
-      is (C > ' ' and then C not in '/' | ''' | '"' | '>' | '=');
+      is (C > ' ' and then C not in '/' | ''' | '"' | '>' | '=' | '<');
 
    --  Check if the character is valid for a value attribute without quotes.
    function Is_Valid_For_Value (C : in Wiki.Strings.WChar) return Boolean
@@ -273,10 +273,7 @@ package body Wiki.Html_Parser is
    procedure Parse_Element (Parser : in out Parser_Type;
                             Text   : in Wiki.Strings.WString;
                             From   : in Positive;
-                            Process : not null access
-                             procedure (Kind  : in State_Type;
-                                        Name  : in Wiki.Strings.WString;
-                                        Attr  : in out Wiki.Attributes.Attribute_List);
+                            Result : out State_Type;
                             Last   : out Positive) is
       procedure Append_Attribute (Name : in Wiki.Strings.WString);
       procedure Append_Attribute (Name : in Wiki.Strings.WString) is
@@ -323,6 +320,7 @@ package body Wiki.Html_Parser is
       C   : Wiki.Strings.WChar;
       Pos : Positive := From;
    begin
+      Result := HTML_NONE;
       loop
          case Parser.State is
             when State_None | State_Start =>
@@ -388,7 +386,7 @@ package body Wiki.Html_Parser is
                if Parser.State = State_Check_Attribute and then Text (Pos) = '>' then
                   Last := Pos + 1;
                   Parser.State := State_None;
-                  Process (HTML_END, To_WString (Parser.Elt_Name), Parser.Attributes);
+                  Result := HTML_END;
                   return;
                end if;
 
@@ -402,9 +400,9 @@ package body Wiki.Html_Parser is
                      return;
                   end if;
                elsif C = '>' then
-                  Process (HTML_START, To_WString (Parser.Elt_Name), Parser.Attributes);
                   Last := Pos + 1;
                   Parser.State := State_None;
+                  Result := HTML_START;
                   return;
                else
                   Parser.State := State_Parse_Attribute;
@@ -418,28 +416,28 @@ package body Wiki.Html_Parser is
                end if;
                C := Text (Pos);
                if C = '>' then
-                  Process (HTML_END, To_WString (Parser.Elt_Name), Parser.Attributes);
                   Last := Pos + 1;
                   Parser.State := State_None;
+                  Result := HTML_END;
                   return;
                else
-                  Process (HTML_ERROR, To_WString (Parser.Elt_Name), Parser.Attributes);
                   Last := Pos;
                   Parser.State := State_None;
+                  Result := HTML_ERROR;
                   return;
                end if;
 
             when State_Expect_Start_End_Element =>
                C := Text (Pos);
                if C = '>' then
-                  Process (HTML_START_END, To_WString (Parser.Elt_Name), Parser.Attributes);
                   Last := Pos + 1;
                   Parser.State := State_None;
+                  Result := HTML_START_END;
                   return;
                else
-                  Process (HTML_ERROR, To_WString (Parser.Elt_Name), Parser.Attributes);
                   Last := Pos;
                   Parser.State := State_None;
+                  Result := HTML_ERROR;
                   return;
                end if;
 
@@ -456,9 +454,9 @@ package body Wiki.Html_Parser is
                   if Length (Parser.Attr_Name) > 0 then
                      Append_Attribute_No_Value (Parser.Attr_Name);
                   end if;
-                  Process (HTML_START, To_WString (Parser.Elt_Name), Parser.Attributes);
                   Last := Pos + 1;
                   Parser.State := State_None;
+                  Result := HTML_START;
                   return;
 
                elsif C = '/' then
@@ -472,7 +470,7 @@ package body Wiki.Html_Parser is
                elsif Wiki.Strings.Length (Parser.Attr_Name) = 0 then
                   Last := Pos;
                   Parser.State := State_None;
-                  Process (HTML_ERROR, To_WString (Parser.Elt_Name), Parser.Attributes);
+                  Result := HTML_ERROR;
                   return;
 
                elsif C = '=' then
@@ -507,7 +505,7 @@ package body Wiki.Html_Parser is
             when State_Error =>
                Last := Pos;
                Parser.State := State_None;
-               Process (HTML_ERROR, To_WString (Parser.Elt_Name), Parser.Attributes);
+               Result := HTML_ERROR;
                return;
 
          end case;

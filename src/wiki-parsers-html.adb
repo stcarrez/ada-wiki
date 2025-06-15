@@ -19,13 +19,14 @@ package body Wiki.Parsers.Html is
    procedure Parse_Line_Fragment (Parser : in out Parser_Type;
                                   Text   : in out Wiki.Strings.WString) is
       procedure Process (Kind : in Wiki.Html_Parser.State_Type;
-                         Name : in Wiki.Strings.WString;
+                         Name : in Wiki.Strings.BString;
                          Attributes : in out Wiki.Attributes.Attribute_List);
 
       procedure Process (Kind : in Wiki.Html_Parser.State_Type;
-                         Name : in Wiki.Strings.WString;
+                         Name : in Wiki.Strings.BString;
                          Attributes : in out Wiki.Attributes.Attribute_List) is
-         Tag  : constant Wiki.Html_Tag := Wiki.Find_Tag (Name);
+         WN   : constant Wiki.Strings.WString := Wiki.Strings.To_WString (Name);
+         Tag  : constant Wiki.Html_Tag := Wiki.Find_Tag (WN);
       begin
          if Kind = Wiki.Html_Parser.HTML_START then
             Start_Element (Parser, Tag, Attributes);
@@ -41,9 +42,13 @@ package body Wiki.Parsers.Html is
       Last  : constant Natural := Text'Last;
       First : Natural := Text'First;
       C     : Wiki.Strings.WChar;
+      Kind  : Wiki.Html_Parser.State_Type;
    begin
       if not Wiki.Html_Parser.Is_Empty (Parser.Html) then
-         Wiki.Html_Parser.Parse_Element (Parser.Html, Text, Pos, Process'Access, Pos);
+         Wiki.Html_Parser.Parse_Element (Parser.Html, Text, Pos, Kind, Pos);
+         if Kind /= Wiki.Html_Parser.HTML_NONE then
+            Process (Kind, Parser.Html.Elt_Name, Parser.Html.Attributes);
+         end if;
       end if;
       First := Pos;
       while Pos <= Last loop
@@ -53,7 +58,10 @@ package body Wiki.Parsers.Html is
                if First < Pos then
                   Append (Parser.Text, Text (First .. Pos - 1));
                end if;
-               Wiki.Html_Parser.Parse_Element (Parser.Html, Text, Pos + 1, Process'Access, Pos);
+               Wiki.Html_Parser.Parse_Element (Parser.Html, Text, Pos + 1, Kind, Pos);
+               if Kind /= Wiki.Html_Parser.HTML_NONE then
+                  Process (Kind, Parser.Html.Elt_Name, Parser.Html.Attributes);
+               end if;
                First := Pos;
 
             when '&' =>
