@@ -360,6 +360,9 @@ package body Wiki.Render.Text is
          end if;
          Col_Num := Col_Num + 1;
          if Col_Num <= Columns'Last then
+            --  Because we are diverting each column, the current indent
+            --  position must be cleared.
+            Engine.Current_Indent := 0;
             Engine.Diverter := Columns (Col_Num);
             Engine.Diverter.Clear;
             Engine.Render (Doc, Column.Children);
