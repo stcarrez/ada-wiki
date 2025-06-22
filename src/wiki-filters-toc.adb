@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-toc -- Filter for the creation of Table Of Contents
---  Copyright (C) 2016, 2018, 2020, 2022 Stephane Carrez
+--  Copyright (C) 2016, 2018, 2020, 2022, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -62,7 +62,6 @@ package body Wiki.Filters.TOC is
       if Kind = Nodes.N_HEADER then
          Filter.Header_Level := Level;
       end if;
-      Filter.Header_Level := Level;
 
       Filter_Type (Filter).Start_Block (Document, Kind, Level);
    end Start_Block;
