@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-mediawiki -- Media Wiki parser operations
---  Copyright (C) 2011- 2022 Stephane Carrez
+--  Copyright (C) 2011- 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -107,9 +107,7 @@ package body Wiki.Parsers.MediaWiki is
             end if;
 
          when '*' | '#' =>
-            if Common.Is_List (Pos) then
-               Common.Parse_List (Parser, Pos);
-            end if;
+            Common.Parse_List (Parser, Pos);
 
          when ' ' =>
             declare
