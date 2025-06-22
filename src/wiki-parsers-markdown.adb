@@ -2150,7 +2150,7 @@ package body Wiki.Parsers.Markdown is
                                   To    : in Delimiter_Index_Type) is
          I : Delimiter_Index_Type := First;
       begin
-         while I <= To loop
+         while I <= To and then Text.Block /= null loop
             declare
                Delim : constant Delimiter_Vectors.Reference_Type := Delimiters.Reference (I);
             begin
