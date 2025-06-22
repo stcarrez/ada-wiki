@@ -1,12 +1,13 @@
 # Ada Wiki
 
 [![Alire](https://img.shields.io/endpoint?url=https://alire.ada.dev/badges/wikiada.json)](https://alire.ada.dev/crates/wikiada)
+[![Ada 2012](https://img.shields.io/badge/2012-inside-green?logo=ada&logoColor=white&logoSize=auto)](https://adaic.org/ada-resources/standards/ada12)
 [![Build Status](https://img.shields.io/endpoint?url=https://porion.vacs.fr/porion/api/v1/projects/ada-wiki/badges/build.json)](https://porion.vacs.fr/porion/projects/view/ada-wiki/summary)
 [![Test Status](https://img.shields.io/endpoint?url=https://porion.vacs.fr/porion/api/v1/projects/ada-wiki/badges/tests.json)](https://porion.vacs.fr/porion/projects/view/ada-wiki/xunits)
 [![Coverage](https://img.shields.io/endpoint?url=https://porion.vacs.fr/porion/api/v1/projects/ada-wiki/badges/coverage.json)](https://porion.vacs.fr/porion/projects/view/ada-wiki/summary)
-[![Download](https://img.shields.io/badge/download-1.4.2-brightgreen.svg)](http://download.vacs.fr/ada-wiki/ada-wiki-1.4.2.tar.gz)
+[![Download](https://img.shields.io/badge/download-1.4.3-brightgreen.svg)](http://download.vacs.fr/ada-wiki/ada-wiki-1.4.3.tar.gz)
 [![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](LICENSE)
-[![Commits](https://img.shields.io/github/commits-since/stcarrez/ada-wiki/1.4.2.svg)](Commits)
+[![Commits](https://img.shields.io/github/commits-since/stcarrez/ada-wiki/1.4.4.svg)](Commits)
 
 Ada Wiki is a small library that provides a Wiki engine supporting several Wiki syntaxes.
 
