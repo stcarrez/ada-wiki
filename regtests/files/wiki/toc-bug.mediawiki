@@ -1,0 +1,17 @@
+
+__TOC__
+
+==Overview==
+I started LPS during the 2006 summer ...
+;0..20V/4A:Two positive
+;0..-20V/4A:Two negative
+
+LPS will also feature:
+*Measure of output current and voltage
+*Recording of these measures over time
+*An isolated serial connection for a remote control and monitoring
+*Integrated PC switching supply
+
+==Architecture==
+
+==Documentation==

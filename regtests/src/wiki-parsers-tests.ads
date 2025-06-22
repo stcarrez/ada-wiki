@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-tests -- Unit tests for wiki parsing
---  Copyright (C) 2011, 2012, 2013, 2016 Stephane Carrez
+--  Copyright (C) 2011, 2012, 2013, 2016, 2025 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -50,5 +50,7 @@ package Wiki.Parsers.Tests is
    procedure Test_Wiki_UTF_8 (T : in out Test);
 
    procedure Test_Buffer (T : in out Test);
+
+   procedure Test_Wiki_Parse (T : in out Test);
 
 end Wiki.Parsers.Tests;

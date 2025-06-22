@@ -46,6 +46,8 @@ package body Wiki.Parsers.Tests is
                        Test_Wiki_UTF_8'Access);
       Caller.Add_Test (Suite, "Test Wiki.Buffers.Append)",
                        Test_Buffer'Access);
+      Caller.Add_Test (Suite, "Test Wiki.Parser.Parse",
+                       Test_Wiki_Parse'Access);
    end Add_Tests;
 
    --  ------------------------------
@@ -350,5 +352,13 @@ package body Wiki.Parsers.Tests is
          T.Assert ("   hello   " = R, "Invalid buffer");
       end;
    end Test_Buffer;
+
+   procedure Test_Wiki_Parse (T : in out Test) is
+      Engine : Wiki.Parsers.Parser;
+      Doc    : Wiki.Documents.Document;
+   begin
+      Wiki.Parsers.Parse (Engine, String '("![Ada/are-scripts.png](Ada/are-scripts.png)"),
+                          Doc);
+   end Test_Wiki_Parse;
 
 end Wiki.Parsers.Tests;
