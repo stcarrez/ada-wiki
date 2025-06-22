@@ -27,6 +27,8 @@ You can play with the Wiki engine by using [Wi2wic](https://gitlab.com/stcarrez/
   - Feature #12: Improvement of HTML renderer
   - Feature #10: Text renderer improvement
   - Fix #11: Newline in link titles should be ignored and replaced by space
+  - Fix parsing MediaWiki definition lists
+  - Many fixes in the Markdown parser to better follow [CommonMark Spec](https://spec.commonmark.org/)
 
 ## Version 1.4.3   - Nov 2024
   - Feature #7: Add a style on HTML table
