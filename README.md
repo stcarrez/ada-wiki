@@ -9,7 +9,7 @@
 [![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](LICENSE)
 [![Commits](https://img.shields.io/github/commits-since/stcarrez/ada-wiki/1.4.3.svg)](Commits)
 
-Ada Wiki is a small library that provides a Wiki engine supporting several Wiki syntaxes.
+Ada Wiki is a small library that provides a Wiki engine supporting several Wiki syntaxes such as Markdown.
 
 The library allows to:
 
@@ -19,7 +19,8 @@ The library allows to:
 * Render the wiki text in HTML, text or another wiki format.
 
 The Ada Wiki library is used by [Ada Web Application](https://gitlab.com/stcarrez/ada-awa)
-for the implementation of the blog and wiki online plugins.
+for the implementation of the blog and wiki online plugins and by [mdshow](https://gitlab.com/stcarrez/mdshow) a terminal based
+Markdown viewer.
 
 You can play with the Wiki engine by using [Wi2wic](https://gitlab.com/stcarrez/wi2wic) on https://wi2wic.vacs.fr/wi2wic/index.html
 
