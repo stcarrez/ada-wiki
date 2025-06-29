@@ -9,6 +9,7 @@ with Wiki.Tests;
 with Wiki.Filters.Html.Tests;
 with Wiki.Html_Parser.Tests;
 with Wiki.Samples_Tests;
+with Wiki.CommonMark_Tests;
 package body Wiki.Testsuite is
 
    package Markdown_Samples is
@@ -27,6 +28,7 @@ package body Wiki.Testsuite is
    function Suite return Util.Tests.Access_Test_Suite is
       Ret : constant Util.Tests.Access_Test_Suite := Tests'Access;
    begin
+      CommonMark_Tests.Add_Tests (Ret);
       Markdown_Samples.Add_Tests (Ret);
       Dotclear_Samples.Add_Tests (Ret);
       Mediawiki_Samples.Add_Tests (Ret);
