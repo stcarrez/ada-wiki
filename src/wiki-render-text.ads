@@ -15,6 +15,15 @@ private with Ada.Finalization;
 --  The formatting rules are ignored except for the paragraphs and sections.
 package Wiki.Render.Text is
 
+   type Box_Drawing_Item is (BD_C_TOP_LEFT, BD_TOP, BD_TOP_CROSS, BD_C_TOP_RIGHT,
+                             BD_LEFT, BD_FILL, BD_MIDDLE, BD_RIGHT,
+                             BD_LEFT_CROSS, BD_M_SEP, BD_M_CROSS, BD_RIGHT_CROSS,
+                             BD_C_BOT_LEFT, BD_BOT, BD_BOT_CROSS, BD_C_BOT_RIGHT);
+
+   type Box_Drawing is array (Box_Drawing_Item) of Strings.WChar;
+
+   Default_Box_Drawing : constant Box_Drawing;
+
    type Text_Diverter is limited interface;
    type Text_Diverter_Access is access all Text_Diverter'Class;
 
@@ -61,6 +70,11 @@ package Wiki.Render.Text is
    --  Set the indentation of pre-formatted text (default is 0).
    procedure Set_Preformatted_Indentation (Engine : in out Text_Renderer;
                                            Level  : in Natural);
+
+   --  Set the box drawing characters (the default is a combination
+   --  of '+', '-' and '|').
+   procedure Set_Box_Drawing (Engine  : in out Text_Renderer;
+                              Drawing : in Box_Drawing);
 
    --  Returns True if the current text processed by Write_Text is currently
    --  diverted and handled by the Text_Diverter class.
@@ -176,6 +190,14 @@ package Wiki.Render.Text is
 
 private
 
+   Default_Box_Drawing : constant Box_Drawing :=
+     (BD_C_TOP_LEFT | BD_TOP_CROSS | BD_C_TOP_RIGHT
+        | BD_LEFT_CROSS | BD_M_CROSS | BD_RIGHT_CROSS
+          | BD_C_BOT_LEFT | BD_BOT_CROSS | BD_C_BOT_RIGHT => '+',
+      BD_LEFT | BD_MIDDLE | BD_RIGHT => '|',
+      BD_FILL => ' ',
+      others => '-');
+
    type Diverter_Array is array (Positive range <>) of Text_Diverter_Access;
 
    type Text_Renderer is limited new Wiki.Render.Renderer with record
@@ -205,6 +227,7 @@ private
       In_Definition       : Boolean := False;
       Current_Mode        : Nodes.Node_Kind := Nodes.N_NONE;
       Diverter            : Wiki.Render.Text.Text_Diverter_Access;
+      Drawing             : Box_Drawing := Default_Box_Drawing;
    end record;
 
    type Text_Line;

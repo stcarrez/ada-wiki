@@ -60,6 +60,16 @@ package body Wiki.Render.Text is
    end Set_Preformatted_Indentation;
 
    --  ------------------------------
+   --  Set the box drawing characters (the default is a combination
+   --  of '+', '-' and '|').
+   --  ------------------------------
+   procedure Set_Box_Drawing (Engine  : in out Text_Renderer;
+                              Drawing : in Box_Drawing) is
+   begin
+      Engine.Drawing := Drawing;
+   end Set_Box_Drawing;
+
+   --  ------------------------------
    --  Set the text style format.
    --  ------------------------------
    procedure Set_Format (Engine : in out Text_Renderer;
@@ -325,7 +335,7 @@ package body Wiki.Render.Text is
                            Node    : in Wiki.Nodes.Node_Type;
                            Column_Styles : in Wiki.Nodes.Column_Array_Style) is
       procedure Process_Row (Row : in Wiki.Nodes.Node_Type);
-      procedure Write_Separator;
+      procedure Write_Separator (Drawing : Box_Drawing_Item);
       procedure Process_Column (Column : in Wiki.Nodes.Node_Type);
 
       Old_Line_Length : constant Natural := Engine.Line_Length;
@@ -338,17 +348,25 @@ package body Wiki.Render.Text is
       Col_Num : Natural;
       Previous_Row_Is_Header : Boolean := False;
 
-      procedure Write_Separator is
+      procedure Write_Separator (Drawing : Box_Drawing_Item) is
+         Draw   : constant Box_Drawing_Item := Drawing;
+         Fill   : constant Box_Drawing_Item := Box_Drawing_Item'Succ (Drawing);
+         Middle : constant Box_Drawing_Item := Box_Drawing_Item'Succ (Fill);
+         Right  : constant Box_Drawing_Item := Box_Drawing_Item'Succ (Middle);
       begin
          for I in 1 .. Indent loop
             Engine.Output.Write (' ');
          end loop;
-         Engine.Output.Write ('+');
+         Engine.Output.Write (Engine.Drawing (Draw));
          for I in Columns'Range loop
             for J in 1 .. Styles (I).Width loop
-               Engine.Output.Write ('-');
+               Engine.Output.Write (Engine.Drawing (Fill));
             end loop;
-            Engine.Output.Write ('+');
+            if I < Columns'Last then
+               Engine.Output.Write (Engine.Drawing (Middle));
+            else
+               Engine.Output.Write (Engine.Drawing (Right));
+            end if;
          end loop;
          Text_Renderer'Class (Engine).Write_Newline;
       end Write_Separator;
@@ -374,7 +392,7 @@ package body Wiki.Render.Text is
          More : Boolean := True;
       begin
          if Previous_Row_Is_Header then
-            Write_Separator;
+            Write_Separator (Drawing => BD_LEFT_CROSS);
          end if;
          Previous_Row_Is_Header := Row.Kind in Wiki.Nodes.N_ROW_HEADER | Wiki.Nodes.N_ROW_FOOTER;
          Col_Num := 0;
@@ -386,7 +404,7 @@ package body Wiki.Render.Text is
          while More loop
             Line := Line + 1;
             More := False;
-            Engine.Output.Write ('|');
+            Engine.Output.Write (Engine.Drawing (BD_LEFT));
             for I in Columns'Range loop
                declare
                   Is_Last : Boolean;
@@ -394,7 +412,11 @@ package body Wiki.Render.Text is
                   Columns (I).Flush_Line (Engine.Output.all, Line,
                                           Styles (I).Format, Styles (I).Width,
                                           Is_Last);
-                  Engine.Output.Write ('|');
+                  if I = Columns'Last then
+                     Engine.Output.Write (Engine.Drawing (BD_RIGHT));
+                  else
+                     Engine.Output.Write (Engine.Drawing (BD_MIDDLE));
+                  end if;
                   if not Is_Last then
                      More := True;
                   end if;
@@ -425,9 +447,9 @@ package body Wiki.Render.Text is
       for I in Columns'Range loop
          Columns (I) := Text_Renderer'Class (Engine).Create_Text_Diverter (Styles (I).Width);
       end loop;
-      Write_Separator;
+      Write_Separator (Drawing => BD_C_TOP_LEFT);
       Nodes.Lists.Iterate (Node.Children, Process_Row'Access);
-      Write_Separator;
+      Write_Separator (Drawing => BD_C_BOT_LEFT);
       Engine.Line_Length := Old_Line_Length;
       Engine.Diverter := null;
       Engine.Indent_Level := Indent;
