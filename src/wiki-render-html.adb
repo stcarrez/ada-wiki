@@ -738,6 +738,12 @@ package body Wiki.Render.Html is
       if Node.Kind = Nodes.N_IMAGE then
          Engine.Links.Make_Image_Link (Src, URI, Width, Height);
          Engine.Output.Write_Wide_Attribute ("src", URI);
+         if Title'Length > 0 and then Alt'Length = 0 then
+            Engine.Output.Write_Wide_Attribute ("alt", Title);
+         elsif Alt'Length > 0 then
+            Engine.Output.Write_Wide_Attribute ("alt", Alt);
+         end if;
+
          if Title_Attr'Length > 0 then
             Engine.Output.Write_Wide_Attribute ("title", Title_Attr);
          end if;
@@ -750,6 +756,12 @@ package body Wiki.Render.Html is
          begin
             Engine.Links.Make_Image_Link (Link, URI, Width, Height);
             Engine.Output.Write_Wide_Attribute ("src", URI);
+            if Title'Length > 0 and then Alt'Length = 0 then
+               Engine.Output.Write_Wide_Attribute ("alt", Title);
+            elsif Alt'Length > 0 then
+               Engine.Output.Write_Wide_Attribute ("alt", Alt);
+            end if;
+
             if Img_Title'Length > 0 then
                Engine.Output.Write_Wide_Attribute ("title", Img_Title);
             end if;
@@ -769,11 +781,6 @@ package body Wiki.Render.Html is
       end if;
       if Style'Length > 0 then
          Engine.Output.Write_Wide_Attribute ("style", Style);
-      end if;
-      if Title'Length > 0 and then Alt'Length = 0 then
-         Engine.Output.Write_Wide_Attribute ("alt", Title);
-      elsif Alt'Length > 0 then
-         Engine.Output.Write_Wide_Attribute ("alt", Alt);
       end if;
 
       Engine.Output.End_Element ("img");
