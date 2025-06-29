@@ -9,11 +9,10 @@
 [![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](LICENSE)
 [![Commits](https://img.shields.io/github/commits-since/stcarrez/ada-wiki/1.4.3.svg)](Commits)
 
-Ada Wiki is a small library that provides a Wiki engine supporting several Wiki syntaxes such as Markdown.
+Ada Wiki is a small library that provides a parser and renderer for Markdown and several
+other Wiki syntaxes.  The library allows to:
 
-The library allows to:
-
-* Parse a wiki text such as Markdown, Mediawiki, Creole, PhpBB, Dotclear and Google Code,
+* Parse a Markdown text but other Wiki such as Mediawiki, Creole, PhpBB, Dotclear and Google Code,
 * Parse HTML content in embedded wiki text,
 * Filter out the wiki, HTML or text through customizable filters,
 * Render the wiki text in HTML, text or another wiki format.
