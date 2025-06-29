@@ -50,7 +50,7 @@ Two ways can be used to measure the current or voltage arround R1. Current Measu
 
 The operational amplifier has its inputs which can range from 0 to the maximum output voltage supported by the power supply. Therefore we must provide it a power supply that is 1 or 2 volts greater than the maximum output voltage.
 
-A second issue more important occurs when the output power supply has a low voltage and high output current. We have a constraint that Vs <Vo. If="" this="" is="" not="" satisfied,="" then="" the="" transistor="" Q1="" cannot="" drive="" the="" current="" in="" R3="" from="" its="" collector.="" Due="" to="" the="" NPN="" transistor,="" the="" current="" that="" flows="" in="" R3="" will="" come="" from="" the="" Q1="" base="" and="" Vs="" will="" grow="" without="" any="" relation="" to="" the="" current="" <i>i.
+A second issue more important occurs when the output power supply has a low voltage and high output current. We have a constraint that Vs <Vo. If="" this="" is="" not="" satisfied,="" then="" the="" transistor="" Q1="" cannot="" drive="" the="" current="" in="" R3="" from="" its="" collector.="" Due="" to="" the="" NPN="" transistor,="" the="" current="" that="" flows="" in="" R3="" will="" come="" from="" the="" Q1="" base="" and="" Vs="" will="" grow="" without="" any="" relation="" to="" the="" current="">i.
 
 +----------------+----------------+----------------+----------------+----------------+
 |R1              |R2              |R3              |i               |Vs              |
