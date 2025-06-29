@@ -2041,6 +2041,11 @@ package body Wiki.Parsers.Markdown is
                      for J in 1 .. Delim.Count + Delim.Skip_Count loop
                         C := Buffers.Char_At (Pos);
                         Append (Ref, C);
+                        --  If we find a '<' keep it in the Alt text but we want
+                        --  to ignore other formatting characters.
+                        if Delim.Marker = M_INLINE_HTML then
+                           Append (Alt, C);
+                        end if;
                         Buffers.Next (Pos);
                      end loop;
                   end if;
