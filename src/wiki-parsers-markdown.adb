@@ -1118,9 +1118,14 @@ package body Wiki.Parsers.Markdown is
 
                   if (Buffers.Has_Next (Text)
                       and then Helpers.Is_Space_Or_Tab (Buffers.Next_At (Text)))
+
+                    --  Accept new list item even if line is empty but
+                    --  we must not have some text in the buffer, unless we are
+                    --  already in a list item!
                     or else (Buffers.Has_Next (Text)
                              and then Helpers.Is_Newline (Buffers.Next_At (Text))
-                             and then Parser.Text_Buffer.Length = 0)
+                             and then (Parser.Text_Buffer.Length = 0
+                                       or else Parser.Current_Node = N_LIST_ITEM))
                   then
                      declare
                         Top   : Block_Access := Current (Parser);
@@ -1278,6 +1283,15 @@ package body Wiki.Parsers.Markdown is
                                  Append_Char (Parser.Text, ' ');
                               end if;
                               C := Helpers.NUL;
+                              return;
+                           end if;
+                           if Parser.In_Html = HTML_BLOCK_PRE then
+                              Common.Parse_Html_Preformatted (Parser, Pos);
+                              if not Buffers.Is_Valid (Pos) then
+                                 C := Helpers.NUL;
+                              else
+                                 C := Pos.Block.Content (Pos.Pos);
+                              end if;
                               return;
                            end if;
                            Parser.In_Html := HTML_NONE;
@@ -1562,7 +1576,12 @@ package body Wiki.Parsers.Markdown is
                   Status : Wiki.Html_Parser.Entity_State_Type;
                begin
                   Common.Parse_Entity (Parser, Pos, Status, C);
-                  Append (Link, C);
+                  if Status = Wiki.Html_Parser.ENTITY_VALID then
+                     Append (Link, C);
+                  else
+                     Append (Link, '&');
+                     Buffers.Next (Pos);
+                  end if;
                end;
             else
                Buffers.Next (Pos);

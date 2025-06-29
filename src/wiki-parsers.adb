@@ -846,6 +846,7 @@ package body Wiki.Parsers is
                P.Set_Syntax (P.Previous_Syntax);
             end if;
             P.Pre_Tag := UNKNOWN_TAG;
+            P.In_Html := HTML_NONE;
          end if;
       elsif P.In_Html = HTML_NONE then
          P.In_Html := HTML_BLOCK;
