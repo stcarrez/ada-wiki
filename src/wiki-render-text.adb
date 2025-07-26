@@ -661,7 +661,7 @@ package body Wiki.Render.Text is
             Text_Renderer'Class (Engine).Render_Link (Doc, Node, Node.Title, Node.Link_Attr);
 
          when Wiki.Nodes.N_IMAGE =>
-            Engine.Render_Image (Node.Title, Node.Link_Attr);
+            Text_Renderer'Class (Engine).Render_Image (Node.Title, Node.Link_Attr);
 
          when Wiki.Nodes.N_PREFORMAT =>
             Engine.Render_Preformatted (Node.Preformatted, "");
@@ -739,8 +739,9 @@ package body Wiki.Render.Text is
             return;
 
          when IMG_TAG =>
-            Engine.Render_Image (Title => Attributes.Get_Attribute (Node.Attributes, "alt"),
-                                 Attr  => Node.Attributes);
+            Text_Renderer'Class (Engine).Render_Image
+              (Title => Attributes.Get_Attribute (Node.Attributes, "alt"),
+               Attr  => Node.Attributes);
 
          when A_TAG | Q_TAG =>
             declare
