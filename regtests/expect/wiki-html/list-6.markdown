@@ -1,0 +1,1 @@
+<h3>MySQL/MariaDB setup</h3><p>To create manually the database, you can proceed to the following steps:</p><ol start="2"><li>Create the 'ado' user and give the access rights:<pre><code></code></pre></li></ol><p>mysql&gt; CREATE USER 'ado' IDENTIFIED BY '';</p><pre><code></code></pre>

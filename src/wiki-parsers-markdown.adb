@@ -323,7 +323,8 @@ package body Wiki.Parsers.Markdown is
             --  A list that interrupts a paragraph must start with 1.
             exit when Level /= 1
               and then not (Parser.Current_Node in Nodes.N_LIST_ITEM)
-              and then Parser.Text_Buffer.Length > 0;
+              and then Parser.Text_Buffer.Length > 0
+              and then Parser.Previous_Line_Empty = 0;
 
             --  An empty list item cannot interrupt a paragraph.
             exit when not Buffers.Is_Valid (Pos) and then Parser.Text_Buffer.Length > 0;
