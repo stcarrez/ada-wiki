@@ -1,4 +1,4 @@
-Version 1.5.0   - Under development
+Version 1.5.0   - Oct 2025
   - Feature #12: Improvement of HTML renderer
   - Feature #10: Text renderer improvement
   - Fix #11: Newline in link titles should be ignored and replaced by space

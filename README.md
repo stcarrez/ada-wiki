@@ -5,9 +5,9 @@
 [![Build Status](https://img.shields.io/endpoint?url=https://porion.vacs.fr/porion/api/v1/projects/ada-wiki/badges/build.json)](https://porion.vacs.fr/porion/projects/view/ada-wiki/summary)
 [![Test Status](https://img.shields.io/endpoint?url=https://porion.vacs.fr/porion/api/v1/projects/ada-wiki/badges/tests.json)](https://porion.vacs.fr/porion/projects/view/ada-wiki/xunits)
 [![Coverage](https://img.shields.io/endpoint?url=https://porion.vacs.fr/porion/api/v1/projects/ada-wiki/badges/coverage.json)](https://porion.vacs.fr/porion/projects/view/ada-wiki/summary)
-[![Download](https://img.shields.io/badge/download-1.4.3-brightgreen.svg)](http://download.vacs.fr/ada-wiki/ada-wiki-1.4.3.tar.gz)
+[![Download](https://img.shields.io/badge/download-1.5.0-brightgreen.svg)](http://download.vacs.fr/ada-wiki/ada-wiki-1.5.0.tar.gz)
 [![License](https://img.shields.io/badge/license-APACHE2-blue.svg)](LICENSE)
-[![Commits](https://img.shields.io/github/commits-since/stcarrez/ada-wiki/1.4.3.svg)](Commits)
+[![Commits](https://img.shields.io/github/commits-since/stcarrez/ada-wiki/1.5.0.svg)](Commits)
 
 Ada Wiki is a small library that provides a parser and renderer for Markdown and several
 other Wiki syntaxes.  The library allows to:
@@ -23,7 +23,7 @@ Markdown viewer.
 
 You can play with the Wiki engine by using [Wi2wic](https://gitlab.com/stcarrez/wi2wic) on https://wi2wic.vacs.fr/wi2wic/index.html
 
-## Version 1.5.0   - Under development
+## Version 1.5.0   - Oct 2025
   - Feature #12: Improvement of HTML renderer
   - Feature #10: Text renderer improvement
   - Fix #11: Newline in link titles should be ignored and replaced by space
