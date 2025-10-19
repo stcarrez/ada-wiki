@@ -723,10 +723,26 @@ package body Wiki.Parsers.Markdown is
       procedure Process (Nodes : in Block_Stack.Element_Type_Array);
 
       procedure Process (Nodes : in Block_Stack.Element_Type_Array) is
+         procedure Leave_Blocks;
+
          Need_Char : Boolean := True;
          Matched   : Boolean;
          I         : Positive := Nodes'First;
          Indent    : Natural := 0;
+
+         procedure Leave_Blocks is
+         begin
+            if Parser.Indent > Indent then
+               Parser.Indent := Parser.Indent - Indent;
+            else
+               Parser.Indent := 0;
+            end if;
+            while I <= Nodes'Last loop
+               Pop_Block (Parser, Trim => Wiki.Parsers.Right);
+               I := I + 1;
+            end loop;
+         end Leave_Blocks;
+
       begin
          while I <= Nodes'Last loop
             if Need_Char then
@@ -762,7 +778,7 @@ package body Wiki.Parsers.Markdown is
                     and then Parser.Previous_Line_Empty > 0
                     and then I + 1 <= Nodes'Last
                   then
-                     Parser.Need_Paragraph := Nodes (I + 1).Line_Count > 1;
+                     --  Parser.Need_Paragraph := Nodes (I + 1).Line_Count > 1;
                      Parser.Need_Paragraph := False;
                   end if;
                   if Matched then
@@ -778,8 +794,12 @@ package body Wiki.Parsers.Markdown is
                            Indent := 0;
                            if Is_List_Item (Text, Nodes (I).Marker) then
                               I := I + 1;
-                              Documents.Set_Loose (Parser.Document);
+                              Leave_Blocks;
+                              if Parser.Previous_Line_Empty > 0 then
+                                 Documents.Set_Loose (Parser.Document);
+                              end if;
                               Parser.Need_Paragraph := False;
+                              return;
                            end if;
                         else
                            I := I + 1;
@@ -846,15 +866,7 @@ package body Wiki.Parsers.Markdown is
                   Matched := False;
             end case;
             if not Matched then
-               if Parser.Indent > Indent then
-                  Parser.Indent := Parser.Indent - Indent;
-               else
-                  Parser.Indent := 0;
-               end if;
-               while I <= Nodes'Last loop
-                  Pop_Block (Parser, Trim => Wiki.Parsers.Right);
-                  I := I + 1;
-               end loop;
+               Leave_Blocks;
                return;
             end if;
             I := I + 1;
