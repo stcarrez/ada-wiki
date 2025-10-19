@@ -239,6 +239,7 @@ package body Wiki.Parsers.Markdown is
          Space_Count : Natural;
          C : Wiki.Strings.WChar;
          Has_Bracket : Boolean := False;
+         Top   : Block_Access := Current (Parser);
       begin
          Wiki.Strings.Clear (Parser.Preformat_Format);
          Buffers.Skip_Spaces (Pos, Space_Count);
@@ -277,16 +278,20 @@ package body Wiki.Parsers.Markdown is
             exit when Helpers.Is_Newline (C);
          end loop;
          Text := Pos;
+
+         --  If we are in a list, it is loose due to the blank line.
+         if Parser.Previous_Line_Empty > 0 then
+            Documents.Set_Loose (Parser.Document);
+         end if;
+         Flush_Block (Parser, Trim => Right);
+         if Top /= null and then Parser.Column < Top.Level then
+            Pop_List (Parser);
+         end if;
       end;
 
-      --  If we are in a list, it is loose due to the blank line.
-      if Parser.Previous_Line_Empty > 0 then
-         Documents.Set_Loose (Parser.Document);
-      end if;
       Parser.Preformat_Indent := Parser.Indent;
       Parser.Preformat_Fence := Marker;
       Parser.Preformat_Fcount := Count;
-      Flush_Block (Parser, Trim => Right);
       Push_Block (Parser, N_PREFORMAT, Parser.Indent);
       Parser.Previous_Line_Empty := 0;
    end Parse_Preformatted;
@@ -1198,6 +1203,7 @@ package body Wiki.Parsers.Markdown is
                            return;
                         end if;
                         Need_Char := False;
+                        Parser.Column := Parser.Column + Count;
                      end;
                   else
                      return;
@@ -1251,6 +1257,7 @@ package body Wiki.Parsers.Markdown is
                            return;
                         end if;
                         Need_Char := False;
+                        Parser.Column := Parser.Column + Count;
                      else
                         return;
                      end if;
