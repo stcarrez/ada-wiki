@@ -239,7 +239,7 @@ package body Wiki.Parsers.Markdown is
          Space_Count : Natural;
          C : Wiki.Strings.WChar;
          Has_Bracket : Boolean := False;
-         Top   : Block_Access := Current (Parser);
+         Top   : constant Block_Access := Current (Parser);
       begin
          Wiki.Strings.Clear (Parser.Preformat_Format);
          Buffers.Skip_Spaces (Pos, Space_Count);

@@ -158,6 +158,7 @@ package body Wiki.CommonMark_Tests is
    procedure Add_Tests (Suite : in Util.Tests.Access_Test_Suite) is
       package UBO renames Util.Beans.Objects;
       procedure Add_Test (Node : in UBO.Object);
+      procedure Read_XFail (Line : in String);
 
       XFail : Util.Strings.Sets.Set;
 
