@@ -1,5 +1,5 @@
 NAME=wikiada
-VERSION=1.4.2
+VERSION=1.5.0
 
 DIST_DIR=ada-wiki-$(VERSION)
 DIST_FILE=ada-wiki-$(VERSION).tar.gz
