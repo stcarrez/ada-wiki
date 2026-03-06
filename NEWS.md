@@ -1,3 +1,6 @@
+Version 1.5.1   - Under development
+  - Fix wrong closing in HTML of some formatting element within a list item
+
 Version 1.5.0   - Oct 2025
   - Feature #12: Improvement of HTML renderer
   - Feature #10: Text renderer improvement

@@ -23,6 +23,9 @@ Markdown viewer.
 
 You can play with the Wiki engine by using [Wi2wic](https://gitlab.com/stcarrez/wi2wic) on https://wi2wic.vacs.fr/wi2wic/index.html
 
+## Version 1.5.1   - Under development
+  - Fix wrong closing in HTML of some formatting element within a list item
+
 ## Version 1.5.0   - Oct 2025
   - Feature #12: Improvement of HTML renderer
   - Feature #10: Text renderer improvement
