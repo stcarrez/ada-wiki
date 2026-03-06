@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-html -- Wiki HTML renderer
---  Copyright (C) 2011 - 2024 Stephane Carrez
+--  Copyright (C) 2011 - 2026 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -525,6 +525,7 @@ package body Wiki.Render.Html is
    procedure Render_List_Item (Engine : in out Html_Renderer;
                                Doc    : in Wiki.Documents.Document;
                                Node   : in Wiki.Nodes.Node_Type) is
+      Format : constant Format_Map := Engine.Current_Format;
       Prev_Loose_List : constant Boolean := Engine.Loose_List;
       List : constant Wiki.Nodes.Node_Type_Access := Wiki.Nodes.Find_List (Node);
    begin
@@ -541,6 +542,7 @@ package body Wiki.Render.Html is
          end if;
          Engine.Render (Doc, Node.Children);
       end if;
+      Engine.Set_Format (Format);
       Engine.Render_List_End ("li");
       Engine.Loose_List := Prev_Loose_List;
    end Render_List_Item;
