@@ -1,8 +1,3 @@
-- a
-- ```
-  b
+- Fix #53: Executor does not always stop the worker `tasks`
 
-  b2
-  ```
-- c
-
+This article highlights two new features provided by the new version.
