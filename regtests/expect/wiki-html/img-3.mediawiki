@@ -1,1 +1,1 @@
-<figure class="wiki-img-thumb wiki-img-right"><img src="study_current_measure2.png" alt="Current Measurement" /><figurecaption>Current Measurement</figurecaption></figure>
+<figure class="wiki-img-thumb wiki-img-right"><img src="study_current_measure2.png" alt="Current Measurement" /><figcaption>Current Measurement</figcaption></figure>

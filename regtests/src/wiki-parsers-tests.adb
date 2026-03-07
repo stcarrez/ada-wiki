@@ -252,8 +252,8 @@ package body Wiki.Parsers.Tests is
                                 Wiki.Utils.To_Html ("((/image/t.png|title))", SYNTAX_DOTCLEAR),
                                 "Image rendering invalid");
       Util.Tests.Assert_Equals (T, "<figure class=""wiki-img-center""><img " &
-                                "src=""/image/t.png"" alt=""title"" /><figurecaption>describe" &
-                                "</figurecaption></figure>",
+                                "src=""/image/t.png"" alt=""title"" /><figcaption>describe" &
+                                "</figcaption></figure>",
                                 Wiki.Utils.To_Html ("((/image/t.png|title|x|describe))",
                                                  SYNTAX_DOTCLEAR),
                                 "Image rendering invalid");

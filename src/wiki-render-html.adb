@@ -793,13 +793,13 @@ package body Wiki.Render.Html is
                     and then Frame /= "frameless"
                     and then Frame /= "")
          then
-            Engine.Output.Start_Element ("figurecaption");
+            Engine.Output.Start_Element ("figcaption");
             if Desc'Length > 0 then
                Engine.Output.Write_Wide_Text (Desc);
             else
                Engine.Output.Write_Wide_Text (Title);
             end if;
-            Engine.Output.End_Element ("figurecaption");
+            Engine.Output.End_Element ("figcaption");
          end if;
          Engine.Output.End_Element ("figure");
       end if;

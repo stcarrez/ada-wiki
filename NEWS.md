@@ -1,6 +1,6 @@
 Version 1.5.1   - Under development
   - Fix wrong closing in HTML of some formatting element within a list item
-  - Feature #17: Generate `<figure>` and `<figurecaption>` when an image has a caption
+  - Feature #17: Generate `<figure>` and `<figcaption>` when an image has a caption
 
 Version 1.5.0   - Oct 2025
   - Feature #12: Improvement of HTML renderer
