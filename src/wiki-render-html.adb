@@ -725,12 +725,15 @@ package body Wiki.Render.Html is
          Strings.Append (Frame_Attr, "wiki-img-");
          Strings.Append (Frame_Attr, Valign);
       end if;
-      Engine.Open_Paragraph;
+      if Desc'Length > 0 and then Strings.Length (Frame_Attr) = 0 then
+         Strings.Append (Frame_Attr, "wiki-img-center");
+      end if;
       if Strings.Length (Frame_Attr) > 0 then
-         Engine.Output.Start_Element ("div");
+         Engine.Close_Paragraph;
+         Engine.Output.Start_Element ("figure");
          Engine.Output.Write_Wide_Attribute ("class", Frame_Attr);
-         Engine.Output.Start_Element ("div");
-         Engine.Output.Write_Wide_Attribute ("class", "wiki-img-inner");
+      else
+         Engine.Open_Paragraph;
       end if;
 
       if Size'Length > 0 then
@@ -775,30 +778,30 @@ package body Wiki.Render.Html is
       if Height > 0 then
          Engine.Output.Write_Attribute ("height", Util.Strings.Image (Height));
       end if;
-      if Desc'Length > 0 then
-         Engine.Output.Write_Wide_Attribute ("longdesc", Desc);
-      end if;
+
       if Class'Length > 0 then
          Engine.Output.Write_Wide_Attribute ("class", Class);
       end if;
       if Style'Length > 0 then
          Engine.Output.Write_Wide_Attribute ("style", Style);
       end if;
-
       Engine.Output.End_Element ("img");
+
       if Strings.Length (Frame_Attr) > 0 then
-         Engine.Output.End_Element ("div");
-         if Title'Length > 0
-           and then Frame /= "border"
-           and then Frame /= "frameless"
-           and then Frame /= ""
+         if Desc'Length > 0
+           or else (Title'Length > 0 and then Frame /= "border"
+                    and then Frame /= "frameless"
+                    and then Frame /= "")
          then
-            Engine.Output.Start_Element ("div");
-            Engine.Output.Write_Wide_Attribute ("class", "wiki-img-caption");
-            Engine.Output.Write_Wide_Text (Title);
-            Engine.Output.End_Element ("div");
+            Engine.Output.Start_Element ("figurecaption");
+            if Desc'Length > 0 then
+               Engine.Output.Write_Wide_Text (Desc);
+            else
+               Engine.Output.Write_Wide_Text (Title);
+            end if;
+            Engine.Output.End_Element ("figurecaption");
          end if;
-         Engine.Output.End_Element ("div");
+         Engine.Output.End_Element ("figure");
       end if;
    end Render_Image;
 
