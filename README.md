@@ -112,7 +112,7 @@ and can be tried online with [Atlas](https://demo.vacs.fr/atlas/index.html)
 
 * [Ada Wiki Programmer's Guide](https://ada-wiki.readthedocs.io/en/latest/) [PDF](https://gitlab.com/stcarrez/ada-wiki/blob/master/docs/wiki-book.pdf)
 
-* [Using the Ada Wiki Engine](https://blog.vacs.fr/vacs/blogs/post.html?post=2016/04/30/Using-the-Ada-Wiki-Engine)
+* [Using the Ada Wiki Engine](https://blog.vacs.fr/vacs/blogs/posts/2016/04/30/Using-the-Ada-Wiki-Engine)
 
 # Sites Using Ada Wiki
 
