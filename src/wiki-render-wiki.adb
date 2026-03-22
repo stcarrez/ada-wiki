@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-wiki -- Wiki to Wiki renderer
---  Copyright (C) 2015 - 2025 Stephane Carrez
+--  Copyright (C) 2015 - 2026 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -786,7 +786,7 @@ package body Wiki.Render.Wiki is
             end loop;
          end if;
          if Engine.Need_Space then
-            if not Helpers.Is_Punctuation (Text (Start)) then
+            if Start <= Text'Last and then not Helpers.Is_Punctuation (Text (Start)) then
                Append (Engine.Content, ' ');
             end if;
             Engine.Need_Space := False;
