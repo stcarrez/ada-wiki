@@ -506,6 +506,7 @@ package body Wiki.Render.Html is
                                 Tag      : in String;
                                 Level    : in Natural) is
    begin
+      Engine.Set_Format ((others => False));
       if Engine.Has_Paragraph then
          Engine.Output.End_Element ("p");
          Engine.Has_Paragraph := False;
