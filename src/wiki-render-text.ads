@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-text -- Wiki Text renderer
---  Copyright (C) 2011 - 2025 Stephane Carrez
+--  Copyright (C) 2011 - 2026 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -170,7 +170,7 @@ package Wiki.Render.Text is
    procedure Render_Paragraph (Engine : in out Text_Renderer;
                                Kind   : in Wiki.Nodes.Node_Kind;
                                Text   : in Wiki.Strings.WString;
-                               Format : in Format_Map := (others => False));
+                               Format : in Format_Map := [others => False]);
 
    --  Render a quote.
    procedure Render_Quote (Engine : in out Text_Renderer;
@@ -191,18 +191,18 @@ package Wiki.Render.Text is
 private
 
    Default_Box_Drawing : constant Box_Drawing :=
-     (BD_C_TOP_LEFT | BD_TOP_CROSS | BD_C_TOP_RIGHT
+     [BD_C_TOP_LEFT | BD_TOP_CROSS | BD_C_TOP_RIGHT
         | BD_LEFT_CROSS | BD_M_CROSS | BD_RIGHT_CROSS
           | BD_C_BOT_LEFT | BD_BOT_CROSS | BD_C_BOT_RIGHT => '+',
       BD_LEFT | BD_MIDDLE | BD_RIGHT => '|',
       BD_FILL => ' ',
-      others => '-');
+      others => '-'];
 
    type Diverter_Array is array (Positive range <>) of Text_Diverter_Access;
 
    type Text_Renderer is limited new Wiki.Render.Renderer with record
       Output         : Streams.Output_Stream_Access := null;
-      Format         : Wiki.Format_Map := (others => False);
+      Format         : Wiki.Format_Map := [others => False];
       Has_Paragraph  : Boolean := False;
       Need_Paragraph : Boolean := False;
       Need_Space     : Boolean := False;
@@ -219,7 +219,7 @@ private
       List_Levels    : List_Level_Array (1 .. MAX_LIST_LEVEL);
       Header_Index   : List_Index_Type := 0;
       Header_Levels  : List_Level_Array (1 .. 30);
-      Current_Section     : Toc_Number_Array (1 .. MAX_TOC_LEVEL) := (others => 0);
+      Current_Section     : Toc_Number_Array (1 .. MAX_TOC_LEVEL) := [others => 0];
       Quote_Level         : Natural := 0;
       UL_List_Level       : Natural := 0;
       OL_List_Level       : Natural := 0;

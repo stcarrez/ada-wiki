@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki -- Ada Wiki Engine
---  Copyright (C) 2015, 2016, 2020, 2021, 2022 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020, 2021, 2022, 2026 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -166,7 +166,7 @@ package Wiki is
    type Tag_Boolean_Array is array (Html_Tag) of Boolean;
 
    No_End_Tag   : constant Tag_Boolean_Array :=
-     (
+     [
       BASE_TAG   => True,
       LINK_TAG   => True,
       META_TAG   => True,
@@ -176,10 +176,10 @@ package Wiki is
       WBR_TAG    => True,
       INPUT_TAG  => True,
       KEYGEN_TAG => True,
-      others     => False);
+      others     => False];
 
    Tag_Omission : constant Tag_Boolean_Array :=
-     (
+     [
       --  Section 4.4 Grouping content
       LI_TAG    => True,
       DT_TAG    => True,
@@ -202,11 +202,11 @@ package Wiki is
       OPTGROUP_TAG => True,
       OPTION_TAG   => True,
 
-      others    => False);
+      others    => False];
 
    --  Tags before and after which we want to preserve spaces.
    Tag_Text : constant Tag_Boolean_Array :=
-     (
+     [
        A_TAG      => True,
        EM_TAG     => True,
        STRONG_TAG => True,
@@ -237,6 +237,6 @@ package Wiki is
        TT_TAG     => True,
        UNKNOWN_TAG => True,
        others     => False
-     );
+     ];
 
 end Wiki;

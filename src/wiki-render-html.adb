@@ -449,14 +449,14 @@ package body Wiki.Render.Html is
 
       elsif not Engine.TOC_Rendered then
          Engine.Section_Level := 0;
-         Engine.Current_Section := (others => 0);
+         Engine.Current_Section := [others => 0];
          Engine.Output.Start_Element ("div");
          Engine.Output.Write_Attribute ("class", "wiki-toc");
          Wiki.Nodes.Lists.Iterate (Toc, Render_Entry'Access);
          Set_Current_Level (0);
          Engine.Output.End_Element ("div");
          Engine.TOC_Rendered := True;
-         Engine.Current_Section := (others => 0);
+         Engine.Current_Section := [others => 0];
       end if;
    end Render_TOC;
 
@@ -506,7 +506,7 @@ package body Wiki.Render.Html is
                                 Tag      : in String;
                                 Level    : in Natural) is
    begin
-      Engine.Set_Format ((others => False));
+      Engine.Set_Format ([others => False]);
       if Engine.Has_Paragraph then
          Engine.Output.End_Element ("p");
          Engine.Has_Paragraph := False;
@@ -562,7 +562,7 @@ package body Wiki.Render.Html is
       if Engine.Has_Html_Paragraph then
          return;
       end if;
-      Engine.Set_Format ((others => False));
+      Engine.Set_Format ([others => False]);
       if Engine.Has_Paragraph then
          Engine.Output.End_Element ("p");
          if not Engine.No_Newline then
@@ -853,7 +853,7 @@ package body Wiki.Render.Html is
    type String_Array_Access is array (Format_Type) of Wiki.String_Access;
 
    HTML_ELEMENT     : constant String_Array_Access :=
-     (STRONG      => HTML_STRONG'Access,
+     [STRONG      => HTML_STRONG'Access,
       BOLD        => HTML_BOLD'Access,
       ITALIC      => HTML_ITALIC'Access,
       EMPHASIS    => HTML_EM'Access,
@@ -864,7 +864,7 @@ package body Wiki.Render.Html is
       PREFORMAT   => HTML_PREFORMAT'Access,
       INS         => HTML_INS'Access,
       CITE        => HTML_CITE'Access,
-      UNDERLINE   => HTML_UNDERLINE'Access);
+      UNDERLINE   => HTML_UNDERLINE'Access];
 
    --  ------------------------------
    --  Add a text block with the given format.

@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-markdown -- Markdown parser operations
---  Copyright (C) 2016 - 2025 Stephane Carrez
+--  Copyright (C) 2016 - 2026 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -1982,14 +1982,14 @@ package body Wiki.Parsers.Markdown is
    end Scan_Inline_Html;
 
    HREF_LOOSE  : constant Util.Encoders.URI.Encoding_Array
-     := ('0' .. '9' => False,
+     := ['0' .. '9' => False,
          'a' .. 'z' => False,
          'A' .. 'Z' => False,
          '-' => False, '.' => False, '_' => False, '~' => False, '+' => False,
          ''' => False, '*' => False, '(' => False, '&' => False, '$' => False,
          ')' => False, ',' => False, '%' => False, '#' => False, '@' => False,
          '?' => False, '=' => False, ';' => False, ':' => False, '/' => False,
-         others => True);
+         others => True];
 
    procedure Parse_Inline_Text (Parser : in out Parser_Type;
                                 Text   : in Wiki.Buffers.Cursor) is

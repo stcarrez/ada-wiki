@@ -2140,7 +2140,7 @@ private package Wiki.Html_Parser.Entities is
    ZWJ_NAME                   : aliased constant String := "zwj";
    ZWNJ_NAME                  : aliased constant String := "zwnj";
 
-   Keywords : constant Keyword_Array := (
+   Keywords : constant Keyword_Array := [
       AELIG_NAME'Access,
       AMP_NAME'Access,
       AACUTE_NAME'Access,
@@ -4265,9 +4265,9 @@ private package Wiki.Html_Parser.Entities is
       ZOPF_402_NAME'Access,
       ZSCR_403_NAME'Access,
       ZWJ_NAME'Access,
-      ZWNJ_NAME'Access);
+      ZWNJ_NAME'Access];
 
-   Mapping : constant Char_Array := (
+   Mapping : constant Char_Array := [
       Wide_Wide_Character'Val (198),
       Wide_Wide_Character'Val (38),
       Wide_Wide_Character'Val (193),
@@ -6392,6 +6392,6 @@ private package Wiki.Html_Parser.Entities is
       Wide_Wide_Character'Val (120171),
       Wide_Wide_Character'Val (120015),
       Wide_Wide_Character'Val (8205),
-      Wide_Wide_Character'Val (8204));
+      Wide_Wide_Character'Val (8204)];
 
 end Wiki.Html_Parser.Entities;

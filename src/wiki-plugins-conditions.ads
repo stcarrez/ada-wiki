@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-plugins-conditions -- Condition Plugin
---  Copyright (C) 2016, 2020 Stephane Carrez
+--  Copyright (C) 2016, 2020, 2026 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -49,7 +49,7 @@ private
 
    type Condition_Plugin is new Wiki_Plugin with record
       Depth  : Condition_Depth := 1;
-      Values : Boolean_Array := (others => False);
+      Values : Boolean_Array := [others => False];
       Params : Wiki.Attributes.Attribute_List;
    end record;
 

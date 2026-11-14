@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-text -- Wiki Text renderer
---  Copyright (C) 2011 - 2025 Stephane Carrez
+--  Copyright (C) 2011 - 2026 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -15,7 +15,7 @@ package body Wiki.Render.Text is
    use type Nodes.Node_List_Access;
    use type Wiki.Nodes.Node_Type_Access;
 
-   Empty_Formats : constant Format_Map := (others => False);
+   Empty_Formats : constant Format_Map := [others => False];
 
    --  ------------------------------
    --  Set the output writer.
@@ -237,30 +237,30 @@ package body Wiki.Render.Text is
             Engine.Current_Mode := Previous_Mode;
          else
             if Title'Length /= 0 then
-               Engine.Render_Paragraph (Nodes.N_LINK, Title, (others => False));
+               Engine.Render_Paragraph (Nodes.N_LINK, Title, [others => False]);
             end if;
             if Href'Length /= 0 and then Engine.Display_Links then
                if Title'Length /= 0 then
-                  Engine.Render_Paragraph (Nodes.N_LINK, " (", (others => False));
+                  Engine.Render_Paragraph (Nodes.N_LINK, " (", [others => False]);
                end if;
-               Engine.Render_Paragraph (Nodes.N_LINK, Href, (others => False));
+               Engine.Render_Paragraph (Nodes.N_LINK, Href, [others => False]);
                if Title'Length /= 0 then
-                  Engine.Render_Paragraph (Nodes.N_LINK, ")", (others => False));
+                  Engine.Render_Paragraph (Nodes.N_LINK, ")", [others => False]);
                end if;
             end if;
          end if;
       else
          if not Doc.Has_Link (Title) then
-            Engine.Render_Paragraph (Nodes.N_TEXT, "[", (others => False));
+            Engine.Render_Paragraph (Nodes.N_TEXT, "[", [others => False]);
             Engine.Current_Mode := Nodes.N_LINK;
             Engine.Render (Doc, Node.Children);
             Engine.Current_Mode := Previous_Mode;
-            Engine.Render_Paragraph (Nodes.N_TEXT, "]", (others => False));
+            Engine.Render_Paragraph (Nodes.N_TEXT, "]", [others => False]);
          else
             declare
                Link_Title : constant Wiki.Strings.WString := Doc.Get_Link_Title (Title);
             begin
-               Engine.Render_Paragraph (Nodes.N_LINK, Link_Title, (others => False));
+               Engine.Render_Paragraph (Nodes.N_LINK, Link_Title, [others => False]);
             end;
          end if;
       end if;
@@ -313,7 +313,7 @@ package body Wiki.Render.Text is
                Last := (if Helpers.Is_Newline (Text (Pos)) then Pos - 1 else Pos);
                Text_Renderer'Class (Engine).Write_Text (Nodes.N_PREFORMAT,
                                                         Text (First .. Last),
-                                                        (others => False));
+                                                        [others => False]);
                Engine.Current_Indent := 1;
                Engine.Add_Line_Break;
                Engine.Empty_Line := Last >= First;
@@ -529,7 +529,7 @@ package body Wiki.Render.Text is
    procedure Render_Paragraph (Engine : in out Text_Renderer;
                                Kind   : in Wiki.Nodes.Node_Kind;
                                Text   : in Wiki.Strings.WString;
-                               Format : in Format_Map := (others => False)) is
+                               Format : in Format_Map := [others => False]) is
       Max : constant Natural := Engine.Line_Length;
       C : Wiki.Strings.WChar;
    begin

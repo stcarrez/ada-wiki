@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-html -- Wiki HTML renderer
---  Copyright (C) 2011 - 2024 Stephane Carrez
+--  Copyright (C) 2011 - 2026 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -112,8 +112,8 @@ private
 
    type Html_Renderer is limited new Renderer with record
       Output            : Wiki.Streams.Html.Html_Output_Stream_Access := null;
-      Format            : Wiki.Format_Map := (others => False);
-      Current_Format    : Format_Map := (others => False);
+      Format            : Wiki.Format_Map := [others => False];
+      Current_Format    : Format_Map := [others => False];
       Fmt_Stack         : Format_Stack;
       Fmt_Stack_Size    : Natural := 0;
       Links             : Wiki.Render.Links.Link_Renderer_Access := Default_Links'Access;
@@ -127,10 +127,10 @@ private
       Current_Level     : Natural := 0;
       Html_Tag          : Wiki.Html_Tag := BODY_TAG;
       Html_Stack        : Tag_Stacks.Stack;
-      List_Styles       : List_Style_Array := (others => False);
+      List_Styles       : List_Style_Array := [others => False];
       Quote_Level       : Natural := 0;
       Html_Level        : Natural := 0;
-      Current_Section   : Toc_Number_Array (1 .. MAX_TOC_LEVEL) := (others => 0);
+      Current_Section   : Toc_Number_Array (1 .. MAX_TOC_LEVEL) := [others => 0];
       Section_Level     : List_Index_Type := 0;
       Column            : Natural := 0;
       In_Definition     : Boolean := False;

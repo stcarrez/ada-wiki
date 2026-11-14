@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-render-wiki -- Wiki to Wiki renderer
---  Copyright (C) 2015, 2016, 2020, 2022, 2024, 2025 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020, 2022, 2024, 2025, 2026 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -144,10 +144,10 @@ private
    type Wiki_Renderer is new Renderer with record
       Output              : Streams.Output_Stream_Access := null;
       Syntax              : Wiki_Syntax := SYNTAX_CREOLE;
-      Format              : Format_Map := (others => False);
-      Tags                : Wiki_Tag_Array := (others => EMPTY_TAG'Access);
-      Style_Start_Tags    : Wiki_Format_Array := (others => EMPTY_TAG'Access);
-      Style_End_Tags      : Wiki_Format_Array := (others => EMPTY_TAG'Access);
+      Format              : Format_Map := [others => False];
+      Tags                : Wiki_Tag_Array := [others => EMPTY_TAG'Access];
+      Style_Start_Tags    : Wiki_Format_Array := [others => EMPTY_TAG'Access];
+      Style_End_Tags      : Wiki_Format_Array := [others => EMPTY_TAG'Access];
       Escape_Set          : Ada.Strings.Wide_Wide_Maps.Wide_Wide_Character_Set;
       List_Index          : List_Index_Type := 0;
       List_Levels         : List_Level_Array (1 .. MAX_LIST_LEVEL);
@@ -175,7 +175,7 @@ private
       UL_List_Level       : Natural := 0;
       OL_List_Level       : Natural := 0;
       Current_Indent      : Natural := 0;
-      Current_Style       : Format_Map := (others => False);
+      Current_Style       : Format_Map := [others => False];
       Content             : Unbounded_Wide_Wide_String;
       Link_Href           : Unbounded_Wide_Wide_String;
       Link_Title          : Unbounded_Wide_Wide_String;

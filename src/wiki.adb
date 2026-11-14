@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki -- Ada Wiki Engine
---  Copyright (C) 2015, 2016, 2018, 2020 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2018, 2020, 2026 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -121,7 +121,7 @@ package body Wiki is
    UNKNOWN_TAG_NAME             : aliased constant String := "unknown";
 
    Tag_Names : constant Tag_Array :=
-     (
+     [
       ROOT_HTML_TAG             => HTML_TAG_NAME'Access,
       HEAD_TAG                  => HEAD_TAG_NAME'Access,
       TITLE_TAG                 => TITLE_TAG_NAME'Access,
@@ -232,7 +232,7 @@ package body Wiki is
       CANVAS_TAG                => CANVAS_TAG_NAME'Access,
       TT_TAG                    => TT_TAG_NAME'Access,
       UNKNOWN_TAG               => UNKNOWN_TAG_NAME'Access
-     );
+     ];
 
    --  ------------------------------
    --  Get the HTML tag name.

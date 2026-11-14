@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-common -- Common operations with several wiki parsers
---  Copyright (C) 2011 - 2024 Stephane Carrez
+--  Copyright (C) 2011 - 2026 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -13,13 +13,13 @@ package body Wiki.Parsers.Common is
    use Wiki.Buffers;
 
    Attr_Names_Title_First : constant String_Array (1 .. 4)
-     := (NAME_ATTR'Access, HREF_ATTR'Access, LANG_ATTR'Access, TITLE_ATTR'Access);
+     := [NAME_ATTR'Access, HREF_ATTR'Access, LANG_ATTR'Access, TITLE_ATTR'Access];
 
    Attr_Names_Link_First  : constant String_Array (1 .. 4)
-     := (HREF_ATTR'Access, NAME_ATTR'Access, LANG_ATTR'Access, TITLE_ATTR'Access);
+     := [HREF_ATTR'Access, NAME_ATTR'Access, LANG_ATTR'Access, TITLE_ATTR'Access];
 
    Attr_Name              : constant String_Array (1 .. 1)
-     := (1 => NAME_ATTR'Access);
+     := [1 => NAME_ATTR'Access];
 
    procedure Expand_Parameter (Parser  : in out Parser_Type;
                                Text    : in out Wiki.Buffers.Cursor;

@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-helpers -- Helper operations for wiki parsers and renderer
---  Copyright (C) 2016, 2020, 2022, 2024, 2025 Stephane Carrez
+--  Copyright (C) 2016, 2020, 2022, 2024, 2025, 2026 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -236,14 +236,14 @@ package body Wiki.Helpers is
    end Index;
 
    HREF_LOOSE  : constant Util.Encoders.URI.Encoding_Array
-     := ('0' .. '9' => False,
+     := ['0' .. '9' => False,
          'a' .. 'z' => False,
          'A' .. 'Z' => False,
          '-' => False, '.' => False, '_' => False, '~' => False, '+' => False,
          ''' => False, '*' => False, '(' => False, '&' => False, '$' => False,
          ')' => False, ',' => False, '%' => False, '#' => False, '@' => False,
          '?' => False, '=' => False, ';' => False, ':' => False, '/' => False,
-         others => True);
+         others => True];
 
    --  ------------------------------
    --  Encode the URI.

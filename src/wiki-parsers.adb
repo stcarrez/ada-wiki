@@ -165,7 +165,7 @@ package body Wiki.Parsers is
          Strings.Clear (Parser.Text);
          Parser.Context.Filters.Add_Text (Parser.Document,
                                           Content (Content'First .. Last),
-                                          Format => (others => False));
+                                          Format => [others => False]);
       end Add_Header;
 
       procedure Add_Header is
@@ -1038,7 +1038,7 @@ package body Wiki.Parsers is
       Engine.Document   := Doc;
       Engine.Previous_Syntax := Engine.Context.Syntax;
       Engine.Empty_Line := True;
-      Engine.Format     := (others => False);
+      Engine.Format     := [others => False];
       Engine.Is_Eof     := False;
       Engine.In_Paragraph := True;
       Engine.Reader      := Stream;

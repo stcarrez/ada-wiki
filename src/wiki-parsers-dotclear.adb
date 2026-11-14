@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-parsers-dotclear -- Dotclear parser operations
---  Copyright (C) 2011 - 2025 Stephane Carrez
+--  Copyright (C) 2011 - 2026 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -11,7 +11,6 @@ package body Wiki.Parsers.Dotclear is
 
    use Wiki.Helpers;
    use Wiki.Nodes;
-   use Wiki.Strings;
    use Wiki.Buffers;
 
    --  Parse an image.

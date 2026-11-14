@@ -104,7 +104,7 @@ package body Wiki.Render.Wiki is
    IMG_START_MEDIAWIKI       : aliased constant Strings.WString := "[[File:";
    IMG_END_MEDIAWIKI         : aliased constant Strings.WString := "]]";
 
-   Empty_Formats : constant Format_Map := (others => False);
+   Empty_Formats : constant Format_Map := [others => False];
 
    function Default_Need_Escape (Engine : in Wiki_Renderer;
                                  Text   : in Strings.WString) return Boolean is

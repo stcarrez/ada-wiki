@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-filters-html -- Wiki HTML filters
---  Copyright (C) 2015, 2016, 2020, 2025 Stephane Carrez
+--  Copyright (C) 2015, 2016, 2020, 2025, 2026 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -127,20 +127,20 @@ private
    subtype Tag_Cursor is Tag_Vectors.Cursor;
 
    type Html_Filter_Type is new Filter_Type with record
-      Allowed    : Tag_Boolean_Array := (UNKNOWN_TAG   => False,
+      Allowed    : Tag_Boolean_Array := [UNKNOWN_TAG   => False,
                                          SCRIPT_TAG    => False,
                                          ROOT_HTML_TAG => False,
                                          HEAD_TAG      => False,
                                          BODY_TAG      => False,
                                          META_TAG      => False,
                                          TITLE_TAG     => False,
-                                         others        => True);
+                                         others        => True];
 
-      Hidden     : Tag_Boolean_Array := (UNKNOWN_TAG  => False,
+      Hidden     : Tag_Boolean_Array := [UNKNOWN_TAG  => False,
                                          SCRIPT_TAG   => True,
                                          STYLE_TAG    => True,
                                          NOSCRIPT_TAG => True,
-                                         others       => False);
+                                         others       => False];
       Stack      : Tag_Vector;
       Hide_Level : Natural := 0;
    end record;
