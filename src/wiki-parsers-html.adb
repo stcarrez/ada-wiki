@@ -46,7 +46,10 @@ package body Wiki.Parsers.Html is
    begin
       if not Wiki.Html_Parser.Is_Empty (Parser.Html) then
          Wiki.Html_Parser.Parse_Element (Parser.Html, Text, Pos, Kind, Pos);
-         if Kind /= Wiki.Html_Parser.HTML_NONE then
+         if Kind = Wiki.Html_Parser.HTML_ERROR and then Pos = Text'First then
+            --  The pending '<' does not start a HTML element: keep it as text.
+            Append (Parser.Text, '<');
+         elsif Kind /= Wiki.Html_Parser.HTML_NONE then
             Process (Kind, Parser.Html.Elt_Name, Parser.Html.Attributes);
          end if;
       end if;
@@ -55,14 +58,25 @@ package body Wiki.Parsers.Html is
          C := Text (Pos);
          case C is
             when '<' =>
-               if First < Pos then
-                  Append (Parser.Text, Text (First .. Pos - 1));
-               end if;
-               Wiki.Html_Parser.Parse_Element (Parser.Html, Text, Pos + 1, Kind, Pos);
-               if Kind /= Wiki.Html_Parser.HTML_NONE then
-                  Process (Kind, Parser.Html.Elt_Name, Parser.Html.Attributes);
-               end if;
-               First := Pos;
+               declare
+                  Lt_Pos : constant Natural := Pos;
+               begin
+                  Wiki.Html_Parser.Parse_Element (Parser.Html, Text, Lt_Pos + 1, Kind, Pos);
+                  if Kind = Wiki.Html_Parser.HTML_ERROR then
+                     --  The '<' does not start a HTML element: keep the text as is.
+                     if First < Pos then
+                        Append (Parser.Text, Text (First .. Pos - 1));
+                     end if;
+                  else
+                     if First < Lt_Pos then
+                        Append (Parser.Text, Text (First .. Lt_Pos - 1));
+                     end if;
+                     if Kind /= Wiki.Html_Parser.HTML_NONE then
+                        Process (Kind, Parser.Html.Elt_Name, Parser.Html.Attributes);
+                     end if;
+                  end if;
+                  First := Pos;
+               end;
 
             when '&' =>
                declare

@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------
 --  wiki-html_parser -- Wiki HTML parser
---  Copyright (C) 2015, 2016, 2018, 2020, 2021, 2022, 2023, 2025 Stephane Carrez
+--  Copyright (C) 2015 - 2026 Stephane Carrez
 --  Written by Stephane Carrez (Stephane.Carrez@gmail.com)
 --  SPDX-License-Identifier: Apache-2.0
 -----------------------------------------------------------------------
@@ -342,10 +342,20 @@ package body Wiki.Html_Parser is
                   Parser.State := State_End_Element;
                   Pos := Pos + 1;
                   Wiki.Strings.Clear (Parser.Elt_Name);
-               else
+               elsif C in 'a' .. 'z' | 'A' .. 'Z' then
+                  --  Only an ASCII letter can start a HTML element name.
                   Parser.State := State_Element;
                   Wiki.Strings.Clear (Parser.Elt_Name);
                   Wiki.Attributes.Clear (Parser.Attributes);
+               else
+                  --  The '<' is not followed by a letter: it is a literal text
+                  --  character (HTML5 tag open state).  Only the '<' is consumed.
+                  Parser.State := State_None;
+                  Wiki.Strings.Clear (Parser.Elt_Name);
+                  Wiki.Attributes.Clear (Parser.Attributes);
+                  Result := HTML_ERROR;
+                  Last := Pos;
+                  return;
                end if;
 
             when State_Comment_Or_Doctype =>

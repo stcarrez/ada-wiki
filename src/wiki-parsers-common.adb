@@ -518,12 +518,19 @@ package body Wiki.Parsers.Common is
 
       --  Feed the HTML parser if there are some pending state.
       loop
-         Wiki.Html_Parser.Parse_Element (Parser.Html, Pos.Block.Content (1 .. Pos.Block.Last),
-                                         Pos.Pos, Kind, Pos.Pos);
-         if Kind /= Wiki.Html_Parser.HTML_NONE then
-            Process_Html (Parser, Kind, Wiki.Strings.To_WString (Parser.Html.Elt_Name),
-                          Parser.Html.Attributes);
-         end if;
+         declare
+            From : constant Natural := Pos.Pos;
+         begin
+            Wiki.Html_Parser.Parse_Element (Parser.Html, Pos.Block.Content (1 .. Pos.Block.Last),
+                                            From, Kind, Pos.Pos);
+            if Kind = Wiki.Html_Parser.HTML_ERROR and then Pos.Pos = From then
+               --  The '<' does not start a HTML element: keep it as text.
+               Append (Parser.Text, '<');
+            elsif Kind /= Wiki.Html_Parser.HTML_NONE then
+               Process_Html (Parser, Kind, Wiki.Strings.To_WString (Parser.Html.Elt_Name),
+                             Parser.Html.Attributes);
+            end if;
+         end;
          if Pos.Pos = Pos.Block.Last + 1 then
             Pos.Block := Pos.Block.Next_Block;
             exit when Pos.Block = null;
@@ -547,12 +554,19 @@ package body Wiki.Parsers.Common is
       while Buffers.Is_Valid (Pos) loop
          C := Buffers.Char_At (Pos);
          if C = '<' then
-            Wiki.Html_Parser.Parse_Element (Parser.Html, Pos.Block.Content (1 .. Pos.Block.Last),
-                                            Pos.Pos + 1, Kind, Pos.Pos);
-            if Kind /= Wiki.Html_Parser.HTML_NONE then
-               Process_Html (Parser, Kind, Wiki.Strings.To_WString (Parser.Html.Elt_Name),
-                             Parser.Html.Attributes);
-            end if;
+            declare
+               From : constant Natural := Pos.Pos + 1;
+            begin
+               Wiki.Html_Parser.Parse_Element (Parser.Html, Pos.Block.Content (1 .. Pos.Block.Last),
+                                               From, Kind, Pos.Pos);
+               if Kind = Wiki.Html_Parser.HTML_ERROR and then Pos.Pos = From then
+                  --  The '<' does not start a HTML element: keep it as text.
+                  Append (Parser.Text, '<');
+               elsif Kind /= Wiki.Html_Parser.HTML_NONE then
+                  Process_Html (Parser, Kind, Wiki.Strings.To_WString (Parser.Html.Elt_Name),
+                                Parser.Html.Attributes);
+               end if;
+            end;
          else
             Append (Parser.Text, C);
             Buffers.Next (Pos);
