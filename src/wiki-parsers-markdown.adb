@@ -1975,7 +1975,7 @@ package body Wiki.Parsers.Markdown is
       if not (Kind in Wiki.Html_Parser.HTML_NONE | Wiki.Html_Parser.HTML_ERROR) then
          Delim.Count := 1;
          Delim.Marker := M_INLINE_HTML;
-         Buffers.Next (Pos);
+         --  Parse_Element left Pos just after the '>' of the tag.
          Text := Pos;
          return;
       end if;

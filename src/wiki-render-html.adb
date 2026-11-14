@@ -610,6 +610,9 @@ package body Wiki.Render.Html is
                           Title  : in Wiki.Strings.WString;
                           Attr   : in Wiki.Attributes.Attribute_List) is
 
+      Prev_Para : Boolean;
+      Format    : constant Format_Map := Engine.Current_Format;
+
       procedure Render_Attribute (Name  : in String;
                                   Value : in Wiki.Strings.WString);
 
@@ -638,6 +641,7 @@ package body Wiki.Render.Html is
 
    begin
       Engine.Open_Paragraph;
+      Prev_Para := Engine.Has_Paragraph;
       if Node.Kind = Nodes.N_LINK then
          Engine.Output.Start_Element ("a");
          Wiki.Attributes.Iterate (Attr, Render_Attribute'Access);
@@ -646,6 +650,14 @@ package body Wiki.Render.Html is
          elsif Title'Length > 0 then
             --  Print the title only when it is not empty to avoid <a> </a>.
             Engine.Output.Write_Wide_Text (Title);
+         end if;
+         --  Close the paragraph and the text formats that were opened within
+         --  the link so that the end tag is properly nested.
+         Engine.Set_Format (Format);
+         if not Prev_Para and then Engine.Has_Paragraph then
+            Engine.Output.End_Element ("p");
+            Engine.Has_Paragraph := False;
+            Engine.Need_Paragraph := True;
          end if;
          Engine.Output.End_Element ("a");
       else
@@ -679,6 +691,14 @@ package body Wiki.Render.Html is
                      Engine.Output.Write_Wide_Text (Title);
                   end if;
                end;
+               --  Close the paragraph and the text formats that were opened
+               --  within the link so that the end tag is properly nested.
+               Engine.Set_Format (Format);
+               if not Prev_Para and then Engine.Has_Paragraph then
+                  Engine.Output.End_Element ("p");
+                  Engine.Has_Paragraph := False;
+                  Engine.Need_Paragraph := True;
+               end if;
                Engine.Output.End_Element ("a");
             end if;
          end;
