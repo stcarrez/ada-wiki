@@ -1,0 +1,1 @@
+<p>I &lt;3 hearts&gt; wiki syntax.</p><p>A &lt; b and 5 &lt; 6 are comparisons, not tags.</p><p>A <span class="x">valid</span> tag still works.</p>

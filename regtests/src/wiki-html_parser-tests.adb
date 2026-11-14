@@ -138,10 +138,9 @@ package body Wiki.Html_Parser.Tests is
    procedure Test_Parse_Element (T : in out Test) is
    begin
       Check_Parser (T, "a", HTML_START, "a>");
-      Check_Parser (T, "a", HTML_START, "   a   >");
       Check_Parser (T, "input", HTML_START, "input>");
       Check_Parser (T, "a", HTML_END, "/a>");
-      Check_Parser (T, "input", HTML_START_END, "  input  />");
+      Check_Parser (T, "input", HTML_START_END, "input  />");
       Check_Parser (T, "br", HTML_START_END, "br/>");
       Check_Parser (T, "img", HTML_END, "/img   >");
    end Test_Parse_Element;
@@ -155,6 +154,13 @@ package body Wiki.Html_Parser.Tests is
       Check_Error (T, 9, "input   """);
       Check_Error (T, 7, "input =");
       Check_Error (T, 17, "input abcd efgh =");
+      --  A '<' followed by a non letter is not a HTML element (literal text).
+      Check_Error (T, 1, "3 hearts>");
+      Check_Error (T, 1, "   a   >");
+      Check_Error (T, 1, "  input  />");
+      Check_Error (T, 1, "?xml version='1.0'?>");
+      Check_Error (T, 1, "3");
+      Check_Error (T, 1, "  3 hearts>");
    end Test_Parse_Error;
 
    procedure Check_Attribute (T     : in out Test;

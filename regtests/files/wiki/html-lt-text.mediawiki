@@ -1,0 +1,5 @@
+I <3 hearts> wiki syntax.
+
+A < b and 5 < 6 are comparisons, not tags.
+
+A <span class='x'>valid</span> tag still works.
