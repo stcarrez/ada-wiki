@@ -26,6 +26,7 @@ You can play with the Wiki engine by using [Wi2wic](https://gitlab.com/stcarrez/
 ## Version 1.5.1   - Under development
   - Fix wrong closing in HTML of some formatting element within a list item
   - Feature #17: Generate `<figure>` and `<figcaption>` when an image has a caption
+  - Fix #19: HTML parser: treat < followed by a non-letter as literal text (HTML5 tag-open rule)
 
 ## Version 1.5.0   - Oct 2025
   - Feature #12: Improvement of HTML renderer
