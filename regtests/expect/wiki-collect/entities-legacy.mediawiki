@@ -1,0 +1,17 @@
+== Words ==
+Invalid 1
+Legacy 1
+Named 1
+Numeric 1
+amp 1
+end 1
+kept 1
+semicolon 2
+tag 1
+text 1
+unknown 1
+with 1
+without 1
+zwnj 1
+== Links ==
+== Images ==

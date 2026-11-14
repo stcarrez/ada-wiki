@@ -1,1 +1,1 @@
-![the & ≤ >](image-1.jpg) ![the &](image-2.jpg) ![the &](image-3.jpg)
+![the & ≤ >](image-1.jpg) ![the &amp](image-2.jpg) ![the &#34](image-3.jpg)

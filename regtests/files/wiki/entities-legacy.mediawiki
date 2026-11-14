@@ -1,0 +1,7 @@
+Named with semicolon: &amp; &copy; &lt;tag&gt; &notin;
+
+Legacy without semicolon: &amp &copy &lt &gt &nbsp end.
+
+Numeric: &#65; &#x41; &#128; &#x1F600; &#55296; &#1114112; &#x10FFFF;
+
+Invalid kept as text: &unknown; &amp= &zwnj

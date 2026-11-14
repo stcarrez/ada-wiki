@@ -282,8 +282,9 @@ package body Wiki.Html_Parser.Tests is
       Assert_Equals (T, ENTITY_NONE, Status, "Invalid status");
 
       Parse_Entity (P, "#x000000;", 1, Status, Entity, Last);
-      Util.Tests.Assert_Equals (T, 1, Last, "Invalid last index");
-      Assert_Equals (T, ENTITY_NONE, Status, "Invalid status");
+      Util.Tests.Assert_Equals (T, 10, Last, "Invalid last index");
+      Assert_Equals (T, ENTITY_VALID, Status, "Invalid status");
+      Assert_Equals (T, Wiki.Strings.WChar'Val (16#0FFFD#), Entity, "Invalid parsed entity");
 
       Parse_Entity (P, "#000000;", 1, Status, Entity, Last);
       Util.Tests.Assert_Equals (T, 9, Last, "Invalid last index");
@@ -303,6 +304,60 @@ package body Wiki.Html_Parser.Tests is
       Assert_Equals (T, ENTITY_NONE, Status, "Invalid status");
       Util.Tests.Assert_Equals (T, 1, Last, "Invalid last index");
       Assert_Equals (T, NUL, Entity, "Invalid parsed entity");
+
+      --  Numeric character references follow the HTML5 rules.
+      Parse_Entity (P, "#128;", 1, Status, Entity, Last);       --  0x80 -> euro sign
+      Util.Tests.Assert_Equals (T, 6, Last, "Invalid last index");
+      Assert_Equals (T, Wiki.Strings.WChar'Val (16#20AC#), Entity, "Invalid parsed entity");
+
+      Parse_Entity (P, "#x80;", 1, Status, Entity, Last);
+      Util.Tests.Assert_Equals (T, 6, Last, "Invalid last index");
+      Assert_Equals (T, Wiki.Strings.WChar'Val (16#20AC#), Entity, "Invalid parsed entity");
+
+      Parse_Entity (P, "#x1F600;", 1, Status, Entity, Last);    --  astral hex plane
+      Util.Tests.Assert_Equals (T, 9, Last, "Invalid last index");
+      Assert_Equals (T, Wiki.Strings.WChar'Val (16#1F600#), Entity, "Invalid parsed entity");
+
+      Parse_Entity (P, "#128512;", 1, Status, Entity, Last);    --  astral decimal
+      Util.Tests.Assert_Equals (T, 9, Last, "Invalid last index");
+      Assert_Equals (T, Wiki.Strings.WChar'Val (16#1F600#), Entity, "Invalid parsed entity");
+
+      Parse_Entity (P, "#x10FFFF;", 1, Status, Entity, Last);   --  max valid code point
+      Util.Tests.Assert_Equals (T, 10, Last, "Invalid last index");
+      Assert_Equals (T, Wiki.Strings.WChar'Val (16#10FFFF#), Entity, "Invalid parsed entity");
+
+      Parse_Entity (P, "#55296;", 1, Status, Entity, Last);     --  surrogate -> U+FFFD
+      Util.Tests.Assert_Equals (T, 8, Last, "Invalid last index");
+      Assert_Equals (T, Wiki.Strings.WChar'Val (16#0FFFD#), Entity, "Invalid parsed entity");
+
+      Parse_Entity (P, "#xD800;", 1, Status, Entity, Last);     --  surrogate hex -> U+FFFD
+      Util.Tests.Assert_Equals (T, 8, Last, "Invalid last index");
+      Assert_Equals (T, Wiki.Strings.WChar'Val (16#0FFFD#), Entity, "Invalid parsed entity");
+
+      Parse_Entity (P, "#1114112;", 1, Status, Entity, Last);   --  > 0x10FFFF -> U+FFFD
+      Util.Tests.Assert_Equals (T, 10, Last, "Invalid last index");
+      Assert_Equals (T, Wiki.Strings.WChar'Val (16#0FFFD#), Entity, "Invalid parsed entity");
+
+      --  Legacy named character references without the ';' terminator.
+      Parse_Entity (P, "amp ", 1, Status, Entity, Last);
+      Util.Tests.Assert_Equals (T, 4, Last, "Invalid last index");
+      Assert_Equals (T, '&', Entity, "Invalid parsed entity");
+
+      Parse_Entity (P, "copy,", 1, Status, Entity, Last);
+      Util.Tests.Assert_Equals (T, 5, Last, "Invalid last index");
+      Assert_Equals (T, Wiki.Strings.WChar'Val (16#A9#), Entity, "Invalid parsed entity");
+
+      Parse_Entity (P, "amp=", 1, Status, Entity, Last);        --  followed by '=': not decoded
+      Assert_Equals (T, ENTITY_NONE, Status, "Invalid status");
+      Util.Tests.Assert_Equals (T, 1, Last, "Invalid last index");
+
+      Parse_Entity (P, "ampx", 1, Status, Entity, Last);        --  followed by alnum: wait/keep
+      Assert_Equals (T, ENTITY_MIDDLE, Status, "Invalid status");
+
+      Status := ENTITY_NONE;
+      Parse_Entity (P, "zwnj ", 1, Status, Entity, Last);       --  not a legacy name: ';' required
+      Assert_Equals (T, ENTITY_NONE, Status, "Invalid status");
+      Util.Tests.Assert_Equals (T, 1, Last, "Invalid last index");
 
    end Test_Parse_Entity;
 

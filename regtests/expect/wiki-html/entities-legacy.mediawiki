@@ -1,0 +1,1 @@
+<p>Named with semicolon: &amp; © &lt;tag&gt; ∉</p><p>Legacy without semicolon: &amp; © &lt; &gt;   end.</p><p>Numeric: A A € 😀 � � 􏿿</p><p>Invalid kept as text: &amp;unknown; &amp;amp= &amp;zwnj</p>
