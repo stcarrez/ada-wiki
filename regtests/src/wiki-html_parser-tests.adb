@@ -240,6 +240,62 @@ package body Wiki.Html_Parser.Tests is
       Util.Tests.Assert_Equals (T, 19, Last, "Invalid last index");
       Assert_Equals (T, P.State, State_None, "Invalid parser state");
 
+      --  HTML5 comment end states: abrupt `<!-->` and `<!--->` close the comment.
+      declare
+         Q : Parser_Type;
+      begin
+         Parse_Element (Q, "!-->", 1, Kind, Last);
+         T.Assert (Kind = HTML_NONE, "invalid state");
+         Util.Tests.Assert_Equals (T, 5, Last, "Invalid last index");
+         Assert_Equals (T, Q.State, State_None, "Invalid parser state");
+      end;
+      declare
+         Q : Parser_Type;
+      begin
+         Parse_Element (Q, "!--->", 1, Kind, Last);
+         Util.Tests.Assert_Equals (T, 6, Last, "Invalid last index");
+         Assert_Equals (T, Q.State, State_None, "Invalid parser state");
+      end;
+      --  `--!>` also closes the comment.
+      declare
+         Q : Parser_Type;
+      begin
+         Parse_Element (Q, "!-- x --!>", 1, Kind, Last);
+         Util.Tests.Assert_Equals (T, 11, Last, "Invalid last index");
+         Assert_Equals (T, Q.State, State_None, "Invalid parser state");
+      end;
+      --  `--!->` does not close the comment.
+      declare
+         Q : Parser_Type;
+      begin
+         Parse_Element (Q, "!-- x --!->", 1, Kind, Last);
+         Util.Tests.Assert_Equals (T, 12, Last, "Invalid last index");
+         Assert_Equals (T, Q.State, State_Comment, "Invalid parser state");
+      end;
+      --  `--->` closes the comment, `-- >` does not.
+      declare
+         Q : Parser_Type;
+      begin
+         Parse_Element (Q, "!-- x --->", 1, Kind, Last);
+         Util.Tests.Assert_Equals (T, 11, Last, "Invalid last index");
+         Assert_Equals (T, Q.State, State_None, "Invalid parser state");
+      end;
+      declare
+         Q : Parser_Type;
+      begin
+         Parse_Element (Q, "!-- x -- >", 1, Kind, Last);
+         Util.Tests.Assert_Equals (T, 11, Last, "Invalid last index");
+         Assert_Equals (T, Q.State, State_Comment, "Invalid parser state");
+      end;
+      --  `<!-x>` is a bogus comment ended at the first '>'.
+      declare
+         Q : Parser_Type;
+      begin
+         Parse_Element (Q, "!-x>", 1, Kind, Last);
+         Util.Tests.Assert_Equals (T, 5, Last, "Invalid last index");
+         Assert_Equals (T, Q.State, State_None, "Invalid parser state");
+      end;
+
    end Test_Parse_Doctype;
 
    --  ------------------------------
