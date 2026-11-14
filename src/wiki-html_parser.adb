@@ -182,37 +182,128 @@ package body Wiki.Html_Parser is
    end Parse_Attribute_Value;
 
    --  ------------------------------
-   --  Parse a HTML/XML comment to strip it.
+   --  HTML5 comment states.  The sub-state is saved in `Parser.Counter` so that
+   --  a comment can be scanned over several input chunks.
+   --  ------------------------------
+   type Comment_State_Type is (C_Open_Dash,   --  `<!--` opener: expect the 2nd dash
+                               C_Bogus,       --  not a comment: skip up to '>'
+                               C_Start,       --  comment start (after `<!--`)
+                               C_Start_Dash,  --  comment start dash
+                               C_Body,        --  comment
+                               C_End_Dash,    --  comment end dash
+                               C_End,         --  comment end
+                               C_End_Bang);   --  comment end bang
+
+   --  ------------------------------
+   --  Parse a HTML/XML comment to strip it.  Follows the HTML5 comment states:
+   --  the comment ends at the first `-->` (also `--!>`), and the abrupt forms
+   --  `<!-->` and `<!--->` close an empty comment.
    --  ------------------------------
    procedure Parse_Comment (Parser : in out Parser_Type;
                             Text   : in Wiki.Strings.WString;
                             From   : in Positive;
                             Last   : out Positive) is
-      C    : Wiki.Strings.WChar;
-      Pos  : Positive := From;
+      C   : Wiki.Strings.WChar;
+      Pos : Positive := From;
+      S   : Comment_State_Type;
    begin
-      if Parser.State /= State_Comment then
+      if Parser.State = State_Comment then
+         S := Comment_State_Type'Val (Parser.Counter);
+      else
+         --  `<!-` was seen, the character at `From` completes the `<!--` opener.
          Parser.State := State_Comment;
-         Parser.Counter := 0;
+         S := C_Open_Dash;
       end if;
 
       while Pos <= Text'Last loop
          C := Text (Pos);
-         Pos := Pos + 1;
-         if C = '-' then
-            Parser.Counter := Parser.Counter + 1;
+         case S is
+            when C_Open_Dash =>
+               Pos := Pos + 1;
+               if C = '-' then
+                  S := C_Start;
+               else
+                  --  Not a comment opener: bogus comment, skip up to '>'.
+                  S := C_Bogus;
+               end if;
 
-         elsif C = '>' then
-            if Parser.Counter >= 2 then
-               Parser.State := State_None;
-               exit;
-            end if;
-            Parser.Counter := 0;
+            when C_Bogus =>
+               Pos := Pos + 1;
+               if C = '>' then
+                  Parser.State := State_None;
+                  Last := Pos;
+                  return;
+               end if;
 
-         else
-            Parser.Counter := 0;
-         end if;
+            when C_Start =>
+               Pos := Pos + 1;
+               if C = '>' then
+                  --  Abrupt closing of an empty comment: `<!-->`.
+                  Parser.State := State_None;
+                  Last := Pos;
+                  return;
+               elsif C = '-' then
+                  S := C_Start_Dash;
+               else
+                  S := C_Body;
+               end if;
+
+            when C_Start_Dash =>
+               Pos := Pos + 1;
+               if C = '>' then
+                  --  Abrupt closing of an empty comment: `<!--->`.
+                  Parser.State := State_None;
+                  Last := Pos;
+                  return;
+               elsif C = '-' then
+                  S := C_End;
+               else
+                  S := C_Body;
+               end if;
+
+            when C_Body =>
+               Pos := Pos + 1;
+               if C = '-' then
+                  S := C_End_Dash;
+               end if;
+
+            when C_End_Dash =>
+               Pos := Pos + 1;
+               if C = '-' then
+                  S := C_End;
+               else
+                  S := C_Body;
+               end if;
+
+            when C_End =>
+               Pos := Pos + 1;
+               if C = '>' then
+                  Parser.State := State_None;
+                  Last := Pos;
+                  return;
+               elsif C = '!' then
+                  S := C_End_Bang;
+               elsif C = '-' then
+                  S := C_End;
+               else
+                  S := C_Body;
+               end if;
+
+            when C_End_Bang =>
+               Pos := Pos + 1;
+               if C = '>' then
+                  --  `--!>` also closes the comment.
+                  Parser.State := State_None;
+                  Last := Pos;
+                  return;
+               elsif C = '-' then
+                  S := C_End_Dash;
+               else
+                  S := C_Body;
+               end if;
+         end case;
       end loop;
+      Parser.Counter := Comment_State_Type'Pos (S);
       Last := Pos;
    end Parse_Comment;
 
