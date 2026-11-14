@@ -42,7 +42,7 @@ package body Wiki.Html_Parser is
                             Last   : out Positive);
 
    function Is_Letter (C : in Wiki.Strings.WChar) return Boolean;
-   function From_Hex (Value : in String) return Wiki.Strings.WChar;
+   function From_Hex (Value : in String) return Interfaces.Unsigned_32;
 
    --  Check if the character is valid for a name attribute.
    function Is_Valid_For_Name (C : in Wiki.Strings.WChar) return Boolean
@@ -251,13 +251,18 @@ package body Wiki.Html_Parser is
          Target_Pos := Target_Pos + 1;
          C := From (Pos);
          if C = '&' then
-            Parse_Entity (Parser, From, Pos + 1, Status, C, Pos);
-            if Status = ENTITY_VALID then
-               Into (Target_Pos) := C;
-            else
-               Into (Target_Pos) := '&';
-               Pos := Pos + 1;
-            end if;
+            declare
+               Amp_Pos : constant Natural := Pos;
+            begin
+               Parse_Entity (Parser, From, Amp_Pos + 1, Status, C, Pos);
+               if Status = ENTITY_VALID then
+                  Into (Target_Pos) := C;
+               else
+                  --  Not a valid entity: keep the '&' and reprocess what follows it.
+                  Into (Target_Pos) := '&';
+                  Pos := Amp_Pos + 1;
+               end if;
+            end;
          else
             Into (Target_Pos) := C;
             Pos := Pos + 1;
@@ -530,15 +535,111 @@ package body Wiki.Html_Parser is
       elsif C in 'a' .. 'f' then Character'Pos (C) - Character'Pos ('a') + 10
       else raise Constraint_Error);
 
-   function From_Hex (Value : in String) return Wiki.Strings.WChar is
+   function From_Hex (Value : in String) return Interfaces.Unsigned_32 is
       Result : Interfaces.Unsigned_32 := 0;
    begin
       for C of Value loop
          Result := Interfaces.Shift_Left (Result, 4);
          Result := Result + Interfaces.Unsigned_32 (From_Hex (C));
       end loop;
-      return Wiki.Strings.WChar'Val (Result);
+      return Result;
    end From_Hex;
+
+   --  ------------------------------
+   --  Find a named character reference in the sorted keyword table.
+   --  Returns the index of the entry, or 0 when not found.
+   --  ------------------------------
+   function Find_Keyword (Name : in String) return Natural is
+      High : Natural := Wiki.Html_Parser.Entities.Keywords'Last;
+      Low  : Natural := Wiki.Html_Parser.Entities.Keywords'First;
+   begin
+      while Low <= High loop
+         declare
+            I : constant Natural := (Low + High) / 2;
+         begin
+            if Wiki.Html_Parser.Entities.Keywords (I).all = Name then
+               return I;
+            elsif Entities.Keywords (I).all < Name then
+               Low := I + 1;
+            else
+               High := I - 1;
+            end if;
+         end;
+      end loop;
+      return 0;
+   end Find_Keyword;
+
+   --  ------------------------------
+   --  Check whether the name is a legacy named character reference that HTML5
+   --  also recognizes without the ';' terminator.
+   --  ------------------------------
+   function Is_Legacy_Keyword (Name : in String) return Boolean is
+      High : Natural := Wiki.Html_Parser.Entities.Legacy_Keywords'Last;
+      Low  : Natural := Wiki.Html_Parser.Entities.Legacy_Keywords'First;
+   begin
+      while Low <= High loop
+         declare
+            I : constant Natural := (Low + High) / 2;
+         begin
+            if Wiki.Html_Parser.Entities.Legacy_Keywords (I).all = Name then
+               return True;
+            elsif Entities.Legacy_Keywords (I).all < Name then
+               Low := I + 1;
+            else
+               High := I - 1;
+            end if;
+         end;
+      end loop;
+      return False;
+   end Is_Legacy_Keyword;
+
+   --  ------------------------------
+   --  Map a numeric character reference value to a Unicode code point following
+   --  the HTML5 rules: NULL, surrogates and values above 0x10FFFF are replaced by
+   --  U+FFFD, and the 0x80-0x9F range is mapped through the Windows-1252 table.
+   --  ------------------------------
+   function Numeric_Reference (Value : in Interfaces.Unsigned_32) return Wiki.Strings.WChar is
+      use type Interfaces.Unsigned_32;
+   begin
+      if Value = 0 or else Value > 16#10FFFF#
+        or else (Value >= 16#D800# and then Value <= 16#DFFF#)
+      then
+         return Wiki.Strings.WChar'Val (16#FFFD#);
+      elsif Value >= 16#80# and then Value <= 16#9F# then
+         case Value is
+            when 16#80# => return Wiki.Strings.WChar'Val (16#20AC#);
+            when 16#82# => return Wiki.Strings.WChar'Val (16#201A#);
+            when 16#83# => return Wiki.Strings.WChar'Val (16#0192#);
+            when 16#84# => return Wiki.Strings.WChar'Val (16#201E#);
+            when 16#85# => return Wiki.Strings.WChar'Val (16#2026#);
+            when 16#86# => return Wiki.Strings.WChar'Val (16#2020#);
+            when 16#87# => return Wiki.Strings.WChar'Val (16#2021#);
+            when 16#88# => return Wiki.Strings.WChar'Val (16#02C6#);
+            when 16#89# => return Wiki.Strings.WChar'Val (16#2030#);
+            when 16#8A# => return Wiki.Strings.WChar'Val (16#0160#);
+            when 16#8B# => return Wiki.Strings.WChar'Val (16#2039#);
+            when 16#8C# => return Wiki.Strings.WChar'Val (16#0152#);
+            when 16#8E# => return Wiki.Strings.WChar'Val (16#017D#);
+            when 16#91# => return Wiki.Strings.WChar'Val (16#2018#);
+            when 16#92# => return Wiki.Strings.WChar'Val (16#2019#);
+            when 16#93# => return Wiki.Strings.WChar'Val (16#201C#);
+            when 16#94# => return Wiki.Strings.WChar'Val (16#201D#);
+            when 16#95# => return Wiki.Strings.WChar'Val (16#2022#);
+            when 16#96# => return Wiki.Strings.WChar'Val (16#2013#);
+            when 16#97# => return Wiki.Strings.WChar'Val (16#2014#);
+            when 16#98# => return Wiki.Strings.WChar'Val (16#02DC#);
+            when 16#99# => return Wiki.Strings.WChar'Val (16#2122#);
+            when 16#9A# => return Wiki.Strings.WChar'Val (16#0161#);
+            when 16#9B# => return Wiki.Strings.WChar'Val (16#203A#);
+            when 16#9C# => return Wiki.Strings.WChar'Val (16#0153#);
+            when 16#9E# => return Wiki.Strings.WChar'Val (16#017E#);
+            when 16#9F# => return Wiki.Strings.WChar'Val (16#0178#);
+            when others => return Wiki.Strings.WChar'Val (Value);
+         end case;
+      else
+         return Wiki.Strings.WChar'Val (Value);
+      end if;
+   end Numeric_Reference;
 
    --  ------------------------------
    --  Parse an HTML entity such as `&nbsp;` and return its value with the last position
@@ -552,13 +653,15 @@ package body Wiki.Html_Parser is
                            Status  : in out Entity_State_Type;
                            Entity  : out Wiki.Strings.WChar;
                            Last    : out Natural) is
-      Len  : Natural := Parser.Counter;
-      C    : Wiki.Strings.WChar;
-      Pos  : Positive := From;
+      Len        : Natural := Parser.Counter;
+      C          : Wiki.Strings.WChar;
+      Pos        : Positive := From;
+      Terminated : Boolean := False;
    begin
       if Status /= ENTITY_MIDDLE then
          Len := 0;
       end if;
+      --  Scan the entity name: it is made of ASCII letters, digits and '#'.
       while Len < MAX_ENTITY_LENGTH loop
          if Pos > Text'Last then
             Parser.Counter := Len;
@@ -568,8 +671,11 @@ package body Wiki.Html_Parser is
             return;
          end if;
          C := Text (Pos);
-         Pos := Pos + 1;
-         exit when C = ';';
+         if C = ';' then
+            Terminated := True;
+            Pos := Pos + 1;
+            exit;
+         end if;
          if Wiki.Helpers.Is_Newline (C) then
             Parser.Counter := 0;
             Entity := NUL;
@@ -577,66 +683,90 @@ package body Wiki.Html_Parser is
             Last := From;
             return;
          end if;
+         if C not in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '#' then
+            --  End of the entity name without the ';' terminator.
+            exit;
+         end if;
          Len := Len + 1;
          Parser.Entity_Name (Len) := Wiki.Strings.To_Char (C);
+         Pos := Pos + 1;
       end loop;
 
       Parser.Counter := 0;
-      declare
-         High : Natural := Wiki.Html_Parser.Entities.Keywords'Last;
-         Low  : Natural := Wiki.Html_Parser.Entities.Keywords'First;
-      begin
-         while Low <= High loop
-            declare
-               I : constant Natural := (Low + High) / 2;
-            begin
-               if Wiki.Html_Parser.Entities.Keywords (I).all = Parser.Entity_Name (1 .. Len) then
-                  Entity := Entities.Mapping (I);
-                  Last := Pos;
-                  Status := ENTITY_VALID;
-                  return;
-               elsif Entities.Keywords (I).all < Parser.Entity_Name (1 .. Len) then
-                  Low := I + 1;
-               else
-                  High := I - 1;
-               end if;
-            end;
+      if Len = 0 then
+         Status := ENTITY_NONE;
+         Entity := NUL;
+         Last := From;
+         return;
+      end if;
+
+      if Terminated then
+         --  With the ';' terminator the name must match a named character reference.
+         declare
+            I : constant Natural := Find_Keyword (Parser.Entity_Name (1 .. Len));
+         begin
+            if I > 0 then
+               Entity := Entities.Mapping (I);
+               Last := Pos;
+               Status := ENTITY_VALID;
+               return;
+            end if;
+         end;
+      elsif Pos > Text'Last
+        or else Text (Pos) not in '=' | 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9'
+      then
+         --  Without the ';' terminator, only the legacy named character references
+         --  are recognized, and only when not followed by '=' or an alphanumeric
+         --  character (HTML5 named character reference state).  Use the longest match.
+         for L in reverse 1 .. Len loop
+            if Is_Legacy_Keyword (Parser.Entity_Name (1 .. L)) then
+               declare
+                  I : constant Natural := Find_Keyword (Parser.Entity_Name (1 .. L));
+               begin
+                  if I > 0 then
+                     Entity := Entities.Mapping (I);
+                     Last := Pos;
+                     Status := ENTITY_VALID;
+                     return;
+                  end if;
+               end;
+            end if;
          end loop;
-      end;
+      end if;
 
-      if Len >= 2 and then Parser.Entity_Name (1) = '#' then
-         if Parser.Entity_Name (2) in '0' .. '9' and then Len <= 7 then
-            begin
-               C := Wiki.Strings.WChar'Val (Natural'Value (Parser.Entity_Name (2 .. Len)));
-               if C = NUL then
-                  C := Wiki.Strings.WChar'Val (16#0fffd#);
-               end if;
-               Entity := C;
+      --  Numeric character references &#123; and &#x1F600; (the ';' is optional).
+      if Parser.Entity_Name (1) = '#' then
+         declare
+            Value : Interfaces.Unsigned_32 := 0;
+            Valid : Boolean := True;
+         begin
+            if Len >= 2 and then Parser.Entity_Name (2) in '0' .. '9' and then Len <= 8 then
+               --  Decimal reference with up to 7 digits.
+               begin
+                  Value := Interfaces.Unsigned_32
+                    (Natural'Value (Parser.Entity_Name (2 .. Len)));
+               exception
+                  when Constraint_Error =>
+                     Valid := False;
+               end;
+            elsif Len >= 3 and then Parser.Entity_Name (2) in 'x' | 'X' and then Len <= 8 then
+               --  Hexadecimal reference with up to 6 digits.
+               begin
+                  Value := From_Hex (Parser.Entity_Name (3 .. Len));
+               exception
+                  when Constraint_Error =>
+                     Valid := False;
+               end;
+            else
+               Valid := False;
+            end if;
+            if Valid then
+               Entity := Numeric_Reference (Value);
                Last := Pos;
                Status := ENTITY_VALID;
                return;
-
-            exception
-               when Constraint_Error =>
-                  null;
-            end;
-         elsif Parser.Entity_Name (2) in 'x' | 'X' and then Len in 3 .. 6 then
-            begin
-               C := From_Hex (Parser.Entity_Name (3 .. Len));
-               if C = NUL then
-                  C := Wiki.Strings.WChar'Val (16#0fffd#);
-               end if;
-               Entity := C;
-               Last := Pos;
-               Status := ENTITY_VALID;
-               return;
-
-            exception
-               when Constraint_Error =>
-                  null;
-            end;
-
-         end if;
+            end if;
+         end;
       end if;
 
       --  The HTML entity is not recognized: we must treat it as plain wiki text.

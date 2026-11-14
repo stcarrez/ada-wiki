@@ -2205,10 +2205,17 @@ package body Wiki.Parsers.Markdown is
                   if Delim.Marker = M_ENTITY then
                      Add_Text (Parser, Text, Delim.Cursor);
                      Text := Delim.Cursor;
-                     while Buffers.Is_Valid (Text) and then Buffers.Char_At (Text) /= ';' loop
-                        Buffers.Next (Text);
+                     --  Skip the entity name (and the ';' terminator when present).
+                     while Buffers.Is_Valid (Text) loop
+                        declare
+                           Ch : constant Wiki.Strings.WChar := Buffers.Char_At (Text);
+                        begin
+                           exit when Ch = ';'
+                             or else Ch not in 'a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | '#';
+                           Buffers.Next (Text);
+                        end;
                      end loop;
-                     if Buffers.Is_Valid (Text) then
+                     if Buffers.Is_Valid (Text) and then Buffers.Char_At (Text) = ';' then
                         Buffers.Next (Text);
                      end if;
                   elsif Delim.Marker in M_LINK | M_LINK_REF then
