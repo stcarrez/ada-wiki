@@ -3,6 +3,7 @@ Version 1.5.1   - Under development
   - Feature #17: Generate `<figure>` and `<figcaption>` when an image has a caption
   - Fix #19: HTML parser: treat < followed by a non-letter as literal text (HTML5 tag-open rule)
   - Fix #20: HTML entity decoding don't follow HTML5 character-reference rules
+  - Fix #21: Issues when parsing HTML5 comments
 
 Version 1.5.0   - Oct 2025
   - Feature #12: Improvement of HTML renderer
